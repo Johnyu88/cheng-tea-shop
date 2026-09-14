@@ -6,13 +6,26 @@ Last updated: 2026-09-14
 
 - Repository: `Johnyu88/cheng-tea-shop`
 - Default branch: `main`
-- Product stage: Phase 1 — UX/UI in progress
-- Application code: not started
+- Product stage: Phase 2 — Frontend prototype, Wave 0 audit completed
+- Application code: not started; no candidate template code imported
 - Highest principle: **Website First → Mock API → ERP Reuse → API Integration**
 
 ## Last completed milestone
 
-The frontend technical selection and implementation plan was approved:
+Wave 0 template audit was completed:
+
+- Candidate pinned at commit 2df689427f1c22c6ed558ba59e13ac34965e6cec.
+- Reject wholesale import; permit only individually reviewed MIT UI primitives and layout concepts.
+- Reviewed all 78 text source/configuration files in the pinned tree.
+- Candidate maturity: four commits, four stars, one fork, no release, tests, CI, Docker, or Cloud Run baseline.
+- Next.js 16.1.7 is below the 2026-09-14 official security baseline; Wave 1 uses current patched stable, with 16.3.3 the known minimum on this date.
+- Keep: selected App Router ideas, strict TypeScript aliases, ESLint foundation, Tailwind variables, lib/utils, and individually reviewed shadcn primitives.
+- Rewrite: brand, metadata, design tokens, domain, services, Mock Adapter, storefront flows, accessibility, tests, CI, and deployment.
+- Remove: Nova/sample content, unverified assets, remote dependencies, fake payment/authentication, and unapproved optional modules.
+- Dynamic build was not run because security preflight rejected the candidate and the execution environment was unavailable. No template code was executed or imported.
+- Evidence: docs/audits/2026-09-14-wave-0-template-audit.md.
+
+The frontend technical selection and implementation plan was previously approved:
 
 - Stack: Next.js App Router, TypeScript, Tailwind CSS, shadcn/ui, and pnpm.
 - Reuse: audit and pin the MIT shadcn ecommerce candidate before selective import; Vercel Commerce is architecture reference only.
@@ -137,7 +150,7 @@ The method for invoking the local 35B model is unknown. When the computer and Co
 
 ## Next action
 
-After this documentation PR is merged and the user explicitly authorizes implementation, execute Wave 0 from docs/superpowers/plans/2026-09-14-frontend-implementation-plan.md: audit and pin the candidate template, document the keep/rewrite/remove decision, and record the independent build result. Establish the testable project baseline separately in Wave 1. Do not write website code before that authorization.
+After the Wave 0 audit PR is merged, execute Wave 1 on a new branch: scaffold a clean project-owned Next.js baseline with the current patched stable release, pnpm lockfile, strict TypeScript, lint, Vitest/RTL, Playwright, standalone output, and Docker smoke checks. Reuse only individually approved MIT primitives and keep all UI data behind project-owned service interfaces.
 
 ## Startup reminder
 

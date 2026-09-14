@@ -98,6 +98,16 @@ Exit checks:
 - Clean install and build results are recorded.
 - No template code has entered main before the audit PR is approved.
 
+## Wave 0 audit result — 2026-09-14
+
+- Candidate pinned at commit 2df689427f1c22c6ed558ba59e13ac34965e6cec.
+- Result: FAIL for wholesale import; PASS for proceeding with a clean project-owned baseline.
+- No template code was copied or executed.
+- Pre-install review failed because Next.js 16.1.7 is below the official security baseline, no tests or CI evidence exists, and data, payment, authentication, assets, and deployment conflict with this project.
+- Dynamic build was not run after rejection; the execution environment was also unavailable. This is not build success.
+- Only individually reviewed MIT UI primitives or layout concepts may be considered later with the required notice retained.
+- Full evidence: docs/audits/2026-09-14-wave-0-template-audit.md.
+
 ## Wave 1 — Reproducible project baseline
 
 Owner roles: Frontend Engineer, QA.

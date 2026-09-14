@@ -23,7 +23,7 @@ Status legend: ✅ complete · 🟡 in progress · ⬜ not started · ⛔ blocke
 |---|---:|---|
 | Phase 0 — Direction and specification | ✅ | Brand, audience, storefront functions, information architecture, and core acceptance criteria approved |
 | Phase 1 — UX/UI | 🟡 | Core responsive wireframes, required states, and frontend implementation plan approved; real-content validation and prototype-based older-user testing remain |
-| Phase 2 — Frontend prototype | ⬜ | Plan ready; begins with template audit only after explicit user authorization |
+| Phase 2 — Frontend prototype | 🟡 | Wave 0 audit complete: wholesale template import rejected; Wave 1 clean baseline is next after merge |
 | Phase 3 — Backend capability map | ⬜ | Validated domain models and Unified API contract |
 | Phase 4 — ERP selection | ⬜ | Licensed, maintained, secure candidate selected from evidence |
 | Phase 5 — Integration | ⬜ | ERP, payment, and logistics adapters pass integration tests |
@@ -77,4 +77,4 @@ Status legend: ✅ complete · 🟡 in progress · ⬜ not started · ⛔ blocke
 
 ## E. Current next capability
 
-After the plan PR is merged and the user explicitly authorizes implementation, execute Wave 0: audit and pin the candidate MIT template, record the keep/rewrite/remove decision, and record the independent build result. Establish the testable Next.js baseline separately in Wave 1. Do not import template code before this gate.
+Merge the reviewed Wave 0 audit. Then execute Wave 1 on a new branch: create a clean, reproducible Next.js baseline using the current officially patched stable release, pnpm lockfile, strict TypeScript, lint, Vitest/RTL, Playwright, standalone output, and Docker smoke checks. Reuse only individually approved MIT UI primitives; do not import the candidate template wholesale.

@@ -276,6 +276,10 @@ GitHub 是正式文件與程式來源。聊天中的新指令若尚未寫入 Git
 - 部署保持 Docker 可攜性，使用 Next.js standalone，目標 Google Cloud Run 台灣區 asia-east1。
 - 實作分八個 Wave：模板稽核、基線、設計系統、領域介面與 Mock、首頁與目錄、商品與購物車、結帳與商品草稿、完整 QA 與容器部署。
 - 詳細驗收與測試門檻見 docs/superpowers/plans/2026-09-14-frontend-implementation-plan.md。
+- Wave 0 已固定稽核 shadcnspace/ecommerce-shadcn-nextjs-template commit 2df689427f1c22c6ed558ba59e13ac34965e6cec。結論為禁止整包匯入，只能逐項重用通過審查的 MIT UI primitive 或版面概念。
+- 候選快照的 Next.js 16.1.7 已低於 2026-09-14 官方安全基準，且缺少測試、CI、standalone 與 Docker 設定；Nova 品牌、假結帳、靜態商品、遠端圖片及假登入不得沿用。
+- Wave 1 改採乾淨基線，以官方當日已修補的穩定版 Next.js 建立專案；2026-09-14 的已知最低目標為 16.3.3，實作時仍須再次查核官方安全公告。
+- 完整紀錄見 docs/audits/2026-09-14-wave-0-template-audit.md。
 
 ## 23. 目前狀態
 
@@ -286,5 +290,5 @@ GitHub 是正式文件與程式來源。聊天中的新指令若尚未寫入 Git
 - Phase 1 桌機／平板響應式 Wireframe、必要狀態與年長操作保護已確認。
 - Phase 1 首頁真實長度文案與手機／平板／桌機構圖已確認。
 - Phase 1 仍在進行；現有店家照片公開使用權已確認，缺圖商品可使用有標示的品牌預設圖。前端技術選型與實作計畫已確認，可操作原型的實際年長使用者測試仍待完成。
-- 網站程式尚未開始。
-- 下一步在游老師確認合併後，依實作計畫啟動 Wave 0 模板稽核；未收到「開始實作」指令前不寫網站程式。
+- 網站程式尚未開始；沒有任何候選模板程式進入專案。
+- Wave 0 模板稽核已完成並判定不可整包匯入。下一步在稽核 PR 合併後，依 Wave 1 建立乾淨、可測試、可容器化的前端基線。
