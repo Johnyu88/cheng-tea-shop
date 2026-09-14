@@ -5,7 +5,7 @@ Status: Approved for documentation
 
 ## 1. Objective
 
-Define a calm, trustworthy, mobile-first storefront for Chen Tea Shop. A customer should be able to understand the shop, choose tea by taste, review a product, and complete checkout without tea expertise or mandatory account registration.
+Define a calm, trustworthy, mobile-first storefront for Long Ying Tea (龍映茗茶), informally known to returning customers as Chen Tea Shop (陳老師茶行). A customer should be able to understand the shop, choose tea by taste, review a product, and complete checkout without tea expertise or mandatory account registration.
 
 This design covers the brand direction, homepage, product discovery, product detail, in-person tea entry point, cart, checkout, delivery, payment choices, inventory display, and interaction comfort. It does not authorize application implementation.
 
@@ -17,7 +17,7 @@ This design covers the brand direction, homepage, product discovery, product det
 - Payment and logistics providers remain behind stable interfaces and adapters.
 - Credit card and LINE Pay are required future payment capabilities; the provider is selected later.
 - Product stock is available or sold out in the first version; exact quantities are outside scope.
-- Business content such as the final slogan, real photos, address, hours, phone, LINE link, shipping fee, and free-shipping threshold must be configurable rather than hard-coded.
+- Business content such as the public brand name, informal alias, final slogan, real photos, address, hours, phone, LINE link, shipping fee, and free-shipping threshold must be configurable rather than hard-coded.
 - No website code, framework, dependency, command, or source structure is selected by this design. Those choices require a reuse-first assessment and an approved implementation plan.
 
 ## 3. Brand direction
@@ -49,12 +49,13 @@ Use mist green as the primary family, warm ivory as the background family, and t
 - Preserve realistic foliage, tea, packaging, and tea-liquor colors.
 - Avoid excessive retouching, false origin implications, and AI-generated scenery that could be mistaken for the product's actual origin.
 - Use authentic product and shop photography whenever a factual relationship is implied.
+- Until authentic imagery is available, use neutral licensed media or the labeled brand product placeholder; never imply a substitute is the actual origin or product.
 
 ## 4. Homepage
 
 The first viewport contains:
 
-1. a real tea-mountain mist photograph;
+1. a real tea-mountain mist photograph, or a clearly non-factual neutral placeholder until it is available;
 2. one short brand statement;
 3. one large **Start choosing tea** action.
 
@@ -62,7 +63,7 @@ The page then presents, in order:
 
 1. four taste-selection cards;
 2. three featured teas;
-3. a short Chen Tea Shop story;
+3. a short Long Ying Tea story centered on Teacher Chen;
 4. a secondary **Visit for tea** contact section;
 5. payment, delivery, and purchase-assurance information;
 6. address, hours, map, telephone, LINE, and footer information.
@@ -80,7 +81,7 @@ Show four large cards:
 - rich and full;
 - roasted.
 
-Selecting a card immediately displays matching products. Do not require a quiz in the first version. Tea type and production details remain available as secondary filters or product information, not the main entry point.
+Selecting a card immediately displays matching products. Do not require a quiz in the first version. Tea type remains a full catalog filter alongside taste, while production details remain secondary product information.
 
 ## 6. Product listing and detail
 
@@ -88,7 +89,7 @@ Selecting a card immediately displays matching products. Do not require a quiz i
 
 Each card shows only:
 
-- product photo;
+- product photo, or the branded “商品照片準備中” placeholder;
 - tea name;
 - price;
 - one short taste description;
@@ -248,3 +249,8 @@ During implementation:
 This document completes the Phase 0 brand and core shopping-experience decision set. Application implementation remains unapproved.
 
 The next step is Phase 1 UX/UI: produce mobile-first wireframes and a small design system, then review those visual artifacts before selecting a frontend stack or writing production code.
+
+
+## 15. Later approved clarification
+
+The public brand is 龍映茗茶, while 陳老師茶行 remains an informal alias in story and search text. The catalog supports at least 40 products without a fixed ceiling, allows incremental draft-to-publish entry, and uses both taste and tea-category filters. Detailed rules in `2026-09-14-brand-and-progressive-catalog-design.md` supersede any conflicting earlier assumptions in this document.
