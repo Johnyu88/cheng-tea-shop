@@ -31,9 +31,9 @@ The project-governance design was approved:
 - Isolate ERP, payment, and logistics providers behind adapters.
 - Preserve credit-card and LINE Pay integration as expected future capabilities.
 
-## Active review
+## Governance delivery
 
-- Pull Request #2 contains the approved governance documents and is waiting for the user's merge confirmation.
+- The approved governance documents were prepared and reviewed through Pull Request #2.
 - The conditional morning report is enabled; its first scheduled check is 2026-09-15 at 08:00 Asia/Taipei.
 
 ## Open dependency
