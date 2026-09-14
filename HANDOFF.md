@@ -12,15 +12,18 @@ Last updated: 2026-09-14
 
 ## Last completed milestone
 
-The mobile-first core wireframes and small design system were approved:
+The desktop, responsive, state, and elder-safeguard design was approved:
 
-- Mobile homepage, product-detail, cart, and three-step checkout wireframes are confirmed.
-- Guest checkout keeps phone required and email optional.
-- The approved system uses accessible mountain-mist colors, serif headings, legible sans-serif body text, 48 × 48px minimum touch targets, and visible form labels and focus states.
-- Loading, empty, error, sold-out, payment, and success states are specified as requirements; their complete mockups still remain.
-- Subtle mist or breeze may be evaluated later and must respect reduced-motion preferences.
-- Bird and insect ambience is optional, defaults off, requires an explicit click, can be stopped anytime, and stops on leaving the homepage.
-- Phase 1 is still in progress; desktop/responsive wireframes, real-content validation, and an older-user walkthrough remain.
+- Desktop homepage uses a balanced split hero.
+- Desktop product detail uses photography on the left and buying information on the right.
+- Desktop checkout uses three steps on the left and an order summary on the right.
+- Tablet checkout switches to one column with an expandable summary above the form.
+- For four or more products, the summary shows the first three and lets the customer expand the remainder.
+- Loading, empty-cart, network-error, sold-out, form-error, payment-processing, payment-failure, and order-success states are confirmed.
+- Errors retain valid data and payment processing prevents duplicate submission.
+- One-tap telephone help is primary; LINE is secondary.
+- The cart may persist, while personal contact and address data is limited to the current browsing session and cleared after completion, cancellation, or expiry.
+- Phase 1 remains in progress; authentic content validation, prototype-based older-user testing, and implementation planning remain.
 - No application code has been started.
 
 The elder-friendly single-product publishing design was previously approved:
@@ -66,6 +69,10 @@ The project-governance design was previously approved:
 - Avoid intrusive promotion, autoplay media, and exaggerated claims.
 - Use the approved mobile design tokens, typography hierarchy, visible labels, focus states, and minimum touch targets.
 - Treat environmental sound as an explicit opt-in enhancement only; default it off and keep it non-blocking.
+- Use the approved desktop split layouts and single-column tablet checkout.
+- Keep multi-item summaries concise and expandable.
+- Preserve valid data through errors; keep personal data session-only and never retain payment credentials in frontend storage.
+- Make one-tap telephone help primary and LINE secondary during checkout.
 
 ## Governance delivery
 
@@ -83,7 +90,7 @@ The method for invoking the local 35B model is unknown. When the computer and Co
 
 ## Next action
 
-Complete desktop and responsive wireframes plus the required loading, empty, error, sold-out, payment, and success-state mockups. Then validate authentic imagery and final copy and conduct an older-user walkthrough. Do not write production website code until these Phase 1 artifacts and the implementation plan are approved.
+Validate the approved layouts with authentic tea-mountain, product, and shop photography plus realistic final-length copy. Then prepare the frontend implementation plan and technical selection. Run real older-user testing after an operable prototype exists. Do not write production website code until the plan is approved.
 
 ## Startup reminder
 
