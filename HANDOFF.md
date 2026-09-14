@@ -12,7 +12,18 @@ Last updated: 2026-09-14
 
 ## Last completed milestone
 
-The project-governance design was approved:
+The elder-friendly single-product publishing design was approved:
+
+- Works on both mobile and desktop.
+- Publishes one single-specification product at a time.
+- Uses one to three photos with assisted cropping and lighting preview.
+- Uses only available / sold-out inventory in the first version.
+- Generates an AI description draft from provided facts and tags; human confirmation is mandatory.
+- Saves a draft before explicit publication.
+- If actual stock is insufficient after ordering, the tea shop contacts the customer within 24 hours for exchange or refund.
+- No application code has been started.
+
+The project-governance design was previously approved:
 
 - Codex is the sole orchestrator.
 - Each stage uses a dynamic team of two to four specialist roles.
@@ -31,6 +42,9 @@ The project-governance design was approved:
 - Prefer mature open-source ERP / commerce systems over building a full ERP.
 - Isolate ERP, payment, and logistics providers behind adapters.
 - Preserve credit-card and LINE Pay integration as expected future capabilities.
+- Make product publishing usable by an older operator on phone and computer.
+- Keep first-version product entry single-item, single-specification, and low-field.
+- Do not let AI invent origin, health effects, or unsupported product claims.
 
 ## Governance delivery
 
