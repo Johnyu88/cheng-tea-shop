@@ -12,7 +12,18 @@ Last updated: 2026-09-14
 
 ## Last completed milestone
 
-The public brand and progressive catalog design was approved:
+The frontend technical selection and implementation plan was approved:
+
+- Stack: Next.js App Router, TypeScript, Tailwind CSS, shadcn/ui, and pnpm.
+- Reuse: audit and pin the MIT shadcn ecommerce candidate before selective import; Vercel Commerce is architecture reference only.
+- Boundary: Page/Component → project-owned Frontend Service/API Interface → Mock Adapter → future ERP Adapter.
+- Prototype data remains synthetic. Real 40-plus product entry waits for persistent storage, authentication, authorization, and backup/restore.
+- Deployment target is Dockerized Next.js standalone on Google Cloud Run asia-east1.
+- Verification includes lint, typecheck, Vitest, React Testing Library, Playwright Chromium/WebKit, accessibility, build, and Docker smoke checks.
+- Eight implementation Waves are defined in docs/superpowers/plans/2026-09-14-frontend-implementation-plan.md.
+- Phase 1 remains in progress; this milestone authorizes documentation only, not website code.
+
+The public brand and progressive catalog design was previously approved:
 
 - The public-facing brand is “龍映茗茶”; “陳老師茶行” remains an informal customer-facing alias in story and search text.
 - The catalog must support at least 40 teas without a fixed 40-item ceiling.
@@ -49,7 +60,7 @@ The desktop, responsive, state, and elder-safeguard design was previously approv
 - Errors retain valid data and payment processing prevents duplicate submission.
 - One-tap telephone help is primary; LINE is secondary.
 - The cart may persist, while personal contact and address data is limited to the current browsing session and cleared after completion, cancellation, or expiry.
-- Phase 1 remains in progress; authentic content validation, prototype-based older-user testing, and implementation planning remain.
+- Phase 1 remains in progress; evidence-gated content validation and prototype-based older-user testing remain.
 - No application code has been started.
 
 The elder-friendly single-product publishing design was previously approved:
@@ -105,6 +116,10 @@ The project-governance design was previously approved:
 - Let customers browse by both taste and tea category while keeping only three manually featured homepage products.
 - Use a labeled brand placeholder when a product photo is missing; never use another product photo as a substitute.
 - Existing shop photos have confirmed website-use permission; evidence remains mandatory for product and origin claims.
+- Frontend stack is Next.js App Router, TypeScript, Tailwind CSS, shadcn/ui, and pnpm.
+- UI components depend on project-owned service interfaces, never directly on Mock data or a specific ERP SDK.
+- Deployment stays Docker-portable and targets Cloud Run asia-east1.
+- Real catalog entry starts only after persistence, authentication, authorization, and backup/restore are operational.
 
 ## Governance delivery
 
@@ -122,7 +137,7 @@ The method for invoking the local 35B model is unknown. When the computer and Co
 
 ## Next action
 
-Prepare the frontend implementation plan and technical selection for the approved 龍映茗茶 brand, 40-plus progressive catalog, elder-friendly one-page publishing form, Mock API boundaries, and labeled image placeholders. Preserve evidence gates for product and origin claims. Run real older-user testing after an operable prototype exists. Do not write production website code until the plan is approved.
+After this documentation PR is merged and the user explicitly authorizes implementation, execute Wave 0 from docs/superpowers/plans/2026-09-14-frontend-implementation-plan.md: audit and pin the candidate template, document the keep/rewrite/remove decision, and record the independent build result. Establish the testable project baseline separately in Wave 1. Do not write website code before that authorization.
 
 ## Startup reminder
 

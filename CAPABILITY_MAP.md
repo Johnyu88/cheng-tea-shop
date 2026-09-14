@@ -22,8 +22,8 @@ Status legend: ✅ complete · 🟡 in progress · ⬜ not started · ⛔ blocke
 | Phase | Status | Current capability / exit condition |
 |---|---:|---|
 | Phase 0 — Direction and specification | ✅ | Brand, audience, storefront functions, information architecture, and core acceptance criteria approved |
-| Phase 1 — UX/UI | 🟡 | Mobile, desktop, tablet-responsive core wireframes and required states approved; real-content validation, prototype-based older-user testing, and implementation planning remain |
-| Phase 2 — Frontend prototype | ⬜ | Usable storefront backed by Mock Data / Mock API |
+| Phase 1 — UX/UI | 🟡 | Core responsive wireframes, required states, and frontend implementation plan approved; real-content validation and prototype-based older-user testing remain |
+| Phase 2 — Frontend prototype | ⬜ | Plan ready; begins with template audit only after explicit user authorization |
 | Phase 3 — Backend capability map | ⬜ | Validated domain models and Unified API contract |
 | Phase 4 — ERP selection | ⬜ | Licensed, maintained, secure candidate selected from evidence |
 | Phase 5 — Integration | ⬜ | ERP, payment, and logistics adapters pass integration tests |
@@ -43,7 +43,7 @@ Status legend: ✅ complete · 🟡 in progress · ⬜ not started · ⛔ blocke
 | Incremental draft-to-publish workflow | ✅ | Publish each completed item independently; unfinished items remain private drafts |
 | Elder-friendly one-page minimum form | ✅ | Name, single specification, price, tea category, and availability are the minimum fields |
 | Branded missing-photo fallback | ✅ | Use one labeled “商品照片準備中” image; never substitute another product photo |
-| Product publishing implementation | ⬜ | Begins only after the frontend implementation plan is approved |
+| Product publishing implementation | ⬜ | Plan approved; begins in Phase 2 after explicit user authorization |
 
 ## D. Approved storefront experience
 
@@ -77,4 +77,4 @@ Status legend: ✅ complete · 🟡 in progress · ⬜ not started · ⛔ blocke
 
 ## E. Current next capability
 
-Prepare the frontend implementation plan and technical selection for the approved Long Ying Tea brand, 40-plus incremental catalog, Mock API boundaries, and labeled image placeholders. Keep origin and product claims evidence-gated. Real older-user testing follows when an operable prototype exists. Do not write production code before the plan is approved.
+After the plan PR is merged and the user explicitly authorizes implementation, execute Wave 0: audit and pin the candidate MIT template, record the keep/rewrite/remove decision, and record the independent build result. Establish the testable Next.js baseline separately in Wave 1. Do not import template code before this gate.
