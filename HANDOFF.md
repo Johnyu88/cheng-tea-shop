@@ -6,7 +6,7 @@ Last updated: 2026-09-14
 
 - Repository: `Johnyu88/cheng-tea-shop`
 - Default branch: `main`
-- Product stage: Phase 0 — Direction and specification
+- Product stage: Phase 1 — UX/UI preparation
 - Application code: not started
 - Highest principle: **Website First → Mock API → ERP Reuse → API Integration**
 
