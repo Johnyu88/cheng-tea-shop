@@ -12,7 +12,20 @@ Last updated: 2026-09-14
 
 ## Last completed milestone
 
-The desktop, responsive, state, and elder-safeguard design was approved:
+The homepage real-content composition was approved:
+
+- Hero headline: “慢慢選一杯好茶”.
+- Hero supporting copy: “從喜歡的香氣與口感開始，不必先懂茶，也能找到適合自己的茶。”
+- Primary action remains “開始選茶”.
+- Brand story uses the teacher-at-tea image as the main visual and the shop interior as support, with a warm “sit down for tea” tone.
+- Featured teas use confirmed real-length data: 陳年白茶 (一兩／NT$800／清甜柔順), 霜雪龍 (二兩／NT$1,000／清香甘甜), and 東方美人 (一兩／NT$1,200／花果香柔順).
+- Product cards show photo, taste, name, specification and price, then “查看茶品”; no complex option selector appears on the homepage.
+- Desktop, tablet, and mobile composition directions were visually reviewed and approved.
+- Final release requires authentic missing photos, public-use permission, and evidence for any “無毒” or similar claim.
+- Uploaded photos remain internal references and are not committed in this milestone.
+- Phase 1 remains in progress; application code has not started.
+
+The desktop, responsive, state, and elder-safeguard design was previously approved:
 
 - Desktop homepage uses a balanced split hero.
 - Desktop product detail uses photography on the left and buying information on the right.
@@ -73,6 +86,8 @@ The project-governance design was previously approved:
 - Keep multi-item summaries concise and expandable.
 - Preserve valid data through errors; keep personal data session-only and never retain payment credentials in frontend storage.
 - Make one-tap telephone help primary and LINE secondary during checkout.
+- Use the approved homepage hero copy, warm teacher-led story, and three confirmed featured-tea summaries.
+- Keep uploaded photography internal until public-use permission and claim evidence are confirmed.
 
 ## Governance delivery
 
@@ -90,7 +105,7 @@ The method for invoking the local 35B model is unknown. When the computer and Co
 
 ## Next action
 
-Validate the approved layouts with authentic tea-mountain, product, and shop photography plus realistic final-length copy. Then prepare the frontend implementation plan and technical selection. Run real older-user testing after an operable prototype exists. Do not write production website code until the plan is approved.
+Complete the remaining homepage asset gate: final tea-mountain, aged-white-tea, and 霜雪龍 photos; public-use permission for people and credited images; and evidence for any product claims. Then prepare the frontend implementation plan and technical selection. Run real older-user testing after an operable prototype exists. Do not write production website code until the plan is approved.
 
 ## Startup reminder
 

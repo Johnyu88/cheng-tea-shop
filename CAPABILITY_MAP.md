@@ -67,9 +67,10 @@ Status legend: ✅ complete · 🟡 in progress · ⬜ not started · ⛔ blocke
 | Complete state mockups | ✅ | Loading, empty, network, sold-out, form, payment, and success states approved |
 | Multi-item checkout summary | ✅ | Show all 1–3 items; show first three and expandable remainder for 4+ items |
 | Elder-friendly checkout safeguards | ✅ | Phone help first; session-only PII; cart persists; errors preserve valid input |
-| Real content and asset validation | ⬜ | Validate layout with authentic photography and final copy |
+| Homepage real-length copy and responsive composition | ✅ | Approved hero copy, story direction, three featured products, and 360/768/1024/1440 layout behavior |
+| Real content and asset validation | 🟡 | Final tea-mountain and two product photos plus public-use and claim evidence remain before release |
 | Prototype-based older-user testing | ⬜ | Run with real older users after an operable prototype exists |
 
 ## E. Current next capability
 
-Validate the approved layouts with authentic photography and final copy, then prepare the frontend implementation plan and technical selection. Real older-user testing follows when an operable prototype exists. Do not write production code before the plan is approved.
+Complete the remaining asset gate: final tea-mountain and two product photos, public-use confirmation, and evidence for any product claims. Then prepare the frontend implementation plan and technical selection. Real older-user testing follows when an operable prototype exists. Do not write production code before the plan is approved.
