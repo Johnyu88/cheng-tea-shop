@@ -128,3 +128,15 @@
 4. `docs/superpowers/specs/` 內最新相關規格
 
 不得在未確認前台需求前，直接開始打造完整 ERP。
+
+
+## 11. 已確認的前端技術與交付策略（2026-09-14）
+
+- 技術基線：Next.js App Router、TypeScript、Tailwind CSS、shadcn/ui、pnpm。
+- 候選骨架：先稽核 shadcnspace/ecommerce-shadcn-nextjs-template 的授權、固定 commit、依賴、安全與可移除範圍，再選擇性重用。
+- 參考範圍：Vercel Commerce 只用於理解可替換供應商的架構；不帶入 Shopify 綁定。已棄用的 Medusa 舊 starter 不採用；Saleor 留待後端選型階段評估。
+- 前端元件不得直接依賴 Mock 資料或特定 ERP SDK，統一經由專案自有 Service/API 介面與 Adapter。
+- 部署採 Docker 與 Next.js standalone，目標 Google Cloud Run 台灣區 asia-east1；機密只放部署環境，不進 GitHub。
+- 原型資料只使用合成 Mock 商品。真實商品大量輸入，須等持久化、身分驗證、權限與備份還原可用後才開始。
+- 開發切成八個可驗收 Wave；每個 Wave 採獨立分支、測試、文件更新、審查、PR 與使用者確認合併。
+- 詳細計畫：docs/superpowers/plans/2026-09-14-frontend-implementation-plan.md。

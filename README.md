@@ -12,6 +12,17 @@
 
 **完成目標優先，不重複造輪子。** 開發前先評估成熟模板、元件與開源功能；確認授權、維護、安全與架構吻合後，優先修改重用。
 
+## 已確認的前端實作基線
+
+- 技術：Next.js App Router、TypeScript、Tailwind CSS、shadcn/ui。
+- 套件管理：pnpm，提交 lockfile 固定依賴版本。
+- 重用方式：先稽核 MIT 授權的 shadcn 電商模板，再決定保留、改寫或移除；Vercel Commerce 僅作架構參考，不引入 Shopify 綁定。
+- 資料邊界：頁面與元件只呼叫專案自有的 Frontend Service / API Interface；前期接 Mock Adapter，後期改接 ERP Adapter。
+- 部署：使用 Next.js standalone 與 Docker 保持可攜性，目標為 Google Cloud Run 台灣區 asia-east1。
+- 資料安全：原型只使用少量合成 Mock 商品；真實 40 種以上商品資料，須等持久化後端、登入權限與備份還原完成後才開始輸入。
+- 完整分階段計畫：docs/superpowers/plans/2026-09-14-frontend-implementation-plan.md。
+
+
 ## 新工作階段的閱讀順序
 
 1. `RESUME_PROMPT.md`

@@ -267,7 +267,17 @@ GitHub 是正式文件與程式來源。聊天中的新指令若尚未寫入 Git
 
 詳細規格見 `docs/superpowers/specs/2026-09-14-brand-and-progressive-catalog-design.md`。
 
-## 22. 目前狀態
+## 22. 前端技術選型與實作計畫
+
+- 採混合重用：以 Next.js App Router、TypeScript、Tailwind CSS、shadcn/ui 建立專案自有前端；候選 MIT 模板必須先稽核與固定 commit，不能整包直接覆蓋專案。
+- Vercel Commerce 僅作可替換後端的架構參考，不引入 Shopify 綁定。
+- 資料流固定為：頁面／元件 → Frontend Service/API Interface → Mock Adapter → 未來 ERP Adapter。
+- 原型只放少量合成 Mock 商品；真實 40 種以上商品，等持久化後端、登入權限與備份還原完成後才由陳老師逐步輸入。
+- 部署保持 Docker 可攜性，使用 Next.js standalone，目標 Google Cloud Run 台灣區 asia-east1。
+- 實作分八個 Wave：模板稽核、基線、設計系統、領域介面與 Mock、首頁與目錄、商品與購物車、結帳與商品草稿、完整 QA 與容器部署。
+- 詳細驗收與測試門檻見 docs/superpowers/plans/2026-09-14-frontend-implementation-plan.md。
+
+## 23. 目前狀態
 
 - Agent 工作流設計已確認。
 - 長輩友善商品上架設計已確認。
@@ -275,6 +285,6 @@ GitHub 是正式文件與程式來源。聊天中的新指令若尚未寫入 Git
 - Phase 1 手機核心 Wireframe 與小型設計系統已確認。
 - Phase 1 桌機／平板響應式 Wireframe、必要狀態與年長操作保護已確認。
 - Phase 1 首頁真實長度文案與手機／平板／桌機構圖已確認。
-- Phase 1 仍在進行；現有店家照片公開使用權已確認，缺圖商品可使用有標示的品牌預設圖。可操作原型的實際年長使用者測試與前端實作計畫仍待完成。
+- Phase 1 仍在進行；現有店家照片公開使用權已確認，缺圖商品可使用有標示的品牌預設圖。前端技術選型與實作計畫已確認，可操作原型的實際年長使用者測試仍待完成。
 - 網站程式尚未開始。
-- 下一步撰寫前端實作計畫與技術選型，把品牌、40 種以上漸進式目錄、Mock API 與圖片替代規則轉為可驗收工作。
+- 下一步在游老師確認合併後，依實作計畫啟動 Wave 0 模板稽核；未收到「開始實作」指令前不寫網站程式。
