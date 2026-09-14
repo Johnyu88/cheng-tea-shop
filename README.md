@@ -4,11 +4,25 @@
 
 ## 最高開發原則
 
-**Website First → Mock API → ERP Reuse**
+**Website First → Mock API → ERP Reuse → API Integration**
 
-本專案優先把使用者真正看得到、摸得到、感受得到的部分做好：品牌風格、視覺、美感、舒適度、手機版體驗、商品展示與購物流程。
+本專案優先把顧客真正看得到、摸得到、感受得到的部分做好：品牌風格、視覺、美感、舒適度、手機版體驗、商品展示與購物流程。
 
-在前台尚未定型前，不先從零打造完整 ERP。前台先透過 Mock Data / Mock API 驗證流程；等網站需求穩定後，再尋找成熟且授權適合的 GitHub 開源 ERP / 電商後端專案，選擇最接近需求者進行裁切與調整，並透過 API Adapter 串接。
+前台尚未定型前，不從零打造完整 ERP。先以 Mock Data / Mock API 驗證流程；需求穩定後，再選擇授權合適、維護成熟的開源 ERP / 電商後端，透過 Adapter 串接。
+
+## 新工作階段的閱讀順序
+
+1. `RESUME_PROMPT.md`
+2. `AGENTS.md`
+3. `WORKFLOW.md`
+4. `HANDOFF.md`
+5. `CAPABILITY_MAP.md`
+6. `WHITEPAPER.md`
+7. `DEVELOPMENT_STRATEGY.md`
+8. `docs/superpowers/specs/` 內最新相關規格
+9. 最近的 Git commit 與開啟中的 Pull Request
+
+先回報現況與下一步。未獲得明確批准前，不開始寫程式或修改 GitHub。
 
 ## 開發順序
 
@@ -23,10 +37,19 @@
 
 ## 文件
 
+- `RESUME_PROMPT.md`：每次接續專案的精簡提示
+- `AGENTS.md`：Codex、35B 與專業 Agent 的責任和權限
+- `WORKFLOW.md`：拆解、執行、測試、PR 與合併規則
+- `HANDOFF.md`：最新進度、阻礙與下一步
+- `CAPABILITY_MAP.md`：能力與階段狀態
 - `DEVELOPMENT_STRATEGY.md`：工程策略與邊界
 - `WHITEPAPER.md`：產品與工程白皮書
-- `docs/superpowers/specs/2026-09-12-website-first-architecture-design.md`：Website First 架構設計規格
+- `docs/superpowers/specs/`：已確認的設計規格
 
-## 原則
+## Git 與安全原則
 
-前台不綁死特定 ERP。商品、庫存、訂單、顧客與付款等資料交換應透過穩定介面與 Adapter 層完成，讓後端未來可以替換，而不必重做網站。
+- 所有修改使用獨立 Branch／Worktree。
+- Agent 可以自動工作到建立 PR，但不得自行合併。
+- 只有游老師明確確認後才合併到 `main`。
+- 不得提交密碼、API Key、付款金鑰、Token、私人顧客資料或其他機密資訊。
+- 每個重要階段都要同步更新白皮書、能力地圖和交接狀態。
