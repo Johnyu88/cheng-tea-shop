@@ -22,7 +22,7 @@ Status legend: ✅ complete · 🟡 in progress · ⬜ not started · ⛔ blocke
 | Phase | Status | Current capability / exit condition |
 |---|---:|---|
 | Phase 0 — Direction and specification | ✅ | Brand, audience, storefront functions, information architecture, and core acceptance criteria approved |
-| Phase 1 — UX/UI | 🟡 | Next: mobile-first wireframes, design system, responsive and interaction states |
+| Phase 1 — UX/UI | 🟡 | Mobile core wireframes and small design system approved; desktop/responsive adaptations, complete states, real-content validation, and older-user walkthrough remain |
 | Phase 2 — Frontend prototype | ⬜ | Usable storefront backed by Mock Data / Mock API |
 | Phase 3 — Backend capability map | ⬜ | Validated domain models and Unified API contract |
 | Phase 4 — ERP selection | ⬜ | Licensed, maintained, secure candidate selected from evidence |
@@ -58,8 +58,15 @@ Status legend: ✅ complete · 🟡 in progress · ⬜ not started · ⛔ blocke
 | First-version payment choices | ✅ | Credit card / LINE Pay online; in-store payment allowed for pickup |
 | Configurable shipping rules | ✅ | Fixed fee and free-shipping threshold remain configurable |
 | Non-aggressive content policy | ✅ | No autoplay, countdowns, intrusive pop-ups, or unsupported claims |
-| Phase 1 wireframes and design system | ⬜ | Next capability; implementation not started |
+| Mobile homepage wireframe | ✅ | Design approved; implementation not started |
+| Mobile product-detail wireframe | ✅ | Design approved; buying essentials appear before story and brewing details |
+| Mobile cart and checkout wireframes | ✅ | Design approved; cart plus three checkout steps |
+| Small design system | ✅ | Approved color, typography, form, focus, and touch-target rules |
+| Optional ambient nature experience | ✅ | Design rules approved; sound defaults off and requires explicit user action |
+| Desktop and responsive wireframes | ⬜ | Required before Phase 1 completion |
+| Complete state mockups | ⬜ | Loading, empty, error, sold-out, payment, and success states remain |
+| Real content and asset validation | ⬜ | Validate layout with authentic photography and final copy |
 
 ## E. Current next capability
 
-Begin Phase 1 UX/UI with mobile-first wireframes and a small design system. Review visual artifacts and required interaction states before selecting a frontend stack or writing production code.
+Continue Phase 1 with desktop and responsive wireframes plus required state mockups. Then validate real photography and copy and complete an older-user walkthrough. Do not select a frontend stack or write production code until these visual gates and the implementation plan are approved.
