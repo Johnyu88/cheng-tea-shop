@@ -12,7 +12,19 @@ Last updated: 2026-09-14
 
 ## Last completed milestone
 
-The elder-friendly single-product publishing design was approved:
+The storefront brand and core shopping-experience design was approved:
+
+- Mountain Mist Nature direction with mist green, warm ivory, and tea brown.
+- Real Taiwanese tea-mountain photography with natural light.
+- Serif headings and highly legible sans-serif body text.
+- A simple hero, four taste cards, three featured teas, story, tea-visit contact, assurance, and shop information.
+- Taste-first discovery and concise product cards.
+- Guest checkout with contact, delivery, and payment steps.
+- Home delivery and in-store pickup.
+- No aggressive promotion, autoplay media, or unsupported claims.
+- No application code has been started.
+
+The elder-friendly single-product publishing design was previously approved:
 
 - Works on both mobile and desktop.
 - Publishes one single-specification product at a time.
@@ -45,6 +57,14 @@ The project-governance design was previously approved:
 - Make product publishing usable by an older operator on phone and computer.
 - Keep first-version product entry single-item, single-specification, and low-field.
 - Do not let AI invent origin, health effects, or unsupported product claims.
+- Use the Mountain Mist Nature visual direction.
+- Keep shopping primary and use telephone / LINE as the secondary in-person tea contact.
+- Let customers choose tea through four large taste cards.
+- Keep product cards concise and buying essentials first on product detail pages.
+- Allow guest checkout; require phone and keep email optional.
+- Support home delivery and in-store pickup in the first version.
+- Keep shipping fee and free-shipping threshold configurable.
+- Avoid intrusive promotion, autoplay media, and exaggerated claims.
 
 ## Governance delivery
 
@@ -62,7 +82,7 @@ The method for invoking the local 35B model is unknown. When the computer and Co
 
 ## Next action
 
-Continue Phase 0. Ask one question about the desired brand and visual direction for the storefront. Do not write website code yet.
+Review and merge the approved storefront design documentation. After merge, begin Phase 1 UX/UI with mobile-first wireframes and a small design system. Do not write production website code until the visual artifacts and implementation plan are approved.
 
 ## Startup reminder
 
