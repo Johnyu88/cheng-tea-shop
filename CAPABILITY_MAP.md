@@ -41,24 +41,25 @@ Status legend: ✅ complete · 🟡 in progress · ⬜ not started · ⛔ blocke
 | Oversell exception handling | ✅ | Contact customer within 24 hours for exchange or refund |
 | Product publishing implementation | ⬜ | Begins only after the broader Phase 0 and UX/UI gates are approved |
 
-## D. Planned storefront capabilities
+## D. Approved storefront experience
 
-These capabilities remain unimplemented until Phase 0 and Phase 1 decisions are approved:
-
-- Home page
-- Brand and tea shop story
-- Product categories
-- Product detail
-- Cart
-- Checkout
-- Customer/account information
-- Order lookup
-- Payment interface
-- Delivery information
-- Contact and in-person tea experience information
-- Mobile-first responsive behavior
-- Loading, empty, error, and success states
+| Capability | Status | Evidence / next action |
+|---|---:|---|
+| Mountain-mist brand direction | ✅ | Mist green, warm ivory, tea brown, serif headings, sans-serif body |
+| Authentic tea-mountain photography policy | ✅ | Real Taiwanese tea-mountain imagery; no false origin implications |
+| Homepage information order | ✅ | Hero → taste cards → three featured teas → story → visit → assurance → contact |
+| Taste-first product discovery | ✅ | Four large cards: light/fragrant, sweet, rich, roasted |
+| Concise product cards | ✅ | Photo, name, price, one taste sentence, sold-out state |
+| Product detail hierarchy | ✅ | Buying essentials before story, production, and brewing details |
+| In-person tea contact | ✅ | Secondary telephone and LINE entry; no automated booking in first version |
+| Guest checkout | ✅ | No mandatory account; three mobile steps |
+| Customer contact fields | ✅ | Phone required; email optional |
+| First-version delivery | ✅ | Home delivery and in-store pickup |
+| First-version payment choices | ✅ | Credit card / LINE Pay online; in-store payment allowed for pickup |
+| Configurable shipping rules | ✅ | Fixed fee and free-shipping threshold remain configurable |
+| Non-aggressive content policy | ✅ | No autoplay, countdowns, intrusive pop-ups, or unsupported claims |
+| Phase 1 wireframes and design system | ⬜ | Next capability; implementation not started |
 
 ## E. Current next capability
 
-Continue Phase 0 with one question at a time. The next topic is the website's primary brand and visual direction. Do not begin website implementation yet.
+Begin Phase 1 UX/UI with mobile-first wireframes and a small design system. Review visual artifacts and required interaction states before selecting a frontend stack or writing production code.
