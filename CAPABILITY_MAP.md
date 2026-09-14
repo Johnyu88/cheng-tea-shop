@@ -21,8 +21,8 @@ Status legend: ✅ complete · 🟡 in progress · ⬜ not started · ⛔ blocke
 
 | Phase | Status | Current capability / exit condition |
 |---|---:|---|
-| Phase 0 — Direction and specification | 🟡 | Define brand, audience, storefront functions, information architecture, and acceptance criteria |
-| Phase 1 — UX/UI | ⬜ | Approved wireframes, design system, responsive and interaction states |
+| Phase 0 — Direction and specification | ✅ | Brand, audience, storefront functions, information architecture, and core acceptance criteria approved |
+| Phase 1 — UX/UI | 🟡 | Next: mobile-first wireframes, design system, responsive and interaction states |
 | Phase 2 — Frontend prototype | ⬜ | Usable storefront backed by Mock Data / Mock API |
 | Phase 3 — Backend capability map | ⬜ | Validated domain models and Unified API contract |
 | Phase 4 — ERP selection | ⬜ | Licensed, maintained, secure candidate selected from evidence |
