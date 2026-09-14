@@ -6,22 +6,21 @@ Last updated: 2026-09-14
 
 - Repository: `Johnyu88/cheng-tea-shop`
 - Default branch: `main`
-- Product stage: Phase 1 — UX/UI preparation
+- Product stage: Phase 1 — UX/UI in progress
 - Application code: not started
 - Highest principle: **Website First → Mock API → ERP Reuse → API Integration**
 
 ## Last completed milestone
 
-The storefront brand and core shopping-experience design was approved:
+The mobile-first core wireframes and small design system were approved:
 
-- Mountain Mist Nature direction with mist green, warm ivory, and tea brown.
-- Real Taiwanese tea-mountain photography with natural light.
-- Serif headings and highly legible sans-serif body text.
-- A simple hero, four taste cards, three featured teas, story, tea-visit contact, assurance, and shop information.
-- Taste-first discovery and concise product cards.
-- Guest checkout with contact, delivery, and payment steps.
-- Home delivery and in-store pickup.
-- No aggressive promotion, autoplay media, or unsupported claims.
+- Mobile homepage, product-detail, cart, and three-step checkout wireframes are confirmed.
+- Guest checkout keeps phone required and email optional.
+- The approved system uses accessible mountain-mist colors, serif headings, legible sans-serif body text, 48 × 48px minimum touch targets, and visible form labels and focus states.
+- Loading, empty, error, sold-out, payment, and success states are specified as requirements; their complete mockups still remain.
+- Subtle mist or breeze may be evaluated later and must respect reduced-motion preferences.
+- Bird and insect ambience is optional, defaults off, requires an explicit click, can be stopped anytime, and stops on leaving the homepage.
+- Phase 1 is still in progress; desktop/responsive wireframes, real-content validation, and an older-user walkthrough remain.
 - No application code has been started.
 
 The elder-friendly single-product publishing design was previously approved:
@@ -65,6 +64,8 @@ The project-governance design was previously approved:
 - Support home delivery and in-store pickup in the first version.
 - Keep shipping fee and free-shipping threshold configurable.
 - Avoid intrusive promotion, autoplay media, and exaggerated claims.
+- Use the approved mobile design tokens, typography hierarchy, visible labels, focus states, and minimum touch targets.
+- Treat environmental sound as an explicit opt-in enhancement only; default it off and keep it non-blocking.
 
 ## Governance delivery
 
@@ -82,7 +83,7 @@ The method for invoking the local 35B model is unknown. When the computer and Co
 
 ## Next action
 
-Review and merge the approved storefront design documentation. After merge, begin Phase 1 UX/UI with mobile-first wireframes and a small design system. Do not write production website code until the visual artifacts and implementation plan are approved.
+Complete desktop and responsive wireframes plus the required loading, empty, error, sold-out, payment, and success-state mockups. Then validate authentic imagery and final copy and conduct an older-user walkthrough. Do not write production website code until these Phase 1 artifacts and the implementation plan are approved.
 
 ## Startup reminder
 
