@@ -29,7 +29,19 @@ Status legend: ✅ complete · 🟡 in progress · ⬜ not started · ⛔ blocke
 | Phase 5 — Integration | ⬜ | ERP, payment, and logistics adapters pass integration tests |
 | Phase 6 — Production hardening | ⬜ | Security, backup, monitoring, performance, and release gates pass |
 
-## C. Planned storefront capabilities
+## C. Elder-friendly product publishing
+
+| Capability | Status | Evidence / next action |
+|---|---:|---|
+| Mobile and desktop single-item publishing UX | ✅ | Design approved; implementation not started |
+| One-to-three photo upload with assisted processing | ✅ | Design approved; retain preview and recovery requirements |
+| AI-assisted product description draft | ✅ | Design approved; human confirmation and no-fabrication guardrails required |
+| Draft, preview, and explicit publish flow | ✅ | Design approved; implementation not started |
+| Simple available / sold-out inventory | ✅ | Design approved; no exact quantity in first version |
+| Oversell exception handling | ✅ | Contact customer within 24 hours for exchange or refund |
+| Product publishing implementation | ⬜ | Begins only after the broader Phase 0 and UX/UI gates are approved |
+
+## D. Planned storefront capabilities
 
 These capabilities remain unimplemented until Phase 0 and Phase 1 decisions are approved:
 
@@ -47,6 +59,6 @@ These capabilities remain unimplemented until Phase 0 and Phase 1 decisions are 
 - Mobile-first responsive behavior
 - Loading, empty, error, and success states
 
-## D. Current next capability
+## E. Current next capability
 
 Continue Phase 0 with one question at a time. The next topic is the website's primary brand and visual direction. Do not begin website implementation yet.
