@@ -14,7 +14,7 @@ Status legend: ✅ complete · 🟡 in progress · ⬜ not started · ⛔ blocke
 | Branch, review, and merge workflow | ✅ | Approved design recorded in `WORKFLOW.md` |
 | Dynamic 2–4 specialist dispatch | ✅ | Codex orchestrates; full team is not activated by default |
 | 35B second-review policy | 🟡 | Role approved; invocation method must be inspected on the connected computer |
-| Morning progress report | 🟡 | Daily 08:00 Asia/Taipei conditional report is being configured |
+| Morning progress report | ✅ | Enabled daily at 08:00 Asia/Taipei; sends only on meaningful change or access failure |
 
 ## B. Product delivery
 

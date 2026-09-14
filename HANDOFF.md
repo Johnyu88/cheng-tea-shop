@@ -20,7 +20,7 @@ The project-governance design was approved:
 - The local 35B model provides second review when its invocation method is available.
 - Work may proceed automatically through testing, review, documentation, commit, and PR.
 - Merge to `main` requires the user's explicit approval.
-- A daily 08:00 Asia/Taipei report is sent only when meaningful GitHub progress or a blocker exists.
+- A daily 08:00 Asia/Taipei report is enabled and sends only when meaningful GitHub progress, a blocker, or a GitHub access failure exists.
 
 ## Confirmed product decisions
 
@@ -30,6 +30,11 @@ The project-governance design was approved:
 - Prefer mature open-source ERP / commerce systems over building a full ERP.
 - Isolate ERP, payment, and logistics providers behind adapters.
 - Preserve credit-card and LINE Pay integration as expected future capabilities.
+
+## Active review
+
+- Pull Request #2 contains the approved governance documents and is waiting for the user's merge confirmation.
+- The conditional morning report is enabled; its first scheduled check is 2026-09-15 at 08:00 Asia/Taipei.
 
 ## Open dependency
 
