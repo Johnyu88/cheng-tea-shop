@@ -187,14 +187,17 @@ During Phase 1, the design system must define and verify:
 - accessible contrast;
 - reduced-motion behavior;
 - clear loading, empty, error, sold-out, payment-pending, payment-failed, and success states;
-- recovery that preserves customer-entered data.
+- recovery that preserves customer-entered data;
+- a plain-language privacy notice at data collection;
+- collection limited to information required for order fulfilment;
+- no customer contact, address, or payment data sent to analytics tools.
 
 Payment, deletion, publication, and other consequential actions require explicit confirmation.
 
 ## 13. Acceptance criteria
 
 - The approved mountain-mist direction is recognizable through color, typography, photography, spacing, and voice.
-- The homepage follows the approved eight-section order and keeps shopping primary.
+- The homepage follows the approved content order and keeps shopping primary.
 - A first-time customer can reach recommended teas by selecting one of four taste cards.
 - Product cards show only the approved concise fields.
 - Product detail pages place buying essentials before story and brewing information.
