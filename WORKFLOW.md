@@ -20,7 +20,16 @@ Merging to `main` always requires the user's explicit confirmation.
 
 ### Step 2 — Task graph
 
-Codex decomposes the approved work into small capabilities. Every task records:
+Before custom implementation, Codex performs a reuse-first assessment:
+
+- search for mature templates, components, workflows, and open-source capabilities relevant to the approved goal;
+- compare license, maintenance, security, architectural fit, modification cost, and lock-in;
+- prefer adapting a suitable solution over rebuilding it;
+- remove unnecessary modules and keep the project's stable interfaces;
+- record why a candidate was reused or rejected;
+- never let a template override approved product requirements.
+
+Codex then decomposes the approved work into small capabilities. Every task records:
 
 - owner role;
 - goal and non-goals;

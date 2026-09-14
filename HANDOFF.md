@@ -25,6 +25,7 @@ The project-governance design was approved:
 ## Confirmed product decisions
 
 - Complete and validate the storefront before selecting an ERP.
+- Prioritize completing the approved goal; assess mature templates, components, and open-source features before custom development.
 - Use Mock Data / Mock API during the frontend phase.
 - Access commerce data through stable domain interfaces rather than hard-coded UI data.
 - Prefer mature open-source ERP / commerce systems over building a full ERP.
