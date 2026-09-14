@@ -77,4 +77,4 @@ Status legend: ✅ complete · 🟡 in progress · ⬜ not started · ⛔ blocke
 
 ## E. Current next capability
 
-After the plan PR is merged and the user explicitly authorizes implementation, execute Wave 0: audit and pin the candidate MIT template, record retained and removed modules, and establish the testable Next.js baseline. Do not import template code before this gate.
+After the plan PR is merged and the user explicitly authorizes implementation, execute Wave 0: audit and pin the candidate MIT template, record the keep/rewrite/remove decision, and record the independent build result. Establish the testable Next.js baseline separately in Wave 1. Do not import template code before this gate.

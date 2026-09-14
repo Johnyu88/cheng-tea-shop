@@ -60,7 +60,7 @@ The desktop, responsive, state, and elder-safeguard design was previously approv
 - Errors retain valid data and payment processing prevents duplicate submission.
 - One-tap telephone help is primary; LINE is secondary.
 - The cart may persist, while personal contact and address data is limited to the current browsing session and cleared after completion, cancellation, or expiry.
-- Phase 1 remains in progress; authentic content validation, prototype-based older-user testing, and implementation planning remain.
+- Phase 1 remains in progress; evidence-gated content validation and prototype-based older-user testing remain.
 - No application code has been started.
 
 The elder-friendly single-product publishing design was previously approved:
@@ -137,7 +137,7 @@ The method for invoking the local 35B model is unknown. When the computer and Co
 
 ## Next action
 
-After this documentation PR is merged and the user explicitly authorizes implementation, execute Wave 0 from docs/superpowers/plans/2026-09-14-frontend-implementation-plan.md: audit and pin the candidate template, document retained and removed modules, and establish the testable project baseline. Do not write website code before that authorization.
+After this documentation PR is merged and the user explicitly authorizes implementation, execute Wave 0 from docs/superpowers/plans/2026-09-14-frontend-implementation-plan.md: audit and pin the candidate template, document the keep/rewrite/remove decision, and record the independent build result. Establish the testable project baseline separately in Wave 1. Do not write website code before that authorization.
 
 ## Startup reminder
 
