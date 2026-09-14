@@ -9,6 +9,7 @@ Status legend: ✅ complete · 🟡 in progress · ⬜ not started · ⛔ blocke
 | Capability | Status | Evidence / next action |
 |---|---:|---|
 | Website-first architecture | ✅ | Approved in `WHITEPAPER.md` and the 2026-09-12 architecture spec |
+| Goal-first template reuse policy | ✅ | Reuse mature, licensed, maintainable solutions when they fit; record selection evidence |
 | Concise resume prompt | ✅ | `RESUME_PROMPT.md` merged to `main` |
 | Agent roles and authority | ✅ | Approved design recorded in `AGENTS.md` |
 | Branch, review, and merge workflow | ✅ | Approved design recorded in `WORKFLOW.md` |
