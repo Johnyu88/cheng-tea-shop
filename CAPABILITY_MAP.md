@@ -34,12 +34,16 @@ Status legend: ✅ complete · 🟡 in progress · ⬜ not started · ⛔ blocke
 | Capability | Status | Evidence / next action |
 |---|---:|---|
 | Mobile and desktop single-item publishing UX | ✅ | Design approved; implementation not started |
-| One-to-three photo upload with assisted processing | ✅ | Design approved; retain preview and recovery requirements |
+| Optional one-to-three photo upload with assisted processing | ✅ | Missing photos use a labeled brand placeholder; retain preview and recovery requirements |
 | AI-assisted product description draft | ✅ | Design approved; human confirmation and no-fabrication guardrails required |
 | Draft, preview, and explicit publish flow | ✅ | Design approved; implementation not started |
 | Simple available / sold-out inventory | ✅ | Design approved; no exact quantity in first version |
 | Oversell exception handling | ✅ | Contact customer within 24 hours for exchange or refund |
-| Product publishing implementation | ⬜ | Begins only after the broader Phase 0 and UX/UI gates are approved |
+| 40-plus product catalog capacity | ✅ | Design requires at least 40 products without a fixed 40-item ceiling |
+| Incremental draft-to-publish workflow | ✅ | Publish each completed item independently; unfinished items remain private drafts |
+| Elder-friendly one-page minimum form | ✅ | Name, single specification, price, tea category, and availability are the minimum fields |
+| Branded missing-photo fallback | ✅ | Use one labeled “商品照片準備中” image; never substitute another product photo |
+| Product publishing implementation | ⬜ | Begins only after the frontend implementation plan is approved |
 
 ## D. Approved storefront experience
 
@@ -68,9 +72,9 @@ Status legend: ✅ complete · 🟡 in progress · ⬜ not started · ⛔ blocke
 | Multi-item checkout summary | ✅ | Show all 1–3 items; show first three and expandable remainder for 4+ items |
 | Elder-friendly checkout safeguards | ✅ | Phone help first; session-only PII; cart persists; errors preserve valid input |
 | Homepage real-length copy and responsive composition | ✅ | Approved hero copy, story direction, three featured products, and 360/768/1024/1440 layout behavior |
-| Real content and asset validation | 🟡 | Final tea-mountain and two product photos plus public-use and claim evidence remain before release |
+| Real content and asset validation | 🟡 | Store-owned photo permission confirmed; labeled placeholders are allowed; origin and product claims still need evidence |
 | Prototype-based older-user testing | ⬜ | Run with real older users after an operable prototype exists |
 
 ## E. Current next capability
 
-Complete the remaining asset gate: final tea-mountain and two product photos, public-use confirmation, and evidence for any product claims. Then prepare the frontend implementation plan and technical selection. Real older-user testing follows when an operable prototype exists. Do not write production code before the plan is approved.
+Prepare the frontend implementation plan and technical selection for the approved Long Ying Tea brand, 40-plus incremental catalog, Mock API boundaries, and labeled image placeholders. Keep origin and product claims evidence-gated. Real older-user testing follows when an operable prototype exists. Do not write production code before the plan is approved.
