@@ -12,7 +12,7 @@ Allow an older operator who is not comfortable with complex software to publish 
 - Support both mobile and desktop.
 - Publish one product at a time.
 - Each product has one specification in the first version.
-- Upload one to three photos.
+- Photos are optional; add one to three when available, otherwise use the approved labeled brand placeholder.
 - Inventory is only available or sold out.
 - AI may draft product copy only from provided facts and selected tags.
 - Save as draft, preview, then explicitly publish.
@@ -21,9 +21,9 @@ Allow an older operator who is not comfortable with complex software to publish 
 ## 3. Publishing flow
 
 1. Select **Add product**.
-2. Take or choose one to three photos.
+2. Optionally take or choose one to three photos; otherwise keep the branded “商品照片準備中” placeholder.
 3. Review non-destructive assisted cropping, consistent aspect ratio, and modest lighting correction.
-4. Enter the product name and price.
+4. Enter the product name, single specification, price, and tea category.
 5. Choose available or sold out.
 6. Select simple factual fields and tags:
    - origin;
@@ -40,7 +40,7 @@ Allow an older operator who is not comfortable with complex software to publish 
 ## 4. Interaction requirements
 
 - Use plain language instead of commerce or ERP terminology.
-- Present one primary task per screen.
+- Use one clear, elder-friendly page for the minimum fields; optional details may expand without hiding the save and publish actions.
 - Use large, clear text and controls.
 - Autosave progress.
 - Resume an unfinished draft on either supported device.
@@ -51,7 +51,8 @@ Allow an older operator who is not comfortable with complex software to publish 
 
 ## 5. Photo handling
 
-- The first photo is the default primary image.
+- When photos exist, the first photo is the default primary image.
+- When no photo exists, use the single branded placeholder labeled “商品照片準備中”; never use another tea product's photo.
 - The operator can reorder photos.
 - Processing must preserve the original upload.
 - Automatic changes are limited to aspect ratio, crop suggestion, modest brightness, and web-sized derivatives.
@@ -96,8 +97,8 @@ The customer-facing product and checkout experience must disclose that limited t
 ## 9. Acceptance criteria
 
 - A new user can publish a single-specification product on phone or computer using the defined flow.
-- Only product name, price, availability, and at least one photo are required; other factual fields may remain optional unless later approved.
-- One to three photos can be added, reordered, previewed, and recovered after a failed upload.
+- Product name, single specification, price, tea category, and availability are the only minimum fields; a photo is optional.
+- Zero to three photos are supported; added photos can be reordered, previewed, and recovered after a failed upload.
 - Progress is autosaved before publication.
 - AI copy never publishes automatically and visibly marks missing information.
 - Mobile and desktop previews are available before publication.
@@ -135,4 +136,4 @@ During implementation:
 
 ## 12. Current boundary
 
-This document approves the product-publishing experience only. It does not authorize website implementation. The next Phase 0 topic remains the storefront's brand and visual direction.
+This document approves the core product-publishing experience only. The later approved brand, 40-plus catalog, incremental publication, and placeholder rules in `2026-09-14-brand-and-progressive-catalog-design.md` supersede conflicting details here. It does not authorize website implementation.
