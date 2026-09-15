@@ -1,7 +1,8 @@
 name: Bootstrap lockfile
 
 on:
-  workflow_dispatch:
+  push:
+    branches: [feature/wave-1-reproducible-baseline]
 
 permissions:
   contents: read
