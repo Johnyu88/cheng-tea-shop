@@ -73,7 +73,7 @@ Create `package.json` with exact versions, `private: true`, `packageManager: "pn
 }
 ```
 
-Runtime dependencies are exactly `next@16.3.5`, `react@19.3.0`, `react-dom@19.3.0`, `clsx@2.1.1`, and `tailwind-merge@3.7.0`. Development dependencies are exactly `tailwindcss@4.3.3`, `@tailwindcss/postcss@4.3.3`, `typescript@7.0.2`, `@types/node@26.5.1`, `@types/react@19.3.0`, `@types/react-dom@19.3.0`, `eslint@10.10.0`, `eslint-config-next@16.3.5`, `vitest@5.0.0`, `@vitejs/plugin-react@6.1.1`, `vite-tsconfig-paths@6.1.1`, `jsdom@30.0.1`, `@testing-library/react@16.3.3`, `@testing-library/dom@10.4.2`, and `@testing-library/jest-dom@7.0.1`.
+Runtime dependencies are exactly `next@16.3.5`, `react@19.3.0`, `react-dom@19.3.0`, `clsx@2.1.1`, and `tailwind-merge@3.7.0`. Development dependencies are exactly `tailwindcss@4.3.3`, `@tailwindcss/postcss@4.3.3`, `typescript@6.0.2`, `@types/node@26.5.1`, `@types/react@19.3.0`, `@types/react-dom@19.3.0`, `eslint@10.10.0`, `eslint-config-next@16.3.5`, `vitest@5.0.0`, `@vitejs/plugin-react@6.1.1`, `vite-tsconfig-paths@6.1.1`, `jsdom@30.0.1`, `@testing-library/react@16.3.3`, `@testing-library/dom@10.4.2`, and `@testing-library/jest-dom@7.0.1`.
 
 - [ ] **Step 2: Add strict framework, styling, lint, shadcn, and test configuration**
 
