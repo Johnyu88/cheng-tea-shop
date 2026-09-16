@@ -1,6 +1,15 @@
 # HANDOFF
 
-Last updated: 2026-09-14
+Last updated: 2026-09-16
+
+## Wave 1 status
+
+- Branch: `feature/wave-1-reproducible-baseline`
+- Pull request: #12 (draft) — https://github.com/Johnyu88/cheng-tea-shop/pull/12
+- Implemented: Next.js 16.3.5 App Router baseline, strict TypeScript, Tailwind 4, shadcn project configuration, Vitest/RTL contracts, health endpoint, standalone non-root Dockerfile, and Chromium/WebKit + axe CI definitions.
+- Toolchain pins: Node 24.19.0 and pnpm 11.19.0.
+- `BLOCKED_EXTERNAL`: local npm/GitHub TCP access prevents reproducing the frozen install and Docker smoke locally; the required quality workflow is the authoritative clean-runner verification.
+- `NEEDS_ADVANCED_REVIEW`: final QA/security review and PR readiness still require review of the complete CI result before marking ready.
 
 ## Current state
 
