@@ -299,3 +299,10 @@ GitHub 是正式文件與程式來源。聊天中的新指令若尚未寫入 Git
 - No candidate-template application code or assets, ERP, real authentication, real payment, real product data, or secrets were added. The lockfile was generated on a clean GitHub runner and the temporary bootstrap workflow was removed.
 - The first Quality run exposed pnpm 11's ignored-build policy for `unrs-resolver`; the manifest now permits only that dependency's required build script. A fresh full Quality result is still pending.
 - Local frozen-install and Docker checks remain `BLOCKED_EXTERNAL` by the restricted npm/GitHub TCP environment; clean-runner CI is authoritative for those gates.
+
+
+## 24. Wave 1 completion and Wave 2 handoff
+
+Wave 1 is complete and PR #14 is merged into `main` as `ed86232e1a6e42953e6c3bc5c23d2a7e13258a93`. Quality run `35121518151` passed frozen install, lint, typecheck, unit/component tests, production build, Chromium/WebKit plus axe, dependency audits, Docker build, and container smoke. The temporary lockfile regeneration workflow and artifact upload were removed; the committed lockfile is verified by frozen install.
+
+Wave 2 begins from `RESUME_PROMPT.md` and the merged `main` state. Its first bounded work should be the approved design-system and storefront foundation, with no ERP, real payment, real authentication, or real product data until separately authorized.

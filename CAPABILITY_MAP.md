@@ -79,13 +79,13 @@ Status legend: ✅ complete · 🟡 in progress · ⬜ not started · ⛔ blocke
 
 | Capability | Status | Evidence / next action |
 |---|---:|---|
-| Reproducible Next.js baseline | 🟡 | PR #12 uses Next.js 16.3.5, strict TypeScript, Tailwind 4, shadcn conventions, and pinned Node/pnpm; await a fresh full Quality run |
-| Health and standalone container boundary | 🟡 | `/api/health` contract and non-root standalone Dockerfile are committed; Docker smoke is CI-only because local Docker is unavailable |
-| Browser and accessibility gates | 🟡 | Chromium/WebKit and axe tests plus CI workflow are committed; await clean-runner result |
-| Dependency and secret hygiene | 🟡 | Lockfile generated on a clean runner, direct versions pinned, notices and env example added; final audit remains pending |
+| Reproducible Next.js baseline | ✅ | PR #14 merged as `ed86232e1a6e42953e6c3bc5c23d2a7e13258a93`; Next.js 16.3.5, strict TypeScript, Tailwind 4, shadcn conventions, pinned Node/pnpm |
+| Health and standalone container boundary | ✅ | `/api/health` contract, non-root standalone Dockerfile, Docker build and container smoke passed in Quality run `35121518151` |
+| Browser and accessibility gates | ✅ | Chromium/WebKit and axe tests passed in Quality run `35121518151` |
+| Dependency and secret hygiene | ✅ | Frozen lockfile install, dependency audits, notices, env example, and secret review passed for PR #14 |
 
 No candidate-template application code or assets, ERP, real authentication, real payment, real product data, or secrets were added. Reuse remains limited to individually reviewed MIT primitives.
 
 ## F. Current next capability
 
-Complete the fresh Quality workflow for PR #12, perform final QA/Security review, then leave the PR open awaiting explicit `確認合併`; do not merge main automatically.
+Wave 2: start from `RESUME_PROMPT.md` and merged `main`; implement the approved design-system and storefront foundation in bounded, testable increments. Keep ERP, real payment, real authentication, and real product data out of scope until separately authorized.

@@ -1,5 +1,12 @@
 # HANDOFF
 
+## Wave 1 completion — PR #14 merged
+
+- PR #14 was merged into `main` as `ed86232e1a6e42953e6c3bc5c23d2a7e13258a93`.
+- Quality run `35121518151` passed frozen install, lint, typecheck, unit/component tests, production build, Chromium/WebKit + axe, dependency audits, Docker build, and container smoke.
+- The corrected workflow uses `pnpm install --frozen-lockfile`; regenerated-lockfile artifacts and temporary regeneration workflow were removed.
+- Next step: Wave 2 design-system and storefront foundation work, starting from `RESUME_PROMPT.md` and the merged `main` state.
+
 ## PR #14 Quality follow-up
 
 - Prior Quality run passed all functional, browser, audit, Docker build, and container smoke steps while using a temporary non-frozen install.
@@ -9,7 +16,7 @@
 ## Wave 1 status
 
 - Branch: feature/wave-1-reproducible-baseline
-- Pull request: #12 — https://github.com/Johnyu88/cheng-tea-shop/pull/12
+- Pull request: #14 — https://github.com/Johnyu88/cheng-tea-shop/pull/14 (merged)
 - Implemented: Next.js 16.3.5 App Router baseline, strict TypeScript, Tailwind 4, shadcn project configuration, Vitest/RTL contracts, health endpoint, standalone non-root Dockerfile, and Chromium/WebKit + axe CI definitions.
 - Toolchain pins: Node 24.19.0 and pnpm 11.19.0.
 - BLOCKED_EXTERNAL: local npm/GitHub TCP access prevents reproducing frozen install and Docker smoke locally; clean-runner CI is authoritative.
