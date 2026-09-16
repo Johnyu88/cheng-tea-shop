@@ -86,3 +86,43 @@ An agent report is not proof of completion. Codex must independently inspect the
 - Do not overwrite unrelated user changes.
 - Do not build a full ERP before storefront requirements are validated.
 - Do not couple frontend components directly to a specific ERP.
+
+## 8. Human-in-the-loop policy
+
+The user should be interrupted for decisions, not routine operations.
+
+Agents may proceed without additional confirmation for low-risk, reversible work that is already inside an approved task scope, including:
+
+- editing project files;
+- running tests, lint, type checks, builds, and local verification;
+- updating project documentation to match verified work;
+- inspecting `git status`, diffs, and recent history;
+- creating focused local commits;
+- pushing an already-authorized working branch and opening or updating its pull request.
+
+Agents must stop and request explicit user confirmation before high-risk or materially irreversible actions, including:
+
+- merging to `main`;
+- force-pushing or rewriting shared history;
+- deleting large or important data sets;
+- destructive database migrations;
+- production deployment or production configuration changes;
+- payment, LINE Pay, credit-card, secret, credential, or account-permission changes;
+- major architecture changes outside the approved scope;
+- any operation with a meaningful risk of data loss.
+
+If a GitHub login, connector, permission, push, or remote API action requires human intervention, do not repeatedly interrupt the user for the same blocker. Follow the resilience procedure in `WORKFLOW.md`, preserve progress locally, record the blocker in `HANDOFF.md`, and continue any independent work that does not depend on the blocked remote action.
+
+## 9. Task persistence principle
+
+Models, agents, sessions, and computers are replaceable; project state is not.
+
+Every meaningful milestone must be recoverable from durable project state. At minimum, preserve the current state through the combination of:
+
+- Git commits;
+- `HANDOFF.md`;
+- `WHITEPAPER.md` when architecture, product strategy, or major decisions change;
+- relevant specs or plans;
+- actual verification results.
+
+A new agent should be able to resume work by reading the project documents and Git state without depending on chat history or one specific model session.
