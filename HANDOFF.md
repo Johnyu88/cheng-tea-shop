@@ -12,6 +12,7 @@ Last updated: 2026-09-16
 - `NEEDS_ADVANCED_REVIEW`: final QA/security review and PR readiness still require review of the complete CI result before marking ready.
 - CI follow-up: the first Quality run stopped at frozen install because pnpm 11 rejected the required `unrs-resolver` build script; the package manifest now explicitly allows only that dependency's build step, pending a fresh clean-runner result.
 - The clean-runner-generated Playwright lockfile is synchronized in the feature worktree; the temporary bootstrap workflow has been removed.
+- A fresh Quality workflow is requested after the pnpm build-policy fix; until it completes, CI verification remains pending.
 
 ## Current state
 
