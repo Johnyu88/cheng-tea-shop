@@ -25,13 +25,7 @@ jobs:
           node-version: 24.19.0
           cache: pnpm
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
-      - name: Upload regenerated lockfile
-        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4
-        with:
-          name: regenerated-pnpm-lock
-          path: pnpm-lock.yaml
-          if-no-files-found: error
+        run: pnpm install --frozen-lockfile
       - name: Install Playwright browsers
         run: pnpm exec playwright install --with-deps chromium webkit
       - name: Lint
