@@ -257,6 +257,14 @@ Every implementation PR must pass:
 - Candidate ecommerce skeleton: https://github.com/shadcnspace/ecommerce-shadcn-nextjs-template
 - Vercel Commerce reference: https://github.com/vercel/commerce
 
+## Wave 1 execution record — 2026-09-16
+
+- Wave 1 branch: `feature/wave-1-reproducible-baseline`; PR #12 is open as a draft.
+- Implemented baseline: Next.js 16.3.5, Node 24.19.0, pnpm 11.19.0, strict TypeScript, Tailwind 4, shadcn configuration, Vitest/RTL, health route, standalone non-root Dockerfile, Playwright Chromium/WebKit, axe, and CI quality gates.
+- Explicit exclusions remain intact: no wholesale candidate import, ERP, real payment, real login, real product data, or secrets.
+- CI evidence: clean-runner lockfile bootstrap passed; first full Quality run failed at pnpm ignored-build policy for `unrs-resolver`, now addressed through a narrowly scoped `onlyBuiltDependencies` allowlist. Fresh full Quality verification is pending.
+- `BLOCKED_EXTERNAL`: local npm/GitHub TCP restrictions prevent frozen install and Docker smoke reproduction; `NEEDS_ADVANCED_REVIEW`: final QA/Security and PR readiness require the fresh CI result.
+
 ## Start gate
 
 This plan becomes executable only after:
