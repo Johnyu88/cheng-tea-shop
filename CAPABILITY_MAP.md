@@ -75,6 +75,17 @@ Status legend: ✅ complete · 🟡 in progress · ⬜ not started · ⛔ blocke
 | Real content and asset validation | 🟡 | Store-owned photo permission confirmed; labeled placeholders are allowed; origin and product claims still need evidence |
 | Prototype-based older-user testing | ⬜ | Run with real older users after an operable prototype exists |
 
-## E. Current next capability
+## E. Wave 1 baseline status
 
-Merge the reviewed Wave 0 audit. Then execute Wave 1 on a new branch: create a clean, reproducible Next.js baseline using the current officially patched stable release, pnpm lockfile, strict TypeScript, lint, Vitest/RTL, Playwright, standalone output, and Docker smoke checks. Reuse only individually approved MIT UI primitives; do not import the candidate template wholesale.
+| Capability | Status | Evidence / next action |
+|---|---:|---|
+| Reproducible Next.js baseline | 🟡 | PR #12 uses Next.js 16.3.5, strict TypeScript, Tailwind 4, shadcn conventions, and pinned Node/pnpm; await a fresh full Quality run |
+| Health and standalone container boundary | 🟡 | `/api/health` contract and non-root standalone Dockerfile are committed; Docker smoke is CI-only because local Docker is unavailable |
+| Browser and accessibility gates | 🟡 | Chromium/WebKit and axe tests plus CI workflow are committed; await clean-runner result |
+| Dependency and secret hygiene | 🟡 | Lockfile generated on a clean runner, direct versions pinned, notices and env example added; final audit remains pending |
+
+No candidate-template application code or assets, ERP, real authentication, real payment, real product data, or secrets were added. Reuse remains limited to individually reviewed MIT primitives.
+
+## F. Current next capability
+
+Complete the fresh Quality workflow for PR #12, perform final QA/Security review, then leave the PR open awaiting explicit `確認合併`; do not merge main automatically.
