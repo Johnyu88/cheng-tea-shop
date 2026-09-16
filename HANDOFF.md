@@ -10,6 +10,7 @@ Last updated: 2026-09-16
 - Toolchain pins: Node 24.19.0 and pnpm 11.19.0.
 - `BLOCKED_EXTERNAL`: local npm/GitHub TCP access prevents reproducing the frozen install and Docker smoke locally; the required quality workflow is the authoritative clean-runner verification.
 - `NEEDS_ADVANCED_REVIEW`: final QA/security review and PR readiness still require review of the complete CI result before marking ready.
+- CI follow-up: the first Quality run stopped at frozen install because pnpm 11 rejected the required `unrs-resolver` build script; the package manifest now explicitly allows only that dependency's build step, pending a fresh clean-runner result.
 
 ## Current state
 
