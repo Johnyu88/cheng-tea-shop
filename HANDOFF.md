@@ -1,5 +1,11 @@
 # HANDOFF
 
+## PR #14 Quality follow-up
+
+- Prior Quality run passed all functional, browser, audit, Docker build, and container smoke steps while using a temporary non-frozen install.
+- Workflow correction committed: `pnpm install --frozen-lockfile`; regenerated-lockfile artifact upload removed; reviewed lockfile retained.
+- Fresh full Quality workflow is pending on the corrected commit; do not merge until it completes successfully.
+
 ## Wave 1 status
 
 - Branch: feature/wave-1-reproducible-baseline
@@ -9,7 +15,7 @@
 - BLOCKED_EXTERNAL: local npm/GitHub TCP access prevents reproducing frozen install and Docker smoke locally; clean-runner CI is authoritative.
 - NEEDS_ADVANCED_REVIEW: final QA/Security evidence was pending; merge was explicitly confirmed by the user.
 
-Last updated: 2026-09-16
+Last updated: 2026-09-17
 
 ## Current state
 
