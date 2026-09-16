@@ -4,7 +4,7 @@
 
 - Prior Quality run passed all functional, browser, audit, Docker build, and container smoke steps while using a temporary non-frozen install.
 - Workflow correction committed: `pnpm install --frozen-lockfile`; regenerated-lockfile artifact upload removed; reviewed lockfile retained.
-- Fresh full Quality workflow is pending on the corrected commit; do not merge until it completes successfully.
+- Clean-runner lockfile regeneration passed and removed its temporary workflow; the corrected full Quality workflow is now running on the user-authored follow-up commit.
 
 ## Wave 1 status
 
