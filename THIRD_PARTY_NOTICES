@@ -1,0 +1,25 @@
+THIRD-PARTY SOFTWARE NOTICES
+
+No source code or asset from the Wave 0 candidate template was imported into
+this baseline. The project uses the following direct open-source packages.
+Their license texts remain available at the listed upstream locations:
+
+- Next.js and eslint-config-next: https://github.com/vercel/next.js/blob/canary/license
+- React and React DOM: https://github.com/facebook/react/blob/main/LICENSE
+- clsx: https://github.com/lukeed/clsx/blob/master/license
+- tailwind-merge: https://github.com/dcastil/tailwind-merge/blob/main/LICENSE.md
+- Tailwind CSS and @tailwindcss/postcss: https://github.com/tailwindlabs/tailwindcss/blob/main/LICENSE
+- TypeScript: https://github.com/microsoft/TypeScript/blob/main/LICENSE.txt
+- @types/node, @types/react, and @types/react-dom: https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/LICENSE
+- ESLint: https://github.com/eslint/eslint/blob/main/LICENSE
+- Vitest: https://github.com/vitest-dev/vitest/blob/main/LICENSE
+- @vitejs/plugin-react: https://github.com/vitejs/vite-plugin-react/blob/main/LICENSE
+- vite-tsconfig-paths: https://github.com/aleclarson/vite-tsconfig-paths/blob/master/LICENSE
+- jsdom: https://github.com/jsdom/jsdom/blob/main/LICENSE.txt
+- React Testing Library: https://github.com/testing-library/react-testing-library/blob/main/LICENSE
+- DOM Testing Library: https://github.com/testing-library/dom-testing-library/blob/main/LICENSE
+- jest-dom: https://github.com/testing-library/jest-dom/blob/main/LICENSE
+
+The shadcn/ui project configuration does not copy or install any primitive.
+Any shadcn primitive copied in a future Wave requires a file-level license and
+notice review before it enters this repository.

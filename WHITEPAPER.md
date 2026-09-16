@@ -292,3 +292,10 @@ GitHub 是正式文件與程式來源。聊天中的新指令若尚未寫入 Git
 - Phase 1 仍在進行；現有店家照片公開使用權已確認，缺圖商品可使用有標示的品牌預設圖。前端技術選型與實作計畫已確認，可操作原型的實際年長使用者測試仍待完成。
 - 網站程式尚未開始；沒有任何候選模板程式進入專案。
 - Wave 0 模板稽核已完成並判定不可整包匯入。下一步在稽核 PR 合併後，依 Wave 1 建立乾淨、可測試、可容器化的前端基線。
+
+### Wave 1 implementation status — 2026-09-16
+
+- Branch `feature/wave-1-reproducible-baseline` and draft PR #12 contain a clean Next.js 16.3.5 App Router baseline with Node 24.19.0, pnpm 11.19.0, strict TypeScript, Tailwind 4, shadcn conventions, Vitest/RTL contracts, a minimal health route, standalone non-root Dockerfile, and Chromium/WebKit plus axe checks.
+- No candidate-template application code or assets, ERP, real authentication, real payment, real product data, or secrets were added. The lockfile was generated on a clean GitHub runner and the temporary bootstrap workflow was removed.
+- The first Quality run exposed pnpm 11's ignored-build policy for `unrs-resolver`; the manifest now permits only that dependency's required build script. A fresh full Quality result is still pending.
+- Local frozen-install and Docker checks remain `BLOCKED_EXTERNAL` by the restricted npm/GitHub TCP environment; clean-runner CI is authoritative for those gates.
