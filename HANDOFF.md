@@ -1,5 +1,11 @@
 # HANDOFF
 
+## PR #14 Quality follow-up
+
+- Prior Quality run passed all functional, browser, audit, Docker build, and container smoke steps while using a temporary non-frozen install.
+- Workflow correction committed: `pnpm install --frozen-lockfile`; regenerated-lockfile artifact upload removed; reviewed lockfile retained.
+- Clean-runner lockfile regeneration passed and removed its temporary workflow; Quality workflow run 35121057371 passed all required gates on the corrected frozen-lockfile workflow.
+
 ## Wave 1 status
 
 - Branch: feature/wave-1-reproducible-baseline
@@ -7,9 +13,9 @@
 - Implemented: Next.js 16.3.5 App Router baseline, strict TypeScript, Tailwind 4, shadcn project configuration, Vitest/RTL contracts, health endpoint, standalone non-root Dockerfile, and Chromium/WebKit + axe CI definitions.
 - Toolchain pins: Node 24.19.0 and pnpm 11.19.0.
 - BLOCKED_EXTERNAL: local npm/GitHub TCP access prevents reproducing frozen install and Docker smoke locally; clean-runner CI is authoritative.
-- NEEDS_ADVANCED_REVIEW: final QA/Security evidence was pending; merge was explicitly confirmed by the user.
+- Final CI evidence: Quality run 35121057371 passed frozen install, lint, typecheck, unit/component tests, production build, Chromium/WebKit + axe, dependency audits, Docker build, and container smoke.
 
-Last updated: 2026-09-16
+Last updated: 2026-09-17
 
 ## Current state
 
