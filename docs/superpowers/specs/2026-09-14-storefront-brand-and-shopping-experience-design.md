@@ -5,7 +5,7 @@ Status: Approved for documentation
 
 ## 1. Objective
 
-Define a calm, trustworthy, mobile-first storefront for Long Ying Tea (龍映茗茶), informally known to returning customers as Chen Tea Shop (陳老師茶行). A customer should be able to understand the shop, choose tea by taste, review a product, and complete checkout without tea expertise or mandatory account registration.
+Define a calm, trustworthy, mobile-first storefront for Long Ying Tea (陳老師茶行), informally known to returning customers as Chen Tea Shop (陳老師茶行). A customer should be able to understand the shop, choose tea by taste, review a product, and complete checkout without tea expertise or mandatory account registration.
 
 This design covers the brand direction, homepage, product discovery, product detail, in-person tea entry point, cart, checkout, delivery, payment choices, inventory display, and interaction comfort. It does not authorize application implementation.
 
@@ -253,4 +253,4 @@ The next step is Phase 1 UX/UI: produce mobile-first wireframes and a small desi
 
 ## 15. Later approved clarification
 
-The public brand is 龍映茗茶, while 陳老師茶行 remains an informal alias in story and search text. The catalog supports at least 40 products without a fixed ceiling, allows incremental draft-to-publish entry, and uses both taste and tea-category filters. Detailed rules in `2026-09-14-brand-and-progressive-catalog-design.md` supersede any conflicting earlier assumptions in this document.
+The public brand is 陳老師茶行, while 陳老師茶行 remains an informal alias in story and search text. The catalog supports at least 40 products without a fixed ceiling, allows incremental draft-to-publish entry, and uses both taste and tea-category filters. Detailed rules in `2026-09-14-brand-and-progressive-catalog-design.md` supersede any conflicting earlier assumptions in this document.
