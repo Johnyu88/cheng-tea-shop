@@ -61,7 +61,7 @@ The frontend technical selection and implementation plan was previously approved
 
 The public brand and progressive catalog design was previously approved:
 
-- The public-facing brand is “龍映茗茶”; “陳老師茶行” remains an informal customer-facing alias in story and search text.
+- The public-facing brand is “陳老師茶行”; “陳老師茶行” remains an informal customer-facing alias in story and search text.
 - The catalog must support at least 40 teas without a fixed 40-item ceiling.
 - Products are entered one at a time through an elder-friendly one-page form.
 - Minimum fields are name, single specification, price, tea category, and available / sold-out status.
@@ -147,7 +147,7 @@ The project-governance design was previously approved:
 - Preserve valid data through errors; keep personal data session-only and never retain payment credentials in frontend storage.
 - Make one-tap telephone help primary and LINE secondary during checkout.
 - Use the approved homepage hero copy, warm teacher-led story, and three confirmed featured-tea summaries.
-- Use the public brand “龍映茗茶” and retain “陳老師茶行” as the informal alias in story and search text.
+- Use the public brand “陳老師茶行” and retain “陳老師茶行” as the informal alias in story and search text.
 - Support at least 40 products with incremental draft-to-publish entry and no fixed 40-item ceiling.
 - Let customers browse by both taste and tea category while keeping only three manually featured homepage products.
 - Use a labeled brand placeholder when a product photo is missing; never use another product photo as a substitute.
