@@ -61,7 +61,7 @@ The first viewport contains:
 
 The page then presents, in order:
 
-1. four taste-selection cards;
+1. tea-category navigation for the ten formal tea categories;
 2. three featured teas;
 3. a short Long Ying Tea story centered on Teacher Chen;
 4. a secondary **Visit for tea** contact section;
@@ -70,18 +70,31 @@ The page then presents, in order:
 
 The page must not use autoplay video or audio, intrusive pop-ups, countdown timers, fake scarcity, or excessive motion.
 
-## 5. Choosing tea by taste
+## 5. Tea-shop navigation and discovery
 
-The primary discovery model is taste rather than specialist tea terminology.
+The storefront uses ten formal tea categories as the primary catalog taxonomy:
 
-Show four large cards:
+1. 台灣野生山茶
+2. 綠茶
+3. 白茶
+4. 黃茶
+5. 青茶（烏龍茶）
+6. 紅茶
+7. 黑茶（普洱茶）
+8. 花茶（窨花茶）
+9. 特殊茶
+10. 老茶
 
-- light and fragrant;
-- naturally sweet;
-- rich and full;
-- roasted.
+The tea-shop navigation must expose these ten categories directly. 「禮盒」與「茶具」不屬於第一版茶葉商城分類，從商城分類與選單中移除。
 
-Selecting a card immediately displays matching products. Do not require a quiz in the first version. Tea type remains a full catalog filter alongside taste, while production details remain secondary product information.
+Taste remains a secondary discovery aid rather than a product category. The current taste tags are:
+
+- 清香
+- 甘甜
+- 濃郁
+- 焙火
+
+A product has one primary tea category and may have multiple taste tags. Do not require a quiz in the first version. Production details remain secondary product information.
 
 ## 6. Product listing and detail
 
@@ -199,7 +212,7 @@ Payment, deletion, publication, and other consequential actions require explicit
 
 - The approved mountain-mist direction is recognizable through color, typography, photography, spacing, and voice.
 - The homepage follows the approved content order and keeps shopping primary.
-- A first-time customer can reach recommended teas by selecting one of four taste cards.
+- A customer can browse the ten formal tea categories directly, while taste tags remain available as secondary discovery aids.
 - Product cards show only the approved concise fields.
 - Product detail pages place buying essentials before story and brewing information.
 - Sold-out products remain visible and cannot be purchased.
