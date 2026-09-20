@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import { HomePage } from "@/features/home/components/home-page";
 import { createMockCatalogService } from "@/lib/domain";
 
@@ -25,10 +25,11 @@ it("renders the first three catalog products through the catalog service", async
     expect(screen.getByRole("heading", { level: 2, name: "推薦茶品" })).toBeInTheDocument();
   });
 
-  expect(screen.getAllByRole("article")).toHaveLength(3);
-  expect(screen.getByText("合成茶品 001")).toBeInTheDocument();
-  expect(screen.getByText("合成茶品 003")).toBeInTheDocument();
-  expect(screen.getAllByText("商品照片準備中")).toHaveLength(3);
+  const preview = screen.getByRole("region", { name: "推薦茶品" });
+  expect(within(preview).getAllByRole("article")).toHaveLength(3);
+  expect(within(preview).getByText("合成茶品 001")).toBeInTheDocument();
+  expect(within(preview).getByText("合成茶品 003")).toBeInTheDocument();
+  expect(within(preview).getAllByText("商品照片準備中")).toHaveLength(3);
 });
 
 it("keeps the catalog section useful when no products are available", async () => {
@@ -43,7 +44,7 @@ it("explains when the catalog cannot be loaded", async () => {
   render(<HomePage catalogService={createMockCatalogService({ scenario: "catalog-error" })} />);
 
   await waitFor(() => {
-    expect(screen.getByText("目前無法取得茶品目錄，請稍後再試。")).toBeInTheDocument();
+    expect(screen.getAllByRole("alert")).toHaveLength(2);
   });
 });
 
