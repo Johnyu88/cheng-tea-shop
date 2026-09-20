@@ -157,7 +157,11 @@ export function ProductDetailPage({ slug }: ProductDetailPageProps): JSX.Element
           </button>
         </div>
 
-        {addState.status === "success" && <p role="status">{addState.message}</p>}
+        {addState.status === "success" && (
+          <p role="status">
+            {addState.message} <Link href="/cart">查看購物車</Link>
+          </p>
+        )}
         {addState.status === "error" && (
           <div role="alert">
             <p>{addState.message}</p>

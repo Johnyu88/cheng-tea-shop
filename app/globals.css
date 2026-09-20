@@ -315,6 +315,167 @@ h1 {
   font-weight: 700;
 }
 
+main > article[aria-labelledby="product-detail-heading"] {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 1rem 3rem;
+  align-items: start;
+  padding-block: clamp(2rem, 7vw, 5rem);
+}
+
+main > article[aria-labelledby="product-detail-heading"] > div:first-child {
+  display: grid;
+  min-height: 24rem;
+  grid-row: span 8;
+  place-items: center;
+  padding: 2rem;
+  border-radius: 1.5rem;
+  color: var(--muted-ink);
+  background: color-mix(in srgb, var(--mist) 70%, var(--white));
+  text-align: center;
+}
+
+main > article[aria-labelledby="product-detail-heading"] > p,
+main > article[aria-labelledby="product-detail-heading"] > h1,
+main > article[aria-labelledby="product-detail-heading"] > div[aria-label="購買數量"],
+main > article[aria-labelledby="product-detail-heading"] > button,
+main > article[aria-labelledby="product-detail-heading"] > div[role="alert"] {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+main > article[aria-labelledby="product-detail-heading"] > h1 {
+  max-width: none;
+  font-size: clamp(2.25rem, 6vw, 4.5rem);
+}
+
+main > article[aria-labelledby="product-detail-heading"] > div[aria-label="購買數量"],
+main > section[aria-labelledby="cart-heading"] div[aria-label$="數量"] {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+main > article[aria-labelledby="product-detail-heading"] input,
+main > section[aria-labelledby="cart-heading"] input {
+  width: 5rem;
+  min-height: 3rem;
+  border: 1px solid color-mix(in srgb, var(--ink) 30%, transparent);
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+  color: var(--ink);
+  background: var(--white);
+  font: inherit;
+  text-align: center;
+}
+
+main > article[aria-labelledby="product-detail-heading"] button,
+main > section[aria-labelledby="cart-heading"] button {
+  min-height: 3rem;
+  border: 1px solid color-mix(in srgb, var(--ink) 25%, transparent);
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  color: var(--ink);
+  background: var(--white);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+main > article[aria-labelledby="product-detail-heading"] > button:last-child {
+  color: var(--white);
+  background: var(--ink);
+}
+
+main > article[aria-labelledby="product-detail-heading"] button:disabled,
+main > section[aria-labelledby="cart-heading"] button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+main > article[aria-labelledby="product-detail-heading"] > div[role="alert"],
+main > section[aria-labelledby="cart-heading"] > div[role="alert"] {
+  padding: 1rem;
+  border-left: 0.35rem solid var(--tea-brown);
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, var(--mist) 55%, var(--white));
+}
+
+main > article[aria-labelledby="product-detail-heading"] > p[role="status"],
+main > section[aria-labelledby="cart-heading"] > p[role="status"] {
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  color: var(--ink);
+  background: var(--mist);
+}
+
+main > section[aria-labelledby="cart-heading"] {
+  display: grid;
+  gap: 1rem;
+  padding-block: clamp(2rem, 7vw, 5rem);
+}
+
+main > section[aria-labelledby="cart-heading"] > div:not([role="alert"]) {
+  display: grid;
+  gap: 1rem;
+}
+
+main > section[aria-labelledby="cart-heading"] article {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.5rem 1rem;
+  align-items: center;
+  padding: 1.25rem;
+  border: 1px solid color-mix(in srgb, var(--ink) 14%, transparent);
+  border-radius: 1rem;
+  background: var(--white);
+}
+
+main > section[aria-labelledby="cart-heading"] article > * {
+  margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+main > section[aria-labelledby="cart-heading"] article h2,
+main > section[aria-labelledby="cart-heading"] article > div,
+main > section[aria-labelledby="cart-heading"] article > button {
+  grid-column: 2;
+}
+
+main > section[aria-labelledby="cart-heading"] article h2 {
+  grid-column: 1;
+  grid-row: span 2;
+  font-family: Georgia, "Noto Serif TC", serif;
+}
+
+main > section[aria-labelledby="cart-heading"] > div[role="region"] {
+  padding: 1rem;
+  border-radius: 0.75rem;
+  background: var(--mist);
+  font-weight: 700;
+}
+
+main > section[aria-labelledby="cart-heading"] > a {
+  width: fit-content;
+  min-height: 3rem;
+  padding: 0.75rem 1rem;
+  color: var(--tea-brown);
+  font-weight: 700;
+}
+
+main > section[aria-labelledby="cart-heading"] > button {
+  width: fit-content;
+  color: var(--muted-ink);
+  background: color-mix(in srgb, var(--mist) 45%, var(--white));
+}
+
+button:focus-visible,
+input:focus-visible {
+  outline: 3px solid var(--tea-brown);
+  outline-offset: 3px;
+}
+
 a {
   color: inherit;
 }
@@ -371,5 +532,25 @@ a:focus-visible {
   .teacher-story-media img,
   .teacher-story-media video {
     min-height: 0;
+  }
+
+  main > article[aria-labelledby="product-detail-heading"] {
+    grid-template-columns: 1fr;
+  }
+
+  main > article[aria-labelledby="product-detail-heading"] > div:first-child {
+    grid-row: auto;
+    min-height: 14rem;
+  }
+
+  main > section[aria-labelledby="cart-heading"] article {
+    grid-template-columns: 1fr;
+  }
+
+  main > section[aria-labelledby="cart-heading"] article h2,
+  main > section[aria-labelledby="cart-heading"] article > div,
+  main > section[aria-labelledby="cart-heading"] article > button {
+    grid-column: 1;
+    grid-row: auto;
   }
 }
