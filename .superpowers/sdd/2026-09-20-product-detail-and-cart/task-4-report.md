@@ -25,3 +25,11 @@
 
 - Re-run `pnpm vitest run tests/cart-page.test.tsx`, then the full quality checks, in an environment where the pnpm launcher can run without the temporary-file EPERM and the configured jest-dom setup is loaded.
 - The route entry intentionally remains a thin mount, matching the requested file scope; provider placement remains owned by the existing application shell.
+
+## Fix-round evidence
+
+- Subtotal assertions now use scoped accessible item/summary regions, avoiding ambiguity between line and cart totals.
+- Cart inventory text now derives from `CartLine.inventoryStatus` and explicitly renders `目前售完` for sold-out lines.
+- Added regression coverage proving zero, fractional, and over-limit input never calls `updateQuantity`.
+- RED was observed for the new sold-out/scoped queries before the component change; after the minimal fix, direct Vitest passed: 1 file, 7 tests.
+- Focused TypeScript was attempted but could not complete because the worktree could not write `tsconfig.tsbuildinfo` (EPERM); it also surfaced existing `tests/commerce-provider.test.tsx` strictness diagnostics. ESLint was not run after the bounded-stop instruction.

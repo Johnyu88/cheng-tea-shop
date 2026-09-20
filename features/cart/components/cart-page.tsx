@@ -89,22 +89,25 @@ export function CartPage(): JSX.Element {
         <div>
           {cart.lines.map((line) => {
             const disabled = mutationState.status === "pending";
-            return <article key={`${line.productId}-${line.variantId}`} aria-label={line.productName}>
+            const soldOut = line.inventoryStatus === "sold-out";
+            return <article key={`${line.productId}-${line.variantId}`} aria-label={`${line.productName}購物車品項`}>
               <h2>{line.productName}</h2>
               <p>{line.specification}</p>
-              <p>單價：{formatMoney(line.unitPrice.amount)}</p>
-              <p>目前有貨，最多購買 {line.maxQuantity} 件</p>
+              <p aria-label={`${line.productName}單價 ${formatMoney(line.unitPrice.amount)}`}>單價：{formatMoney(line.unitPrice.amount)}</p>
+              <p>{soldOut ? "目前售完" : `目前有貨，最多購買 ${line.maxQuantity} 件`}</p>
               <div aria-label={`${line.productName}數量`}>
                 <button type="button" aria-label={`減少 ${line.productName}`} disabled={disabled || line.quantity <= 1} onClick={() => updateLine(line, line.quantity - 1)}>−</button>
                 <input aria-label={`${line.productName}數量`} type="number" min={1} max={line.maxQuantity} step={1} value={line.quantity} disabled={disabled} onChange={(event) => { const quantity = Number(event.target.value); if (event.target.value === "" || !isValidQuantity(quantity, line.maxQuantity)) { setMutationState({ status: "error", message: `請輸入 1 到 ${line.maxQuantity} 件。`, retryable: false }); return; } updateLine(line, quantity); }} />
                 <button type="button" aria-label={`增加 ${line.productName}`} disabled={disabled || line.quantity >= line.maxQuantity} onClick={() => updateLine(line, line.quantity + 1)}>＋</button>
               </div>
-              <p>小計：{formatMoney(line.unitPrice.amount * line.quantity)}</p>
+              <p aria-label={`${line.productName}單項小計 ${formatMoney(line.unitPrice.amount * line.quantity)}`}>小計：{formatMoney(line.unitPrice.amount * line.quantity)}</p>
               <button type="button" disabled={disabled} aria-label={`移除 ${line.productName}`} onClick={() => void runOperation({ kind: "remove", line })}>移除</button>
             </article>;
           })}
         </div>
-        <p>小計：{formatMoney(cart.subtotal.amount)}</p>
+        <div aria-label="購物車摘要" role="region">
+          <p aria-label={`購物車總小計 ${formatMoney(cart.subtotal.amount)}`}>小計：{formatMoney(cart.subtotal.amount)}</p>
+        </div>
         <Link href="/#catalog">繼續選茶</Link>
         <button type="button" disabled aria-disabled="true">前往結帳</button>
       </section>
