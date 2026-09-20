@@ -1,4 +1,4 @@
-import { describe, expect, test } from "vitest";
+import { expect, test } from "vitest";
 import { createMockCatalogService } from "@/lib/domain/mock/mock-catalog-service";
 
 test("paginates 41 or more deterministic synthetic products without duplicates", async () => {
@@ -8,7 +8,7 @@ test("paginates 41 or more deterministic synthetic products without duplicates",
   let total = 0;
 
   do {
-    const result = await service.listProducts({ cursor, limit: 12 });
+    const result = await service.listProducts(cursor === undefined ? { limit: 12 } : { cursor, limit: 12 });
     expect(result.ok).toBe(true);
     if (!result.ok) throw new Error(result.error.message);
     result.value.items.forEach((product) => seen.add(product.id));

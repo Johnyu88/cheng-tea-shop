@@ -1,5 +1,4 @@
-import type { CatalogService } from "./catalog-service";
-import type { Cart, Product, ProductVariant, ProductId, VariantId } from "./types";
+import type { Cart, ProductId, VariantId } from "./types";
 import type { ServiceResult } from "./result";
 
 export interface CartService {

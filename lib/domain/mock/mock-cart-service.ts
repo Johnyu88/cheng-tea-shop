@@ -41,7 +41,7 @@ const findVariant = (product: Product, variantId: string): ProductVariant | unde
 export const createMockCartService = (options: MockCartOptions = {}): CartService => {
   const scenario = options.scenario ?? "happy";
   const catalog = options.catalog ?? createMockCatalogService();
-  let cart = emptyCart();
+  const cart = emptyCart();
 
   const resolveLine = async (productId: string, variantId: string): Promise<ServiceResult<{ product: Product; variant: ProductVariant }>> => {
     const productResult = await catalog.getProductBySlug(productId);
