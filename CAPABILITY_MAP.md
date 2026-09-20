@@ -82,6 +82,65 @@ Status legend: ✅ complete · 🟡 in progress · ⬜ not started · ⛔ blocke
 | Reproducible Next.js baseline | 🟡 | PR #12 uses Next.js 16.3.5, strict TypeScript, Tailwind 4, shadcn conventions, and pinned Node/pnpm; await a fresh full Quality run |
 | Health and standalone container boundary | 🟡 | `/api/health` contract and non-root standalone Dockerfile are committed; Docker smoke is CI-only because local Docker is unavailable |
 | Browser and accessibility gates | 🟡 | Chromium/WebKit and axe tests plus CI workflow are committed; await clean-runner result |
+| Dependency and secret hygiene | 🟡 | Lockfile generated on a clean runner, direct versions pinned, notices and env example added; final audit remains pending |
+
+No candidate-template application code or assets, ERP, real authentication, real payment, real product data, or secrets were added. Reuse remains limited to individually reviewed MIT primitives.
+
+## F. Current next capability
+
+## C. Elder-friendly product publishing
+
+| Capability | Status | Evidence / next action |
+|---|---:|---|
+| Mobile and desktop single-item publishing UX | ✅ | Design approved; implementation not started |
+| Optional one-to-three photo upload with assisted processing | ✅ | Missing photos use a labeled brand placeholder; retain preview and recovery requirements |
+| AI-assisted product description draft | ✅ | Design approved; human confirmation and no-fabrication guardrails required |
+| Draft, preview, and explicit publish flow | ✅ | Design approved; implementation not started |
+| Simple available / sold-out inventory | ✅ | Design approved; no exact quantity in first version |
+| Oversell exception handling | ✅ | Contact customer within 24 hours for exchange or refund |
+| 40-plus product catalog capacity | ✅ | Design requires at least 40 products without a fixed 40-item ceiling |
+| Incremental draft-to-publish workflow | ✅ | Publish each completed item independently; unfinished items remain private drafts |
+| Elder-friendly one-page minimum form | ✅ | Name, single specification, price, tea category, and availability are the minimum fields |
+| Branded missing-photo fallback | ✅ | Use one labeled “商品照片準備中” image; never substitute another product photo |
+| Product publishing implementation | ⬜ | Plan approved; begins in Phase 2 after explicit user authorization |
+
+## D. Approved storefront experience
+
+| Capability | Status | Evidence / next action |
+|---|---:|---|
+| Mountain-mist brand direction | ✅ | Mist green, warm ivory, tea brown, serif headings, sans-serif body |
+| Authentic tea-mountain photography policy | ✅ | Real Taiwanese tea-mountain imagery; no false origin implications |
+| Homepage information order | ✅ | Hero → taste cards → three featured teas → story → visit → assurance → contact |
+| Taste-first product discovery | ✅ | Four large cards: light/fragrant, sweet, rich, roasted |
+| Concise product cards | ✅ | Photo, name, price, one taste sentence, sold-out state |
+| Product detail hierarchy | ✅ | Buying essentials before story, production, and brewing details |
+| In-person tea contact | ✅ | Secondary telephone and LINE entry; no automated booking in first version |
+| Guest checkout | ✅ | No mandatory account; three mobile steps |
+| Customer contact fields | ✅ | Phone required; email optional |
+| First-version delivery | ✅ | Home delivery and in-store pickup |
+| First-version payment choices | ✅ | Credit card / LINE Pay online; in-store payment allowed for pickup |
+| Configurable shipping rules | ✅ | Fixed fee and free-shipping threshold remain configurable |
+| Non-aggressive content policy | ✅ | No autoplay, countdowns, intrusive pop-ups, or unsupported claims |
+| Mobile homepage wireframe | ✅ | Design approved; implementation not started |
+| Mobile product-detail wireframe | ✅ | Design approved; buying essentials appear before story and brewing details |
+| Mobile cart and checkout wireframes | ✅ | Design approved; cart plus three checkout steps |
+| Small design system | ✅ | Approved color, typography, form, focus, and touch-target rules |
+| Optional ambient nature experience | ✅ | Design rules approved; sound defaults off and requires explicit user action |
+| Desktop and responsive wireframes | ✅ | Desktop home, product, checkout, and tablet checkout behavior approved |
+| Complete state mockups | ✅ | Loading, empty, network, sold-out, form, payment, and success states approved |
+| Multi-item checkout summary | ✅ | Show all 1–3 items; show first three and expandable remainder for 4+ items |
+| Elder-friendly checkout safeguards | ✅ | Phone help first; session-only PII; cart persists; errors preserve valid input |
+| Homepage real-length copy and responsive composition | ✅ | Approved hero copy, story direction, three featured products, and 360/768/1024/1440 layout behavior |
+| Real content and asset validation | 🟡 | Store-owned photo permission confirmed; labeled placeholders are allowed; origin and product claims still need evidence |
+| Prototype-based older-user testing | ⬜ | Run with real older users after an operable prototype exists |
+
+## E. Wave 1 baseline status
+
+| Capability | Status | Evidence / next action |
+|---|---:|---|
+| Reproducible Next.js baseline | 🟡 | PR #12 uses Next.js 16.3.5, strict TypeScript, Tailwind 4, shadcn conventions, and pinned Node/pnpm; await a fresh full Quality run |
+| Health and standalone container boundary | 🟡 | `/api/health` contract and non-root standalone Dockerfile are committed; Docker smoke is CI-only because local Docker is unavailable |
+| Browser and accessibility gates | 🟡 | Chromium/WebKit and axe tests plus CI workflow are committed; await clean-runner result |
 | Dependency and secret hygiene | 🟡 | Lockfile generated on a clean runner, direct versions pinned, notices and env example added; pnpm build policy moved to workspace config; local audits are clean, final CI review remains pending |
 
 No candidate-template application code or assets, ERP, real authentication, real payment, real product data, or secrets were added. Reuse remains limited to individually reviewed MIT primitives.

@@ -22,6 +22,7 @@ Last updated: 2026-09-16
 - Product stage: Phase 2 — Frontend prototype, Wave 0 audit completed
 - Application code: Wave 1 baseline exists; Wave 2 brand shell is now in progress. No candidate template code imported.
 - Highest principle: **Website First → Mock API → ERP Reuse → API Integration**
+- GitHub state: `SYNCED` on `main`; governance resilience changes are under review on `docs/resilient-agent-governance`.
 
 ## Last completed milestone
 
@@ -151,6 +152,18 @@ The project-governance design was previously approved:
 
 - The approved governance documents were prepared and reviewed through Pull Request #2.
 - The conditional morning report is enabled; its first scheduled check is 2026-09-15 at 08:00 Asia/Taipei.
+- A resilience governance update is being prepared on branch `docs/resilient-agent-governance` so routine work can continue through GitHub/authentication blockers without repeatedly interrupting the user.
+- The resilience policy keeps merge-to-main, production, payment, credential, destructive, and major architecture changes behind explicit human confirmation.
+
+## GitHub / external-blocker status convention
+
+Use exactly one of these states when handing work to another agent:
+
+- `SYNCED` — local and remote branch state are aligned.
+- `LOCAL_COMMITS_PENDING` — coherent work is committed locally but cannot yet be pushed.
+- `BLOCKED_EXTERNAL` — GitHub, authentication, connector, network, provider, or another external dependency requires intervention.
+
+When blocked externally, record the current branch, latest commit hash if available, completed verification, the exact blocker, and the smallest human action needed. Do not repeatedly ask for the same intervention, and continue independent approved work when it is safe to do so.
 
 ## Open dependency
 
