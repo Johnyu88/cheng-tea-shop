@@ -281,6 +281,16 @@ GitHub 是正式文件與程式來源。聊天中的新指令若尚未寫入 Git
 - Wave 1 改採乾淨基線，以官方當日已修補的穩定版 Next.js 建立專案；2026-09-14 的已知最低目標為 16.3.3，實作時仍須再次查核官方安全公告。
 - 完整紀錄見 docs/audits/2026-09-14-wave-0-template-audit.md。
 
+## 24. Wave 3 領域介面與 Mock Adapter — 2026-09-20
+
+- 專案自有 TypeScript contracts 現在定義 `Money`、商品與規格、庫存狀態、購物車、結帳草稿及商品草稿。
+- Catalog、cart、checkout 與 publishing service interfaces 已與 fixture 和 adapter 實作分離。
+- deterministic Mock Adapter 包含 48 筆合成商品、cursor 分頁、茶類／口感篩選、空結果與目錄錯誤、售完處理、購買上限、整數 TWD 金額、結帳驗證及單規格草稿發布。
+- Mock Adapter 不包含真實顧客資料、付款憑證、登入、ERP、持久化或未經證實的產地／療效宣稱。
+- Wave 3 本地驗證通過：Vitest 6 個檔案／14 個測試、ESLint、TypeScript 與 production build。
+- 商品頁、目錄 UI 整合、購物車 UI、真實結帳／付款、ERP、瀏覽器 e2e 與 Docker smoke 仍是後續或外部 gate。
+- 詳細規格見 `docs/superpowers/specs/2026-09-20-domain-interfaces-and-mock-adapter-design.md`；實作計畫見 `docs/superpowers/plans/2026-09-20-domain-interfaces-and-mock-adapter-implementation-plan.md`。
+
 ## 23. 目前狀態
 
 - Agent 工作流設計已確認。

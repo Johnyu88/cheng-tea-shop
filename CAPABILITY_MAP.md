@@ -1,6 +1,6 @@
 # CAPABILITY MAP
 
-Last updated: 2026-09-14
+Last updated: 2026-09-20
 
 Status legend: ✅ complete · 🟡 in progress · ⬜ not started · ⛔ blocked
 
@@ -145,6 +145,20 @@ No candidate-template application code or assets, ERP, real authentication, real
 
 No candidate-template application code or assets, ERP, real authentication, real payment, real product data, or secrets were added. Reuse remains limited to individually reviewed MIT primitives.
 
-## F. Current next capability
+## F. Wave 3 domain and Mock Adapter status
 
-Complete the fresh Quality workflow for PR #12, perform final QA/Security review, then leave the PR open awaiting explicit `確認合併`; do not merge main automatically. After that, finish the small Wave 2 responsive shell before domain and Mock Adapter work.
+| Capability | Status | Evidence / next action |
+|---|---:|---|
+| Shared domain contracts | ✅ | Money, catalog, cart, checkout, and product-draft types are exported from `lib/domain` |
+| Deterministic synthetic catalog | ✅ | 48 stable products, cursor paging, category/taste filters, empty and error scenarios |
+| Mock cart service | ✅ | Integer TWD totals, sold-out rejection, purchase-limit rejection, and state preservation |
+| Mock checkout validation | ✅ | Phone required; delivery/payment compatibility is validated without payment credentials |
+| Mock product publishing | ✅ | One-specification draft save/publish with labeled placeholder and supplied facts only |
+| UI integration | ⬜ | Wave 4: connect home/catalog UI through `CatalogService` |
+| Persistent catalog and real data | ⬜ | Wait for persistence, authentication, authorization, backup, and restore |
+
+Wave 3 local verification: Vitest 6 files / 14 tests, ESLint, TypeScript, and production build passed. Browser e2e and Docker smoke remain unverified locally. PR #12 still requires its fresh clean-runner Quality result and final QA/Security review; do not merge `main` automatically.
+
+## G. Current next capability
+
+Complete the fresh Quality workflow for PR #12, then implement Wave 4 home and catalog UI integration through the project-owned service interfaces. Do not add real product data, payment credentials, ERP integration, authentication, or persistence in Wave 4.

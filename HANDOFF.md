@@ -1,6 +1,6 @@
 # HANDOFF
 
-Last updated: 2026-09-16
+Last updated: 2026-09-20
 
 ## Wave 1 status
 
@@ -148,6 +148,14 @@ The project-governance design was previously approved:
 - Deployment stays Docker-portable and targets Cloud Run asia-east1.
 - Real catalog entry starts only after persistence, authentication, authorization, and backup/restore are operational.
 
+### Wave 3 domain and Mock Adapter slice — 2026-09-20
+
+- Commits `0acfe28`, `c7199e8`, `e3699fe`, and `37cd1f0` add project-owned domain contracts, deterministic catalog and cart services, checkout validation, and single-specification publishing behavior.
+- The synthetic catalog contains 48 stable products and supports cursor paging, taste/category filtering, empty/error results, sold-out behavior, purchase limits, and integer TWD totals.
+- Local verification passed: Vitest 6 files / 14 tests, ESLint, TypeScript, and production build. Browser e2e and Docker smoke remain unverified locally.
+- No real product data, customer data, payment credentials, ERP integration, authentication, persistence, or secrets were added.
+- Wave 4 is the next implementation stage: integrate the catalog service into the approved home/catalog UI. Product detail, cart UI, checkout UI, payment, ERP, and real catalog entry remain out of scope until their planned waves.
+
 ## Governance delivery
 
 - The approved governance documents were prepared and reviewed through Pull Request #2.
@@ -176,7 +184,7 @@ The method for invoking the local 35B model is unknown. When the computer and Co
 
 ## Next action
 
-Close the Wave 1 quality gate, then complete the smallest Wave 2 brand shell slice: project-owned tokens, accessible header/navigation, responsive hero shell, focus treatment, and reduced-motion behavior. Keep product, cart, order, payment, ERP, and real customer data out of this slice.
+Close the fresh Wave 1 Quality workflow / PR #12 review when its clean-runner result is available, then begin Wave 4 home and catalog UI integration through the project-owned CatalogService. Keep product pages, checkout, payment, ERP, and real customer data out of that slice.
 
 ## Startup reminder
 
