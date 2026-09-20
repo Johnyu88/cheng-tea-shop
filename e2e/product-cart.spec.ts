@@ -20,7 +20,7 @@ test("customer can add, update, remove, and empty a cart line", async ({ page })
   await expect(page.getByRole("region", { name: "購物車摘要" })).toContainText("小計：NT$1,020");
   await expect(page.getByRole("button", { name: "前往結帳" })).toBeDisabled();
 
-  const quantity = page.getByLabel("合成茶品 001數量");
+  const quantity = page.getByRole("spinbutton", { name: "合成茶品 001數量" });
   await quantity.fill("3");
   await expect(page.getByRole("status")).toContainText("購物車數量已更新");
   await expect(page.getByRole("region", { name: "購物車摘要" })).toContainText("小計：NT$1,530");
@@ -46,10 +46,10 @@ test("detail and cart controls have accessible names and responsive layouts", as
 
   await quantity.fill("6");
   await page.getByRole("button", { name: "加入購物車" }).click();
-  await expect(page.getByRole("alert")).toContainText("最多購買 5 件");
+  await expect(page.getByRole("alert").filter({ hasText: "最多購買 5 件" })).toContainText("最多購買 5 件");
 
   await page.goto("/tea/does-not-exist");
-  await expect(page.getByRole("alert")).toContainText("找不到這項茶品");
+  await expect(page.getByRole("alert").filter({ hasText: "找不到這項茶品" })).toContainText("找不到這項茶品");
   await expect(page.getByRole("link", { name: "返回茶品目錄" })).toHaveAttribute("href", "/#catalog");
 });
 
