@@ -253,7 +253,7 @@ GitHub 是正式文件與程式來源。聊天中的新指令若尚未寫入 Git
 
 缺少正式茶山或商品照片時，可先使用來源清楚的中性替代素材；商品圖統一使用品牌預設圖並標示「商品照片準備中」，不得使用相近茶品照片冒充實物或暗示虛假產地。店家現有照片的公開使用權已確認；第三方素材仍須保留授權與署名要求。「無毒」或類似商品宣稱須有可查證依據才可公開。
 
-此成果完成首頁真實長度文案與構圖驗證，但尚未完成全部正式素材。網站程式仍未開始。詳細規格見 `docs/superpowers/specs/2026-09-14-homepage-real-content-validation-design.md`。
+此成果完成首頁真實長度文案與構圖驗證，但尚未完成全部正式素材。Wave 1 已建立技術基線，正式前台內容仍待後續 Wave 實作。詳細規格見 `docs/superpowers/specs/2026-09-14-homepage-real-content-validation-design.md`。
 
 ## 21. 龍映茗茶品牌與漸進式商品目錄
 
@@ -290,8 +290,8 @@ GitHub 是正式文件與程式來源。聊天中的新指令若尚未寫入 Git
 - Phase 1 桌機／平板響應式 Wireframe、必要狀態與年長操作保護已確認。
 - Phase 1 首頁真實長度文案與手機／平板／桌機構圖已確認。
 - Phase 1 仍在進行；現有店家照片公開使用權已確認，缺圖商品可使用有標示的品牌預設圖。前端技術選型與實作計畫已確認，可操作原型的實際年長使用者測試仍待完成。
-- 網站程式尚未開始；沒有任何候選模板程式進入專案。
-- Wave 0 模板稽核已完成並判定不可整包匯入。下一步在稽核 PR 合併後，依 Wave 1 建立乾淨、可測試、可容器化的前端基線。
+- Wave 1 已建立乾淨、可測試、可容器化的前端基線；沒有任何候選模板程式或素材整包進入專案。
+- Wave 0 模板稽核已完成並判定不可整包匯入。下一步是完成 Wave 1 quality gate，再以小範圍進入 Wave 2 品牌 shell。
 
 ### Wave 1 implementation status — 2026-09-16
 
@@ -299,3 +299,9 @@ GitHub 是正式文件與程式來源。聊天中的新指令若尚未寫入 Git
 - No candidate-template application code or assets, ERP, real authentication, real payment, real product data, or secrets were added. The lockfile was generated on a clean GitHub runner and the temporary bootstrap workflow was removed.
 - The first Quality run exposed pnpm 11's ignored-build policy for `unrs-resolver`; the manifest now permits only that dependency's required build script. A fresh full Quality result is still pending.
 - Local frozen-install and Docker checks remain `BLOCKED_EXTERNAL` by the restricted npm/GitHub TCP environment; clean-runner CI is authoritative for those gates.
+
+### Wave 2 initial shell slice — 2026-09-20
+
+- The project-owned homepage now has a semantic header, named primary navigation, responsive hero spacing, mist-green / warm-ivory / tea-brown tokens, visible focus treatment, and reduced-motion handling.
+- Product catalog, cart, checkout, orders, payment, ERP, authentication, and real customer data remain intentionally absent.
+- Local verification passed for frozen install, Vitest (2 files / 3 tests), ESLint, TypeScript, and production build. Playwright Chromium/WebKit browsers downloaded, but the six-test e2e run hung locally after browser launch and was stopped; e2e and Docker smoke remain unverified. ESLint is pinned to 9.39.1 because the planned 10.10.0 release is incompatible with the installed Next.js React lint plugin API.

@@ -82,10 +82,10 @@ Status legend: ✅ complete · 🟡 in progress · ⬜ not started · ⛔ blocke
 | Reproducible Next.js baseline | 🟡 | PR #12 uses Next.js 16.3.5, strict TypeScript, Tailwind 4, shadcn conventions, and pinned Node/pnpm; await a fresh full Quality run |
 | Health and standalone container boundary | 🟡 | `/api/health` contract and non-root standalone Dockerfile are committed; Docker smoke is CI-only because local Docker is unavailable |
 | Browser and accessibility gates | 🟡 | Chromium/WebKit and axe tests plus CI workflow are committed; await clean-runner result |
-| Dependency and secret hygiene | 🟡 | Lockfile generated on a clean runner, direct versions pinned, notices and env example added; final audit remains pending |
+| Dependency and secret hygiene | 🟡 | Lockfile generated on a clean runner, direct versions pinned, notices and env example added; pnpm build policy moved to workspace config; local audits are clean, final CI review remains pending |
 
 No candidate-template application code or assets, ERP, real authentication, real payment, real product data, or secrets were added. Reuse remains limited to individually reviewed MIT primitives.
 
 ## F. Current next capability
 
-Complete the fresh Quality workflow for PR #12, perform final QA/Security review, then leave the PR open awaiting explicit `確認合併`; do not merge main automatically.
+Complete the fresh Quality workflow for PR #12, perform final QA/Security review, then leave the PR open awaiting explicit `確認合併`; do not merge main automatically. After that, finish the small Wave 2 responsive shell before domain and Mock Adapter work.

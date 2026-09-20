@@ -13,13 +13,14 @@ Last updated: 2026-09-16
 - CI follow-up: the first Quality run stopped at frozen install because pnpm 11 rejected the required `unrs-resolver` build script; the package manifest now explicitly allows only that dependency's build step, pending a fresh clean-runner result.
 - The clean-runner-generated Playwright lockfile is synchronized in the feature worktree; the temporary bootstrap workflow has been removed.
 - A fresh Quality workflow is requested after the pnpm build-policy fix; until it completes, CI verification remains pending.
+- Local verification on 2026-09-20: frozen install, Vitest (2 files / 3 tests), ESLint, TypeScript, and production build passed after the pnpm workspace and test-boundary fixes. Playwright Chromium/WebKit browsers downloaded, but the six-test e2e run hung locally after browser launch and was stopped; e2e and Docker smoke remain unverified locally.
 
 ## Current state
 
 - Repository: `Johnyu88/cheng-tea-shop`
 - Default branch: `main`
 - Product stage: Phase 2 — Frontend prototype, Wave 0 audit completed
-- Application code: not started; no candidate template code imported
+- Application code: Wave 1 baseline exists; Wave 2 brand shell is now in progress. No candidate template code imported.
 - Highest principle: **Website First → Mock API → ERP Reuse → API Integration**
 
 ## Last completed milestone
@@ -59,7 +60,7 @@ The public brand and progressive catalog design was previously approved:
 - A missing product photo uses a consistent branded placeholder labeled “商品照片準備中”; another tea’s photo must never be used as a substitute.
 - The current shop and identifiable-person photos were confirmed as shop-created/uploaded and approved for website use; originals are preferred when available.
 - Evidence is still required before publishing “無毒”, origin, year, producer, or similar verifiable claims.
-- Phase 1 remains in progress; application code has not started.
+- Phase 1 remains in progress; the Wave 1 baseline exists, while approved storefront capabilities remain unimplemented.
 
 The homepage real-content composition was previously approved:
 
@@ -72,7 +73,7 @@ The homepage real-content composition was previously approved:
 - Desktop, tablet, and mobile composition directions were visually reviewed and approved.
 - Missing product photos may use the approved labeled brand placeholder; temporary hero media must not imply a false origin.
 - Existing shop photos have confirmed website-use permission; no photos are committed in this documentation milestone.
-- Phase 1 remains in progress; application code has not started.
+- Phase 1 remains in progress; the Wave 1 baseline exists, while real-content validation and older-user testing remain.
 
 The desktop, responsive, state, and elder-safeguard design was previously approved:
 
@@ -86,7 +87,7 @@ The desktop, responsive, state, and elder-safeguard design was previously approv
 - One-tap telephone help is primary; LINE is secondary.
 - The cart may persist, while personal contact and address data is limited to the current browsing session and cleared after completion, cancellation, or expiry.
 - Phase 1 remains in progress; evidence-gated content validation and prototype-based older-user testing remain.
-- No application code has been started.
+- Wave 1 baseline application code exists; Wave 2 shell implementation is the current small implementation slice.
 
 The elder-friendly single-product publishing design was previously approved:
 
@@ -97,7 +98,7 @@ The elder-friendly single-product publishing design was previously approved:
 - Generates an AI description draft from provided facts and tags; human confirmation is mandatory.
 - Saves a draft before explicit publication.
 - If actual stock is insufficient after ordering, the tea shop contacts the customer within 24 hours for exchange or refund.
-- No application code has been started.
+- Wave 1 baseline application code exists; storefront commerce flows remain unimplemented.
 
 The project-governance design was previously approved:
 
@@ -162,7 +163,7 @@ The method for invoking the local 35B model is unknown. When the computer and Co
 
 ## Next action
 
-After the Wave 0 audit PR is merged, execute Wave 1 on a new branch: scaffold a clean project-owned Next.js baseline with the current patched stable release, pnpm lockfile, strict TypeScript, lint, Vitest/RTL, Playwright, standalone output, and Docker smoke checks. Reuse only individually approved MIT primitives and keep all UI data behind project-owned service interfaces.
+Close the Wave 1 quality gate, then complete the smallest Wave 2 brand shell slice: project-owned tokens, accessible header/navigation, responsive hero shell, focus treatment, and reduced-motion behavior. Keep product, cart, order, payment, ERP, and real customer data out of this slice.
 
 ## Startup reminder
 

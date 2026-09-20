@@ -2,6 +2,12 @@
 
 :root {
   color-scheme: light;
+  --ink: #20352e;
+  --muted-ink: #5b665f;
+  --mist: #dbe6dc;
+  --paper: #faf8f2;
+  --tea-brown: #8b6446;
+  --white: #ffffff;
 }
 
 * {
@@ -14,19 +20,142 @@ html {
 
 body {
   margin: 0;
-  color: #262421;
-  background: #faf8f2;
+  color: var(--ink);
+  background: var(--paper);
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
-main {
+.site-shell {
   min-height: 100vh;
 }
 
-section {
-  padding: 4rem max(1.5rem, calc((100vw - 64rem) / 2));
+.site-header,
+main {
+  width: min(100% - 3rem, 72rem);
+  margin-inline: auto;
+}
+
+.site-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 5rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--ink) 14%, transparent);
+}
+
+.site-header nav {
+  display: flex;
+  gap: 1.25rem;
+}
+
+.brand-mark {
+  color: var(--ink);
+  font-family: Georgia, "Noto Serif TC", serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.site-header nav a,
+.primary-action {
+  border-radius: 999px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.site-header nav a {
+  padding: 0.75rem 1rem;
+}
+
+.hero,
+.baseline-card {
+  padding-block: clamp(4rem, 12vw, 8rem);
+}
+
+.hero {
+  max-width: 48rem;
+}
+
+.eyebrow {
+  margin: 0 0 1rem;
+  color: var(--tea-brown);
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+}
+
+h1,
+h2 {
+  margin: 0;
+  font-family: Georgia, "Noto Serif TC", serif;
+  line-height: 1.2;
+}
+
+h1 {
+  max-width: 12ch;
+  font-size: clamp(3rem, 9vw, 6.5rem);
+  letter-spacing: -0.04em;
+}
+
+.hero-copy,
+.baseline-card p {
+  max-width: 38rem;
+  color: var(--muted-ink);
+  font-size: clamp(1.1rem, 2vw, 1.35rem);
+  line-height: 1.8;
+}
+
+.hero-copy {
+  margin: 1.5rem 0 2rem;
+}
+
+.primary-action {
+  display: inline-block;
+  min-height: 3rem;
+  padding: 0.85rem 1.4rem;
+  color: var(--white);
+  background: var(--ink);
+}
+
+.baseline-card {
+  margin-bottom: 4rem;
+  padding: 2rem;
+  border: 1px solid color-mix(in srgb, var(--ink) 12%, transparent);
+  border-radius: 1.5rem;
+  background: var(--mist);
+}
+
+.baseline-card p {
+  margin-bottom: 0;
+  font-size: 1rem;
 }
 
 a {
   color: inherit;
+}
+
+a:focus-visible {
+  outline: 3px solid var(--tea-brown);
+  outline-offset: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+@media (max-width: 40rem) {
+  .site-header,
+  main {
+    width: min(100% - 2rem, 72rem);
+  }
+
+  .site-header {
+    min-height: 4.5rem;
+  }
+
+  .site-header nav a {
+    padding-inline: 0.5rem;
+  }
 }

@@ -1,13 +1,13 @@
 # Frontend Implementation Plan
 
 Date: 2026-09-14
-Status: Approved design plan; implementation not started
+Status: Approved design plan; Wave 1 baseline and initial Wave 2 shell implementation are in progress
 Project: Johnyu88/cheng-tea-shop
 Deployment target: Google Cloud Run, Taiwan asia-east1
 
 ## Goal
 
-Turn the approved 龍映茗茶 storefront, progressive 40-plus catalog, elder-friendly product publishing concept, Mock API boundary, and image-placeholder rules into small, testable delivery Waves. This document authorizes planning only. Website code starts only after this PR is merged and 游老師 gives an explicit「開始實作」or Wave 0 approval.
+Turn the approved 龍映茗茶 storefront, progressive 40-plus catalog, elder-friendly product publishing concept, Mock API boundary, and image-placeholder rules into small, testable delivery Waves. This document remains the governing plan for post-audit implementation; Wave 1 baseline work is in the feature branch, while commerce work remains explicitly scoped by later approvals.
 
 ## Confirmed technical baseline
 
