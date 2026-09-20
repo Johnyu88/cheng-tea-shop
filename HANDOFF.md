@@ -165,6 +165,13 @@ The project-governance design was previously approved:
 - No real product/customer/payment data, credentials, ERP integration, authentication, or persistence was added.
 - Next slice: review the homepage/catalog preview in a browser, then plan the next catalog browsing interaction. Keep product detail, cart, checkout, payment, ERP, and real data out.
 
+### Teacher story media slice — 2026-09-20
+
+- User-provided teacher portrait and short video are now included in the homepage brand-story section.
+- Committed assets are optimized WebP and silent MP4 only; original JPG/MOV remain outside Git. Video metadata was stripped before commit.
+- The video is manual, muted, inline-capable, and has a poster plus accessible label; the portrait has descriptive alt text.
+- Keep these assets as brand-story media, never as product imagery or evidence for origin/health claims.
+
 ## Governance delivery
 
 - The approved governance documents were prepared and reviewed through Pull Request #2.

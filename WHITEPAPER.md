@@ -311,6 +311,13 @@ GitHub 是正式文件與程式來源。聊天中的新指令若尚未寫入 Git
 - Wave 4 本地驗證通過：Vitest 6 個檔案／17 個測試、ESLint、TypeScript 與 production build。
 - 購物車 UI、產品詳情、checkout UI、真實付款、ERP、登入、持久化與真實商品資料仍不在本切片範圍。
 
+## 26. 陳老師品牌故事媒體 — 2026-09-20
+
+- 使用者提供並核准將陳老師照片與短片用於網站品牌故事區，不作為商品照片或商品真實性證據。
+- 網站只提交最佳化後的 `public/media/teacher-portrait.webp` 與 `public/media/teacher-story.mp4`；原始 JPG／MOV 不進 Git。
+- 影片轉為無音軌 MP4，預設靜音、手動播放、保留 controls，並清除 GPS、裝置與拍攝 metadata。
+- 照片以可存取的替代文字呈現；影片提供 aria label、poster 與瀏覽器不支援時的 fallback 文案。
+
 ### Wave 1 implementation status — 2026-09-16
 
 - Branch `feature/wave-1-reproducible-baseline` and draft PR #12 contain a clean Next.js 16.3.5 App Router baseline with Node 24.19.0, pnpm 11.19.0, strict TypeScript, Tailwind 4, shadcn conventions, Vitest/RTL contracts, a minimal health route, standalone non-root Dockerfile, and Chromium/WebKit plus axe checks.

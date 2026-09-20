@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, type JSX } from "react";
+import Image from "next/image";
 import type { CatalogService, Product } from "@/lib/domain";
 import { createMockCatalogService } from "@/lib/domain";
 
@@ -94,6 +95,36 @@ export function HomePage({ catalogService = defaultCatalogService }: HomePagePro
           <h1 id="storefront-heading">慢慢選一杯好茶</h1>
           <p className="hero-copy">從喜歡的香氣與口感開始，不必先懂茶，也能找到適合自己的茶。</p>
           <a className="primary-action" href="#baseline">開始選茶</a>
+        </section>
+
+        <section className="teacher-story" aria-labelledby="teacher-story-heading">
+          <div className="teacher-story-copy">
+            <p className="eyebrow">坐下來，聽陳老師說茶</p>
+            <h2 id="teacher-story-heading">先認識泡茶的人，再慢慢找到喜歡的茶。</h2>
+            <p>
+              這裡保留陳老師在茶行裡的照片與一段短片，讓第一次來的客人先感受到這間茶行的溫度。
+            </p>
+          </div>
+          <div className="teacher-story-media">
+            <Image
+              src="/media/teacher-portrait.webp"
+              alt="陳老師在茶行裡的照片"
+              width={1200}
+              height={1600}
+              sizes="(max-width: 40rem) 100vw, 40vw"
+            />
+            <video
+              aria-label="陳老師茶行介紹影片"
+              controls
+              muted
+              playsInline
+              preload="metadata"
+              poster="/media/teacher-portrait.webp"
+            >
+              <source src="/media/teacher-story.mp4" type="video/mp4" />
+              您的瀏覽器不支援影片播放。
+            </video>
+          </div>
         </section>
 
         <CatalogPreview catalogService={catalogService} />

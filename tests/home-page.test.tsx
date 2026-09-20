@@ -46,3 +46,21 @@ it("explains when the catalog cannot be loaded", async () => {
     expect(screen.getByText("目前無法取得茶品目錄，請稍後再試。")).toBeInTheDocument();
   });
 });
+
+it("introduces the teacher with an accessible portrait", () => {
+  render(<HomePage catalogService={createMockCatalogService()} />);
+
+  expect(screen.getByRole("img", { name: "陳老師在茶行裡的照片" }).getAttribute("src")).toContain(
+    "teacher-portrait.webp",
+  );
+});
+
+it("keeps the teacher story video manual and muted", () => {
+  render(<HomePage catalogService={createMockCatalogService()} />);
+
+  const video = screen.getByLabelText("陳老師茶行介紹影片");
+  expect(video).toHaveAttribute("controls");
+  expect(video).toHaveProperty("muted", true);
+  expect(video).toHaveAttribute("playsinline");
+  expect(video).not.toHaveAttribute("autoplay");
+});
