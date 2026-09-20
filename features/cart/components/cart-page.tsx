@@ -77,7 +77,7 @@ export function CartPage(): JSX.Element {
 
   const cart = cartState.cart;
   if (cart.lines.length === 0) {
-    return <main><section aria-labelledby="empty-cart-heading"><h1 id="empty-cart-heading">購物車是空的</h1><p>先挑一款喜歡的茶，再回來這裡查看。</p><Link href="/#catalog">開始選茶</Link><Link href="/">回首頁</Link></section></main>;
+    return <main>{mutationState.status === "success" && <p role="status">{mutationState.message}</p>}<section aria-labelledby="empty-cart-heading"><h1 id="empty-cart-heading">購物車是空的</h1><p>先挑一款喜歡的茶，再回來這裡查看。</p><Link href="/#catalog">開始選茶</Link><Link href="/">回首頁</Link></section></main>;
   }
 
   return (

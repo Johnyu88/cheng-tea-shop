@@ -112,6 +112,7 @@ it("replaces the cart after removing a line", async () => {
   fireEvent.click(screen.getByRole("button", { name: "移除 玉露清香" }));
 
   await waitFor(() => expect(screen.getByRole("heading", { name: "購物車是空的" })).toBeTruthy());
+  expect(screen.getByRole("status")).toHaveTextContent("已移除茶品");
   expect(receivedIds).toEqual(["tea-jade", "tea-jade-variant"]);
 });
 

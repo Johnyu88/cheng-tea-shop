@@ -58,7 +58,9 @@ test("detail and cart avoid horizontal overflow on a phone viewport", async ({ p
   await page.goto("/tea/mock-tea-001");
 
   await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(360);
-  await expect(page.locator("main > article")).toHaveCSS("grid-template-columns", "1fr");
+  await expect.poll(() => page.locator("main > article").evaluate((element) => {
+    return getComputedStyle(element).gridTemplateColumns.trim().split(/\s+/).length;
+  })).toBe(1);
 
   await page.getByRole("button", { name: "增加數量" }).click();
   await page.getByRole("button", { name: "加入購物車" }).click();
