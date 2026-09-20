@@ -13,6 +13,7 @@ it("loads the first page of the complete catalog and offers more products", asyn
 
   expect(screen.getAllByRole("article")).toHaveLength(2);
   expect(screen.getByRole("button", { name: "載入更多茶品" })).toBeInTheDocument();
+  expect(screen.getAllByRole("link", { name: "查看茶品" })[0]).toHaveAttribute("href", "/tea/mock-product-001");
 });
 
 it("reloads the catalog when a visitor chooses a taste filter", async () => {

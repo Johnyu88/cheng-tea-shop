@@ -30,6 +30,10 @@ it("renders the first three catalog products through the catalog service", async
   expect(within(preview).getByText("合成茶品 001")).toBeInTheDocument();
   expect(within(preview).getByText("合成茶品 003")).toBeInTheDocument();
   expect(within(preview).getAllByText("商品照片準備中")).toHaveLength(3);
+  expect(within(preview).getAllByRole("link", { name: "查看茶品" })[0]).toHaveAttribute(
+    "href",
+    "/tea/mock-product-001",
+  );
 });
 
 it("keeps the catalog section useful when no products are available", async () => {
