@@ -332,7 +332,7 @@ GitHub 是正式文件與程式來源。聊天中的新指令若尚未寫入 Git
 
 - 目錄商品卡現在以穩定 slug 連到 `/tea/[slug]`；商品詳情透過 project-owned `CatalogService` 讀取商品，首屏顯示品牌預設圖、茶名、口感摘要、規格、整數 TWD 價格與供貨狀態。
 - 有貨商品提供單一 `ProductVariant` 的正整數數量控制與 `maxQuantity` 限制；售完、找不到商品、服務失敗與超過購買上限均保留既有選擇並以頁內可理解訊息處理。
-- `/cart` 透過 `CartService` 處理新增／合併、數量更新、移除與 subtotal；共享 `CartProvider` 在 client navigation 間保留同一個 Mock service instance。Wave 5 不使用瀏覽器儲存個資或付款資料。
+- `/cart` 透過 `CartService` 處理新增／合併、數量更新、移除與 subtotal；共享 `CommerceProvider` 在 client navigation 間保留同一個 Mock service instance。Wave 5 不使用瀏覽器儲存個資或付款資料。
 - 這一 Wave 只驗證合成商品的前台購買互動。結帳、付款 adapter、訂單 API、物流、會員／登入、ERP、持久化資料庫、多規格、精確庫存與真實商品資料仍是後續範圍。
 - 實作與驗證限制詳見 `.superpowers/sdd/2026-09-20-product-detail-and-cart/task-7-report.md`；未將尚未通過的 typecheck、production build 或 Chromium／WebKit e2e 寫成通過。
 

@@ -37,3 +37,8 @@ Base Wave 4.1 merge: `bdbf18b`
 ## Recommended next step
 
 Repair or rerun the typecheck/build/browser gate on a clean dependency environment, then proceed to Wave 6 checkout, payment-state, and product-draft work.
+
+## Task 7 review correction — 2026-09-21
+
+- Corrected the durable architecture wording in `WHITEPAPER.md`: the shared provider is `CommerceProvider`, matching the implementation export. No implementation files were modified.
+- `git diff --check` passed for the correction.
