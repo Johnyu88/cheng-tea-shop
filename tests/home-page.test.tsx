@@ -32,7 +32,7 @@ it("renders the first three catalog products through the catalog service", async
   expect(within(preview).getAllByText("商品照片準備中")).toHaveLength(3);
   expect(within(preview).getAllByRole("link", { name: "查看茶品" })[0]).toHaveAttribute(
     "href",
-    "/tea/mock-product-001",
+    "/tea/mock-tea-001",
   );
 });
 

@@ -22,3 +22,9 @@ Implemented the catalog-card links for both the complete catalog and homepage pr
 ## Concerns
 
 The target worktree has restricted/partial dependency and build-cache write access, so Vitest, substantive ESLint, and TypeScript verification could not complete locally. No dependencies were installed and no files outside the requested implementation/test scope were changed by this task.
+
+## Correction
+
+The focused Task 3 assertions initially used `/tea/mock-product-001`, but the existing synthetic fixture slug is `/tea/mock-tea-001`. Both test expectations were corrected; the link implementation was unchanged.
+
+The requested focused command was rerun: `node node_modules/vitest/vitest.mjs run tests/catalog-browser.test.tsx tests/home-page.test.tsx`. It remained blocked before test collection because Vite could not write `node_modules/.vite-temp` (`EPERM`).
