@@ -303,6 +303,14 @@ GitHub 是正式文件與程式來源。聊天中的新指令若尚未寫入 Git
 - Wave 1 已建立乾淨、可測試、可容器化的前端基線；沒有任何候選模板程式或素材整包進入專案。
 - Wave 0 模板稽核已完成並判定不可整包匯入。下一步是完成 Wave 1 quality gate，再以小範圍進入 Wave 2 品牌 shell。
 
+## 25. Wave 4 首頁目錄展示 — 2026-09-20
+
+- 首頁現在透過 project-owned `CatalogService` 取得前三筆商品，不直接依賴 fixture 或特定 ERP SDK。
+- 商品卡顯示名稱、口感標籤、摘要、規格、整數 TWD 價格與「商品照片準備中」placeholder；目前「查看茶品」仍是 prototype 文案，不建立商品詳情頁。
+- 首頁保留 loading、empty 與 catalog error 狀態，錯誤訊息不會假裝有商品資料。
+- Wave 4 本地驗證通過：Vitest 6 個檔案／17 個測試、ESLint、TypeScript 與 production build。
+- 購物車 UI、產品詳情、checkout UI、真實付款、ERP、登入、持久化與真實商品資料仍不在本切片範圍。
+
 ### Wave 1 implementation status — 2026-09-16
 
 - Branch `feature/wave-1-reproducible-baseline` and draft PR #12 contain a clean Next.js 16.3.5 App Router baseline with Node 24.19.0, pnpm 11.19.0, strict TypeScript, Tailwind 4, shadcn conventions, Vitest/RTL contracts, a minimal health route, standalone non-root Dockerfile, and Chromium/WebKit plus axe checks.

@@ -156,6 +156,15 @@ The project-governance design was previously approved:
 - No real product data, customer data, payment credentials, ERP integration, authentication, persistence, or secrets were added.
 - Wave 4 is the next implementation stage: integrate the catalog service into the approved home/catalog UI. Product detail, cart UI, checkout UI, payment, ERP, and real catalog entry remain out of scope until their planned waves.
 
+### Wave 4 home catalog preview slice — 2026-09-20
+
+- The homepage now injects the project-owned `CatalogService` and renders the first three deterministic products through a small catalog preview.
+- Product cards show name, taste tags, summary, specification, integer TWD price, and the approved labeled placeholder; product detail navigation is intentionally not implemented.
+- Loading, empty, and catalog-error states are covered by `tests/home-page.test.tsx`.
+- Local verification passed: Vitest 6 files / 17 tests, ESLint, TypeScript, and production build. Browser e2e and Docker smoke remain unverified locally.
+- No real product/customer/payment data, credentials, ERP integration, authentication, or persistence was added.
+- Next slice: review the homepage/catalog preview in a browser, then plan the next catalog browsing interaction. Keep product detail, cart, checkout, payment, ERP, and real data out.
+
 ## Governance delivery
 
 - The approved governance documents were prepared and reviewed through Pull Request #2.
@@ -184,7 +193,7 @@ The method for invoking the local 35B model is unknown. When the computer and Co
 
 ## Next action
 
-Close the fresh Wave 1 Quality workflow / PR #12 review when its clean-runner result is available, then begin Wave 4 home and catalog UI integration through the project-owned CatalogService. Keep product pages, checkout, payment, ERP, and real customer data out of that slice.
+Review the Wave 4 homepage/catalog preview in a browser and confirm its responsive/older-user presentation. Then plan the next catalog browsing interaction through `CatalogService`; keep product detail, checkout, payment, ERP, and real customer data out.
 
 ## Startup reminder
 

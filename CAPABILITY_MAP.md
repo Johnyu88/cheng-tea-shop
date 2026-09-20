@@ -154,11 +154,11 @@ No candidate-template application code or assets, ERP, real authentication, real
 | Mock cart service | ✅ | Integer TWD totals, sold-out rejection, purchase-limit rejection, and state preservation |
 | Mock checkout validation | ✅ | Phone required; delivery/payment compatibility is validated without payment credentials |
 | Mock product publishing | ✅ | One-specification draft save/publish with labeled placeholder and supplied facts only |
-| UI integration | ⬜ | Wave 4: connect home/catalog UI through `CatalogService` |
+| UI integration | 🟡 | Wave 4 homepage preview connects `CatalogService` and renders three products plus loading/empty/error states; browser review remains |
 | Persistent catalog and real data | ⬜ | Wait for persistence, authentication, authorization, backup, and restore |
 
-Wave 3 local verification: Vitest 6 files / 14 tests, ESLint, TypeScript, and production build passed. Browser e2e and Docker smoke remain unverified locally. PR #12 still requires its fresh clean-runner Quality result and final QA/Security review; do not merge `main` automatically.
+Wave 3 local verification: Vitest 6 files / 14 tests, ESLint, TypeScript, and production build passed. Wave 4 local verification: Vitest 6 files / 17 tests, ESLint, TypeScript, and production build passed. Browser e2e, responsive browser review, and Docker smoke remain unverified locally. PR #12 still requires its fresh clean-runner Quality result and final QA/Security review; do not merge `main` automatically.
 
 ## G. Current next capability
 
-Complete the fresh Quality workflow for PR #12, then implement Wave 4 home and catalog UI integration through the project-owned service interfaces. Do not add real product data, payment credentials, ERP integration, authentication, or persistence in Wave 4.
+Review the Wave 4 homepage/catalog preview in a browser, then plan the next catalog browsing interaction through the project-owned service interfaces. Do not add real product data, payment credentials, ERP integration, authentication, or persistence.

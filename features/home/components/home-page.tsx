@@ -1,6 +1,82 @@
-import type { JSX } from "react";
+"use client";
 
-export function HomePage(): JSX.Element {
+import { useEffect, useState, type JSX } from "react";
+import type { CatalogService, Product } from "@/lib/domain";
+import { createMockCatalogService } from "@/lib/domain";
+
+type HomePageProps = {
+  catalogService?: CatalogService;
+};
+
+type CatalogState =
+  | { status: "loading" }
+  | { status: "ready"; products: Product[] }
+  | { status: "empty" }
+  | { status: "error"; message: string };
+
+const defaultCatalogService = createMockCatalogService();
+
+function CatalogPreview({ catalogService }: { catalogService: CatalogService }): JSX.Element {
+  const [state, setState] = useState<CatalogState>({ status: "loading" });
+
+  useEffect(() => {
+    let active = true;
+
+    void catalogService.listProducts({ limit: 3 }).then((result) => {
+      if (!active) return;
+      if (!result.ok) {
+        setState({ status: "error", message: result.error.message });
+        return;
+      }
+      setState(result.value.items.length === 0 ? { status: "empty" } : { status: "ready", products: result.value.items });
+    });
+
+    return () => {
+      active = false;
+    };
+  }, [catalogService]);
+
+  return (
+    <section className="catalog-preview" aria-labelledby="catalog-heading" id="baseline">
+      <div className="catalog-heading-row">
+        <div>
+          <p className="eyebrow">從喜歡的口感開始</p>
+          <h2 id="catalog-heading">推薦茶品</h2>
+        </div>
+        <span className="catalog-count">先看三款</span>
+      </div>
+
+      {state.status === "loading" && <p role="status">正在整理茶品</p>}
+      {state.status === "empty" && <p role="status">目前還沒有可展示的茶品。</p>}
+      {state.status === "error" && <p role="alert">{state.message}</p>}
+      {state.status === "ready" && (
+        <div className="product-grid">
+          {state.products.map((product) => {
+            const variant = product.variants[0];
+            return (
+              <article className="product-card" key={product.id}>
+                <div className="product-placeholder" role="img" aria-label={product.image.alt}>
+                  {product.image.alt}
+                </div>
+                <div className="product-card-content">
+                  <p className="product-taste">{product.tasteTags.join("・")}</p>
+                  <h3>{product.name}</h3>
+                  <p className="product-summary">{product.summary}</p>
+                  <p className="product-meta">
+                    {variant?.specification}／NT${variant?.price.amount.toLocaleString("zh-TW")}
+                  </p>
+                  <span className="product-link">查看茶品</span>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      )}
+    </section>
+  );
+}
+
+export function HomePage({ catalogService = defaultCatalogService }: HomePageProps): JSX.Element {
   return (
     <div id="top" className="site-shell">
       <header className="site-header" role="banner">
@@ -20,10 +96,7 @@ export function HomePage(): JSX.Element {
           <a className="primary-action" href="#baseline">開始選茶</a>
         </section>
 
-        <section className="baseline-card" aria-labelledby="baseline-heading" id="baseline">
-          <h2 id="baseline-heading">Wave 1 技術基線</h2>
-          <p>這是龍映茗茶 Wave 1 的技術基線，後續功能會在通過驗證後逐步加入。</p>
-        </section>
+        <CatalogPreview catalogService={catalogService} />
       </main>
     </div>
   );
