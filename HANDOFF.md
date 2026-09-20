@@ -222,6 +222,15 @@ Review the Wave 4 homepage/catalog preview in a browser and confirm its responsi
 - Pre-existing unrelated work remains untouched: `.superpowers/sdd/2026-09-20-product-detail-and-cart/task-1-report.md` and `next-env.d.ts` are modified in the worktree and are excluded from the Task 7 commit.
 - Recommended next milestone: repair or rerun the typecheck/build/browser gate on a clean dependency environment, then begin Wave 6 checkout, payment-state, and product-draft work.
 
+## Final Wave 5 verification — 2026-09-21
+
+- Controller verification completed after `e6aedae` and `86bd48b`; the latter contains the final selector/cart acceptance fix.
+- `node node_modules/next/dist/bin/next build --webpack` passed after rebuilding and synchronizing standalone static/public artifacts.
+- Chromium acceptance passed 4/4 with `node node_modules/@playwright/test/cli.js test e2e/product-cart.spec.ts --project=chromium --workers=1 --reporter=line`.
+- WebKit is blocked only by the missing `webkit-2359` executable. Docker remains unavailable. These are the only remaining environment limitations recorded for the final Wave 5 gate.
+- Final review evidence includes strict provider-test tuple narrowing, catalog-derived sold-out cart behavior, stale product-response protection, `CommerceProvider` durable naming, and the corrected cart acceptance selector.
+- Next milestone: Wave 6 checkout, payment-state, and product-draft work.
+
 ## Startup reminder
 
 Follow `RESUME_PROMPT.md`, `AGENTS.md`, and `WORKFLOW.md`. If newer explicit user instructions conflict with this handoff, the newer instruction wins and the discrepancy must be recorded.

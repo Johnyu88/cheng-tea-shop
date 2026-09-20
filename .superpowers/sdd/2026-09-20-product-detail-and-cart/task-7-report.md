@@ -65,3 +65,11 @@ Repair or rerun the typecheck/build/browser gate on a clean dependency environme
 
 - This pass did not rerun production build, Chromium/WebKit e2e, or Docker smoke. The prior report records those gates as unavailable or environment-limited in this linked worktree; they remain unclaimed here.
 - The standard `pnpm` launcher remains unsuitable in this environment because it attempts dependency reconciliation. No dependencies were installed or changed.
+
+## Final controller verification — 2026-09-21
+
+- Final review fixes are present in `e6aedae` (`fix: close Wave 5 review findings`) and `86bd48b` (`fix: finish chromium cart acceptance`). The latter corrected the cart acceptance selector and stabilized the cart interaction assertions.
+- `node node_modules/next/dist/bin/next build --webpack` — PASS after `e6aedae`/`86bd48b`; standalone output was rebuilt and its static/public artifacts were synchronized for acceptance testing.
+- `node node_modules/@playwright/test/cli.js test e2e/product-cart.spec.ts --project=chromium --workers=1 --reporter=line` — PASS, 4/4 Chromium acceptance scenarios.
+- WebKit acceptance remains BLOCKED only because the `webkit-2359` executable is missing in the environment. Docker smoke remains unavailable because Docker is not installed.
+- Final review evidence: the provider naming correction is documented as `CommerceProvider`; review fixes include strict tuple narrowing, catalog-derived sold-out cart behavior with regression coverage, stale product-response protection with deferred-response coverage, and selector/cart acceptance stabilization.
