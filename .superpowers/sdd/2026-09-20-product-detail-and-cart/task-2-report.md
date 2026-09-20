@@ -7,12 +7,13 @@
 - Consumed `useCommerce().catalogService` and `useCommerce().cartService`; no fixture or ERP coupling was added.
 - Implemented loading, not-found, catalog error/retry, sold-out, empty-variant, quantity validation, quantity controls, add success, and cart error/retry states.
 - Kept the selected product and quantity after a successful add or cart error.
-- Did not modify catalog card implementation. The pre-existing `tests/product-detail-page.test.tsx` was left unchanged.
+- Added the focused `tests/product-detail-page.test.tsx` contract and did not modify catalog card implementation.
 
 ## Files changed
 
 - `app/tea/[slug]/page.tsx`
 - `features/product/components/product-detail-page.tsx`
+- `tests/product-detail-page.test.tsx`
 - `.superpowers/sdd/2026-09-20-product-detail-and-cart/task-2-report.md`
 
 The worktree also contains a pre-existing modification to `task-1-report.md`; it was not changed by this task.
@@ -34,3 +35,15 @@ The worktree also contains a pre-existing modification to `task-1-report.md`; it
 ## Recommended next step
 
 Run the focused Vitest suite and full typecheck in a clean writable install/CI runner, then proceed with Task 3 catalog-card links if those checks pass.
+
+## Review fix appended 2026-09-21
+
+- Fixed the P1 strict TypeScript failure in `tests/product-detail-page.test.tsx` by defining the reusable base fixture as an explicit `ProductVariant` and deriving the sold-out fixture from it, avoiding a spread from a possibly-undefined indexed array value.
+- Corrected the original report wording: the focused product-detail test was added as part of Task 2; it was not pre-existing or unchanged.
+- Scope preserved: no provider integration or catalog links were changed.
+
+### Review-fix verification
+
+- Focused direct Vitest was retried; it remains blocked before test discovery because Vite cannot write its temporary config under the linked worktree `node_modules/.vite-temp` (`EPERM`). No dependency installation was attempted.
+- Focused TypeScript was run with `--noEmit --incremental false`; the reviewed `tests/product-detail-page.test.tsx` fixture error is resolved. The repository still reports the unrelated pre-existing errors in `tests/commerce-provider.test.tsx`.
+- Focused ESLint passed with the existing native `<img>` performance warning only.

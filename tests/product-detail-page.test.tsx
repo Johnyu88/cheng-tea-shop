@@ -1,7 +1,15 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import type { CartService, CatalogService, Product } from "@/lib/domain";
+import type { CartService, CatalogService, Product, ProductVariant } from "@/lib/domain";
 import { CommerceProvider } from "@/features/commerce/components/commerce-provider";
 import { ProductDetailPage } from "@/features/product/components/product-detail-page";
+
+const productVariant: ProductVariant = {
+  id: "tea-jade-variant",
+  specification: "一兩",
+  price: { currency: "TWD", amount: 800 },
+  inventoryStatus: "available",
+  maxQuantity: 3,
+};
 
 const product: Product = {
   id: "tea-jade",
@@ -11,21 +19,13 @@ const product: Product = {
   tasteTags: ["light", "sweet"],
   summary: "清香柔和，入口甘甜。",
   image: { src: null, alt: "商品照片準備中", isPlaceholder: true },
-  variants: [
-    {
-      id: "tea-jade-variant",
-      specification: "一兩",
-      price: { currency: "TWD", amount: 800 },
-      inventoryStatus: "available",
-      maxQuantity: 3,
-    },
-  ],
+  variants: [productVariant],
   publication: "published",
 };
 
 const soldOutProduct: Product = {
   ...product,
-  variants: [{ ...product.variants[0], inventoryStatus: "sold-out" }],
+  variants: [{ ...productVariant, inventoryStatus: "sold-out" }],
 };
 
 function makeServices(overrides: Partial<CatalogService & CartService> = {}) {
