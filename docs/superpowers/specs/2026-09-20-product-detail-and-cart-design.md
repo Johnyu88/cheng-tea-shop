@@ -1,7 +1,7 @@
 # Wave 5 商品詳情與購物車設計規格
 
 - 日期：2026-09-20
-- 狀態：待實作前審閱
+- 狀態：已實作／已驗證（直接 Vitest 11 檔案／42 測試、strict TypeScript 與 ESLint 通過；TypeScript 使用 `--incremental false` 避免 worktree cache 寫入限制；production build、Chromium／WebKit e2e 與 Docker smoke 仍受既有 worktree／環境限制，詳見 Task 7 report）
 - 階段：Phase 2 前端 prototype，Wave 5
 
 ## 1. 目標

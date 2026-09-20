@@ -52,7 +52,8 @@ export const createMockCartService = (options: MockCartOptions = {}): CartServic
       : { ok: true, value: { product: productResult.value, variant } };
   };
 
-  const effectiveStatus = scenario === "sold-out" ? "sold-out" : "available";
+  const effectiveStatus = (variant: ProductVariant): ProductVariant["inventoryStatus"] =>
+    scenario === "sold-out" ? "sold-out" : variant.inventoryStatus;
   const effectiveLimit = (variant: ProductVariant): number =>
     scenario === "purchase-limit" ? Math.min(2, variant.maxQuantity) : variant.maxQuantity;
 
@@ -63,7 +64,7 @@ export const createMockCartService = (options: MockCartOptions = {}): CartServic
     specification: variant.specification,
     unitPrice: { ...variant.price },
     quantity,
-    inventoryStatus: effectiveStatus,
+    inventoryStatus: effectiveStatus(variant),
     maxQuantity: effectiveLimit(variant),
   });
 
@@ -77,7 +78,7 @@ export const createMockCartService = (options: MockCartOptions = {}): CartServic
       const resolved = await resolveLine(productId, variantId);
       if (!resolved.ok) return resolved;
       const { product, variant } = resolved.value;
-      if (effectiveStatus === "sold-out") return errorResult("product-sold-out", "這項茶品目前售完。 ");
+      if (effectiveStatus(variant) === "sold-out") return errorResult("product-sold-out", "這項茶品目前售完。 ");
 
       const existing = cart.lines.find((line) => line.productId === product.id && line.variantId === variant.id);
       const nextQuantity = (existing?.quantity ?? 0) + quantity;

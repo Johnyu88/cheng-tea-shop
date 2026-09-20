@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState, type JSX } from "react";
+import { useEffect, useState, type JSX } from "react";
 import Link from "next/link";
 import type { Product, ProductVariant } from "@/lib/domain";
 import { useCommerce } from "@/features/commerce/components/commerce-provider";
@@ -30,24 +30,31 @@ export function ProductDetailPage({ slug }: ProductDetailPageProps): JSX.Element
   const [addState, setAddState] = useState<AddState>({ status: "idle" });
   const [requestKey, setRequestKey] = useState(0);
 
-  const loadProduct = useCallback(async () => {
-    setCatalogState({ status: "loading" });
-    const result = await catalogService.getProductBySlug(slug);
-    if (!result.ok) {
-      setCatalogState(
-        result.error.code === "product-not-found"
-          ? { status: "not-found", message: result.error.message }
-          : { status: "error", message: result.error.message },
-      );
-      return;
-    }
-
-    setCatalogState({ status: "ready", product: result.value });
-  }, [catalogService, slug]);
-
   useEffect(() => {
+    let active = true;
+
+    const loadProduct = async () => {
+      setCatalogState({ status: "loading" });
+      const result = await catalogService.getProductBySlug(slug);
+      if (!active) return;
+
+      if (!result.ok) {
+        setCatalogState(
+          result.error.code === "product-not-found"
+            ? { status: "not-found", message: result.error.message }
+            : { status: "error", message: result.error.message },
+        );
+        return;
+      }
+
+      setCatalogState({ status: "ready", product: result.value });
+    };
+
     void Promise.resolve().then(loadProduct);
-  }, [loadProduct, requestKey]);
+    return () => {
+      active = false;
+    };
+  }, [catalogService, slug, requestKey]);
 
   const product = catalogState.status === "ready" ? catalogState.product : undefined;
   const variant = product?.variants[0];

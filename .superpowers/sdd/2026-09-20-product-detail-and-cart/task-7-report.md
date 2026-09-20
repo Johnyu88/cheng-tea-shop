@@ -42,3 +42,26 @@ Repair or rerun the typecheck/build/browser gate on a clean dependency environme
 
 - Corrected the durable architecture wording in `WHITEPAPER.md`: the shared provider is `CommerceProvider`, matching the implementation export. No implementation files were modified.
 - `git diff --check` passed for the correction.
+
+## Final review fix pass — 2026-09-21
+
+### Findings fixed
+
+- Added safe tuple narrowing assertions in `tests/commerce-provider.test.tsx`; `tsconfig.json` remains strict and unchanged.
+- Made `createMockCartService()` derive line inventory status and sold-out decisions from the resolved catalog variant, while preserving the explicit sold-out scenario override. Added regression coverage for default `mock-tea-048`.
+- Guarded `ProductDetailPage` catalog state updates with an effect-lifetime flag so a response for an obsolete slug/request cannot replace the newer product. Added a deferred-response regression test.
+- Updated the approved Wave 5 design spec from pre-implementation review to implemented/verified, with the actual verification caveats.
+
+### TDD and verification evidence
+
+- RED: `node node_modules/vitest/vitest.mjs run tests/mock-cart-service.test.ts` — 1 failing regression, because default `mock-tea-048` was accepted.
+- RED: `node node_modules/vitest/vitest.mjs run tests/product-detail-page.test.tsx` — 1 failing regression, because the old response replaced the newer product.
+- GREEN: the same focused commands passed — mock cart 4/4 tests and product detail 7/7 tests.
+- `node node_modules/vitest/vitest.mjs run` — PASS, 11 files / 42 tests.
+- `node node_modules/typescript/bin/tsc --noEmit --incremental false` — PASS, exit 0. The flag avoids the linked worktree’s unwritable incremental cache; no tsconfig weakening or dependency installation was used.
+- `node node_modules/eslint/bin/eslint.js .` — PASS, exit 0; one existing `@next/next/no-img-element` warning remains at `features/product/components/product-detail-page.tsx:137`.
+
+### Remaining caveats
+
+- This pass did not rerun production build, Chromium/WebKit e2e, or Docker smoke. The prior report records those gates as unavailable or environment-limited in this linked worktree; they remain unclaimed here.
+- The standard `pnpm` launcher remains unsuitable in this environment because it attempts dependency reconciliation. No dependencies were installed or changed.

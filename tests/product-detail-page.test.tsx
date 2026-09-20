@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import type { CartService, CatalogService, Product, ProductVariant } from "@/lib/domain";
 import { CommerceProvider } from "@/features/commerce/components/commerce-provider";
 import { ProductDetailPage } from "@/features/product/components/product-detail-page";
@@ -27,6 +27,16 @@ const soldOutProduct: Product = {
   ...product,
   variants: [{ ...productVariant, inventoryStatus: "sold-out" }],
 };
+
+type CatalogResponse = Awaited<ReturnType<CatalogService["getProductBySlug"]>>;
+
+function deferred<T>() {
+  let resolve!: (value: T) => void;
+  const promise = new Promise<T>((promiseResolve) => {
+    resolve = promiseResolve;
+  });
+  return { promise, resolve };
+}
 
 function makeServices(overrides: Partial<CatalogService & CartService> = {}) {
   const catalogService: CatalogService = {
@@ -74,6 +84,45 @@ it("shows a not-found state for an unknown slug", async () => {
 
   await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent("找不到這項茶品"));
   expect(screen.getByRole("link", { name: "返回茶品目錄" })).toHaveAttribute("href", "/#catalog");
+});
+
+it("keeps the newer product when an older slug request resolves later", async () => {
+  const oldRequest = deferred<CatalogResponse>();
+  const newRequest = deferred<CatalogResponse>();
+  const newerProduct: Product = {
+    ...product,
+    id: "tea-new",
+    slug: "tea-new",
+    name: "新茶品",
+  };
+  const requestedSlugs: string[] = [];
+  const services = makeServices({
+    getProductBySlug: async (requestedSlug) => {
+      requestedSlugs.push(requestedSlug);
+      return requestedSlug === "tea-old" ? oldRequest.promise : newRequest.promise;
+    },
+  });
+
+  const rendered = renderPage("tea-old", services);
+  await waitFor(() => expect(requestedSlugs).toEqual(["tea-old"]));
+
+  rendered.rerender(
+    <CommerceProvider services={services}>
+      <ProductDetailPage slug="tea-new" />
+    </CommerceProvider>,
+  );
+  await waitFor(() => expect(requestedSlugs).toEqual(["tea-old", "tea-new"]));
+
+  newRequest.resolve({ ok: true, value: newerProduct });
+  await waitFor(() => expect(screen.getByRole("heading", { name: "新茶品" })).toBeInTheDocument());
+
+  await act(async () => {
+    oldRequest.resolve({ ok: true, value: product });
+    await oldRequest.promise;
+  });
+
+  expect(screen.getByRole("heading", { name: "新茶品" })).toBeInTheDocument();
+  expect(screen.queryByRole("heading", { name: "玉露清香" })).not.toBeInTheDocument();
 });
 
 it("retries a catalog error without losing the route", async () => {

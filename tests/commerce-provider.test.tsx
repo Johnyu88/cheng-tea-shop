@@ -37,8 +37,15 @@ it("provides one stable default service pair for the mounted tree", () => {
   fireEvent.click(screen.getByRole("button", { name: "重新渲染" }));
 
   expect(renderedServices.length).toBeGreaterThanOrEqual(2);
-  expect(renderedServices[1][0]).toBe(renderedServices[0][0]);
-  expect(renderedServices[1][1]).toBe(renderedServices[0][1]);
+  const firstServices = renderedServices[0];
+  const secondServices = renderedServices[1];
+  expect(firstServices).toBeDefined();
+  expect(secondServices).toBeDefined();
+  if (firstServices === undefined || secondServices === undefined) {
+    throw new Error("Expected services to be captured for both renders");
+  }
+  expect(secondServices[0]).toBe(firstServices[0]);
+  expect(secondServices[1]).toBe(firstServices[1]);
 });
 
 it("returns injected services unchanged", () => {
