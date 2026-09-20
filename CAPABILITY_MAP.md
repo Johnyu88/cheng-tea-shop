@@ -159,6 +159,17 @@ No candidate-template application code or assets, ERP, real authentication, real
 
 Wave 3 local verification: Vitest 6 files / 14 tests, ESLint, TypeScript, and production build passed. Wave 4 local verification: Vitest 6 files / 17 tests, ESLint, TypeScript, and production build passed. Browser e2e, responsive browser review, and Docker smoke remain unverified locally. PR #12 still requires its fresh clean-runner Quality result and final QA/Security review; do not merge `main` automatically.
 
-## G. Current next capability
+## G. Wave 4.1 catalog browsing status
 
-Review the Wave 4 homepage/catalog and teacher story media in a browser, then plan the next catalog browsing interaction through the project-owned service interfaces. Do not add real product data, payment credentials, ERP integration, authentication, or persistence.
+| Capability | Status | Evidence / next action |
+|---|---:|---|
+| Complete catalog browsing | ✅ | `CatalogBrowser` consumes `CatalogService`, supports cursor-based loading, four approved taste filters, accessible pressed states, and loading/empty/error/retry paths |
+| 40-plus synthetic catalog navigation | ✅ | Load-more behavior preserves prior products and follows adapter cursors; no fixed 40-item ceiling or real catalog data added |
+| Responsive elder-friendly controls | 🟡 | Large keyboard-focusable filter/load-more controls and mobile two-column filter layout are implemented; browser/responsive review remains |
+| Product detail and cart | ⬜ | Reserved for Wave 5 |
+
+Wave 4.1 local verification: Vitest 7 files / 22 tests, ESLint, TypeScript, and Webpack production build passed. Turbopack was not used in the isolated worktree because its filesystem-root check rejects the temporary external dependency junction; CI should run the standard build with a clean install. Browser e2e, responsive browser review, and Docker smoke remain unverified locally.
+
+No real product data, customer data, payment credentials, ERP integration, authentication, persistence, or secrets were added.
+
+Next action: review the homepage and complete catalog in a browser, then plan Wave 5 product detail and cart through the existing domain interfaces.

@@ -318,6 +318,15 @@ GitHub 是正式文件與程式來源。聊天中的新指令若尚未寫入 Git
 - 影片轉為無音軌 MP4，預設靜音、手動播放、保留 controls，並清除 GPS、裝置與拍攝 metadata。
 - 照片以可存取的替代文字呈現；影片提供 aria label、poster 與瀏覽器不支援時的 fallback 文案。
 
+## 27. Wave 4.1 完整目錄瀏覽 — 2026-09-20
+
+- 首頁保留三款人工精選，並新增完整目錄瀏覽區；UI 只依賴 project-owned `CatalogService`，不直接讀取 fixture 或 ERP SDK。
+- 目錄以 cursor 分頁載入，使用「載入更多茶品」追加結果，不設定 40 筆上限。
+- 提供清香、甘甜、濃郁、焙火四種口感篩選；切換篩選會重置 cursor 並重新載入。
+- 商品卡延續合成資料與「商品照片準備中」標示；保留 loading、空結果、錯誤及重試狀態。
+- Wave 4.1 本地驗證通過：Vitest 7 個檔案／22 個測試、ESLint、TypeScript 與 Webpack production build。
+- 未加入商品詳情、購物車、結帳、付款、ERP、登入、持久化、真實商品或顧客資料。
+
 ### Wave 1 implementation status — 2026-09-16
 
 - Branch `feature/wave-1-reproducible-baseline` and draft PR #12 contain a clean Next.js 16.3.5 App Router baseline with Node 24.19.0, pnpm 11.19.0, strict TypeScript, Tailwind 4, shadcn conventions, Vitest/RTL contracts, a minimal health route, standalone non-root Dockerfile, and Chromium/WebKit plus axe checks.

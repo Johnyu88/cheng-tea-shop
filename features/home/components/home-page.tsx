@@ -4,6 +4,7 @@ import { useEffect, useState, type JSX } from "react";
 import Image from "next/image";
 import type { CatalogService, Product } from "@/lib/domain";
 import { createMockCatalogService } from "@/lib/domain";
+import { CatalogBrowser } from "@/features/catalog/components/catalog-browser";
 
 type HomePageProps = {
   catalogService?: CatalogService;
@@ -128,6 +129,7 @@ export function HomePage({ catalogService = defaultCatalogService }: HomePagePro
         </section>
 
         <CatalogPreview catalogService={catalogService} />
+        <CatalogBrowser catalogService={catalogService} />
       </main>
     </div>
   );

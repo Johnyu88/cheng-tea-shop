@@ -172,6 +172,16 @@ The project-governance design was previously approved:
 - The video is manual, muted, inline-capable, and has a poster plus accessible label; the portrait has descriptive alt text.
 - Keep these assets as brand-story media, never as product imagery or evidence for origin/health claims.
 
+### Wave 4.1 complete catalog browsing slice — 2026-09-20
+
+- Branch/worktree: `wave-4-1-catalog-browsing` in the isolated Codex worktree.
+- Added `CatalogBrowser`, which consumes the project-owned `CatalogService`, loads cursor pages, preserves existing products, and supports the approved taste filters: 清香、甘甜、濃郁、焙火.
+- Added accessible `aria-pressed` filter controls, mobile two-column controls, load-more action, loading, empty, error, and retry states.
+- Updated homepage tests to scope assertions to the featured preview after adding the complete catalog section.
+- Local verification passed: Vitest 7 files / 22 tests, ESLint, TypeScript, and Webpack production build.
+- Turbopack was blocked only by the isolated worktree's temporary external dependency junction; do not treat that as an application failure. Clean-runner CI remains authoritative for the standard build.
+- Browser e2e, responsive browser review, Docker smoke, product detail, cart, checkout, payment, ERP, authentication, persistence, and real catalog data remain out of scope.
+
 ## Governance delivery
 
 - The approved governance documents were prepared and reviewed through Pull Request #2.
