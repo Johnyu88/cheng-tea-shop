@@ -324,7 +324,8 @@ GitHub 是正式文件與程式來源。聊天中的新指令若尚未寫入 Git
 - 目錄以 cursor 分頁載入，使用「載入更多茶品」追加結果，不設定 40 筆上限。
 - 提供清香、甘甜、濃郁、焙火四種口感篩選；切換篩選會重置 cursor 並重新載入。
 - 商品卡延續合成資料與「商品照片準備中」標示；保留 loading、空結果、錯誤及重試狀態。
-- Wave 4.1 本地驗證通過：Vitest 7 個檔案／22 個測試、ESLint、TypeScript 與 Webpack production build。
+- Wave 4.1 本地驗證通過：Vitest 7 個檔案／22 個測試、ESLint、TypeScript、Webpack production build、Chromium smoke/axe e2e（3/3）與 headless Chromium 目錄互動檢查（初始 12 筆、焙火篩選、載入更多至 24 筆）。
+- Visual browser surface 因 computer-use request-header policy 無法載入而未完成；Docker smoke 仍待 clean runner 或可用 Docker 環境。
 - 未加入商品詳情、購物車、結帳、付款、ERP、登入、持久化、真實商品或顧客資料。
 
 ### Wave 1 implementation status — 2026-09-16

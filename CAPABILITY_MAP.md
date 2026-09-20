@@ -165,10 +165,10 @@ Wave 3 local verification: Vitest 6 files / 14 tests, ESLint, TypeScript, and pr
 |---|---:|---|
 | Complete catalog browsing | ✅ | `CatalogBrowser` consumes `CatalogService`, supports cursor-based loading, four approved taste filters, accessible pressed states, and loading/empty/error/retry paths |
 | 40-plus synthetic catalog navigation | ✅ | Load-more behavior preserves prior products and follows adapter cursors; no fixed 40-item ceiling or real catalog data added |
-| Responsive elder-friendly controls | 🟡 | Large keyboard-focusable filter/load-more controls and mobile two-column filter layout are implemented; browser/responsive review remains |
+| Responsive elder-friendly controls | 🟡 | Large keyboard-focusable filter/load-more controls and mobile two-column filter layout are implemented; headless Chromium interaction review passed, visual browser surface remains unavailable |
 | Product detail and cart | ⬜ | Reserved for Wave 5 |
 
-Wave 4.1 local verification: Vitest 7 files / 22 tests, ESLint, TypeScript, and Webpack production build passed. Turbopack was not used in the isolated worktree because its filesystem-root check rejects the temporary external dependency junction; CI should run the standard build with a clean install. Browser e2e, responsive browser review, and Docker smoke remain unverified locally.
+Wave 4.1 local verification: Vitest 7 files / 22 tests, ESLint, TypeScript, Webpack production build, Chromium smoke/axe e2e (3/3), and headless Chromium catalog interaction review passed. Turbopack was not used in the isolated worktree because its filesystem-root check rejects the temporary external dependency junction; CI should run the standard build with a clean install. Visual browser surface review and Docker smoke remain unverified locally.
 
 No real product data, customer data, payment credentials, ERP integration, authentication, persistence, or secrets were added.
 

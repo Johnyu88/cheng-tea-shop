@@ -178,9 +178,9 @@ The project-governance design was previously approved:
 - Added `CatalogBrowser`, which consumes the project-owned `CatalogService`, loads cursor pages, preserves existing products, and supports the approved taste filters: 清香、甘甜、濃郁、焙火.
 - Added accessible `aria-pressed` filter controls, mobile two-column controls, load-more action, loading, empty, error, and retry states.
 - Updated homepage tests to scope assertions to the featured preview after adding the complete catalog section.
-- Local verification passed: Vitest 7 files / 22 tests, ESLint, TypeScript, and Webpack production build.
+- Local verification passed: Vitest 7 files / 22 tests, ESLint, TypeScript, Webpack production build, Chromium smoke/axe e2e (3/3), and headless Chromium catalog interaction review (12 initial products, 焙火 filter, 24 after load-more).
 - Turbopack was blocked only by the isolated worktree's temporary external dependency junction; do not treat that as an application failure. Clean-runner CI remains authoritative for the standard build.
-- Browser e2e, responsive browser review, Docker smoke, product detail, cart, checkout, payment, ERP, authentication, persistence, and real catalog data remain out of scope.
+- Visual browser surface review and Docker smoke remain unverified; product detail, cart, checkout, payment, ERP, authentication, persistence, and real catalog data remain out of scope.
 
 ## Governance delivery
 
