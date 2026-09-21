@@ -336,6 +336,16 @@ GitHub 是正式文件與程式來源。聊天中的新指令若尚未寫入 Git
 - 這一 Wave 只驗證合成商品的前台購買互動。結帳、付款 adapter、訂單 API、物流、會員／登入、ERP、持久化資料庫、多規格、精確庫存與真實商品資料仍是後續範圍。
 - 實作與驗證限制詳見 `.superpowers/sdd/2026-09-20-product-detail-and-cart/task-7-report.md`；未將尚未通過的 typecheck、production build 或 Chromium／WebKit e2e 寫成通過。
 
+## 29. Wave 6 checkout prototype slice — 2026-09-21
+
+- Wave 6 的 domain contracts、checkout／publishing Mock services、購物車到 `/checkout` 邊界與 guest checkout prototype 已完成；商品草稿發布 UI 尚未開始。
+- Checkout 透過 `CommerceProvider` 注入 project-owned `CheckoutService`，提供聯絡資料、宅配／到店取貨、付款方式、確認訂單、處理中、失敗重試與成功狀態；手機必填、Email 選填。
+- 付款仍是 deterministic Mock。原型不渲染信用卡欄位、不保存付款憑證、不使用瀏覽器儲存、不加入登入、持久化、訂單後端、ERP 或真實金流。
+- 有限庫存提示保留電話作為主要聯絡方式、LINE 作為次要聯絡方式；checkout 的個人資料只存在當前 React flow。
+- 已完成 accessible step-heading focus、live status／error alert、四項以上摘要展開狀態、重複提交保護與 provider-boundary failure recovery 測試。
+- Wave 6 checkout 驗證：focused Vitest 18/18、TypeScript、scoped ESLint 與 diff check 通過。Chromium acceptance 因 standalone hydration／靜態資產環境問題未完成，未宣稱通過；WebKit 與 Docker 留待最後品質 gate。
+- 下一個切片是長輩友善商品草稿：單頁最低欄位、0～3 張暫時預覽圖、grounded Mock 文案、草稿儲存、預覽與人工確認後發布。
+
 ### Wave 1 implementation status — 2026-09-16
 
 - Branch `feature/wave-1-reproducible-baseline` and draft PR #12 contain a clean Next.js 16.3.5 App Router baseline with Node 24.19.0, pnpm 11.19.0, strict TypeScript, Tailwind 4, shadcn conventions, Vitest/RTL contracts, a minimal health route, standalone non-root Dockerfile, and Chromium/WebKit plus axe checks.
