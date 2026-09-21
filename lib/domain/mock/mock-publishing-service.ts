@@ -1,21 +1,44 @@
 import { domainError } from "../errors";
 import type { PublishingService } from "../publishing-service";
-import type { Product, ProductDraft } from "../types";
+import type { Product, ProductDraft, ProductDraftPhoto, TeaCategory } from "../types";
 import type { ServiceResult } from "../result";
 import { assertValidMoney } from "../validation";
+
+const categories: readonly TeaCategory[] = ["white", "green", "oolong", "black", "dark", "other"];
+const inventoryStatuses = ["available", "sold-out"] as const;
 
 const invalid = <T>(message: string): ServiceResult<T> => ({
   ok: false,
   error: domainError("invalid-draft", message, false),
 });
 
+const clonePhoto = (photo: ProductDraftPhoto): ProductDraftPhoto => ({ ...photo });
+
+const cloneDraft = (draft: ProductDraft): ProductDraft => ({
+  ...draft,
+  price: { ...draft.price },
+  tasteTags: [...draft.tasteTags],
+  ...(draft.photos ? { photos: draft.photos.map(clonePhoto) } : {}),
+});
+
 const validateDraft = (draft: ProductDraft): ServiceResult<ProductDraft> => {
   if (draft.name.trim().length === 0 || draft.specification.trim().length === 0) {
     return invalid("茶名與規格不可為空白。");
   }
+
   const money = assertValidMoney(draft.price);
   if (!money.ok) return money;
-  return { ok: true, value: { ...draft, tasteTags: [...draft.tasteTags] } };
+  if (!categories.includes(draft.category)) {
+    return invalid("茶類別不在可用選項內。");
+  }
+  if (!inventoryStatuses.includes(draft.inventoryStatus)) {
+    return invalid("供貨狀態不在可用選項內。");
+  }
+  if ((draft.photos?.length ?? 0) > 3) {
+    return invalid("商品照片最多只能提供三張。");
+  }
+
+  return { ok: true, value: cloneDraft(draft) };
 };
 
 const slugFor = (name: string, sequence: number): string => {
@@ -23,22 +46,55 @@ const slugFor = (name: string, sequence: number): string => {
   return slug.length > 0 ? slug : `mock-product-${sequence}`;
 };
 
+const optionalFacts = [
+  ["產地", "origin"],
+  ["發酵", "fermentation"],
+  ["焙火", "roast"],
+  ["香氣", "aroma"],
+  ["沖泡", "brewing"],
+  ["摘要", "summary"],
+] as const;
+
+const summaryFor = (draft: ProductDraft): string => {
+  const parts = [
+    `茶名：${draft.name.trim()}`,
+    `規格：${draft.specification.trim()}`,
+    `價格：${draft.price.currency} ${draft.price.amount}`,
+    `類別：${draft.category}`,
+    `供貨：${draft.inventoryStatus}`,
+    ...(draft.tasteTags.length > 0 ? [`口感：${draft.tasteTags.join("、")}`] : []),
+    ...optionalFacts.flatMap(([label, key]) => {
+      const value = draft[key]?.trim();
+      return value ? [`${label}：${value}`] : [];
+    }),
+  ];
+
+  if (optionalFacts.some(([, key]) => !draft[key]?.trim())) {
+    parts.push("部分補充資訊未提供。");
+  }
+
+  return parts.join("｜");
+};
+
 export const createMockPublishingService = (): PublishingService => {
   let sequence = 0;
 
   return {
-    async generateSummary(_draft): Promise<ServiceResult<string>> {
-      return {
-        ok: false,
-        error: domainError("publishing-unavailable", "商品摘要服務正在準備中。", true),
-      };
+    async generateSummary(draft): Promise<ServiceResult<string>> {
+      const validated = validateDraft(draft);
+      if (!validated.ok) return validated;
+      return { ok: true, value: summaryFor(validated.value) };
     },
 
     async saveDraft(draft): Promise<ServiceResult<ProductDraft>> {
       return validateDraft(draft);
     },
 
-    async publishDraft(draft, _confirmation): Promise<ServiceResult<Product>> {
+    async publishDraft(draft, confirmation): Promise<ServiceResult<Product>> {
+      if (!confirmation.confirmed) {
+        return invalid("發布前必須明確確認。");
+      }
+
       const validated = validateDraft(draft);
       if (!validated.ok) return validated;
       sequence += 1;
