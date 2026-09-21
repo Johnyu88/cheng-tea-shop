@@ -30,6 +30,14 @@ Branch: `codex/wave-6-checkout-product-draft`
 - Diff check: `git diff --check` — exit 0. Git emitted only CRLF conversion warnings, including the pre-existing unrelated `next-env.d.ts` modification.
 - Browser acceptance was not executed. A first production-build attempt failed under the filesystem sandbox with `EPERM` opening `.next/trace`. The approved retry reached Next.js then failed with `EBUSY: resource busy or locked, rmdir '.next/standalone'`. Playwright was not started because its configured standalone server would not be a fresh Task 6 build.
 
+## Fix round after independent review
+
+- Publication confirmation is now invalidated by any publishable field, fact, tag, summary, or photo change.
+- Save, summary generation, and publication announce explicit in-progress states through the polite live region; duplicate save/generate attempts are ignored while their operation is active.
+- Success now shows the returned product name and first variant/specification; failures retain the draft and previews.
+- Added regression coverage for photo removal/unmount URL revocation, duplicate save/generation, generation/publication failure preservation, confirmation invalidation, and in-progress announcements.
+- Reverification: `node node_modules/vitest/vitest.mjs run tests/product-draft-page.test.tsx tests/commerce-provider.test.tsx` — 2 files, 19 tests passed; TypeScript, scoped ESLint, and `git diff --check` passed.
+
 ## Remaining risks and assumptions
 
 - Chromium/WebKit browser acceptance remains unverified due to the locked pre-existing `.next/standalone` directory. This report does not represent browser coverage as passing.

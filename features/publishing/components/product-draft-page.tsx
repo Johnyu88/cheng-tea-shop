@@ -16,6 +16,7 @@ type FieldProblem = { field: FieldKey; label: string; message: string };
 const initialDraft: FormDraft = { name: "", specification: "", price: "", category: "", inventoryStatus: "available", tasteTags: [], summary: "", origin: "", fermentation: "", roast: "", aroma: "", brewing: "" };
 const categories: Array<[TeaCategory, string]> = [["white", "白茶"], ["green", "綠茶"], ["oolong", "烏龍茶"], ["black", "紅茶"], ["dark", "黑茶"], ["other", "其他茶類"]];
 const tasteTags: Array<[TasteTag, string]> = [["light", "清香"], ["sweet", "甘甜"], ["rich", "濃郁"], ["roasted", "焙火"]];
+const inProgressStatus: Record<Exclude<Operation, "idle">, string> = { saving: "正在儲存草稿。", generating: "正在產生介紹草稿。", publishing: "正在上架商品。" };
 
 function minimumProblems(draft: FormDraft): FieldProblem[] {
   const problems: FieldProblem[] = [];
@@ -63,6 +64,7 @@ export function ProductDraftPage(): JSX.Element {
 
   const change = <Key extends keyof FormDraft>(key: Key, value: FormDraft[Key]) => {
     setDraft((current) => ({ ...current, [key]: value }));
+    setConfirmed(false);
     setFieldProblems([]);
     setError(undefined);
   };
@@ -77,7 +79,7 @@ export function ProductDraftPage(): JSX.Element {
     activeOperation.current = nextOperation;
     setOperation(nextOperation);
     setError(undefined);
-    setStatus("");
+    setStatus(inProgressStatus[nextOperation]);
     return true;
   };
   const finish = () => { activeOperation.current = "idle"; setOperation("idle"); };
@@ -85,21 +87,21 @@ export function ProductDraftPage(): JSX.Element {
     const submission = validate();
     if (!submission || !start("saving")) return;
     const result = await publishingService.saveDraft(submission);
-    if (result.ok) setStatus("草稿已儲存；這仍是暫存商品，尚未上架。"); else setError(result.error);
+    if (result.ok) setStatus("草稿已儲存；這仍是暫存商品，尚未上架。"); else { setError(result.error); setStatus(result.error.message); }
     finish();
   };
   const generateSummary = async () => {
     const submission = validate();
     if (!submission || !start("generating")) return;
     const result = await publishingService.generateSummary(submission);
-    if (result.ok) { setDraft((current) => ({ ...current, summary: result.value })); setStatus("已產生可編輯的介紹草稿；請由您確認後再上架。"); } else setError(result.error);
+    if (result.ok) { setDraft((current) => ({ ...current, summary: result.value })); setConfirmed(false); setStatus("已產生可編輯的介紹草稿；請由您確認後再上架。"); } else { setError(result.error); setStatus(result.error.message); }
     finish();
   };
   const publishDraft = async () => {
     const submission = validate();
     if (!submission || !confirmed || !start("publishing")) return;
     const result = await publishingService.publishDraft(submission, { confirmed: true });
-    if (result.ok) { setPublishedProduct(result.value); setStatus("商品已上架為合成展示資料。沒有儲存到正式系統。"); } else setError(result.error);
+    if (result.ok) { setPublishedProduct(result.value); setStatus("商品已上架為合成展示資料。沒有儲存到正式系統。"); } else { setError(result.error); setStatus(result.error.message); }
     finish();
   };
   const addPhotos = (event: ChangeEvent<HTMLInputElement>) => {
@@ -110,14 +112,15 @@ export function ProductDraftPage(): JSX.Element {
     if (photos.length + files.length > 3) { setError({ code: "invalid-draft", message: "商品照片最多三張；原本選擇的照片與文字都已保留。", retryable: false }); return; }
     const additions = files.map((file) => ({ id: `local-photo-${nextPhotoId.current++}`, previewUrl: URL.createObjectURL(file), alt: `${file.name} 預覽` }));
     setPhotos((current) => [...current, ...additions]);
+    setConfirmed(false);
     setError(undefined);
   };
   const removePhoto = (id: string) => {
-    setPhotos((current) => {
-      const removed = current.find((photo) => photo.id === id);
-      if (removed) URL.revokeObjectURL(removed.previewUrl);
-      return current.filter((photo) => photo.id !== id);
-    });
+    const removed = photos.find((photo) => photo.id === id);
+    if (!removed) return;
+    URL.revokeObjectURL(removed.previewUrl);
+    setPhotos((current) => current.filter((photo) => photo.id !== id));
+    setConfirmed(false);
   };
   const canPublish = minimumProblems(draft).length === 0 && confirmed && operation !== "publishing";
   if (publishedProduct) return <PublishedSuccess product={publishedProduct} />;
@@ -148,4 +151,4 @@ function ValidationSummary({ problems }: { problems: FieldProblem[] }): JSX.Elem
 function FactField({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }): JSX.Element { return <label className="form-field">{label}<input className="form-input" value={value} onChange={(event) => onChange(event.target.value)} /></label>; }
 function PhotoPicker({ photos, onAdd, onRemove }: { photos: ProductDraftPhoto[]; onAdd: (event: ChangeEvent<HTMLInputElement>) => void; onRemove: (id: string) => void }): JSX.Element { return <section className="product-draft-photos" aria-labelledby="product-photo-heading"><h2 id="product-photo-heading">商品照片（選填）</h2><p>可選 0 至 3 張，只在此頁顯示本機預覽，不會上傳。</p><label className="form-field" htmlFor="product-photos">選擇商品照片（最多三張）<input id="product-photos" className="form-input" type="file" accept="image/*" multiple onChange={onAdd} /></label><p>已選擇 {photos.length}／3 張照片</p>{photos.length > 0 && <ul className="product-draft-photo-list">{photos.map((photo) => <li key={photo.id}><img src={photo.previewUrl} alt={photo.alt} /><button className="text-button" type="button" onClick={() => onRemove(photo.id)}>移除 {photo.alt.replace(" 預覽", "")}</button></li>)}</ul>}</section>; }
 function ProductPreview({ draft, mode }: { draft: FormDraft; mode: PreviewMode }): JSX.Element { return <section className={`product-draft-preview product-draft-preview-${mode}`} aria-label="商品預覽" data-preview-mode={mode}><p className="eyebrow">{mode === "mobile" ? "手機版預覽" : "電腦版預覽"}</p><h2>{draft.name || "尚未命名的茶品"}</h2><p>{draft.specification || "尚未填寫規格"}・{draft.price ? `NT$${draft.price}` : "尚未填寫價格"}</p><p>{draft.summary || "尚未提供商品介紹。"}</p></section>; }
-function PublishedSuccess({ product }: { product: Product }): JSX.Element { return <main className="product-draft-page py-8 md:py-12"><section className="product-draft-card" aria-labelledby="product-published-heading"><p role="status" aria-live="polite">商品已上架為合成展示資料。</p><h1 id="product-published-heading">商品已上架</h1><p>合成商品編號：{product.id}</p><p>已建立 {product.variants.length} 個規格</p><p>這是原型結果，沒有真實管理員驗證、資料持久化或照片上傳。</p></section></main>; }
+function PublishedSuccess({ product }: { product: Product }): JSX.Element { const variant = product.variants[0]; return <main className="product-draft-page py-8 md:py-12"><section className="product-draft-card" aria-labelledby="product-published-heading"><p role="status" aria-live="polite">商品已上架為合成展示資料。</p><h1 id="product-published-heading">商品已上架</h1><p>合成商品編號：{product.id}</p><p>已上架商品：{product.name}</p>{variant && <p>規格：{variant.specification}／NT${variant.price.amount}</p>}<p>已建立 {product.variants.length} 個規格</p><p>這是原型結果，沒有真實管理員驗證、資料持久化或照片上傳。</p></section></main>; }

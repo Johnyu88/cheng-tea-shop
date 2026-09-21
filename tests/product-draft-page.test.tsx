@@ -96,6 +96,23 @@ it("keeps zero to three local photo metadata and recovers after rejecting an ove
   expect(createObjectURL).toHaveBeenCalledTimes(3);
 });
 
+it("revokes a removed photo preview immediately and remaining previews when unmounted", () => {
+  const createObjectURL = vi.fn((file: File) => `blob:${file.name}`);
+  const revokeObjectURL = vi.fn();
+  vi.stubGlobal("URL", { createObjectURL, revokeObjectURL });
+  const { unmount } = renderPage();
+  const photoInput = screen.getByLabelText("選擇商品照片（最多三張）");
+  const first = new File(["first"], "first.jpg", { type: "image/jpeg" });
+  const second = new File(["second"], "second.jpg", { type: "image/jpeg" });
+
+  fireEvent.change(photoInput, { target: { files: [first, second] } });
+  fireEvent.click(screen.getByRole("button", { name: "移除 first.jpg" }));
+  expect(revokeObjectURL).toHaveBeenCalledWith("blob:first.jpg");
+
+  unmount();
+  expect(revokeObjectURL).toHaveBeenCalledWith("blob:second.jpg");
+});
+
 it("generates grounded copy that the operator can edit", async () => {
   const generateSummary = vi.fn(async (draft: ProductDraft) => ({ ok: true as const, value: `茶名：${draft.name}｜產地：阿里山` }));
   renderPage(createPublishingService({ generateSummary }));
@@ -121,6 +138,49 @@ it("preserves the draft after a save failure", async () => {
   expect(screen.getByLabelText("單一規格")).toHaveValue("150g");
 });
 
+it("prevents duplicate save mutations and announces that saving is in progress", async () => {
+  let resolveSave: ((result: Awaited<ReturnType<PublishingService["saveDraft"]>>) => void) | undefined;
+  const saveDraft = vi.fn(() => new Promise<Awaited<ReturnType<PublishingService["saveDraft"]>>>((resolve) => { resolveSave = resolve; }));
+  renderPage(createPublishingService({ saveDraft }));
+  fillMinimumFields();
+  const save = screen.getByRole("button", { name: "儲存草稿" });
+
+  fireEvent.click(save);
+  fireEvent.click(save);
+
+  await waitFor(() => expect(saveDraft).toHaveBeenCalledTimes(1));
+  expect(screen.getByRole("status")).toHaveTextContent("正在儲存草稿");
+  await act(async () => { resolveSave?.({ ok: true, value: { name: "春茶", specification: "150g", price: { currency: "TWD", amount: 1200 }, category: "oolong", inventoryStatus: "available", tasteTags: [] } }); });
+});
+
+it("prevents duplicate summary mutations and announces that generation is in progress", async () => {
+  let resolveSummary: ((result: Awaited<ReturnType<PublishingService["generateSummary"]>>) => void) | undefined;
+  const generateSummary = vi.fn(() => new Promise<Awaited<ReturnType<PublishingService["generateSummary"]>>>((resolve) => { resolveSummary = resolve; }));
+  renderPage(createPublishingService({ generateSummary }));
+  fillMinimumFields();
+  const generate = screen.getByRole("button", { name: "產生介紹草稿" });
+
+  fireEvent.click(generate);
+  fireEvent.click(generate);
+
+  await waitFor(() => expect(generateSummary).toHaveBeenCalledTimes(1));
+  expect(screen.getByRole("status")).toHaveTextContent("正在產生介紹草稿");
+  await act(async () => { resolveSummary?.({ ok: true, value: "由店家確認的介紹" }); });
+});
+
+it("preserves editable data after summary generation fails", async () => {
+  renderPage(createPublishingService({ generateSummary: async () => ({ ok: false, error: { code: "publishing-unavailable", message: "暫時無法產生介紹。", retryable: true } }) }));
+  fillMinimumFields();
+  fireEvent.change(screen.getByLabelText("商品介紹草稿（可編輯）"), { target: { value: "原有介紹" } });
+
+  fireEvent.click(screen.getByRole("button", { name: "產生介紹草稿" }));
+
+  await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent("暫時無法產生介紹"));
+  expect(screen.getByLabelText("茶名")).toHaveValue("春茶");
+  expect(screen.getByLabelText("商品介紹草稿（可編輯）")).toHaveValue("原有介紹");
+  expect(screen.getByRole("status")).toHaveTextContent("暫時無法產生介紹");
+});
+
 it("toggles between phone and desktop previews", () => {
   renderPage();
   fillMinimumFields();
@@ -141,6 +201,38 @@ it("requires minimum validation and an explicit confirmation before publishing",
   expect(screen.getByRole("button", { name: "確認並上架" })).toBeEnabled();
 });
 
+it("requires a new confirmation whenever publishable content changes", () => {
+  const createObjectURL = vi.fn((file: File) => `blob:${file.name}`);
+  vi.stubGlobal("URL", { createObjectURL, revokeObjectURL: vi.fn() });
+  renderPage();
+  fillMinimumFields();
+  const confirmation = screen.getByLabelText("我已確認內容，將上架這項商品");
+
+  fireEvent.click(confirmation);
+  fireEvent.change(screen.getByLabelText("茶名"), { target: { value: "新春茶" } });
+  expect(confirmation).not.toBeChecked();
+
+  fireEvent.click(confirmation);
+  fireEvent.change(screen.getByLabelText("產地（選填）"), { target: { value: "阿里山" } });
+  expect(confirmation).not.toBeChecked();
+
+  fireEvent.click(confirmation);
+  fireEvent.change(screen.getByLabelText("商品介紹草稿（可編輯）"), { target: { value: "店家確認介紹" } });
+  expect(confirmation).not.toBeChecked();
+
+  fireEvent.click(confirmation);
+  fireEvent.click(screen.getByLabelText("清香"));
+  expect(confirmation).not.toBeChecked();
+
+  fireEvent.click(confirmation);
+  fireEvent.change(screen.getByLabelText("選擇商品照片（最多三張）"), { target: { files: [new File(["photo"], "tea.jpg", { type: "image/jpeg" })] } });
+  expect(confirmation).not.toBeChecked();
+
+  fireEvent.click(confirmation);
+  fireEvent.click(screen.getByRole("button", { name: "移除 tea.jpg" }));
+  expect(confirmation).not.toBeChecked();
+});
+
 it("prevents duplicate publish mutations while publication is processing", async () => {
   let resolvePublish: ((result: Awaited<ReturnType<PublishingService["publishDraft"]>>) => void) | undefined;
   const publishDraft = vi.fn(() => new Promise<Awaited<ReturnType<PublishingService["publishDraft"]>>>((resolve) => { resolvePublish = resolve; }));
@@ -153,7 +245,23 @@ it("prevents duplicate publish mutations while publication is processing", async
   fireEvent.click(publish);
   await waitFor(() => expect(publishDraft).toHaveBeenCalledTimes(1));
   expect(screen.getByRole("button", { name: "上架處理中" })).toBeDisabled();
+  expect(screen.getByRole("status")).toHaveTextContent("正在上架商品");
   await act(async () => { resolvePublish?.({ ok: true, value: publishedProduct }); });
+});
+
+it("preserves the draft after publication fails", async () => {
+  renderPage(createPublishingService({ publishDraft: async () => ({ ok: false, error: { code: "publishing-unavailable", message: "暫時無法上架。", retryable: true } }) }));
+  fillMinimumFields();
+  fireEvent.change(screen.getByLabelText("商品介紹草稿（可編輯）"), { target: { value: "店家確認介紹" } });
+  fireEvent.click(screen.getByLabelText("我已確認內容，將上架這項商品"));
+
+  fireEvent.click(screen.getByRole("button", { name: "確認並上架" }));
+
+  await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent("暫時無法上架"));
+  expect(screen.getByLabelText("茶名")).toHaveValue("春茶");
+  expect(screen.getByLabelText("商品介紹草稿（可編輯）")).toHaveValue("店家確認介紹");
+  expect(screen.getByLabelText("我已確認內容，將上架這項商品")).toBeChecked();
+  expect(screen.getByRole("status")).toHaveTextContent("暫時無法上架");
 });
 
 it("shows a distinct published success state with one synthetic variant", async () => {
@@ -164,5 +272,7 @@ it("shows a distinct published success state with one synthetic variant", async 
 
   await waitFor(() => expect(screen.getByRole("heading", { name: "商品已上架" })).toBeInTheDocument());
   expect(screen.getByText("合成商品編號：mock-published-1")).toBeInTheDocument();
+  expect(screen.getByText("已上架商品：春茶")).toBeInTheDocument();
+  expect(screen.getByText("規格：150g／NT$1200")).toBeInTheDocument();
   expect(screen.getByText("已建立 1 個規格" )).toBeInTheDocument();
 });
