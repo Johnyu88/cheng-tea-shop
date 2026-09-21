@@ -27,11 +27,18 @@ export const createMockPublishingService = (): PublishingService => {
   let sequence = 0;
 
   return {
+    async generateSummary(_draft): Promise<ServiceResult<string>> {
+      return {
+        ok: false,
+        error: domainError("publishing-unavailable", "商品摘要服務正在準備中。", true),
+      };
+    },
+
     async saveDraft(draft): Promise<ServiceResult<ProductDraft>> {
       return validateDraft(draft);
     },
 
-    async publishDraft(draft): Promise<ServiceResult<Product>> {
+    async publishDraft(draft, _confirmation): Promise<ServiceResult<Product>> {
       const validated = validateDraft(draft);
       if (!validated.ok) return validated;
       sequence += 1;
