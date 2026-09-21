@@ -2,22 +2,34 @@ import { expect, test } from "vitest";
 import { createMockCheckoutService } from "@/lib/domain/mock/mock-checkout-service";
 import { createMockPublishingService } from "@/lib/domain/mock/mock-publishing-service";
 
-const emptyCart = { lines: [], subtotal: { currency: "TWD" as const, amount: 0 } };
+const cart = {
+  lines: [{
+    productId: "tea-1",
+    variantId: "tea-1-one-tael",
+    productName: "陳年白茶",
+    specification: "一兩",
+    unitPrice: { currency: "TWD" as const, amount: 800 },
+    quantity: 1,
+    inventoryStatus: "available" as const,
+    maxQuantity: 3,
+  }],
+  subtotal: { currency: "TWD" as const, amount: 800 },
+};
 
-test("requires a phone and rejects an incompatible pickup payment", async () => {
+test("requires a phone and rejects an incompatible home-delivery payment", async () => {
   const service = createMockCheckoutService();
   const missingPhone = await service.validate({
     name: "陳小姐",
     phone: "",
     deliveryMethod: "home-delivery",
     paymentMethod: "credit-card",
-  }, emptyCart);
+  }, cart);
   const incompatible = await service.validate({
     name: "陳小姐",
     phone: "0912000000",
     deliveryMethod: "home-delivery",
     paymentMethod: "pay-at-store",
-  }, emptyCart);
+  }, cart);
   expect(missingPhone).toMatchObject({ ok: false, error: { code: "invalid-draft" } });
   expect(incompatible).toMatchObject({ ok: false, error: { code: "invalid-draft" } });
 });
