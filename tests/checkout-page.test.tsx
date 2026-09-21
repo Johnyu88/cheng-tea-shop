@@ -51,21 +51,23 @@ function createCheckoutService(overrides: Partial<CheckoutService> = {}): Checko
 }
 
 function renderCheckout(options: { currentCart?: Cart; checkoutService?: CheckoutService } = {}) {
+  const services = {
+    cartService: createCartService(options.currentCart),
+    ...(options.checkoutService === undefined ? {} : { checkoutService: options.checkoutService }),
+  };
+
   return render(
-    <CommerceProvider services={{
-      cartService: createCartService(options.currentCart),
-      checkoutService: options.checkoutService ?? createCheckoutService(),
-    }}>
+    <CommerceProvider services={services}>
       <CheckoutPage />
     </CommerceProvider>,
   );
 }
 
-async function reachReview() {
+async function reachReview(email: string | null = validDraft.email) {
   await waitFor(() => expect(screen.getByRole("heading", { name: "聯絡資料" })).toBeInTheDocument());
   fireEvent.change(screen.getByLabelText("姓名"), { target: { value: validDraft.name } });
   fireEvent.change(screen.getByLabelText("手機號碼"), { target: { value: validDraft.phone } });
-  fireEvent.change(screen.getByLabelText("Email（選填）"), { target: { value: validDraft.email } });
+  if (email !== null) fireEvent.change(screen.getByLabelText("Email（選填）"), { target: { value: email } });
   fireEvent.click(screen.getByRole("button", { name: "下一步" }));
   await waitFor(() => expect(screen.getByRole("heading", { name: "配送方式" })).toBeInTheDocument());
   fireEvent.click(screen.getByLabelText("宅配"));
@@ -74,6 +76,29 @@ async function reachReview() {
   fireEvent.click(screen.getByRole("button", { name: "下一步" }));
   await waitFor(() => expect(screen.getByRole("heading", { name: "確認訂單" })).toBeInTheDocument());
 }
+
+it("submits through the real default checkout service when optional email is omitted", async () => {
+  renderCheckout();
+  await reachReview(null);
+
+  fireEvent.click(screen.getByRole("button", { name: "送出訂單" }));
+
+  await waitFor(() => expect(screen.getByText("訂單編號：MOCK-ORDER-001")).toBeInTheDocument());
+});
+
+it("moves focus to each newly displayed step heading", async () => {
+  renderCheckout();
+  await waitFor(() => expect(screen.getByRole("heading", { name: "聯絡資料" })).toBeInTheDocument());
+  fireEvent.change(screen.getByLabelText("姓名"), { target: { value: validDraft.name } });
+  fireEvent.change(screen.getByLabelText("手機號碼"), { target: { value: validDraft.phone } });
+
+  fireEvent.click(screen.getByRole("button", { name: "下一步" }));
+  await waitFor(() => expect(screen.getByRole("heading", { name: "配送方式" })).toHaveFocus());
+  fireEvent.change(screen.getByLabelText("宅配地址"), { target: { value: validDraft.address } });
+  fireEvent.click(screen.getByRole("button", { name: "下一步" }));
+
+  await waitFor(() => expect(screen.getByRole("heading", { name: "確認訂單" })).toHaveFocus());
+});
 
 it("guides an empty cart back to the cart", async () => {
   renderCheckout({ currentCart: emptyCart });
@@ -223,7 +248,7 @@ it("shows the deterministic order reference and primary phone help on success", 
 
   await waitFor(() => expect(screen.getByText("訂單編號：MOCK-ORDER-001")).toBeInTheDocument());
   expect(screen.getByRole("link", { name: "電話聯絡我們" })).toHaveAttribute("href", "tel:0800000000");
-  expect(screen.getByRole("link", { name: "LINE 聯絡我們" })).toBeInTheDocument();
+  expect(screen.getByRole("link", { name: "LINE 聯絡我們" })).toHaveAttribute("href", "https://line.me/R/ti/p/@longying-tea-shop");
 });
 
 it("uses polite live status and visible error summary semantics", async () => {
@@ -232,6 +257,7 @@ it("uses polite live status and visible error summary semantics", async () => {
   expect(screen.getByRole("status")).toHaveAttribute("aria-live", "polite");
   fireEvent.click(screen.getByRole("button", { name: "下一步" }));
   expect(screen.getByRole("alert")).toHaveTextContent("請填寫手機號碼");
+  expect(screen.getByRole("status")).toBeEmptyDOMElement();
 });
 
 it("expands a four-line cart summary without changing the service subtotal", async () => {
@@ -244,7 +270,11 @@ it("expands a four-line cart summary without changing the service subtotal", asy
 
   expect(screen.getByText("茶品 1")).toBeInTheDocument();
   expect(screen.queryByText("茶品 4")).toBeNull();
-  fireEvent.click(screen.getByRole("button", { name: "顯示全部 4 項茶品" }));
+  const disclosure = screen.getByRole("button", { name: "顯示全部 4 項茶品" });
+  expect(disclosure).toHaveAttribute("aria-expanded", "false");
+  expect(disclosure).toHaveAttribute("aria-controls", "checkout-summary-lines");
+  fireEvent.click(disclosure);
   expect(screen.getByText("茶品 4")).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "收合茶品" })).toHaveAttribute("aria-expanded", "true");
   expect(screen.getByText("小計：NT$3,200")).toBeInTheDocument();
 });
