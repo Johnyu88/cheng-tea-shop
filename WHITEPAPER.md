@@ -328,6 +328,14 @@ GitHub 是正式文件與程式來源。聊天中的新指令若尚未寫入 Git
 - Visual browser surface 因 computer-use request-header policy 無法載入而未完成；Docker smoke 仍待 clean runner 或可用 Docker 環境。
 - 未加入商品詳情、購物車、結帳、付款、ERP、登入、持久化、真實商品或顧客資料。
 
+## 28. Wave 5 商品詳情與購物車 — 2026-09-21
+
+- 目錄商品卡現在以穩定 slug 連到 `/tea/[slug]`；商品詳情透過 project-owned `CatalogService` 讀取商品，首屏顯示品牌預設圖、茶名、口感摘要、規格、整數 TWD 價格與供貨狀態。
+- 有貨商品提供單一 `ProductVariant` 的正整數數量控制與 `maxQuantity` 限制；售完、找不到商品、服務失敗與超過購買上限均保留既有選擇並以頁內可理解訊息處理。
+- `/cart` 透過 `CartService` 處理新增／合併、數量更新、移除與 subtotal；共享 `CommerceProvider` 在 client navigation 間保留同一個 Mock service instance。Wave 5 不使用瀏覽器儲存個資或付款資料。
+- 這一 Wave 只驗證合成商品的前台購買互動。結帳、付款 adapter、訂單 API、物流、會員／登入、ERP、持久化資料庫、多規格、精確庫存與真實商品資料仍是後續範圍。
+- 實作與驗證限制詳見 `.superpowers/sdd/2026-09-20-product-detail-and-cart/task-7-report.md`；未將尚未通過的 typecheck、production build 或 Chromium／WebKit e2e 寫成通過。
+
 ### Wave 1 implementation status — 2026-09-16
 
 - Branch `feature/wave-1-reproducible-baseline` and draft PR #12 contain a clean Next.js 16.3.5 App Router baseline with Node 24.19.0, pnpm 11.19.0, strict TypeScript, Tailwind 4, shadcn conventions, Vitest/RTL contracts, a minimal health route, standalone non-root Dockerfile, and Chromium/WebKit plus axe checks.

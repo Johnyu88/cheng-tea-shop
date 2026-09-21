@@ -212,6 +212,25 @@ The method for invoking the local 35B model is unknown. When the computer and Co
 
 Review the Wave 4 homepage/catalog preview in a browser and confirm its responsive/older-user presentation. Then plan the next catalog browsing interaction through `CatalogService`; keep product detail, checkout, payment, ERP, and real customer data out.
 
+## Wave 5 product detail and cart — 2026-09-21
+
+- Branch: `codex/wave-5-product-detail-cart`; implementation tip `9b1b856` (`feat: polish product and cart accessibility`), based on the Wave 4.1 merge `bdbf18b`.
+- Completed product detail at `/tea/[slug]`, catalog card links, cart at `/cart`, shared `CommerceProvider`, accessible quantity controls, synthetic sold-out/purchase-limit paths, and cart line update/remove/subtotal behavior.
+- Provider state is shared across client navigation through one Mock Catalog/Cart service instance. No localStorage/sessionStorage, customer PII, payment credential, real product data, checkout, payment, ERP, login, or persistence was added.
+- Verification report: `.superpowers/sdd/2026-09-20-product-detail-and-cart/task-7-report.md`. Direct `node node_modules/vitest/vitest.mjs run` passed 11 files / 40 tests. Direct ESLint exited 0 with one `@next/next/no-img-element` warning.
+- Limitations: `pnpm test:run` attempted dependency reconciliation and was stopped after certificate failures; `pnpm lint`/`pnpm exec tsc --noEmit`/`pnpm build` could not be used as launchers because of the same package-manager guard. Direct typecheck failed at four `TS2532` assertions in `tests/commerce-provider.test.tsx`; webpack build compiled but failed at those type errors, while default Turbopack also hit the external dependency junction. Product/cart e2e could not start because `.next/standalone/server.js` was absent after the failed build. Docker is unavailable. `git diff --check` exited 0; its only notice concerns the unrelated pre-existing Task 1 report line endings.
+- Pre-existing unrelated work remains untouched: `.superpowers/sdd/2026-09-20-product-detail-and-cart/task-1-report.md` and `next-env.d.ts` are modified in the worktree and are excluded from the Task 7 commit.
+- Recommended next milestone: repair or rerun the typecheck/build/browser gate on a clean dependency environment, then begin Wave 6 checkout, payment-state, and product-draft work.
+
+## Final Wave 5 verification — 2026-09-21
+
+- Controller verification completed after `e6aedae` and `86bd48b`; the latter contains the final selector/cart acceptance fix.
+- `node node_modules/next/dist/bin/next build --webpack` passed after rebuilding and synchronizing standalone static/public artifacts.
+- Chromium acceptance passed 4/4 with `node node_modules/@playwright/test/cli.js test e2e/product-cart.spec.ts --project=chromium --workers=1 --reporter=line`.
+- WebKit is blocked only by the missing `webkit-2359` executable. Docker remains unavailable. These are the only remaining environment limitations recorded for the final Wave 5 gate.
+- Final review evidence includes strict provider-test tuple narrowing, catalog-derived sold-out cart behavior, stale product-response protection, `CommerceProvider` durable naming, and the corrected cart acceptance selector.
+- Next milestone: Wave 6 checkout, payment-state, and product-draft work.
+
 ## Startup reminder
 
 Follow `RESUME_PROMPT.md`, `AGENTS.md`, and `WORKFLOW.md`. If newer explicit user instructions conflict with this handoff, the newer instruction wins and the discrepancy must be recorded.

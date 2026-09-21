@@ -173,3 +173,16 @@ Wave 4.1 local verification: Vitest 7 files / 22 tests, ESLint, TypeScript, Webp
 No real product data, customer data, payment credentials, ERP integration, authentication, persistence, or secrets were added.
 
 Next action: review the homepage and complete catalog in a browser, then plan Wave 5 product detail and cart through the existing domain interfaces.
+
+## H. Wave 5 product detail and cart status — 2026-09-21
+
+| Capability | Status | Evidence / next action |
+|---|---:|---|
+| Product detail route and purchase essentials | ✅ | `/tea/[slug]` loads through `CatalogService`, preserves not-found/service-error states, and exposes single-variant quantity controls with accessible focus |
+| Cart line operations | ✅ | `/cart` supports empty state, add/merge, quantity updates, removal, subtotal, service errors, and a disabled/placeholder checkout boundary |
+| Shared commerce provider state | ✅ | App Router client navigation shares one Mock Catalog/Cart service instance without localStorage/sessionStorage |
+| Synthetic sold-out and purchase-limit coverage | ✅ | Wave 5 tests cover sold-out rejection and max-quantity preservation using synthetic fixtures |
+| Wave 5 browser gate | 🟡 | Direct Vitest passed 11 files / 40 tests and lint exited 0 with one warning; typecheck/build/e2e remain limited by recorded environment errors |
+| Wave 5 non-goals | ✅ | No real products, customer data, payment credentials, checkout flow, ERP, login, persistence, or precise inventory were added |
+
+Wave 5 verification was recorded in `.superpowers/sdd/2026-09-20-product-detail-and-cart/task-7-report.md`. The next milestone is Wave 6 checkout, payment-state, and product-draft work after the typecheck/build/browser gate is repaired or run on a clean dependency environment.

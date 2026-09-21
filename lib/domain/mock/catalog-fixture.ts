@@ -27,7 +27,7 @@ export const mockCatalogFixture: Product[] = Array.from({ length: 48 }, (_, inde
         id: `${id}-variant`,
         specification: "一兩",
         price: { currency: "TWD", amount: 500 + number * 10 },
-        inventoryStatus: "available",
+        inventoryStatus: number === 48 ? "sold-out" : "available",
         maxQuantity: 5,
       },
     ],

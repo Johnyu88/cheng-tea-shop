@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState, type JSX } from "react";
+import Link from "next/link";
 import type { CatalogService, Product, TasteTag } from "@/lib/domain";
 
 type CatalogBrowserProps = { catalogService: CatalogService };
@@ -34,7 +35,9 @@ function ProductCard({ product }: { product: Product }): JSX.Element {
         <p className="product-meta">
           {variant?.specification}／NT${variant?.price.amount.toLocaleString("zh-TW")}
         </p>
-        <span className="product-link">查看茶品</span>
+        <Link className="product-link" href={`/tea/${product.slug}`}>
+          查看茶品
+        </Link>
       </div>
     </article>
   );
