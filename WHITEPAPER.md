@@ -346,6 +346,15 @@ GitHub 是正式文件與程式來源。聊天中的新指令若尚未寫入 Git
 - Wave 6 checkout 驗證：focused Vitest 18/18、TypeScript、scoped ESLint 與 diff check 通過。Chromium acceptance 因 standalone hydration／靜態資產環境問題未完成，未宣稱通過；WebKit 與 Docker 留待最後品質 gate。
 - 下一個切片是長輩友善商品草稿：單頁最低欄位、0～3 張暫時預覽圖、grounded Mock 文案、草稿儲存、預覽與人工確認後發布。
 
+## 30. Wave 6 商品草稿原型 — 2026-09-21
+
+- `/admin/products/new` 已完成單頁、手機優先的商品草稿原型，最低欄位為茶名、單一規格、整數 TWD 價格、茶類與供貨狀態；另提供可選事實欄位、口感標籤與 0～3 張本機預覽圖。
+- 頁面只透過 `CommerceProvider` 的 `PublishingService` 產生 grounded Mock 介紹、儲存草稿與確認後發布；所有失敗都保留目前草稿與預覽，發布確認會在任何可發布內容變更後失效。
+- 圖片只保留 object URL 與非敏感 metadata，超量／非圖片拒絕時不清除既有資料，移除與卸載時撤銷 object URL；不使用登入、瀏覽器儲存、上傳、ERP、憑證或正式持久化。
+- 操作狀態透過 live region 宣告，save／generate／publish 均有同步重複操作防護；成功狀態顯示 Mock 商品名稱與規格資訊。
+- 商品草稿驗證：focused Vitest 19/19、TypeScript、scoped ESLint、`git diff --check` 與獨立修正輪審查通過。Chromium acceptance 仍因既有 `.next/standalone` 鎖定／建置環境問題未執行，未宣稱通過；WebKit 與 Docker 留待最後 quality gate。
+- 下一步是完成 Wave 6 最終文件、完整測試與品質 gate，並保留真實管理員驗證、持久化、照片上傳、付款、ERP 與正式發布在後續範圍。
+
 ### Wave 1 implementation status — 2026-09-16
 
 - Branch `feature/wave-1-reproducible-baseline` and draft PR #12 contain a clean Next.js 16.3.5 App Router baseline with Node 24.19.0, pnpm 11.19.0, strict TypeScript, Tailwind 4, shadcn conventions, Vitest/RTL contracts, a minimal health route, standalone non-root Dockerfile, and Chromium/WebKit plus axe checks.
