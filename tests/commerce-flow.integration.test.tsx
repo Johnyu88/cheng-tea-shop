@@ -1,10 +1,11 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import type { JSX } from "react";
-import type { Cart, CartService, CatalogService, Product } from "@/lib/domain";
+import type { Cart, CartService, CatalogService, CheckoutService, Product } from "@/lib/domain";
 import RootLayout from "@/app/layout";
 import { CommerceProvider } from "@/features/commerce/components/commerce-provider";
 import { useCommerce } from "@/features/commerce/components/commerce-provider";
 import { CartPage } from "@/features/cart/components/cart-page";
+import { CheckoutPage } from "@/features/checkout/components/checkout-page";
 import { ProductDetailPage } from "@/features/product/components/product-detail-page";
 
 const product: Product = {
@@ -93,4 +94,30 @@ it("mounts the commerce provider at the root layout", () => {
   );
 
   expect(screen.getByText("true")).toBeInTheDocument();
+});
+
+it("keeps the provider cart available when the customer moves from cart to checkout", async () => {
+  const services = createDeterministicServices();
+  const checkoutService: CheckoutService = {
+    validate: async (draft) => ({ ok: true, value: { ...draft } }),
+    submit: async (_draft, currentCart) => ({ ok: true, value: { orderReference: "MOCK-ORDER-001", status: "confirmed", total: currentCart.subtotal } }),
+  };
+  const rendered = render(
+    <CommerceProvider services={{ ...services, checkoutService }}>
+      <ProductDetailPage slug="tea-jade" />
+    </CommerceProvider>,
+  );
+
+  await waitFor(() => expect(screen.getByRole("heading", { name: "玉露清香" })).toBeInTheDocument());
+  fireEvent.click(screen.getByRole("button", { name: "加入購物車" }));
+  await waitFor(() => expect(screen.getByRole("status")).toHaveTextContent("已加入購物車"));
+
+  rendered.rerender(
+    <CommerceProvider services={{ ...services, checkoutService }}>
+      <CheckoutPage />
+    </CommerceProvider>,
+  );
+
+  await waitFor(() => expect(screen.getByRole("heading", { name: "聯絡資料" })).toBeInTheDocument());
+  expect(screen.queryByRole("heading", { name: "購物車是空的" })).toBeNull();
 });
