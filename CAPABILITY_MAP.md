@@ -186,3 +186,18 @@ Next action: review the homepage and complete catalog in a browser, then plan Wa
 | Wave 5 non-goals | ✅ | No real products, customer data, payment credentials, checkout flow, ERP, login, persistence, or precise inventory were added |
 
 Wave 5 verification was recorded in `.superpowers/sdd/2026-09-20-product-detail-and-cart/task-7-report.md`. The next milestone is Wave 6 checkout, payment-state, and product-draft work after the typecheck/build/browser gate is repaired or run on a clean dependency environment.
+
+## I. Wave 6 checkout and product-draft status — 2026-09-21
+
+| Capability | Status | Evidence / next action |
+|---|---:|---|
+| Guest checkout prototype | ✅ | `/checkout` uses the project-owned `CheckoutService` for three-step contact, delivery, review, synthetic success, retryable failure, and duplicate-submit protection; full Vitest passed 15 files / 96 tests |
+| Elder-friendly product-draft prototype | ✅ | `/admin/products/new` supports minimum fields, zero-to-three transient preview metadata, grounded editable Mock copy, save, preview, explicit confirmation, and synthetic publish; no real admin account or persistent media is involved |
+| Session-only privacy boundary | ✅ | Requested scans found no storage, console, card-number, security-code, or secret-term matches in Wave 6 source/test scopes; contact and draft flow data remains transient |
+| Wave 6 type and lint gates | ✅ | TypeScript exited 0; full ESLint exited 0 with one existing `no-img-element` warning outside the Wave 6 diff |
+| Wave 6 build and Chromium acceptance | 🟡 | Sandboxed webpack build hit `EPERM` on `.next/trace`; approved retry hit `EBUSY` on locked `.next/standalone`; Chromium was deliberately not started without a fresh standalone build |
+| WebKit and Docker capability | 🟡 | No WebKit executable or Docker CLI is available; WebKit listing also hit `EPERM` creating `playwright-report` |
+| Final diff hygiene | ✅ | Secret scans had no matches, complete diff check passes after correcting the Wave 6 spec header whitespace, and `next-env.d.ts` stays unstaged |
+| Wave 6 non-goals | ✅ | No real authentication, payment, persistence, ERP integration, file upload, customer/order data, or provider credentials were added |
+
+Wave 6's implementation and unit/component/integration coverage are verified locally, but its final build/browser/container gate remains incomplete. See `.superpowers/sdd/2026-09-21-wave-6-checkout-product-draft/final-verification-report.md` for exact commands and errors.

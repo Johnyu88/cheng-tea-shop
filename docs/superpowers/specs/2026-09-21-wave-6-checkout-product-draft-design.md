@@ -1,6 +1,6 @@
 # Wave 6 — Checkout and Product Draft Prototype Design
 
-Date: 2026-09-21  
+Date: 2026-09-21
 Status: Proposed for implementation review
 
 ## 1. Goal

@@ -338,7 +338,7 @@ GitHub 是正式文件與程式來源。聊天中的新指令若尚未寫入 Git
 
 ## 29. Wave 6 checkout prototype slice — 2026-09-21
 
-- Wave 6 的 domain contracts、checkout／publishing Mock services、購物車到 `/checkout` 邊界與 guest checkout prototype 已完成；商品草稿發布 UI 尚未開始。
+- Wave 6 的 domain contracts、checkout／publishing Mock services、購物車到 `/checkout` 邊界、guest checkout prototype 與商品草稿發布 UI 都已完成；最終 build/browser/container gate 的結果另行如實記錄。
 - Checkout 透過 `CommerceProvider` 注入 project-owned `CheckoutService`，提供聯絡資料、宅配／到店取貨、付款方式、確認訂單、處理中、失敗重試與成功狀態；手機必填、Email 選填。
 - 付款仍是 deterministic Mock。原型不渲染信用卡欄位、不保存付款憑證、不使用瀏覽器儲存、不加入登入、持久化、訂單後端、ERP 或真實金流。
 - 有限庫存提示保留電話作為主要聯絡方式、LINE 作為次要聯絡方式；checkout 的個人資料只存在當前 React flow。
@@ -353,7 +353,14 @@ GitHub 是正式文件與程式來源。聊天中的新指令若尚未寫入 Git
 - 圖片只保留 object URL 與非敏感 metadata，超量／非圖片拒絕時不清除既有資料，移除與卸載時撤銷 object URL；不使用登入、瀏覽器儲存、上傳、ERP、憑證或正式持久化。
 - 操作狀態透過 live region 宣告，save／generate／publish 均有同步重複操作防護；成功狀態顯示 Mock 商品名稱與規格資訊。
 - 商品草稿驗證：focused Vitest 19/19、TypeScript、scoped ESLint、`git diff --check` 與獨立修正輪審查通過。Chromium acceptance 仍因既有 `.next/standalone` 鎖定／建置環境問題未執行，未宣稱通過；WebKit 與 Docker 留待最後 quality gate。
-- 下一步是完成 Wave 6 最終文件、完整測試與品質 gate，並保留真實管理員驗證、持久化、照片上傳、付款、ERP 與正式發布在後續範圍。
+- 完整 local Vitest 已通過 15 個檔案／96 個測試，TypeScript 通過，full ESLint 以 0 errors 結束（另有 Wave 6 diff 外的一項既有 `no-img-element` warning）。Webpack sandbox 嘗試因 `.next/trace` 的 `EPERM` 未能完成，核准重試則因 `.next/standalone` 鎖定而 `EBUSY`；未在非 fresh build 上啟動 Chromium。WebKit executable 與 Docker CLI 均不可用；spec header whitespace 已修正，完整 `git diff --check` 通過。
+- 下一步是在可寫入、無鎖定的 clean environment 重跑 build 和 Chromium，並在安裝 WebKit/Docker 的環境中補齊對應 gate；真實管理員驗證、持久化、照片上傳、付款、ERP 與正式發布仍維持後續範圍。
+
+## 31. Wave 6 quality gate — 2026-09-21
+
+- 完整 Vitest 15 個檔案／96 個測試、TypeScript、全域 ESLint 與完整 branch diff check 通過；獨立 QA/Security 複審無 Critical、Important 或 Minor 發現。
+- Production webpack build 受本機檔案鎖定環境阻擋，Chromium 因無 fresh standalone build 未啟動；WebKit 執行檔與 Docker CLI 不在目前環境。
+- 最終原型仍明確不包含真實身份驗證、付款、持久化、照片上傳、ERP、顧客或訂單資料；完整證據與限制見 `final-verification-report.md`。
 
 ### Wave 1 implementation status — 2026-09-16
 
