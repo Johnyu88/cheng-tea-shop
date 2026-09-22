@@ -478,6 +478,15 @@ GitHub 是正式文件與程式來源。聊天中的新指令若尚未寫入 Git
 - 驗證結果：focused integration contracts 11/11；完整 Vitest 16 files／109 tests；TypeScript 通過；ESLint 0 errors（既有 `<img>` warning）；Webpack production build 通過；Chromium/WebKit 各 14/14 通過（單 worker）。
 - 本階段仍不實作金流、LINE Pay、信用卡、物流 API、資料庫、ERP、登入、持久化、preview 或付費服務；fake 結果維持 `simulated`，不可視為付款授權或物流建立成功。
 
+## 41. Phase 8 Publishing / ERP consistency and coverage matrix — 2026-09-22
+
+- Publishing contract 以 `ProductDraftDto` 與既有 `PublishingService` 為 boundary；ERP contract 以 `ErpProductUpsertDto`、`ErpOrderSyncDto` 與既有 `ErpService` 為 boundary。兩者都透過 `ServiceResult` 回傳，不引入 CMS／ERP SDK。
+- 新增 `validateProductDraftDto`、`validateErpProductUpsertDto`、`validateErpOrderSyncDto`，錯誤分別為 `invalid-publishing-request` 與 `invalid-erp-request`。Publishing adapter error source 也納入 normalized mapping，對應 `publishing-unavailable`；既有 draft validation 的 `invalid-draft` 行為不變。
+- `CommerceProvider` 的 Publishing override 與 integration bundle 的 ERP override 均有 identity-preserving swapping tests；跨服務測試確認所有 local failure 都維持 `{ code, message, retryable }` error shape。
+- Phase 8 contract coverage：Catalog、Cart、Checkout、Payment、Logistics、Publishing、ERP 均已完成 DTO／interface、runtime validation、error model、local fake、override／swapping test 與 UI regression coverage。這只代表本機 contract hardening，不代表真實 provider readiness。
+- 驗證結果：focused integration contracts 15/15；完整 Vitest 16 files／112 tests；TypeScript 通過；ESLint 0 errors（既有 `<img>` warning）；Webpack production build 通過；Chromium/WebKit 各 14/14 通過（單 worker）。
+- 明確未完成：真實 ERP、CMS、資料庫、登入、持久化、付款授權、物流建立、preview、Docker 與真人走查。
+
 ### Wave 1 implementation status — 2026-09-16
 
 - Branch `feature/wave-1-reproducible-baseline` and draft PR #12 contain a clean Next.js 16.3.5 App Router baseline with Node 24.19.0, pnpm 11.19.0, strict TypeScript, Tailwind 4, shadcn conventions, Vitest/RTL contracts, a minimal health route, standalone non-root Dockerfile, and Chromium/WebKit plus axe checks.

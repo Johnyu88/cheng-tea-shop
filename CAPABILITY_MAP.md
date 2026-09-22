@@ -258,3 +258,17 @@ Wave 6's implementation and unit/component/integration coverage are verified loc
 | Real integrations | ⬜ | Payment, logistics, ERP, authentication, persistence, preview, and Docker remain outside this slice |
 
 Phase 8 first and second local slices are complete. The next safe work is contract maintenance or a separately approved boundary slice; do not infer real-provider readiness from these local fakes. Full browser regression is stable when each browser project runs with one worker; a parallel run exposed a shared standalone mock-state race and was not treated as a product failure.
+
+## N. Phase 8 contract coverage matrix — 2026-09-22
+
+| Service | DTO / interface | Runtime validation | Error model | In-memory fake | Override / swap test | UI regression |
+|---|---|---|---|---|---|---|
+| Catalog | ✅ | ✅ query | ✅ domain errors | ✅ | ✅ | ✅ |
+| Cart | ✅ | ✅ cart shape | ✅ domain errors | ✅ | ✅ via injected Catalog | ✅ |
+| Checkout | ✅ | ✅ request shape | ✅ domain errors | ✅ | ✅ independent swap | ✅ |
+| Payment | ✅ | ✅ request | ✅ adapter mapping | ✅ simulated | ✅ | ✅ unchanged |
+| Logistics | ✅ | ✅ quote／fulfillment | ✅ adapter mapping | ✅ simulated | ✅ | ✅ unchanged |
+| Publishing | ✅ | ✅ draft | ✅ adapter mapping + domain errors | ✅ simulated | ✅ | ✅ unchanged |
+| ERP | ✅ | ✅ product／order | ✅ adapter mapping | ✅ simulated | ✅ | ✅ unchanged |
+
+All seven service boundaries have local contract hardening. This matrix does not mean any real provider, persistence, authentication, payment authorization, fulfillment, CMS publication, or ERP synchronization is implemented.

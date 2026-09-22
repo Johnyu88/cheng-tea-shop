@@ -17,6 +17,8 @@ export type DomainErrorCode =
   | "invalid-checkout-request"
   | "invalid-payment-request"
   | "invalid-logistics-request"
+  | "invalid-publishing-request"
+  | "invalid-erp-request"
   | "checkout-unavailable"
   | "publishing-unavailable";
 
@@ -37,6 +39,7 @@ export const mapAdapterError = (error: AdapterError): DomainError => {
     payment: "payment-unavailable",
     logistics: "logistics-unavailable",
     erp: "erp-unavailable",
+    publishing: "publishing-unavailable",
   } as const;
 
   return domainError(codeBySource[error.source], error.message, error.retryable);

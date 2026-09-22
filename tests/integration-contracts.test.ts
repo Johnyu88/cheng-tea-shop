@@ -17,13 +17,17 @@ import {
   validateCartDto,
   validateCheckoutRequestDto,
   validateFulfillmentRequestDto,
+  validateErpOrderSyncDto,
+  validateErpProductUpsertDto,
   validatePaymentRequestDto,
+  validateProductDraftDto,
   validateShippingQuoteRequestDto,
   type CatalogService,
   type CheckoutService,
   type ErpService,
   type LogisticsService,
   type PaymentService,
+  type PublishingService,
   type Product,
 } from "@/lib/domain";
 
@@ -81,6 +85,14 @@ describe("Phase 8 integration contracts", () => {
         retryable: true,
       }).code,
     ).toBe("erp-unavailable");
+    expect(
+      mapAdapterError({
+        source: "publishing",
+        code: "cms-timeout",
+        message: "發布服務暫時無法使用",
+        retryable: true,
+      }).code,
+    ).toBe("publishing-unavailable");
   });
 
   it("provides local fake payment, logistics, and ERP adapters", async () => {
@@ -205,6 +217,68 @@ describe("Phase 8 integration contracts", () => {
 
     expect(adapters.paymentService).toBe(alternatePayment);
     expect(adapters.logisticsService).toBe(alternateLogistics);
+  });
+
+  it("validates Publishing and ERP DTOs with the same boundary error shape", () => {
+    expect(validateProductDraftDto({ name: "", specification: "一盒" })).toEqual({
+      ok: false,
+      error: { code: "invalid-publishing-request", message: "商品草稿資料無效。", retryable: false },
+    });
+    expect(validateErpProductUpsertDto({ productId: "", name: "茶", publication: "published" })).toEqual({
+      ok: false,
+      error: { code: "invalid-erp-request", message: "ERP 資料無效。", retryable: false },
+    });
+    expect(validateErpOrderSyncDto({ orderReference: "ORDER-MOCK-004", total: { currency: "TWD", amount: 100 }, lineCount: 0 })).toEqual({
+      ok: false,
+      error: { code: "invalid-erp-request", message: "ERP 資料無效。", retryable: false },
+    });
+  });
+
+  it("swaps Publishing and ERP adapters independently", () => {
+    const alternatePublishing: PublishingService = {
+      generateSummary: async () => ({ ok: true, value: "替換摘要" }),
+      saveDraft: async (draft) => ({ ok: true, value: draft }),
+      publishDraft: async (draft) => ({
+        ok: true,
+        value: {
+          id: "alternate-published",
+          slug: "alternate-published",
+          name: draft.name,
+          category: draft.category,
+          tasteTags: [...draft.tasteTags],
+          summary: draft.summary ?? "",
+          image: { src: null, alt: "替換商品", isPlaceholder: true },
+          variants: [],
+          publication: "published",
+        },
+      }),
+    };
+    const alternateErp: ErpService = {
+      upsertProduct: async () => ({ ok: true, value: { status: "simulated", reference: "ALT-ERP-PRODUCT" } }),
+      syncOrder: async () => ({ ok: true, value: { status: "simulated", reference: "ALT-ERP-ORDER" } }),
+    };
+    const commerce = createInMemoryCommerceServices({ publishingService: alternatePublishing });
+    const adapters = createInMemoryIntegrationAdapters({ erpService: alternateErp });
+
+    expect(commerce.publishingService).toBe(alternatePublishing);
+    expect(adapters.erpService).toBe(alternateErp);
+  });
+
+  it("keeps all local service failures on the same ServiceResult error contract", () => {
+    const errors = [
+      validatePaymentRequestDto({}),
+      validateShippingQuoteRequestDto({}),
+      validateProductDraftDto({}),
+      validateErpOrderSyncDto({}),
+    ];
+
+    for (const result of errors) {
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(Object.keys(result.error).sort()).toEqual(["code", "message", "retryable"]);
+        expect(result.error.retryable).toBe(false);
+      }
+    }
   });
 
   it("validates Catalog, Cart, and Checkout DTO boundaries with stable errors", () => {

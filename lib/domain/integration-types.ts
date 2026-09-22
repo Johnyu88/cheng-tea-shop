@@ -57,7 +57,7 @@ export type ErpSyncResultDto = {
   reference: string | null;
 };
 
-export type AdapterErrorSource = "payment" | "logistics" | "erp";
+export type AdapterErrorSource = "payment" | "logistics" | "erp" | "publishing";
 
 export type AdapterError = {
   source: AdapterErrorSource;

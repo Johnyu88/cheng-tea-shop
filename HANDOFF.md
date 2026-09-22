@@ -334,3 +334,12 @@ Follow `RESUME_PROMPT.md`, `AGENTS.md`, and `WORKFLOW.md`. If newer explicit use
 - Contract coverage: Payment/Logistics DTO rejection, valid store-pickup fulfillment, and independent adapter identity swapping. Focused tests passed 11/11; full Vitest passed 16 files / 109 tests.
 - Full verification passed: TypeScript, ESLint 0 errors with one existing image warning, Next Webpack build, Chromium 14/14, and WebKit 14/14 (single worker per browser).
 - Scope guard remains active: no real payment, LINE Pay, card data, logistics API, database, ERP, authentication, persistence, preview, Docker, or paid service was used. UI and checkout behavior remain unchanged.
+
+## Phase 8 Publishing / ERP contract slice — 2026-09-22
+
+- Added runtime validation for ProductDraft, ERP product upsert, and ERP order sync DTOs. Added stable `invalid-publishing-request` and `invalid-erp-request` errors.
+- Extended adapter error mapping with `publishing -> publishing-unavailable`; existing Mock Publishing `invalid-draft` behavior remains unchanged.
+- Added Publishing and ERP adapter override/swapping tests plus a cross-service check that all local validation failures expose the same `{ code, message, retryable }` shape.
+- Contract coverage matrix is recorded in `CAPABILITY_MAP.md` section N and `WHITEPAPER.md` section 41. Catalog, Cart, Checkout, Payment, Logistics, Publishing, and ERP now all have local DTO/interface/validation/error/fake/swap coverage.
+- Verification after this slice: focused contracts 15/15; full Vitest 16 files / 112 tests; TypeScript passed; ESLint 0 errors with one existing image warning; Webpack build passed; Chromium 14/14 and WebKit 14/14 passed with one worker per browser.
+- No real ERP, CMS, database, payment, logistics, authentication, persistence, preview, Docker, or paid service was used. `AGENTS.md` and `next-env.d.ts` remain untouched and uncommitted.

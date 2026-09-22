@@ -10,6 +10,11 @@ export {
   validatePaymentRequestDto,
   validateShippingQuoteRequestDto,
 } from "./integration-validation";
+export {
+  validateErpOrderSyncDto,
+  validateErpProductUpsertDto,
+  validateProductDraftDto,
+} from "./publishing-erp-validation";
 export type { ServiceResult } from "./result";
 export type { CatalogService } from "./catalog-service";
 export type { CartService } from "./cart-service";
