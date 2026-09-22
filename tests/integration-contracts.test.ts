@@ -16,6 +16,9 @@ import {
   validateCatalogQuery,
   validateCartDto,
   validateCheckoutRequestDto,
+  validateFulfillmentRequestDto,
+  validatePaymentRequestDto,
+  validateShippingQuoteRequestDto,
   type CatalogService,
   type CheckoutService,
   type ErpService,
@@ -152,6 +155,56 @@ describe("Phase 8 integration contracts", () => {
     expect(adapters.paymentService).toBeDefined();
     expect(adapters.logisticsService).toBeDefined();
     expect(adapters.erpService).toBeDefined();
+  });
+
+  it("validates Payment and Logistics DTOs before an adapter call", () => {
+    expect(
+      validatePaymentRequestDto({
+        orderReference: "ORDER-MOCK-003",
+        method: "pay-at-store",
+        amount: { currency: "USD", amount: 100 },
+      }),
+    ).toEqual({
+      ok: false,
+      error: { code: "invalid-payment-request", message: "付款資料無效。", retryable: false },
+    });
+    expect(
+      validateShippingQuoteRequestDto({
+        orderReference: "ORDER-MOCK-003",
+        deliveryMethod: "home-delivery",
+        destination: null,
+      }),
+    ).toEqual({
+      ok: false,
+      error: { code: "invalid-logistics-request", message: "物流資料無效。", retryable: false },
+    });
+    expect(
+      validateFulfillmentRequestDto({
+        orderReference: "ORDER-MOCK-003",
+        deliveryMethod: "store-pickup",
+        destination: null,
+      }),
+    ).toMatchObject({ ok: true });
+  });
+
+  it("swaps Payment and Logistics adapters at the integration boundary", () => {
+    const alternatePayment: PaymentService = {
+      authorize: async (request) => ({ ok: true, value: { status: "simulated", reference: "ALT-PAYMENT", amount: request.amount } }),
+    };
+    const alternateLogistics: LogisticsService = {
+      quote: async (request) => ({
+        ok: true,
+        value: { serviceable: false, amount: { currency: "TWD", amount: 0 }, deliveryMethod: request.deliveryMethod },
+      }),
+      createFulfillment: async () => ({ ok: true, value: { status: "unavailable", reference: null } }),
+    };
+    const adapters = createInMemoryIntegrationAdapters({
+      paymentService: alternatePayment,
+      logisticsService: alternateLogistics,
+    });
+
+    expect(adapters.paymentService).toBe(alternatePayment);
+    expect(adapters.logisticsService).toBe(alternateLogistics);
   });
 
   it("validates Catalog, Cart, and Checkout DTO boundaries with stable errors", () => {

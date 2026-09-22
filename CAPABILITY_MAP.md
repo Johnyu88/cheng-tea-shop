@@ -244,10 +244,12 @@ Wave 6's implementation and unit/component/integration coverage are verified loc
 |---|---:|---|
 | Catalog/Cart/Checkout/Publishing DTO aliases | ✅ | Explicit DTO exports preserve the existing domain shapes for adapter boundaries without changing UI payloads |
 | Payment/Logistics/ERP DTOs | ✅ | `lib/domain/integration-types.ts` defines narrow request/result DTOs; payment DTOs contain no raw card number, security code, or credential field |
+| Payment/Logistics DTO validation | ✅ | Runtime validators reject malformed payment and delivery/fulfillment requests before adapter calls with stable non-retryable errors |
 | Replaceable service interfaces | ✅ | `PaymentService`, `LogisticsService`, and `ErpService` are independent interfaces returning `ServiceResult` |
 | Normalized adapter error mapping | ✅ | `mapAdapterError` maps payment/logistics/ERP adapter failures to stable domain error codes and preserves message/retryability |
 | Local in-memory fake adapters | ✅ | Synthetic Payment, Logistics, and ERP adapters return `simulated` results only; no network, credential, persistence, or external provider |
 | Grouped integration adapter boundary | ✅ | `createInMemoryIntegrationAdapters` exposes Payment/Logistics/ERP as one replaceable local bundle |
+| Payment/Logistics adapter swapping | ✅ | Bundle accepts independent Payment and Logistics implementations through typed overrides; contract tests verify identity preservation |
 | Frontend service injection | ✅ | `CommerceProvider` now obtains its default Catalog/Cart/Checkout/Publishing bundle from `createInMemoryCommerceServices`; existing injection remains supported |
 | Contract/regression verification | ✅ | 16 Vitest files / 103 tests, TypeScript, lint, Webpack build, Chromium 14/14, WebKit 14/14 |
 | Catalog/Cart/Checkout boundary validation | ✅ | Runtime validators reject malformed query, cart, and checkout DTOs with stable non-retryable domain errors |

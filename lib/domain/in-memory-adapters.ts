@@ -35,6 +35,8 @@ export type InMemoryIntegrationAdapters = {
   erpService: ErpService;
 };
 
+export type InMemoryIntegrationAdapterOverrides = Partial<InMemoryIntegrationAdapters>;
+
 export const createInMemoryCommerceServices = (
   overrides: Partial<InMemoryCommerceServices> = {},
 ): InMemoryCommerceServices => {
@@ -82,8 +84,10 @@ export const createInMemoryErpService = (): ErpService => ({
   },
 });
 
-export const createInMemoryIntegrationAdapters = (): InMemoryIntegrationAdapters => ({
-  paymentService: createInMemoryPaymentService(),
-  logisticsService: createInMemoryLogisticsService(),
-  erpService: createInMemoryErpService(),
+export const createInMemoryIntegrationAdapters = (
+  overrides: InMemoryIntegrationAdapterOverrides = {},
+): InMemoryIntegrationAdapters => ({
+  paymentService: overrides.paymentService ?? createInMemoryPaymentService(),
+  logisticsService: overrides.logisticsService ?? createInMemoryLogisticsService(),
+  erpService: overrides.erpService ?? createInMemoryErpService(),
 });

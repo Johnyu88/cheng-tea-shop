@@ -326,3 +326,11 @@ Follow `RESUME_PROMPT.md`, `AGENTS.md`, and `WORKFLOW.md`. If newer explicit use
 - A combined parallel Chromium/WebKit run had one product-cart URL race while 27/28 passed. The affected product-cart test and the full suite passed when rerun serially; no production or test code was changed for this environmental concurrency observation.
 - Scope remains local-only: no database, real catalog, payment, logistics, ERP, authentication, persistence, preview, Docker, or paid service.
 - `AGENTS.md` and `next-env.d.ts` remain untouched and uncommitted. Before the next commit, preserve these files exactly as local environment state.
+
+## Phase 8 Payment / Logistics contract slice — 2026-09-22
+
+- Added runtime validators for Payment, shipping quote, and fulfillment request DTOs. Invalid shapes return `invalid-payment-request` or `invalid-logistics-request` before a fake adapter is called.
+- Extended `createInMemoryIntegrationAdapters(overrides)` so Payment and Logistics can be swapped independently while preserving the typed service interfaces. ERP remains in the same local bundle but was not changed or connected.
+- Contract coverage: Payment/Logistics DTO rejection, valid store-pickup fulfillment, and independent adapter identity swapping. Focused tests passed 11/11; full Vitest passed 16 files / 109 tests.
+- Full verification passed: TypeScript, ESLint 0 errors with one existing image warning, Next Webpack build, Chromium 14/14, and WebKit 14/14 (single worker per browser).
+- Scope guard remains active: no real payment, LINE Pay, card data, logistics API, database, ERP, authentication, persistence, preview, Docker, or paid service was used. UI and checkout behavior remain unchanged.

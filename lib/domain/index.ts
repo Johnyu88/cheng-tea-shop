@@ -5,6 +5,11 @@ export {
   validateCartDto,
   validateCheckoutRequestDto,
 } from "./boundary-validation";
+export {
+  validateFulfillmentRequestDto,
+  validatePaymentRequestDto,
+  validateShippingQuoteRequestDto,
+} from "./integration-validation";
 export type { ServiceResult } from "./result";
 export type { CatalogService } from "./catalog-service";
 export type { CartService } from "./cart-service";
@@ -63,4 +68,9 @@ export {
   createInMemoryIntegrationAdapters,
   createInMemoryLogisticsService,
   createInMemoryPaymentService,
+} from "./in-memory-adapters";
+export type {
+  InMemoryCommerceServices,
+  InMemoryIntegrationAdapterOverrides,
+  InMemoryIntegrationAdapters,
 } from "./in-memory-adapters";

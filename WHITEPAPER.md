@@ -470,6 +470,14 @@ GitHub 是正式文件與程式來源。聊天中的新指令若尚未寫入 Git
 - TDD／regression 結果：focused integration contracts 9/9；完整 Vitest 16 files／107 tests；TypeScript 通過；ESLint 0 errors（既有 `product-detail-page.tsx` 一項 `<img>` warning）；Webpack production build 通過；Chromium/WebKit 各 14/14 通過（單 worker）。
 - 曾嘗試兩個瀏覽器平行跑 28 tests，出現 1 個共享 standalone mock 狀態的 URL race；單 worker 重跑相關與完整 suite 均通過，未將它誤修成產品行為。未接真實資料庫、付款、物流、ERP 或外部服務。
 
+## 40. Phase 8 Payment / Logistics contract slice — 2026-09-22
+
+- 延續既有 Payment／Logistics DTO、error model 與 service interfaces，新增 `validatePaymentRequestDto`、`validateShippingQuoteRequestDto`、`validateFulfillmentRequestDto`。付款 validation 只接受訂單參照、付款方式與 TWD 金額，沒有 raw card、CVV、token 或 provider credential。
+- 新增 `invalid-payment-request` 與 `invalid-logistics-request`，錯誤在進入 adapter 前被正規化為不可重試的本機 domain error。配送 DTO 要求 home delivery 有 destination；store pickup 可使用 null destination。
+- `createInMemoryIntegrationAdapters` 現在接受 typed overrides，可獨立替換 Payment／Logistics／ERP。測試驗證替換後的 adapter identity 保留，並沒有把 fake 接入前台 checkout。
+- 驗證結果：focused integration contracts 11/11；完整 Vitest 16 files／109 tests；TypeScript 通過；ESLint 0 errors（既有 `<img>` warning）；Webpack production build 通過；Chromium/WebKit 各 14/14 通過（單 worker）。
+- 本階段仍不實作金流、LINE Pay、信用卡、物流 API、資料庫、ERP、登入、持久化、preview 或付費服務；fake 結果維持 `simulated`，不可視為付款授權或物流建立成功。
+
 ### Wave 1 implementation status — 2026-09-16
 
 - Branch `feature/wave-1-reproducible-baseline` and draft PR #12 contain a clean Next.js 16.3.5 App Router baseline with Node 24.19.0, pnpm 11.19.0, strict TypeScript, Tailwind 4, shadcn conventions, Vitest/RTL contracts, a minimal health route, standalone non-root Dockerfile, and Chromium/WebKit plus axe checks.

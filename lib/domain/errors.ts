@@ -15,6 +15,8 @@ export type DomainErrorCode =
   | "invalid-catalog-query"
   | "invalid-cart"
   | "invalid-checkout-request"
+  | "invalid-payment-request"
+  | "invalid-logistics-request"
   | "checkout-unavailable"
   | "publishing-unavailable";
 
