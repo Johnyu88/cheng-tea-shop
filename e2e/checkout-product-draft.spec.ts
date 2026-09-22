@@ -35,6 +35,7 @@ test("cart checkout link leads through a happy guest checkout", async ({ page })
   await completeCheckout(page);
 
   await expect(page.getByRole("heading", { name: "確認訂單" })).toBeVisible();
+  await expect(page.getByText("此頁為合成展示／原型，不會送出真實付款，也不會保存付款資料。")).toBeVisible();
   await expect(page.getByLabel("訂單摘要")).toContainText("合成茶品 001");
   await page.getByRole("button", { name: "送出訂單" }).click();
   await expect(page.getByText("訂單編號：MOCK-ORDER-001")).toBeVisible();
