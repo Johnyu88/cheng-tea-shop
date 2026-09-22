@@ -225,3 +225,15 @@ Wave 6's implementation and unit/component/integration coverage are verified loc
 | Checkout payment boundary | 🟡 | Payment choices are synthetic UI state only; real payment integration and credentials remain out of scope |
 | Checkout prototype boundary copy | ✅ | Initial and synthetic-success states explicitly say this is a synthetic prototype, sends no real payment, and stores no payment data; unit/e2e coverage added |
 | Next offline candidate | ⬜ | No new product behavior selected yet; keep human validation, preview, Docker, persistence, login, payment, and ERP out of scope |
+
+## L. Next-phase construction map — 2026-09-22
+
+| Area | Status | Construction boundary |
+|---|---:|---|
+| Verified storefront, catalog, detail, cart, checkout, prototype boundary, and draft publishing | ✅ | Wave 7-A browser/axe gate and 98 unit tests pass |
+| Mock/stub/draft services and synthetic data | 🟡 | Catalog, cart, checkout, publishing, products, receipts, payment choices, and publication remain local synthetic boundaries |
+| Pure-local continuation | 🟡 | Regression maintenance and local DTO/error/fake-adapter contract tests only; no speculative product scope |
+| Human validation required | 🟡 | Elder-user comprehension, button/navigation intuitiveness, product fact and placeholder understanding |
+| Preview/Docker/external work | 🟡 | Docker, preview, real content, persistence, auth, payment, logistics, ERP, backup, monitoring |
+| Future API boundary map | ⬜ | Catalog, Cart, Checkout, tokenized Payment, Logistics, Publishing, and isolated ERP adapters are documented in WHITEPAPER |
+| Recommended next Phase | ⬜ | Phase 8 Integration-readiness contract hardening; local in-memory fake adapters and DTO/error contract tests |

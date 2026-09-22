@@ -398,6 +398,60 @@ GitHub 是正式文件與程式來源。聊天中的新指令若尚未寫入 Git
 - 驗證結果：完整 Vitest 15 files／98 tests、TypeScript、Webpack build、lint 0 errors（保留既有一項 `<img>` warning）、Chromium checkout e2e 6/6、WebKit checkout e2e 6/6；完整 Wave 7 storefront gate 仍為 Chromium/WebKit 各 14/14。
 - 真人必驗證的易懂性、按鈕直覺性與商品資訊理解仍不由自動化推論；下一個低風險前台項目尚未選定，避免在沒有實際缺陷或明確設計需求時擴大範圍。
 
+## 37. 下一階段施工圖 — 2026-09-22
+
+### 已完成且驗證通過
+
+- 品牌首頁、陳老師故事媒體、完整合成目錄、口感篩選、cursor 載入、商品詳情與購物車。
+- Guest checkout prototype：聯絡、配送、確認三步，欄位驗證、錯誤保留、重試、重複送出保護與合成成功畫面。
+- Checkout prototype boundary copy：初始、確認與合成成功狀態都明示不會送出真實付款、不會保存付款資料。
+- 長輩友善商品草稿 prototype：最低欄位、暫時照片預覽、grounded Mock 文案、草稿、預覽、人工確認與合成發布。
+- Wave 7-A 驗證：Vitest 98/98、TypeScript、Webpack build、lint 0 errors、Chromium/WebKit storefront gate 各 14/14、主要路由 axe coverage 通過。
+
+### 仍屬 mock／stub／draft
+
+- 所有 Catalog、Cart、Checkout、Publishing 都是 project-owned deterministic Mock adapters。
+- 商品、價格、庫存、照片、訂單編號與發布結果都是合成或暫存資料；購物車與聯絡資料不持久化。
+- 付款選項只是 checkout UI state，沒有 payment intent、token、卡號欄位或 provider call。
+- 商品上架頁沒有管理員登入、權限、媒體上傳、版本、稽核或正式發布。
+
+### 可純本機繼續
+
+- 維護 unit／axe／Chromium／WebKit／TypeScript／lint／build regression gates。
+- 在既有 service interfaces 上增加 local fake adapter 與 DTO/error contract tests，不加入網路或憑證。
+- 只有遇到可重現問題或已核准的設計需求時，才改善 loading、retry、錯誤文案與 prototype boundary copy。
+- 保持 facilitator dry run 可重跑，但不把它當作真人研究證據。
+
+### 必須等真人走查
+
+- 年長使用者與首次購物者是否真正理解文字、價格、供貨狀態、placeholder 與合成提示。
+- 按鈕與導覽是否直覺，尤其 checkout 的「返回配送方式」／「上一步」差異。
+- 任務成功率、停頓、誤觸、求助、錯誤修正與口語理解。
+
+### 必須等 preview／Docker／外部服務
+
+- Docker smoke、容器 release gate、preview、網域、Secrets、預算、log 與 rollback。
+- 真實商品／素材／產地證據、持久化、登入權限、真實付款、物流、ERP、備份與監控。
+
+### 未來 API boundary
+
+- `CatalogService`：未來接 versioned catalog DTO、媒體、庫存與 normalized errors；UI 不直接呼叫 ERP。
+- `CartService`：未來加入 server cart identity、版本／併發檢查、idempotency、權威價格與庫存。
+- `CheckoutService`：未來建立 checkout/order session，server-side 重算金額並只回傳安全 receipt。
+- Payment：新增 tokenized provider adapter，只傳 provider token／狀態，絕不在本 app 接收或保存 raw card data。
+- Logistics：獨立 quote／fulfillment adapter，處理配送可服務性、地址同意與 tracking。
+- `PublishingService`：未來接 authenticated draft/version/media/audit boundary，發布內容必須有證據與狀態。
+- ERP：獨立 domain-to-ERP adapter，處理重試、對帳與 dead-letter；前台不直接依賴 ERP SDK。
+
+### 建議下一個 Phase 與最小可驗證切片
+
+**Phase 8：Integration-readiness contract hardening。** 最小切片是使用 in-memory fake adapters，為四個既有 service interface 補 DTO mapping、normalized error、版本與可替換 adapter 的 contract tests。這個 Phase 不實作真實付款、登入、持久化、物流、ERP 或 preview。
+
+### 未提交檔案來源記錄
+
+- `AGENTS.md`：目前無內容 diff，Git 狀態的 M 為工作樹／換行／索引狀態；內容 hash 與 HEAD 一致，未由本次施工圖工作修改或提交。Next dev 曾自動插入規則，但已不保留該內容。
+- `next-env.d.ts`：包含 Next.js 產生的 `.next/types` references 與 generated comment；在前一階段本機 Next build/dev 後已存在，並非本次文件整理產生。維持未提交，不覆蓋、不提交。
+
 ### Wave 1 implementation status — 2026-09-16
 
 - Branch `feature/wave-1-reproducible-baseline` and draft PR #12 contain a clean Next.js 16.3.5 App Router baseline with Node 24.19.0, pnpm 11.19.0, strict TypeScript, Tailwind 4, shadcn conventions, Vitest/RTL contracts, a minimal health route, standalone non-root Dockerfile, and Chromium/WebKit plus axe checks.
