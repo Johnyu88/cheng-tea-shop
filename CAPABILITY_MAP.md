@@ -215,3 +215,19 @@ Wave 6's implementation and unit/component/integration coverage are verified loc
 | Final ERP selection / integration | ⬜ | Waiting for license, security, backup review and explicit implementation authorization |
 
 Phase 10 is planning-only. No real customer or product data has been sent to an ERP, and no candidate has been adopted.
+
+## T. Phase 10 candidate shortlist and PoC plan — 2026-09-23
+
+| Candidate | Role | Status | Scope |
+|---|---|---:|---|
+| ERPNext | ERP reuse candidate | ✅ shortlisted | Catalog／Inventory／Order fixture mapping; later license and sandbox gates |
+| Vendure | TypeScript commerce integration candidate | ✅ shortlisted | Catalog／Inventory／Order GraphQL fixture mapping; not a full ERP |
+| Dolibarr | SMB ERP alternative | ✅ comparison candidate | REST／Docker feasibility comparison; not selected for first PoC |
+| Odoo | ERP comparison candidate | 🟡 gated | API plan／edition and license constraints require review |
+| Medusa | Commerce comparison baseline | 🟡 gated | Core MIT but community Docker and enterprise-material license caveats |
+
+### PoC acceptance boundary
+
+- Synthetic Catalog／Inventory／Order fixtures only; no real product, customer, payment, logistics, database or formal deployment.
+- Both shortlisted shapes must map into project-owned DTOs, expose normalized errors, preserve idempotency semantics, support adapter swapping, and leave UI components unchanged.
+- Contract tests, TypeScript, lint, build and existing regression must pass before any future sandbox review.

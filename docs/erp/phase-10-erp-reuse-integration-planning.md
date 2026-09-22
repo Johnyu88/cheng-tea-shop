@@ -61,3 +61,40 @@
 10-B 只用三筆 synthetic product、兩種庫存狀態與一筆 synthetic receipt，驗證三種 payload 能轉成同一 Catalog／Inventory／Order DTO，並回放缺 SKU、價格衝突、庫存過期、重複訂單、timeout 的 normalized error／retry／idempotency。驗收為 contract tests、unmapped list、error matrix、adapter swapping 與既有 UI regression 全通過；不啟動 ERP、資料庫、Docker、secret、付款、物流或正式部署。
 
 目前不選定最終 ERP；等待明確授權後才開始 10-B，不新增 service type，不送入真實商品或顧客資料。
+
+## 5. Phase 10 shortlist comparison — 2026-09-23
+
+最近更新以 GitHub organization／repository activity 或官方 release／issue 頁面為快照；「修改難度」與「boundary 相容性」是本專案評估，不是上游承諾。
+
+| 候選 | 技術棧 | 授權 | 最近更新（快照） | 商品 | 庫存 | 訂單 | 顧客 | API | Docker | 修改難度 | 與 cheng-tea-shop boundary 相容性 |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| [ERPNext](https://github.com/frappe/erpnext) | Python／Frappe／MariaDB | GPL-3.0；商用部署需法律審查 | 2026-09-21 activity；v16.35.0 2026-09-15 | 強 | 強 | 強 | 強 | REST／DocType；[Frappe REST](https://docs.frappe.io/framework/user/en/api/rest) | 有 Frappe Docker 路線 | 中高：模組完整但資料模型重 | 高：Catalog／Inventory／Order 對應最佳；需 ERP adapter |
+| [Odoo Community](https://github.com/odoo/odoo) | Python／Odoo ORM／PostgreSQL | GPL-3.0 repository；API 方案與 edition 需審查 | 2026-09-21 activity；19.0 issue／PR 持續更新 | 強 | 強 | 強 | 強 | XML-RPC／JSON-2；外部 API 目前限 Custom 方案 | 有官方 [odoo/docker](https://github.com/odoo/docker) | 中高：模組多、版本與 edition 差異大 | 高：domain coverage 強；API 存取與授權成本是主要風險 |
+| [Dolibarr](https://github.com/Dolibarr/dolibarr) | PHP／JavaScript／MariaDB／MySQL | GPL-3+；商用分發需法律審查 | 2026-09-21 activity；official docker 2026-09-12 | 強 | 強 | 強 | 強 | 官方 REST／JSON [API](https://github.com/Dolibarr/dolibarr/blob/develop/htdocs/api/README.md) | 官方 [dolibarr-docker](https://github.com/Dolibarr/dolibarr-docker) | 中：SMB 模組較直接，但 PHP adapter 需另維護 | 中高：小型茶行能力足；內容／圖片要自行 mapping |
+| [Medusa](https://github.com/medusajs/medusa) | Node.js／TypeScript／PostgreSQL／Redis | 核心 MIT；enterprise materials 另有商業授權 | 2026-09-22 activity | 強 | 中強 | 強 | 強 | Store／Admin REST、OpenAPI | 社群 `docker-medusa`；官方不承諾 Docker 支援 | 低中：與前台 TS boundary 接近 | 高：Catalog／Cart／Order mapping 最容易；ERP／會計不是強項 |
+| [Vendure](https://github.com/vendurehq/vendure) | TypeScript／NestJS／GraphQL／SQL | GPLv3 + plugin exception／商業方案；需法律審查 | 2026-09-21 activity | 強 | 強 | 強 | 強 | Shop／Admin GraphQL、plugin API | repo 含 compose／self-host Docker 路線 | 低中：TS／plugin 便於 adapter，但 GPL 核心需審查 | 高：Catalog／Inventory／Order 與現有 service boundary 最貼近；非完整 ERP |
+
+### Shortlist 決策
+
+- **ERP reuse 首選：ERPNext**。能力最接近真正 ERP，可承接商品、庫存、訂單、顧客；PoC 先限定 read-only Catalog／Inventory，再做 order dry-run。GPL 與部署維運是進入下一 gate 的必要審查。
+- **前台 integration 首選：Vendure**。TypeScript／NestJS／GraphQL／plugin 與現有前台 adapter 思路最接近，Catalog／Inventory／Order PoC 修改面較小；它是 commerce backend，不取代財務、稽核或完整 ERP。
+- **保守替代：Dolibarr**。若小型茶行優先需要成熟 SMB ERP 與簡單 REST／Docker，列為第二 ERP 候選；PHP／GPL 與內容 mapping 仍需確認。
+- Odoo 暫列比較候選，不列第一 PoC，因外部 API 方案限制與 edition／授權邊界會直接影響串接成本。Medusa 保留作 Node/TS commerce comparison，不當 ERP。
+
+## 6. 兩個候選的最小 PoC（只規劃）
+
+### PoC A — ERPNext-shaped Catalog / Inventory / Order
+
+1. 以三筆 synthetic product 對應 Item／SKU、價格、active 狀態與圖片 metadata。
+2. 以兩個 synthetic warehouse state 對應 available quantity、reserved quantity、`asOf` 與 stale 判定。
+3. 以一筆 synthetic checkout receipt 做 Sales Order dry-run；只產生 mapping report，不建立真實訂單。
+4. 驗證 REST response 可轉成 project-owned DTO；缺 SKU、庫存過期、重複 order reference、timeout 均轉成統一 error envelope。
+
+### PoC B — Vendure-shaped Catalog / Inventory / Order
+
+1. 以 GraphQL fixture 對應 Product／ProductVariant、stock level、Order／OrderLine。
+2. 驗證 plugin／GraphQL payload 不會洩漏到 UI；前台仍只呼叫目前 service interface。
+3. 驗證 price／stock conflict、order idempotency、provider unavailable 與 adapter swapping。
+4. 比較 PoC A 的 unmapped fields、測試成本、部署依賴、授權限制與維護責任。
+
+兩個 PoC 都不接 Payment、Logistics、Customer persistence、資料庫正式資料、真實商品、正式部署或外部 secrets。通過 contract tests、TypeScript、lint、build、既有 regression 後，才有資格進入 sandbox read-only review；不代表可直接導入。

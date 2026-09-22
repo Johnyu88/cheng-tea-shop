@@ -380,3 +380,7 @@ GitHub 是正式文件與程式來源。聊天中的新指令若尚未寫入 Git
 - 新增 `docs/erp/phase-10-erp-reuse-integration-planning.md`，整理 Catalog、Cart、Checkout、Payment、Logistics、Publishing、ERP boundary 的 ERP 必要能力、模組、候選、API contract、資料 mapping、同步與錯誤處理。
 - 候選僅做比較：ERPNext 為首個 fixture mapping 候選，Odoo／Dolibarr 為 ERP 備選，Medusa／Saleor／Vendure 為 headless commerce 基準；沒有最終導入或授權結論。
 - 下一個最小候選是 10-B：只用 synthetic fixture 做 ERP-shaped payload mapping contract PoC；本次不啟動外部服務、不新增 service type、不接資料庫、付款、物流或正式部署。
+
+- Phase 10 選型補充：ERPNext 為 ERP reuse 首選，Vendure 為 TypeScript／headless commerce integration 首選，Dolibarr 為小型 SMB ERP 保守替代；Odoo 因外部 API 方案與 edition／授權限制暫列比較候選，Medusa 為 commerce 基準。
+- 比較表已補記技術棧、授權、最近更新、商品／庫存／訂單／顧客、API、Docker、修改難度與 boundary 相容性。上游 activity 以 2026-09-23 官方 GitHub 快照為準；商用授權仍需正式法律審查。
+- 只規劃兩個最小 PoC：ERPNext-shaped 與 Vendure-shaped 的 Catalog／Inventory／Order mapping。兩者只使用 synthetic fixture，不接 Payment、Logistics、正式資料庫、正式部署或外部 secrets。

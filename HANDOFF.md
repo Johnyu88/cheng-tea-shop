@@ -256,3 +256,11 @@ Follow `RESUME_PROMPT.md`, `AGENTS.md`, and `WORKFLOW.md`. If newer explicit use
 - Future server-side adapters own mapping, idempotency, retries, reconciliation, and sensitive-field exclusion; website retains brand content, UX, SEO, human validation, and publishing approval.
 - Proposed next step only: Phase 10-B offline ERP-shaped fixture mapping contract PoC using synthetic data. It must not start ERP, database, Docker, payment, logistics, or production deployment.
 - Preserve local `next-env.d.ts` and any other pre-existing changes; do not stage unrelated files.
+
+## Phase 10 candidate shortlist — PoC planning only — 2026-09-23
+
+- Expanded the Phase 10 ERP plan with the required 3–5 candidate comparison: ERPNext, Odoo, Dolibarr, Medusa, and Vendure.
+- Shortlist: ERPNext for ERP reuse; Vendure for TypeScript/headless Catalog-Inventory-Order integration; Dolibarr remains a conservative SMB ERP alternative. Odoo is not first PoC because external API access is plan/edition-sensitive; Medusa remains a commerce baseline.
+- Candidate table records stack, license, activity snapshot, product/inventory/order/customer coverage, API, Docker, modification difficulty, and target boundary compatibility. These are planning assessments, not proof of integration or legal approval.
+- Planned PoCs are ERPNext-shaped and Vendure-shaped fixtures for Catalog / Inventory / Order only. No real ERP, database, payment, logistics, customer persistence, deployment, or secrets.
+- Actual checkout branch remains Wave 6 in this worktree; the compatibility column describes the target service boundary and must not be read as completed live integration.
