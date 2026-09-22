@@ -273,6 +273,13 @@ Keep Docker as the only local environment backlog item. The next safe frontend s
 - Remaining observation for real sessions: T4 has two back-navigation labels and may be cognitively long; button intuitiveness and product comprehension require real participant evidence.
 - Formal older-user testing, preview deployment, paid services, and Docker remain paused/backlog items.
 
+## Capability inventory and human-validation boundary — 2026-09-22
+
+- Must be validated by real older participants, never inferred from automation: ease of understanding, button intuitiveness, navigation comprehension, and understanding of product facts/placeholders.
+- Still mock/stub/draft: deterministic catalog/cart/checkout/publishing services, synthetic products and placeholders, transient cart and draft state, synthetic payment choices, and the unauthenticated product publishing prototype.
+- Still incomplete or externally gated: real content evidence, Docker smoke, preview deployment, persistence, login/authorization, real payment, logistics, ERP, and real participant research.
+- Selected offline candidate: add explicit checkout prototype-boundary copy and focused tests without changing payment behavior, collecting payment credentials, or adding a provider.
+
 ## Startup reminder
 
 Follow `RESUME_PROMPT.md`, `AGENTS.md`, and `WORKFLOW.md`. If newer explicit user instructions conflict with this handoff, the newer instruction wins and the discrepancy must be recorded.

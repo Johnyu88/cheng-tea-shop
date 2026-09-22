@@ -384,6 +384,13 @@ GitHub 是正式文件與程式來源。聊天中的新指令若尚未寫入 Git
 - 客觀觀察：checkout 的 T4 返回路徑包含「返回配送方式」與「上一步」兩層；真人走查時需觀察是否理解兩者差異。按鈕是否直覺、文字是否容易理解，仍不可由自動化 dry run 判定。
 - 隔離工作樹的 dev server 受 `node_modules` junction／Turbopack 限制；改用已驗證的本機 standalone server 完成驗證。正式真人走查、preview deployment、付費服務與 Docker 仍暫緩。
 
+## 35. 真人驗證邊界與下一個離線前台項目 — 2026-09-22
+
+- 年長使用者易懂性、按鈕直覺性、導覽理解及商品資訊／placeholder 理解，均標記為必須由真人走查驗證；自動化 dry run 只證明預定路徑可操作，不取代真人研究。
+- 目前前台仍使用 deterministic Mock catalog/cart/checkout/publishing service；商品、購物車、checkout、商品草稿與發布結果都是 prototype／synthetic／transient 邊界，不代表真實資料、真實付款或正式上架。
+- 尚未完成且受外部條件限制的能力：真實內容與素材證據、真人走查、Docker smoke、正式 preview、持久化資料、登入權限、真實付款、物流與 ERP。
+- 下一個可離線完成的前台品質項目候選為 checkout 的 prototype boundary copy：明確說明付款選項只是合成展示、尚未送出真實付款；不接金流、不保存付款資料、不改變 checkout flow。
+
 ### Wave 1 implementation status — 2026-09-16
 
 - Branch `feature/wave-1-reproducible-baseline` and draft PR #12 contain a clean Next.js 16.3.5 App Router baseline with Node 24.19.0, pnpm 11.19.0, strict TypeScript, Tailwind 4, shadcn conventions, Vitest/RTL contracts, a minimal health route, standalone non-root Dockerfile, and Chromium/WebKit plus axe checks.

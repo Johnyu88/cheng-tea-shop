@@ -214,3 +214,13 @@ Wave 6's implementation and unit/component/integration coverage are verified loc
 | Accessibility contrast repair | ✅ | Catalog count now uses an accessible foreground color; no new axe violations |
 | Real preview deployment | ⬜ | Requires explicit environment/credential authorization and cost review |
 | Older-user task-based validation | ⬜ | Requires real participants after the operable prototype is available |
+
+## K. Wave 7-A human-validation boundary and offline next work — 2026-09-22
+
+| Human comprehension of elder-friendly copy and layout | 🟡 | Must be verified with real older participants; automation must not be used as a substitute |
+| Human intuition of buttons and navigation | 🟡 | Must be verified with real participants observing first-attempt discovery and recovery |
+| Human understanding of product facts and placeholders | 🟡 | Must be verified with real participants; synthetic product and placeholder comprehension is not inferred from e2e |
+| Mock storefront boundary | 🟡 | Catalog, cart, checkout, and publishing use project-owned deterministic Mock services; no persistence or real customer/order data |
+| Product publishing page | 🟡 | Operable draft/preview/publish prototype only; no admin authentication, upload, persistence, or real publication |
+| Checkout payment boundary | 🟡 | Payment choices are synthetic UI state only; real payment integration and credentials remain out of scope |
+| Offline next candidate | ⬜ | Add explicit checkout copy that identifies the flow as a synthetic prototype and has no real payment submission, with focused tests |
