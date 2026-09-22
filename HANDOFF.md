@@ -350,4 +350,13 @@ Follow `RESUME_PROMPT.md`, `AGENTS.md`, and `WORKFLOW.md`. If newer explicit use
 - Smoke passed 2/2. Full verification passed: Vitest 17 files / 114 tests, TypeScript, ESLint 0 errors with one existing image warning, Webpack build, Chromium 14/14, and WebKit 14/14.
 - Phase 8 is now `completed / integration-ready prototype`. No new service type was added in closure; no real API, database, payment, logistics, ERP, CMS, preview, Docker, or paid service was used.
 - Phase 9 candidates only, not started: older-user research, real content evidence, preview/Docker/release pipeline, authentication/persistence/observability/backup, and future tokenized payment/logistics/CMS/ERP planning.
+
+## Phase 9-A execution package — preparation complete, no participant result — 2026-09-22
+
+- Added the final facilitator package at `docs/testing/phase-9a-older-user-and-content-validation-pack.md`, with consent wording, T1–T8 script, neutral prompting, observation categories, P0–P3 rubric, completion gates, and post-session document update instructions.
+- Added `docs/testing/phase-9a-observation-template.md` for de-identified records and `docs/testing/phase-9a-real-content-replacement-checklist.md` for photo/copy source, permission, evidence, alt text, owner, and approval tracking.
+- Added `docs/testing/phase-9a-preflight.mjs`; it passed all documentation checks and explicitly performs no server start, participant contact, external access, or data collection.
+- Current placeholder/synthetic inventory remains unchanged: synthetic products/prices/inventory, labeled missing-photo placeholder, synthetic checkout/payment boundary, Mock receipt, synthetic publishing, local fulfillment and ERP references. No real content was substituted.
+- No human session has occurred. Do not report dry run/e2e as participant evidence. After a real session, update WHITEPAPER, HANDOFF, and CAPABILITY_MAP only with de-identified direct observations and linked issue IDs.
+- Waiting state: participant consent/session and store-approved real photo/copy evidence. No preview, paid service, formal deployment, authentication, persistence, payment, logistics, or ERP work is authorized in this preparation stage.
 - Preserve uncommitted environment files: `AGENTS.md` and `next-env.d.ts` remain untouched and excluded from commits.

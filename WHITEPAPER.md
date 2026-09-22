@@ -495,6 +495,15 @@ GitHub 是正式文件與程式來源。聊天中的新指令若尚未寫入 Git
 - Phase 8 狀態標記為 **completed / integration-ready prototype**。此名稱只代表本機 adapter contract 已可替換與驗證，不代表 production-ready 或任何真實服務已接通。
 - Phase 9 僅整理候選：真人年長使用者走查、真實內容證據、preview／Docker／release readiness、身份驗證與持久化、可觀測性與備份，以及未來 tokenized payment／logistics／CMS／ERP integration planning。未開始任何 Phase 9 實作。
 
+## 43. Phase 9-A 真人走查與真實素材驗證準備 — 2026-09-22
+
+- 建立正式執行包 `docs/testing/phase-9a-older-user-and-content-validation-pack.md`：最終主持開場與中性提示、T1–T8 任務、字體／按鈕／導覽／商品理解／購物車／checkout／錯誤提示觀察、同意與停止規則、P0–P3 分級、完成條件與文件回填方式。
+- 建立 `phase-9a-observation-template.md` 作為去識別化 session record；建立 `phase-9a-real-content-replacement-checklist.md`，逐項要求照片來源／授權／alt text、商品事實證據、文案 owner 與公開核准。
+- 清楚列出目前 placeholder／synthetic data：商品照片準備中、合成商品／價格／供貨狀態、合成 checkout／payment boundary、Mock order receipt、合成 draft publish、local fulfillment 與 ERP references。這些在真實證據前不可冒充正式資料或交易結果。
+- 新增 `phase-9a-preflight.mjs`；本機執行通過，僅檢查執行包文件與 marker，不啟動 server、不聯絡真人、不使用付費服務、不部署。
+- Phase 9-A 目前狀態為「準備完成，真人走查與真實素材驗證尚未執行」。不得填寫假想成功率、可用性結論、參與者偏好或真實內容通過結果。
+- 真人完成後只回填去識別化摘要：WHITEPAPER 記研究範圍與限制、HANDOFF 記 issue／commit／複測、CAPABILITY_MAP 只依直接證據更新 human-validation 與 real-content 狀態。
+
 ### Wave 1 implementation status — 2026-09-16
 
 - Branch `feature/wave-1-reproducible-baseline` and draft PR #12 contain a clean Next.js 16.3.5 App Router baseline with Node 24.19.0, pnpm 11.19.0, strict TypeScript, Tailwind 4, shadcn conventions, Vitest/RTL contracts, a minimal health route, standalone non-root Dockerfile, and Chromium/WebKit plus axe checks.

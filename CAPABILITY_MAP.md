@@ -292,3 +292,17 @@ All seven service boundaries have local contract hardening. This matrix does not
 5. Future tokenized payment、logistics、CMS and ERP integration planning.
 
 Phase 9 requires a separate scope decision and is intentionally not implemented in this closure.
+
+## P. Phase 9-A validation preparation — ready, no human result yet — 2026-09-22
+
+| Capability | Status | Evidence / boundary |
+|---|---:|---|
+| Final older-user facilitator script | ✅ | `docs/testing/phase-9a-older-user-and-content-validation-pack.md`, T1–T8, consent, neutral prompts, stop rules |
+| Observation form and P0–P3 rubric | ✅ | De-identified session template and severity rules are ready; no participant result recorded |
+| Real content replacement checklist | ✅ | Photo, copy, evidence, license, alt text, owner, and approval gates documented |
+| Placeholder / synthetic inventory | ✅ | Current synthetic catalog, payment boundary, draft publish, fulfillment, ERP references are listed in the execution pack |
+| Phase 9-A preflight tool | ✅ | `phase-9a-preflight.mjs` performs local documentation-only checks and does not start services |
+| Real older-user validation | ⬜ | Waiting for participant, consent, and controlled session; automation/dry run is not evidence |
+| Real content validation | ⬜ | Waiting for store-approved photos, copy, source evidence, and permission |
+
+Phase 9-A is **preparation-ready only**. Do not move human-validation or real-content capabilities to complete until direct evidence is recorded and the three project documents are updated from that evidence.
