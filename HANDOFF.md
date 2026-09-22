@@ -280,6 +280,14 @@ Keep Docker as the only local environment backlog item. The next safe frontend s
 - Still incomplete or externally gated: real content evidence, Docker smoke, preview deployment, persistence, login/authorization, real payment, logistics, ERP, and real participant research.
 - Selected offline candidate: add explicit checkout prototype-boundary copy and focused tests without changing payment behavior, collecting payment credentials, or adding a provider.
 
+## Checkout prototype boundary copy — 2026-09-22
+
+- Added visible prototype boundary copy to both active checkout steps and the synthetic success state: this is a synthetic prototype, sends no real payment, and stores no payment data.
+- TDD evidence: the new initial-state test failed before implementation; the new success-state test failed before success-state implementation; both now pass.
+- Verification after implementation: Vitest 15 files / 98 tests, TypeScript (`--incremental false`), Webpack build, lint 0 errors with one existing `no-img-element` warning, Chromium checkout e2e 6/6, WebKit checkout e2e 6/6. Earlier complete storefront gates remain Chromium/WebKit 14/14.
+- No payment provider, payment credential, persistence, login, ERP, preview deployment, Docker, or real participant research was added.
+- Next offline frontend item is intentionally not selected until a concrete low-risk issue or approved design need is identified; human comprehension, button intuitiveness, and product-information understanding remain real-user-only validations.
+
 ## Startup reminder
 
 Follow `RESUME_PROMPT.md`, `AGENTS.md`, and `WORKFLOW.md`. If newer explicit user instructions conflict with this handoff, the newer instruction wins and the discrepancy must be recorded.

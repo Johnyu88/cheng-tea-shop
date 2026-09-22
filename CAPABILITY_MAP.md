@@ -223,4 +223,5 @@ Wave 6's implementation and unit/component/integration coverage are verified loc
 | Mock storefront boundary | 🟡 | Catalog, cart, checkout, and publishing use project-owned deterministic Mock services; no persistence or real customer/order data |
 | Product publishing page | 🟡 | Operable draft/preview/publish prototype only; no admin authentication, upload, persistence, or real publication |
 | Checkout payment boundary | 🟡 | Payment choices are synthetic UI state only; real payment integration and credentials remain out of scope |
-| Offline next candidate | ⬜ | Add explicit checkout copy that identifies the flow as a synthetic prototype and has no real payment submission, with focused tests |
+| Checkout prototype boundary copy | ✅ | Initial and synthetic-success states explicitly say this is a synthetic prototype, sends no real payment, and stores no payment data; unit/e2e coverage added |
+| Next offline candidate | ⬜ | No new product behavior selected yet; keep human validation, preview, Docker, persistence, login, payment, and ERP out of scope |

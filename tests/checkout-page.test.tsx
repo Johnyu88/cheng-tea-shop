@@ -107,6 +107,23 @@ it("guides an empty cart back to the cart", async () => {
   expect(screen.getByRole("link", { name: "查看購物車" })).toHaveAttribute("href", "/cart");
 });
 
+it("labels checkout as a synthetic prototype without real payment or persistence", async () => {
+  renderCheckout();
+
+  await waitFor(() => expect(screen.getByRole("heading", { name: "聯絡資料" })).toBeInTheDocument());
+  expect(screen.getByText("此頁為合成展示／原型，不會送出真實付款，也不會保存付款資料。")).toBeInTheDocument();
+});
+
+it("keeps the prototype boundary visible after synthetic checkout success", async () => {
+  renderCheckout();
+  await reachReview(null);
+
+  fireEvent.click(screen.getByRole("button", { name: "送出訂單" }));
+
+  await waitFor(() => expect(screen.getByText("訂單編號：MOCK-ORDER-001")).toBeInTheDocument());
+  expect(screen.getByText("此頁為合成展示／原型，不會送出真實付款，也不會保存付款資料。")).toBeInTheDocument();
+});
+
 it("requires a phone number before contact can advance", async () => {
   renderCheckout();
 

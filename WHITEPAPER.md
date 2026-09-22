@@ -391,6 +391,13 @@ GitHub 是正式文件與程式來源。聊天中的新指令若尚未寫入 Git
 - 尚未完成且受外部條件限制的能力：真實內容與素材證據、真人走查、Docker smoke、正式 preview、持久化資料、登入權限、真實付款、物流與 ERP。
 - 下一個可離線完成的前台品質項目候選為 checkout 的 prototype boundary copy：明確說明付款選項只是合成展示、尚未送出真實付款；不接金流、不保存付款資料、不改變 checkout flow。
 
+## 36. Checkout prototype boundary copy — 2026-09-22
+
+- Checkout 的初始步驟與 synthetic success 都顯示「此頁為合成展示／原型，不會送出真實付款，也不會保存付款資料。」；這是前台理解邊界，不是付款流程或資料持久化。
+- 以 TDD 新增兩個 checkout component tests，並在 checkout e2e 驗證 Chromium／WebKit 的初始與成功狀態；未新增 payment provider、credential、storage、API 或流程步驟。
+- 驗證結果：完整 Vitest 15 files／98 tests、TypeScript、Webpack build、lint 0 errors（保留既有一項 `<img>` warning）、Chromium checkout e2e 6/6、WebKit checkout e2e 6/6；完整 Wave 7 storefront gate 仍為 Chromium/WebKit 各 14/14。
+- 真人必驗證的易懂性、按鈕直覺性與商品資訊理解仍不由自動化推論；下一個低風險前台項目尚未選定，避免在沒有實際缺陷或明確設計需求時擴大範圍。
+
 ### Wave 1 implementation status — 2026-09-16
 
 - Branch `feature/wave-1-reproducible-baseline` and draft PR #12 contain a clean Next.js 16.3.5 App Router baseline with Node 24.19.0, pnpm 11.19.0, strict TypeScript, Tailwind 4, shadcn conventions, Vitest/RTL contracts, a minimal health route, standalone non-root Dockerfile, and Chromium/WebKit plus axe checks.
