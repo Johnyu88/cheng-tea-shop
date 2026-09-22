@@ -272,3 +272,11 @@ Follow `RESUME_PROMPT.md`, `AGENTS.md`, and `WORKFLOW.md`. If newer explicit use
 - Result: Vendure needs the least mapping and is easiest for the current TypeScript storefront boundary. ERPNext requires more field/status mapping but offers broader ERP reuse. Both still require our adapter for freshness, idempotency, retry, reconciliation, security, and content sidecar.
 - Verification: focused mapping tests 4/4; full Vitest 16 files / 100 tests; TypeScript passed; Webpack production build passed; ESLint 0 errors with one existing `<img>` warning.
 - No UI change, real ERP server, database, payment, logistics, external API, customer persistence, Docker deployment, or formal ERP selection was made. Preserve `next-env.d.ts` as pre-existing uncommitted state.
+
+## Phase 10-C ERPNext physical environment verification — blocked before install — 2026-09-23
+
+- Preflight found no Docker CLI／daemon. Windows CIM memory queries were denied; C: reported approximately 3.79 TB free. Resources were not declared sufficient.
+- Official `frappe/frappe_docker`／`pwd.yml` setup was reviewed but not executed. No Docker installation, system security change, public network exposure, ERPNext container, database, or external API was started.
+- Physical verification result is 0/4: product／variant, inventory, synthetic order/status, and API authentication were not tested against a real ERPNext server.
+- Alternative remains Phase 10-B synthetic ERPNext-shaped fixtures for DTO/error/adapter regression. It cannot prove real endpoint schema, permissions, required fields, stock reservations, transactions, or backup/restore.
+- Next action requires a separately authorized Docker-capable isolated environment. Do not proceed with ERP installation or formal adoption automatically. Preserve `next-env.d.ts` untouched.

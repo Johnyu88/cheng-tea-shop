@@ -392,3 +392,10 @@ GitHub 是正式文件與程式來源。聊天中的新指令若尚未寫入 Git
 - 結論：Vendure mapping 最少、最容易接目前 TypeScript 前台；ERPNext 客製欄位最多，但 ERP 直接沿用能力最廣。兩者都仍需要自有 adapter 處理 freshness、idempotency、retry、reconciliation、安全與內容 sidecar。
 - 驗證結果：focused 4/4；完整 Vitest 16 files／100 tests；TypeScript 通過；Webpack production build 通過；ESLint 0 errors，保留既有一項 `<img>` warning。
 - Phase 10-B 僅為 mapping PoC，不決定正式導入；正式導入前仍需確認授權／商用義務、版本與 SBOM、Docker／資料庫 backup／restore、secret rotation、網路隔離、API 限流、稽核與 rollback。
+
+## 48. Phase 10-C ERPNext physical environment verification — 2026-09-23
+
+- 實施前置檢查：Docker CLI／daemon 不存在；Windows memory query 被拒絕；C: 約有 3.79 TB free，但不足以判定 Docker 資源足夠。`next-env.d.ts` 既有未提交變更保持原狀。
+- 依官方 `frappe/frappe_docker` 的 `pwd.yml` disposable demo 路徑，實體 ERPNext 驗證被標記 `BLOCKED_EXTERNAL`；未安裝 Docker、未啟動 ERPNext、未修改系統安全設定、未開放公開網路。
+- 已記錄日後只用 synthetic data 的商品／規格、庫存、訂單／狀態、API 認證與 DTO mapping 驗證步驟，以及無 Docker 時沿用 Phase 10-B fixture contract 的替代方案。
+- 實體測試執行數為 0/4；因此沒有任何真實 ERP API、權限、資料庫 constraint、庫存 reservation 或 order transaction 結果可宣稱。
