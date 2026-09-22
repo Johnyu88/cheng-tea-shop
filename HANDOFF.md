@@ -264,3 +264,11 @@ Follow `RESUME_PROMPT.md`, `AGENTS.md`, and `WORKFLOW.md`. If newer explicit use
 - Candidate table records stack, license, activity snapshot, product/inventory/order/customer coverage, API, Docker, modification difficulty, and target boundary compatibility. These are planning assessments, not proof of integration or legal approval.
 - Planned PoCs are ERPNext-shaped and Vendure-shaped fixtures for Catalog / Inventory / Order only. No real ERP, database, payment, logistics, customer persistence, deployment, or secrets.
 - Actual checkout branch remains Wave 6 in this worktree; the compatibility column describes the target service boundary and must not be read as completed live integration.
+
+## Phase 10-B minimal mapping PoC — complete, no ERP integration — 2026-09-23
+
+- Added `lib/domain/erp-mapping-poc.ts`, `lib/domain/erp-mapping-fixtures.ts`, barrel exports, and `tests/phase-10b-erp-mapping.test.ts`.
+- ERPNext-shaped and Vendure-shaped synthetic adapters map product/variant, inventory quantity, order reference/status/total, and customer reference into the same project-owned DTOs. Malformed payloads map to non-retryable `erp-mapping-invalid`; adapter swapping is covered.
+- Result: Vendure needs the least mapping and is easiest for the current TypeScript storefront boundary. ERPNext requires more field/status mapping but offers broader ERP reuse. Both still require our adapter for freshness, idempotency, retry, reconciliation, security, and content sidecar.
+- Verification: focused mapping tests 4/4; full Vitest 16 files / 100 tests; TypeScript passed; Webpack production build passed; ESLint 0 errors with one existing `<img>` warning.
+- No UI change, real ERP server, database, payment, logistics, external API, customer persistence, Docker deployment, or formal ERP selection was made. Preserve `next-env.d.ts` as pre-existing uncommitted state.

@@ -29,3 +29,11 @@ export { createMockCatalogService } from "./mock/mock-catalog-service";
 export { createMockCartService } from "./mock/mock-cart-service";
 export { createMockCheckoutService } from "./mock/mock-checkout-service";
 export { createMockPublishingService } from "./mock/mock-publishing-service";
+export { createErpMappingAdapters, mapWithErpAdapter } from "./erp-mapping-poc";
+export type {
+  CanonicalCustomerReference,
+  CanonicalInventory,
+  CanonicalOrder,
+  ErpMappingAdapter,
+  ErpMappingFixture,
+} from "./erp-mapping-poc";

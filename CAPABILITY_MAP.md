@@ -231,3 +231,19 @@ Phase 10 is planning-only. No real customer or product data has been sent to an 
 - Synthetic Catalog／Inventory／Order fixtures only; no real product, customer, payment, logistics, database or formal deployment.
 - Both shortlisted shapes must map into project-owned DTOs, expose normalized errors, preserve idempotency semantics, support adapter swapping, and leave UI components unchanged.
 - Contract tests, TypeScript, lint, build and existing regression must pass before any future sandbox review.
+
+## U. Phase 10-B mapping PoC — completed, no live integration — 2026-09-23
+
+| Capability | Status | Evidence |
+|---|---:|---|
+| ERPNext-shaped product／variant mapping | ✅ | Synthetic `item_code`／variant payload maps to project-owned Product DTO |
+| Vendure-shaped product／variant mapping | ✅ | Synthetic Product／Variant payload maps to the same Product DTO |
+| Inventory quantity／status mapping | ✅ | Reserved／allocated quantities normalize to available quantity and status |
+| Order reference／status／total mapping | ✅ | Synthetic order payloads normalize to canonical Order DTO |
+| Customer reference mapping | ✅ | Provider identifiers normalize to `externalId` |
+| DTO／error translation | ✅ | Provider shapes stay in adapter; malformed payloads use `erp-mapping-invalid` |
+| Adapter swapping | ✅ | Override adapter test passes without UI or consumer changes |
+| UI behavior | ✅ unchanged | No UI imports the PoC adapter; existing storefront tests remain green |
+| Live ERP integration | ⬜ | No ERP server, database, payment, logistics, external API, or formal deployment |
+
+**PoC conclusion:** Vendure is the easiest current TypeScript boundary fit and needs the least mapping. ERPNext needs more custom mapping but supplies broader ERP capabilities. No formal adoption decision was made; next work requires an explicit sandbox／license／operations gate.

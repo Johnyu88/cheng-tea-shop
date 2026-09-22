@@ -98,3 +98,26 @@
 4. 比較 PoC A 的 unmapped fields、測試成本、部署依賴、授權限制與維護責任。
 
 兩個 PoC 都不接 Payment、Logistics、Customer persistence、資料庫正式資料、真實商品、正式部署或外部 secrets。通過 contract tests、TypeScript、lint、build、既有 regression 後，才有資格進入 sandbox read-only review；不代表可直接導入。
+
+## 7. Phase 10-B PoC result — 2026-09-23
+
+| 驗證項目 | 結果 |
+|---|---|
+| Product／variant mapping | 通過；ERPNext `item_code`／Vendure `id`、variant SKU、名稱與 TWD 價格均轉成同一 Product DTO |
+| Inventory quantity mapping | 通過；`actual_qty - reserved_qty` 與 `stockOnHand - stockAllocated` 均轉成 available quantity／status |
+| Order create／status mapping | 通過 synthetic dry-run；兩邊 order reference、total、customer reference 與 confirmed／cancelled／fulfilled status 可正規化 |
+| Customer reference mapping | 通過；ERPNext `customer.name` 與 Vendure `customer.id` 均轉成 `externalId` |
+| DTO translation | 通過；adapter 輸出 project-owned Product／Inventory／Order／Customer DTO，不洩漏 provider payload |
+| Error mapping | 通過；malformed product payload 統一為 `erp-mapping-invalid`、non-retryable |
+| Adapter swapping | 通過；替換 customer mapping adapter 不需修改 consumer 或 UI |
+| Regression | Vitest 16 files／100 tests、TypeScript、Webpack build 通過；ESLint 0 errors，保留既有 1 warning |
+
+### 結論
+
+- **mapping 最少／最容易接目前前台：Vendure**。TypeScript、Product／Variant、Inventory、Order 概念與現有 service boundary 最接近；代價是它是 commerce backend，不是完整 ERP。
+- **客製欄位最多：ERPNext**。ERP 能力最廣，但 Item／Warehouse／Sales Order／Customer 的 ERP 欄位與前台 DTO 差距較大，需要較完整 adapter、狀態 mapping、權限與 reconciliation。
+- **ERP 可直接沿用**：商品 master、variant／SKU、庫存帳、銷售訂單、顧客 reference、營運狀態與 ERP 內部稽核／權限能力。
+- **仍需自有 adapter**：DTO translation、圖片／內容 sidecar、價格／庫存 freshness、idempotency、retry／dead-letter／reconciliation、provider error mapping，以及不把 ERP 欄位洩漏至 UI 的安全邊界。
+- **真正導入前**：確認 GPL／plugin exception／enterprise material 的商用義務；鎖定版本與依賴 SBOM；確認 Docker／資料庫 backup、restore、upgrade、secret rotation、network isolation、API rate limit、audit log、rollback 與正式維運責任。
+
+本 PoC 不做正式導入決策，不安裝完整 ERP，不連線外部 API，不接付款／物流，也不代表任何候選已 production-ready。

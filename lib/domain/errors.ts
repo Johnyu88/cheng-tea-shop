@@ -7,7 +7,8 @@ export type DomainErrorCode =
   | "invalid-draft"
   | "payment-failed"
   | "checkout-unavailable"
-  | "publishing-unavailable";
+  | "publishing-unavailable"
+  | "erp-mapping-invalid";
 
 export type DomainError = {
   code: DomainErrorCode;

@@ -384,3 +384,11 @@ GitHub 是正式文件與程式來源。聊天中的新指令若尚未寫入 Git
 - Phase 10 選型補充：ERPNext 為 ERP reuse 首選，Vendure 為 TypeScript／headless commerce integration 首選，Dolibarr 為小型 SMB ERP 保守替代；Odoo 因外部 API 方案與 edition／授權限制暫列比較候選，Medusa 為 commerce 基準。
 - 比較表已補記技術棧、授權、最近更新、商品／庫存／訂單／顧客、API、Docker、修改難度與 boundary 相容性。上游 activity 以 2026-09-23 官方 GitHub 快照為準；商用授權仍需正式法律審查。
 - 只規劃兩個最小 PoC：ERPNext-shaped 與 Vendure-shaped 的 Catalog／Inventory／Order mapping。兩者只使用 synthetic fixture，不接 Payment、Logistics、正式資料庫、正式部署或外部 secrets。
+
+## 47. Phase 10-B minimal mapping PoC — 2026-09-23
+
+- 新增 `lib/domain/erp-mapping-poc.ts`、synthetic fixtures 與 `tests/phase-10b-erp-mapping.test.ts`。ERPNext-shaped 與 Vendure-shaped adapter 都把 Product／variant、Inventory quantity、Order status、Customer reference 轉為同一組 project-owned DTO。
+- 驗證包含 DTO translation、`erp-mapping-invalid` 統一錯誤、adapter swapping 與 provider payload 不洩漏到 consumer；未修改 UI，未接真實 ERP、付款、物流、資料庫或外部 API。
+- 結論：Vendure mapping 最少、最容易接目前 TypeScript 前台；ERPNext 客製欄位最多，但 ERP 直接沿用能力最廣。兩者都仍需要自有 adapter 處理 freshness、idempotency、retry、reconciliation、安全與內容 sidecar。
+- 驗證結果：focused 4/4；完整 Vitest 16 files／100 tests；TypeScript 通過；Webpack production build 通過；ESLint 0 errors，保留既有一項 `<img>` warning。
+- Phase 10-B 僅為 mapping PoC，不決定正式導入；正式導入前仍需確認授權／商用義務、版本與 SBOM、Docker／資料庫 backup／restore、secret rotation、網路隔離、API 限流、稽核與 rollback。
