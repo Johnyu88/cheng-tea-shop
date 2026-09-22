@@ -45,6 +45,18 @@ export type ProductDraft = {
   inventoryStatus: InventoryStatus;
   tasteTags: TasteTag[];
   summary?: string;
+  photos?: ProductDraftPhoto[];
+  origin?: string;
+  fermentation?: string;
+  roast?: string;
+  aroma?: string;
+  brewing?: string;
+};
+
+export type ProductDraftPhoto = {
+  id: string;
+  previewUrl: string;
+  alt: string;
 };
 
 export type CartLine = {
@@ -64,10 +76,18 @@ export type Cart = {
 };
 
 export type CheckoutDraft = {
+  name: string;
   phone: string;
   email?: string;
   deliveryMethod: "home-delivery" | "store-pickup";
+  address?: string;
   paymentMethod: "credit-card" | "line-pay" | "pay-at-store";
+};
+
+export type CheckoutReceipt = {
+  orderReference: string;
+  status: "confirmed";
+  total: Money;
 };
 
 export type CatalogQuery = {

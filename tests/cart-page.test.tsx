@@ -64,6 +64,8 @@ it("shows loading and then the empty cart state", async () => {
   });
   await waitFor(() => expect(screen.getByRole("heading", { name: "購物車是空的" })).toBeTruthy());
   expect(screen.getByRole("link", { name: "開始選茶" }).getAttribute("href")).toBe("/#catalog");
+  expect(screen.queryByRole("link", { name: "前往結帳" })).toBeNull();
+  expect(screen.queryByRole("button", { name: "前往結帳" })).toBeNull();
 });
 
 it("renders populated lines and the service-provided subtotal", async () => {
@@ -77,7 +79,7 @@ it("renders populated lines and the service-provided subtotal", async () => {
   expect(within(item).getByRole("paragraph", { name: "玉露清香單項小計 NT$1,600" })).toBeTruthy();
   expect(within(screen.getByRole("region", { name: "購物車摘要" })).getByRole("paragraph", { name: "購物車總小計 NT$1,600" })).toBeTruthy();
   expect(screen.getByRole("link", { name: "繼續選茶" }).getAttribute("href")).toBe("/#catalog");
-  expect((screen.getByRole("button", { name: "前往結帳" }) as HTMLButtonElement).disabled).toBe(true);
+  expect(screen.getByRole("link", { name: "前往結帳" }).getAttribute("href")).toBe("/checkout");
 });
 
 it("replaces the rendered line after a valid quantity update", async () => {

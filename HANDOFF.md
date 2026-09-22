@@ -1,6 +1,6 @@
 # HANDOFF
 
-Last updated: 2026-09-20
+Last updated: 2026-09-21
 
 ## Wave 1 status
 
@@ -19,10 +19,10 @@ Last updated: 2026-09-20
 
 - Repository: `Johnyu88/cheng-tea-shop`
 - Default branch: `main`
-- Product stage: Phase 2 — Frontend prototype, Wave 0 audit completed
-- Application code: Wave 1 baseline exists; Wave 2 brand shell is now in progress. No candidate template code imported.
+- Product stage: Phase 2 — Frontend prototype; Wave 6 checkout and product-draft implementation is committed, with local quality-gate limitations recorded below.
+- Application code: Wave 6 adds synthetic guest checkout at `/checkout` and the synthetic operator product-draft prototype at `/admin/products/new`. No candidate template code was imported.
 - Highest principle: **Website First → Mock API → ERP Reuse → API Integration**
-- GitHub state: `SYNCED` on `main`; governance resilience changes are under review on `docs/resilient-agent-governance`.
+- GitHub state: `LOCAL_COMMITS_PENDING` on `codex/wave-6-checkout-product-draft`; no push or pull request was requested for this worktree.
 
 ## Last completed milestone
 
@@ -230,6 +230,20 @@ Review the Wave 4 homepage/catalog preview in a browser and confirm its responsi
 - WebKit is blocked only by the missing `webkit-2359` executable. Docker remains unavailable. These are the only remaining environment limitations recorded for the final Wave 5 gate.
 - Final review evidence includes strict provider-test tuple narrowing, catalog-derived sold-out cart behavior, stale product-response protection, `CommerceProvider` durable naming, and the corrected cart acceptance selector.
 - Next milestone: Wave 6 checkout, payment-state, and product-draft work.
+
+## Wave 6 final verification — 2026-09-21
+
+- Branch: `codex/wave-6-checkout-product-draft`; implementation commits are `6af7399`, `cd0cf12`, `7684f07`, `457a18b`, `2d7f7c8`, `e7237e4`, `657afa0`, `d959b4b`, and `9c91d79` before this documentation checkpoint.
+- Completed behavior: a project-owned Mock checkout service and three-step guest checkout retain valid contact/address values on error, guard duplicate final submission, and expose synthetic success/retry states; the product-draft prototype supports minimum fields, bounded local preview metadata, grounded editable Mock copy, draft save, preview, confirmation-gated synthetic publish, and duplicate-operation protection.
+- Full local verification: Vitest passed 15 files / 96 tests; TypeScript passed with `--incremental false`; full ESLint exited 0 with one existing `@next/next/no-img-element` warning outside the Wave 6 diff.
+- Unpassed gates: the sandboxed `next build --webpack` attempt failed with `EPERM` opening `.next/trace`; the approved retry reached Next.js but failed with `EBUSY` removing the locked `.next/standalone` directory. Chromium acceptance was therefore not started because the configured standalone server was not freshly built. WebKit is not installed and Docker CLI is unavailable. The Wave 6 spec header whitespace was corrected, and the complete branch diff check now passes.
+- Security/privacy checks: the requested secret scan and a scan for browser storage, console logging, card number, and security-code terms found no matches in `app`, `features`, `lib`, `tests`, or `e2e`. The prototype still has no real authentication, payment provider, persistence, ERP integration, file upload, or real customer/order data.
+- Pre-existing `next-env.d.ts` remains modified and intentionally unstaged; its working diff is line-ending normalization only.
+- Full evidence, limits, risks, and the next action are in `.superpowers/sdd/2026-09-21-wave-6-checkout-product-draft/final-verification-report.md`.
+
+## Current next action
+
+Resolve the worktree filesystem/lock restriction in a clean environment, rerun webpack build, Chromium acceptance, and `git diff --check` after the permitted spec-whitespace decision. Then run WebKit/Docker only where their executables are installed; do not add real authentication, payment, persistence, ERP, or upload behavior as part of that verification work.
 
 ## Startup reminder
 

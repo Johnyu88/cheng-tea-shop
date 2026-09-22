@@ -4,7 +4,10 @@ export type DomainErrorCode =
   | "cart-empty"
   | "product-sold-out"
   | "purchase-limit-exceeded"
-  | "invalid-draft";
+  | "invalid-draft"
+  | "payment-failed"
+  | "checkout-unavailable"
+  | "publishing-unavailable";
 
 export type DomainError = {
   code: DomainErrorCode;
