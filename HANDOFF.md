@@ -265,6 +265,14 @@ Keep Docker as the only local environment backlog item. The next safe frontend s
 - No real participant session, preview deployment, paid service, payment credential, login, persistence, ERP, or customer data was used.
 - Next safe action: run a facilitator dry run locally, record no-participant observations separately, and only schedule real sessions when participants and consent handling are available. Docker remains an environment backlog item.
 
+## Facilitator dry run — 2026-09-22
+
+- Completed the scripted T1–T8 walkthrough on the local standalone server at `localhost:3001` with both `360×800` and `1280×800`: 16/16 automated facilitator steps passed.
+- Recorded evidence in `docs/testing/older-user-walkthrough-dry-run-2026-09-22.md`; this is a host-flow rehearsal only and must not be presented as older-user research.
+- Dry-run-only issues were corrected in `docs/testing/older-user-walkthrough-dry-run.mjs`: wait for the catalog entry after loading, use the actual cart line for T5, and use a standalone server when the dev junction blocks Turbopack. No frontend production behavior was changed.
+- Remaining observation for real sessions: T4 has two back-navigation labels and may be cognitively long; button intuitiveness and product comprehension require real participant evidence.
+- Formal older-user testing, preview deployment, paid services, and Docker remain paused/backlog items.
+
 ## Startup reminder
 
 Follow `RESUME_PROMPT.md`, `AGENTS.md`, and `WORKFLOW.md`. If newer explicit user instructions conflict with this handoff, the newer instruction wins and the discrepancy must be recorded.

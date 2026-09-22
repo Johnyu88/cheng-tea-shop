@@ -98,6 +98,8 @@ node node_modules/next/dist/bin/next dev
 
 瀏覽器開啟 `http://localhost:3000/`。若要測窄版，使用 DevTools responsive viewport `360 × 800`；桌機可使用約 `1280 × 800`。本機測試只使用 Mock service，不需要 GitHub、Docker、雲端、付款服務、登入或網路帳戶。
 
+首頁第一次載入可能短暫顯示「正在整理茶品」；主持人應等「查看茶品」等主要入口出現後才開始 T1。若隔離工作樹的 dev server 因 `node_modules` junction 無法穩定載入，可使用已驗證的本機 standalone server 於另一個未占用 port，仍不得視為正式部署：`$env:PORT='3001'; node .next/standalone/server.js`，再開啟 `http://localhost:3001/`。
+
 自動回歸可在另一個終端執行：
 
 ```powershell
@@ -114,3 +116,11 @@ $env:CI='1'; node node_modules/@playwright/test/cli.js test e2e/baseline.spec.ts
 ```
 
 若只做人工走查，無需先執行 production build，也不要為此啟動 preview 或安裝付費服務。結束時以 `Ctrl+C` 停止本機 server，並清除瀏覽器中的測試頁面內容。
+
+主持人 dry run 的自動化輔助指令與最新紀錄：
+
+```powershell
+$env:BASE_URL='http://localhost:3001'; node docs/testing/older-user-walkthrough-dry-run.mjs
+```
+
+這個指令只驗證路徑與控制存在，不模擬真人理解，也不能取代真人走查。

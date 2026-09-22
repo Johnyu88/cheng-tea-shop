@@ -377,6 +377,13 @@ GitHub 是正式文件與程式來源。聊天中的新指令若尚未寫入 Git
 - 新增 `docs/superpowers/plans/2026-09-22-older-user-walkthrough-preparation.md`，定義只使用 localhost、Mock 資料與合成聯絡資料的離線執行方式；不保存真人個資、不啟動 preview、不使用付費服務。
 - 本階段只完成測試準備，不宣稱已完成真人可用性驗證。Wave 7-B 的準備通過線為主要 T1–T5 任務各有完整成功紀錄、無阻斷購物路徑的 P0，且不得誤解 placeholder、Mock checkout 或合成上架結果。
 
+## 34. 年長使用者走查主持人 dry run — 2026-09-22
+
+- 以本機 standalone server、headless Chromium 及 `360×800`／`1280×800` 兩種尺寸完整執行 T1–T8，兩種尺寸均 8/8 PASS，合計 16/16；此為主持流程與路徑驗證，不是真人研究結果。
+- 新增 `docs/testing/older-user-walkthrough-dry-run.mjs` 與紀錄文件；dry run 修正了 loading 等待、購物車商品列定位與 standalone localhost 執行方式，沒有修改前台產品行為。
+- 客觀觀察：checkout 的 T4 返回路徑包含「返回配送方式」與「上一步」兩層；真人走查時需觀察是否理解兩者差異。按鈕是否直覺、文字是否容易理解，仍不可由自動化 dry run 判定。
+- 隔離工作樹的 dev server 受 `node_modules` junction／Turbopack 限制；改用已驗證的本機 standalone server 完成驗證。正式真人走查、preview deployment、付費服務與 Docker 仍暫緩。
+
 ### Wave 1 implementation status — 2026-09-16
 
 - Branch `feature/wave-1-reproducible-baseline` and draft PR #12 contain a clean Next.js 16.3.5 App Router baseline with Node 24.19.0, pnpm 11.19.0, strict TypeScript, Tailwind 4, shadcn conventions, Vitest/RTL contracts, a minimal health route, standalone non-root Dockerfile, and Chromium/WebKit plus axe checks.
