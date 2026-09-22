@@ -365,10 +365,11 @@ GitHub 是正式文件與程式來源。聊天中的新指令若尚未寫入 Git
 ## 32. Wave 7-A 前台購物品質關卡 — 2026-09-22
 
 - 在隔離的 `codex/wave-7-shopping-quality-gate` 分支，以 clean production build 執行前台購物品質關卡；完整 Vitest 15 個檔案／96 個測試、TypeScript、Webpack production build 與 diff check 通過。
-- Chromium storefront gate 通過 14/14：首頁、健康檢查、首頁 axe、商品詳情、購物車、checkout、重複提交保護、手機版 overflow 與商品草稿流程；新增主要 storefront routes 的 axe coverage，`/tea/mock-tea-001`、`/cart`、`/checkout`、`/admin/products/new` 均無 detectable violations。
-- 實際修正三項品質問題：`.catalog-count` 改用符合對比要求的前景色；購物車 e2e 更新為 Wave 6 已實作的 `/checkout` link contract；checkout e2e 的 alert assertion 排除 Next route-announcer 空 alert。
-- 全域 ESLint 以 0 errors 結束，保留既有 `product-detail-page.tsx` 一項 `@next/next/no-img-element` warning。WebKit 因 `webkit-2359` executable 不存在而未能啟動，Docker CLI 亦不可用；未將兩者宣稱為通過。
-- 本階段仍不擴充真實付款、登入、持久化、ERP、顧客資料或付費雲端部署。下一個需外部能力的階段是取得 WebKit/Docker clean runner，並在明確授權與可用憑證後評估非生產 preview；真實年長使用者走查仍需安排參與者。
+- Chromium 與 WebKit storefront gate 均通過 14/14：首頁、健康檢查、首頁 axe、商品詳情、購物車、checkout、重複提交保護、手機版 overflow 與商品草稿流程；`/tea/mock-tea-001`、`/cart`、`/checkout`、`/admin/products/new` 均無 detectable axe violations。
+- 實際修正品質問題：`.catalog-count` 改用符合對比要求的前景色；購物車 e2e 更新為 Wave 6 已實作的 `/checkout` link contract；checkout e2e 的 alert assertion 排除 Next route-announcer 空 alert；商品草稿與 axe e2e 等待 React hydration／主要 h1 完成，避免 WebKit 在 loading 狀態誤判。
+- 依 Playwright 官方方式安裝 WebKit：`node node_modules/@playwright/test/cli.js install webkit`，因本機憑證鏈要求使用 Node `--use-system-ca`；未關閉 TLS 驗證、未修改系統安全設定。WebKit 26.6／playwright webkit v2359 安裝至使用者 Playwright cache 後通過 14/14。
+- 全域 ESLint 以 0 errors 結束，保留既有 `product-detail-page.tsx` 一項 `@next/next/no-img-element` warning。Docker CLI 仍不可用，列為環境待辦，不阻擋前台品質關卡。
+- 本階段仍不擴充真實付款、登入、持久化、ERP、顧客資料或付費雲端部署；正式 preview 與真實年長使用者走查仍需明確授權、參與者與環境條件。
 
 ### Wave 1 implementation status — 2026-09-16
 

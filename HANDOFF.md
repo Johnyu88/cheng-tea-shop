@@ -248,15 +248,15 @@ The Wave 6 filesystem/build limitation was carried into Wave 7-A and resolved fo
 ## Wave 7-A frontend shopping quality gate — 2026-09-22
 
 - Branch/worktree: `codex/wave-7-shopping-quality-gate`, based on merged Wave 6 commit `1aea1bb`; the base checkout and its pre-existing `next-env.d.ts` remain protected.
-- Implemented only evidence-backed fixes: improved catalog count contrast, corrected the stale cart e2e expectation to the `/checkout` link contract, and scoped checkout alert assertions away from Next's empty route-announcer alert.
-- Verification: Vitest 15 files / 96 tests, TypeScript, Webpack production build, full diff check, and Chromium 14/14 passed. Axe passed for homepage and the primary storefront routes: product detail, cart, checkout empty state, and product draft.
-- Full ESLint exited 0 with one existing `@next/next/no-img-element` warning in `features/product/components/product-detail-page.tsx`; secret/privacy scan had no matches.
-- Environment limits: WebKit could not launch because `webkit-2359/Playwright.exe` is absent; Docker CLI is unavailable. These are recorded as unverified, not passed.
-- GitHub state: `LOCAL_COMMITS_PENDING` until this Wave 7-A commit is pushed; no credentials, payment keys, API keys, or customer data were added.
+- Implemented only evidence-backed fixes: improved catalog count contrast, corrected the stale cart e2e expectation to the `/checkout` link contract, scoped checkout alert assertions away from Next's empty route-announcer alert, and added explicit hydration/heading readiness waits for cross-browser e2e.
+- Verification: Vitest 15 files / 96 tests, TypeScript (`--incremental false`), Webpack production build, full diff check, Chromium 14/14, and WebKit 14/14 passed. Axe passed for homepage and the primary storefront routes: product detail, cart, checkout, and product draft.
+- WebKit was installed with the official Playwright CLI using Node `--use-system-ca` only; no TLS bypass or system security change was made. Full WebKit acceptance then passed 14/14.
+- Full ESLint exited 0 with one existing `@next/next/no-img-element` warning in `features/product/components/product-detail-page.tsx`; secret/privacy scan had no matches. Docker CLI remains unavailable and is an environment backlog item.
+- GitHub state: the Wave 7-A branch is pushed and must be reconfirmed after the documentation follow-up commit; no credentials, payment keys, API keys, or customer data were added.
 
 ## Current next action after Wave 7-A
 
-Run WebKit and Docker on a clean runner when those capabilities are available. A preview deployment would require explicit environment/credential authorization and may incur cost, so do not initiate it automatically. Older-user task-based testing also requires human participants; keep the current frontend prototype stable until that can be arranged.
+Keep Docker as the only local environment backlog item. The next safe frontend stage is to prepare the older-user task-based validation plan and review checklist; do not start paid preview deployment without explicit environment and credential authorization. Real participant validation still requires arranging participants.
 
 ## Startup reminder
 

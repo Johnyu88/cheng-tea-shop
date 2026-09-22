@@ -19,6 +19,8 @@ async function completeCheckout(page: Page) {
 }
 
 async function completeMinimumProductDraft(page: Page) {
+  await expect(page.getByRole("heading", { name: "新增一項茶品" })).toBeVisible();
+  await expect(page.locator("main[data-hydrated='true']")).toBeVisible();
   await page.getByLabel("茶名").fill("春茶");
   await page.getByLabel("單一規格").fill("150g");
   await page.getByLabel("價格（TWD）").fill("1200");

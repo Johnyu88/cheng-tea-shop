@@ -55,11 +55,16 @@ export function ProductDraftPage(): JSX.Element {
   const [previewMode, setPreviewMode] = useState<PreviewMode | null>(null);
   const [confirmed, setConfirmed] = useState(false);
   const [publishedProduct, setPublishedProduct] = useState<Product>();
+  const [hydrated, setHydrated] = useState(false);
   const activeOperation = useRef<Operation>("idle");
   const photosRef = useRef<ProductDraftPhoto[]>([]);
   const nextPhotoId = useRef(1);
 
   useEffect(() => { photosRef.current = photos; }, [photos]);
+  useEffect(() => {
+    const timer = window.setTimeout(() => setHydrated(true), 0);
+    return () => window.clearTimeout(timer);
+  }, []);
   useEffect(() => () => { photosRef.current.forEach((photo) => URL.revokeObjectURL(photo.previewUrl)); }, []);
 
   const change = <Key extends keyof FormDraft>(key: Key, value: FormDraft[Key]) => {
@@ -125,7 +130,7 @@ export function ProductDraftPage(): JSX.Element {
   const canPublish = minimumProblems(draft).length === 0 && confirmed && operation !== "publishing";
   if (publishedProduct) return <PublishedSuccess product={publishedProduct} />;
 
-  return <main className="product-draft-page py-8 md:py-12">
+  return <main className="product-draft-page py-8 md:py-12" data-hydrated={hydrated ? "true" : "false"}>
     <p role="status" aria-live="polite" className="product-draft-status">{status}</p>
     <section aria-labelledby="product-draft-heading" className="product-draft-card">
       <p className="eyebrow">商品上架原型</p><h1 id="product-draft-heading">新增一項茶品</h1>

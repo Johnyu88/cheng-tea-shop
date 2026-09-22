@@ -209,7 +209,7 @@ Wave 6's implementation and unit/component/integration coverage are verified loc
 | Frontend shopping journey Chromium gate | ✅ | 14/14 storefront, cart, checkout, product-draft, responsive, and accessibility journeys passed |
 | Primary storefront axe coverage | ✅ | Homepage plus product detail, cart, checkout, and product draft have no detectable axe violations |
 | Production build and static output | ✅ | Next.js Webpack build passed; standalone static/public assets synchronized for acceptance server |
-| WebKit gate | 🟡 | Blocked by missing `webkit-2359/Playwright.exe`; rerun on a clean runner with WebKit installed |
+| WebKit gate | ✅ | Official Playwright WebKit install completed with Node `--use-system-ca`; full acceptance passed 14/14 |
 | Docker smoke gate | 🟡 | Docker CLI unavailable locally; rerun in CI/clean runner |
 | Accessibility contrast repair | ✅ | Catalog count now uses an accessible foreground color; no new axe violations |
 | Real preview deployment | ⬜ | Requires explicit environment/credential authorization and cost review |
