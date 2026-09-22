@@ -341,5 +341,5 @@ Follow `RESUME_PROMPT.md`, `AGENTS.md`, and `WORKFLOW.md`. If newer explicit use
 - Extended adapter error mapping with `publishing -> publishing-unavailable`; existing Mock Publishing `invalid-draft` behavior remains unchanged.
 - Added Publishing and ERP adapter override/swapping tests plus a cross-service check that all local validation failures expose the same `{ code, message, retryable }` shape.
 - Contract coverage matrix is recorded in `CAPABILITY_MAP.md` section N and `WHITEPAPER.md` section 41. Catalog, Cart, Checkout, Payment, Logistics, Publishing, and ERP now all have local DTO/interface/validation/error/fake/swap coverage.
-- Verification after this slice: focused contracts 15/15; full Vitest 16 files / 112 tests; TypeScript passed; ESLint 0 errors with one existing image warning; Webpack build passed; Chromium 14/14 and WebKit 14/14 passed with one worker per browser.
+- Verification after this slice: focused contracts 14/14; full Vitest 16 files / 112 tests; TypeScript passed; ESLint 0 errors with one existing image warning; Webpack build passed; Chromium 14/14 and WebKit 14/14 passed with one worker per browser.
 - No real ERP, CMS, database, payment, logistics, authentication, persistence, preview, Docker, or paid service was used. `AGENTS.md` and `next-env.d.ts` remain untouched and uncommitted.

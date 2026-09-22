@@ -484,7 +484,7 @@ GitHub 是正式文件與程式來源。聊天中的新指令若尚未寫入 Git
 - 新增 `validateProductDraftDto`、`validateErpProductUpsertDto`、`validateErpOrderSyncDto`，錯誤分別為 `invalid-publishing-request` 與 `invalid-erp-request`。Publishing adapter error source 也納入 normalized mapping，對應 `publishing-unavailable`；既有 draft validation 的 `invalid-draft` 行為不變。
 - `CommerceProvider` 的 Publishing override 與 integration bundle 的 ERP override 均有 identity-preserving swapping tests；跨服務測試確認所有 local failure 都維持 `{ code, message, retryable }` error shape。
 - Phase 8 contract coverage：Catalog、Cart、Checkout、Payment、Logistics、Publishing、ERP 均已完成 DTO／interface、runtime validation、error model、local fake、override／swapping test 與 UI regression coverage。這只代表本機 contract hardening，不代表真實 provider readiness。
-- 驗證結果：focused integration contracts 15/15；完整 Vitest 16 files／112 tests；TypeScript 通過；ESLint 0 errors（既有 `<img>` warning）；Webpack production build 通過；Chromium/WebKit 各 14/14 通過（單 worker）。
+- 驗證結果：focused integration contracts 14/14；完整 Vitest 16 files／112 tests；TypeScript 通過；ESLint 0 errors（既有 `<img>` warning）；Webpack production build 通過；Chromium/WebKit 各 14/14 通過（單 worker）。
 - 明確未完成：真實 ERP、CMS、資料庫、登入、持久化、付款授權、物流建立、preview、Docker 與真人走查。
 
 ### Wave 1 implementation status — 2026-09-16
