@@ -399,3 +399,12 @@ GitHub 是正式文件與程式來源。聊天中的新指令若尚未寫入 Git
 - 依官方 `frappe/frappe_docker` 的 `pwd.yml` disposable demo 路徑，實體 ERPNext 驗證被標記 `BLOCKED_EXTERNAL`；未安裝 Docker、未啟動 ERPNext、未修改系統安全設定、未開放公開網路。
 - 已記錄日後只用 synthetic data 的商品／規格、庫存、訂單／狀態、API 認證與 DTO mapping 驗證步驟，以及無 Docker 時沿用 Phase 10-B fixture contract 的替代方案。
 - 實體測試執行數為 0/4；因此沒有任何真實 ERP API、權限、資料庫 constraint、庫存 reservation 或 order transaction 結果可宣稱。
+
+
+## 49. Phase 10-C ERPNext physical verification — 2026-09-23
+
+- Docker Desktop 4.92.0 with Engine 29.8.0 is installed and healthy on the WSL2 backend. WSL2 reports 2.7.14.0; hardware virtualization is enabled; the host has about 63.2 GB RAM and more than 3 TB free on C:.
+- The official `frappe/frappe_docker` `pwd.yml` was used for a disposable local ERPNext v16.35.0 test. The local copy `pwd-local.yml` binds only to `127.0.0.1:18080`; no public or LAN exposure was opened.
+- Synthetic-only API verification succeeded for Administrator session authentication, Item `SYN-TEA-001`, Standard Selling price TWD 150, Bin quantity 10, Customer `Synthetic Customer`, and submitted Sales Order `SAL-ORD-2026-00001` for TWD 300 with status `To Deliver and Bill`.
+- The project now contains a small physical-response boundary in `lib/domain/erpnext-physical-mapping.ts`, with a regression test in `tests/phase-10c-erpnext-physical-mapping.test.ts`. It maps captured Item, Price, Bin, Customer, and Sales Order shapes into existing project DTOs without changing UI consumers.
+- Focused Phase 10-C mapper verification passes 1/1. No persistent API key, password, session cookie, payment data, logistics integration, formal ERP adoption, or real customer data was added. The earlier blocked-before-installation note is historical and superseded by this local verification.

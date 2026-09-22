@@ -248,17 +248,17 @@ Phase 10 is planning-only. No real customer or product data has been sent to an 
 
 **PoC conclusion:** Vendure is the easiest current TypeScript boundary fit and needs the least mapping. ERPNext needs more custom mapping but supplies broader ERP capabilities. No formal adoption decision was made; next work requires an explicit sandbox／license／operations gate.
 
-## V. Phase 10-C ERPNext physical environment verification — blocked_external — 2026-09-23
+## V. Phase 10-C ERPNext physical environment verification — locally verified — 2026-09-23
 
 | Gate | Status | Evidence |
 |---|---:|---|
-| Docker CLI／daemon | ⬜ | `docker version`／`docker info`: command not found |
-| Memory capacity | ⬜ | Windows CIM query denied; no sufficient-resource claim |
-| Disk preflight | 🟡 | C: approximately 3.79 TB free; Docker capacity still unknown |
-| Official ERPNext setup | ⬜ | `frappe/frappe_docker`／`pwd.yml` reviewed only; not executed |
-| Product／variant read | ⬜ | No real ERPNext server available |
-| Inventory query | ⬜ | No real ERPNext server available |
-| Synthetic order/status | ⬜ | No real ERPNext server available |
-| API authentication／DTO mapping | ⬜ | Only Phase 10-B synthetic adapter evidence exists |
+| Docker CLI／daemon | ✅ | Docker Desktop 4.92.0, Engine 29.8.0, WSL2 backend; daemon healthy |
+| Hardware／memory／disk preflight | ✅ | Virtualization enabled; Ryzen 9 7945HX; ~63.2 GB RAM; C: had >3 TB free |
 
-Phase 10-C is blocked before installation. Do not interpret Phase 10-B fixtures as real ERP verification.
+| Official ERPNext setup | ✅ | Official frappe/frappe_docker pwd.yml copied to local-only pwd-local.yml; ERPNext v16.35.0 running |
+| Product／variant read | ✅ | Synthetic Item SYN-TEA-001 and Standard Selling price read via authenticated API |
+| Inventory query | ✅ | Bin reported 10 units in Synthetic Stores - STC |
+| Synthetic order/status | ✅ | Sales Order SAL-ORD-2026-00001, TWD 300, status To Deliver and Bill |
+| API authentication／DTO mapping | ✅ | Session login resolved Administrator; Phase 10-C capture mapper test passes |
+
+The previous blocked-before-installation note is historical. This local disposable verification supersedes it; it does not constitute production approval or formal ERP adoption.

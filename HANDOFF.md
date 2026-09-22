@@ -1,6 +1,6 @@
 # HANDOFF
 
-Last updated: 2026-09-21
+Last updated: 2026-09-23
 
 ## Wave 1 status
 
@@ -280,3 +280,14 @@ Follow `RESUME_PROMPT.md`, `AGENTS.md`, and `WORKFLOW.md`. If newer explicit use
 - Physical verification result is 0/4: product／variant, inventory, synthetic order/status, and API authentication were not tested against a real ERPNext server.
 - Alternative remains Phase 10-B synthetic ERPNext-shaped fixtures for DTO/error/adapter regression. It cannot prove real endpoint schema, permissions, required fields, stock reservations, transactions, or backup/restore.
 - Next action requires a separately authorized Docker-capable isolated environment. Do not proceed with ERP installation or formal adoption automatically. Preserve `next-env.d.ts` untouched.
+
+
+## Phase 10-C ERPNext physical verification — locally verified — 2026-09-23
+
+- Docker Desktop 4.92.0 with Engine 29.8.0 is installed and healthy on the WSL2 backend. WSL2 reports version 2.7.14.0; hardware virtualization is enabled; the host has about 63.2 GB RAM and more than 3 TB free on C:.
+- Official `frappe/frappe_docker` was cloned and its `pwd.yml` was adapted only for this disposable local test as `pwd-local.yml`, binding the frontend to `127.0.0.1:18080` instead of all interfaces. No public or LAN exposure was opened.
+- ERPNext v16.35.0 is running with synthetic data only. Authenticated session login resolved `Administrator`; no persistent API key or credential was committed.
+- Verified through the real local ERPNext API: Item `SYN-TEA-001`, Standard Selling price TWD 150, Bin quantity 10 in `Synthetic Stores - STC`, Customer `Synthetic Customer`, and submitted Sales Order `SAL-ORD-2026-00001` for TWD 300 with status `To Deliver and Bill`.
+- Added `lib/domain/erpnext-physical-mapping.ts` and `tests/phase-10c-erpnext-physical-mapping.test.ts`. The mapper composes the captured Item, Price, Bin, Customer, and Sales Order response shapes into the existing project DTO boundary.
+- Focused Phase 10-C mapper verification passes 1/1. This is a local disposable integration verification, not production approval, formal ERP adoption, payment/logistics integration, or real-customer-data authorization.
+- Pre-existing `next-env.d.ts` remains untouched and unstaged. The older blocked-before-installation entry above is historical and superseded by this checkpoint.
