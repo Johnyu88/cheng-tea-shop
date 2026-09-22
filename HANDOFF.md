@@ -258,6 +258,13 @@ The Wave 6 filesystem/build limitation was carried into Wave 7-A and resolved fo
 
 Keep Docker as the only local environment backlog item. The next safe frontend stage is to prepare the older-user task-based validation plan and review checklist; do not start paid preview deployment without explicit environment and credential authorization. Real participant validation still requires arranging participants.
 
+## Older-user walkthrough preparation — 2026-09-22
+
+- Added `docs/testing/older-user-walkthrough.md` with facilitator wording, eight tasks (T1–T8), observation categories, issue template, success/failure criteria, privacy rules, and localhost setup.
+- Added `docs/superpowers/plans/2026-09-22-older-user-walkthrough-preparation.md` as the offline execution plan. It uses only synthetic values and the existing Mock services.
+- No real participant session, preview deployment, paid service, payment credential, login, persistence, ERP, or customer data was used.
+- Next safe action: run a facilitator dry run locally, record no-participant observations separately, and only schedule real sessions when participants and consent handling are available. Docker remains an environment backlog item.
+
 ## Startup reminder
 
 Follow `RESUME_PROMPT.md`, `AGENTS.md`, and `WORKFLOW.md`. If newer explicit user instructions conflict with this handoff, the newer instruction wins and the discrepancy must be recorded.

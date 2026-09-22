@@ -371,6 +371,12 @@ GitHub 是正式文件與程式來源。聊天中的新指令若尚未寫入 Git
 - 全域 ESLint 以 0 errors 結束，保留既有 `product-detail-page.tsx` 一項 `@next/next/no-img-element` warning。Docker CLI 仍不可用，列為環境待辦，不阻擋前台品質關卡。
 - 本階段仍不擴充真實付款、登入、持久化、ERP、顧客資料或付費雲端部署；正式 preview 與真實年長使用者走查仍需明確授權、參與者與環境條件。
 
+## 33. 年長使用者參與走查本機準備 — 2026-09-22
+
+- 新增 `docs/testing/older-user-walkthrough.md`，包含主持人開場腳本、T1–T8 購物與商品草稿任務、字體／按鈕／導覽／商品理解／購物車／checkout／錯誤提示觀察表、問題紀錄格式及 P0–P3 判定標準。
+- 新增 `docs/superpowers/plans/2026-09-22-older-user-walkthrough-preparation.md`，定義只使用 localhost、Mock 資料與合成聯絡資料的離線執行方式；不保存真人個資、不啟動 preview、不使用付費服務。
+- 本階段只完成測試準備，不宣稱已完成真人可用性驗證。Wave 7-B 的準備通過線為主要 T1–T5 任務各有完整成功紀錄、無阻斷購物路徑的 P0，且不得誤解 placeholder、Mock checkout 或合成上架結果。
+
 ### Wave 1 implementation status — 2026-09-16
 
 - Branch `feature/wave-1-reproducible-baseline` and draft PR #12 contain a clean Next.js 16.3.5 App Router baseline with Node 24.19.0, pnpm 11.19.0, strict TypeScript, Tailwind 4, shadcn conventions, Vitest/RTL contracts, a minimal health route, standalone non-root Dockerfile, and Chromium/WebKit plus axe checks.
