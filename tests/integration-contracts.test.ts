@@ -13,10 +13,15 @@ import {
   createInMemoryLogisticsService,
   createInMemoryPaymentService,
   mapAdapterError,
+  validateCatalogQuery,
+  validateCartDto,
+  validateCheckoutRequestDto,
   type CatalogService,
+  type CheckoutService,
   type ErpService,
   type LogisticsService,
   type PaymentService,
+  type Product,
 } from "@/lib/domain";
 
 describe("Phase 8 integration contracts", () => {
@@ -147,5 +152,64 @@ describe("Phase 8 integration contracts", () => {
     expect(adapters.paymentService).toBeDefined();
     expect(adapters.logisticsService).toBeDefined();
     expect(adapters.erpService).toBeDefined();
+  });
+
+  it("validates Catalog, Cart, and Checkout DTO boundaries with stable errors", () => {
+    expect(validateCatalogQuery({ limit: 0 })).toEqual({
+      ok: false,
+      error: { code: "invalid-catalog-query", message: "目錄查詢條件無效。", retryable: false },
+    });
+    expect(validateCartDto({ lines: [], subtotal: { currency: "USD", amount: 0 } })).toEqual({
+      ok: false,
+      error: { code: "invalid-cart", message: "購物車資料無效。", retryable: false },
+    });
+    expect(validateCheckoutRequestDto({ draft: {}, cart: {} })).toEqual({
+      ok: false,
+      error: { code: "invalid-checkout-request", message: "結帳資料無效。", retryable: false },
+    });
+  });
+
+  it("keeps Cart coupled to the injected Catalog adapter, not a concrete mock", async () => {
+    const product: Product = {
+      id: "alternate-product",
+      slug: "alternate-product",
+      name: "替換目錄茶品",
+      category: "green" as const,
+      tasteTags: ["light"],
+      summary: "契約測試商品",
+      image: { src: null, alt: "替換目錄茶品圖示", isPlaceholder: true },
+      variants: [
+        {
+          id: "alternate-variant",
+          specification: "一盒",
+          price: { currency: "TWD" as const, amount: 360 },
+          inventoryStatus: "available" as const,
+          maxQuantity: 2,
+        },
+      ],
+      publication: "published" as const,
+    };
+    const alternateCatalog: CatalogService = {
+      listProducts: async () => ({ ok: true, value: { items: [product], nextCursor: null, total: 1 } }),
+      getProductBySlug: async () => ({ ok: true, value: product }),
+    };
+    const services = createInMemoryCommerceServices({ catalogService: alternateCatalog });
+
+    const result = await services.cartService.addItem("alternate-product", "alternate-variant", 1);
+
+    expect(result).toMatchObject({ ok: true, value: { lines: [{ productName: "替換目錄茶品" }] } });
+  });
+
+  it("swaps Checkout independently while preserving the commerce bundle boundary", () => {
+    const alternateCheckout: CheckoutService = {
+      validate: async (draft) => ({ ok: true, value: draft }),
+      submit: async (_draft, cart) => ({
+        ok: true,
+        value: { orderReference: "ALTERNATE-ORDER", status: "confirmed", total: cart.subtotal },
+      }),
+    };
+    const services = createInMemoryCommerceServices({ checkoutService: alternateCheckout });
+
+    expect(services.checkoutService).toBe(alternateCheckout);
   });
 });

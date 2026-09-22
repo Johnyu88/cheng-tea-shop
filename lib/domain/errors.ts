@@ -12,6 +12,9 @@ export type DomainErrorCode =
   | "logistics-unavailable"
   | "erp-unavailable"
   | "adapter-invalid-response"
+  | "invalid-catalog-query"
+  | "invalid-cart"
+  | "invalid-checkout-request"
   | "checkout-unavailable"
   | "publishing-unavailable";
 

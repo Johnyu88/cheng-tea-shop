@@ -462,6 +462,14 @@ GitHub 是正式文件與程式來源。聊天中的新指令若尚未寫入 Git
 - TDD 契約測試覆蓋 DTO shape、付款敏感欄位排除、錯誤映射、fake adapter 結果、adapter swapping 與可替換 interface。驗證結果：Vitest 16 files／103 tests、TypeScript 通過、ESLint 0 errors（保留既有 `no-img-element` warning）、Webpack production build 通過，Chromium/WebKit storefront regression 各 14/14 通過。
 - 本切片不新增真實付款、登入、持久化、物流、ERP、preview、Docker 或付費服務；真人走查仍是年長使用者易懂性、按鈕直覺性與商品資訊理解的唯一驗證方式。
 
+## 39. Phase 8 Catalog / Cart / Checkout boundary hardening — 2026-09-22
+
+- 新增本機 runtime DTO validators：`validateCatalogQuery`、`validateCartDto`、`validateCheckoutRequestDto`。它們只驗證 service boundary 的資料形狀與基本不變量，不改變現有 UI 流程，也不保存資料。
+- Catalog query 的非法 filter、cursor、limit 會回傳 `invalid-catalog-query`；Cart 會拒絕非法金額、數量、庫存狀態或 line shape；Checkout request 會拒絕不完整聯絡、配送／付款方式或購物車 shape。錯誤均為 project-owned、non-retryable domain errors。
+- `createInMemoryCommerceServices` 仍以注入的 Catalog 建立預設 Cart，契約測試證明替換 Catalog 後 Cart 仍透過替換後的 adapter 解析商品；Checkout 也能獨立替換而不改變 provider contract。
+- TDD／regression 結果：focused integration contracts 9/9；完整 Vitest 16 files／107 tests；TypeScript 通過；ESLint 0 errors（既有 `product-detail-page.tsx` 一項 `<img>` warning）；Webpack production build 通過；Chromium/WebKit 各 14/14 通過（單 worker）。
+- 曾嘗試兩個瀏覽器平行跑 28 tests，出現 1 個共享 standalone mock 狀態的 URL race；單 worker 重跑相關與完整 suite 均通過，未將它誤修成產品行為。未接真實資料庫、付款、物流、ERP 或外部服務。
+
 ### Wave 1 implementation status — 2026-09-16
 
 - Branch `feature/wave-1-reproducible-baseline` and draft PR #12 contain a clean Next.js 16.3.5 App Router baseline with Node 24.19.0, pnpm 11.19.0, strict TypeScript, Tailwind 4, shadcn conventions, Vitest/RTL contracts, a minimal health route, standalone non-root Dockerfile, and Chromium/WebKit plus axe checks.

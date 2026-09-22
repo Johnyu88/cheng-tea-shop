@@ -317,3 +317,12 @@ Follow `RESUME_PROMPT.md`, `AGENTS.md`, and `WORKFLOW.md`. If newer explicit use
 - `AGENTS.md` and `next-env.d.ts` remain uncommitted and untouched. `AGENTS.md` has no textual diff and its modified status is an environment/index condition; `next-env.d.ts` contains prior Next-generated references. They are excluded from the Phase 8 commit.
 - Next step after push: treat this first contract slice as complete; only continue with another independently bounded local contract improvement if a concrete gap is documented. Keep human validation and all real integrations externally gated.
 - Follow-up local slice: `createInMemoryIntegrationAdapters` groups the three external-facing fake adapters behind one replacement boundary; it remains synthetic and is not connected to checkout or any external service.
+
+## Phase 8 Catalog / Cart / Checkout boundary slice — 2026-09-22
+
+- Added `boundary-validation.ts` with runtime validation for Catalog queries, Cart DTOs, and Checkout request DTOs. New stable errors are `invalid-catalog-query`, `invalid-cart`, and `invalid-checkout-request`; all are non-retryable local domain errors.
+- `createInMemoryCommerceServices` now has explicit contract coverage proving that a Cart created beside an alternate Catalog resolves items through that injected Catalog, and that Checkout can be replaced independently.
+- Verification: focused contract test 9/9; full Vitest 16 files / 107 tests; TypeScript passed; ESLint 0 errors with the existing `no-img-element` warning; Webpack build passed; Chromium 14/14 and WebKit 14/14 passed with one worker per browser.
+- A combined parallel Chromium/WebKit run had one product-cart URL race while 27/28 passed. The affected product-cart test and the full suite passed when rerun serially; no production or test code was changed for this environmental concurrency observation.
+- Scope remains local-only: no database, real catalog, payment, logistics, ERP, authentication, persistence, preview, Docker, or paid service.
+- `AGENTS.md` and `next-env.d.ts` remain untouched and uncommitted. Before the next commit, preserve these files exactly as local environment state.

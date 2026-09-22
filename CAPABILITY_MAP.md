@@ -250,6 +250,9 @@ Wave 6's implementation and unit/component/integration coverage are verified loc
 | Grouped integration adapter boundary | ✅ | `createInMemoryIntegrationAdapters` exposes Payment/Logistics/ERP as one replaceable local bundle |
 | Frontend service injection | ✅ | `CommerceProvider` now obtains its default Catalog/Cart/Checkout/Publishing bundle from `createInMemoryCommerceServices`; existing injection remains supported |
 | Contract/regression verification | ✅ | 16 Vitest files / 103 tests, TypeScript, lint, Webpack build, Chromium 14/14, WebKit 14/14 |
+| Catalog/Cart/Checkout boundary validation | ✅ | Runtime validators reject malformed query, cart, and checkout DTOs with stable non-retryable domain errors |
+| Catalog-to-Cart adapter swapping | ✅ | Default in-memory Cart is constructed with the injected Catalog adapter; contract test adds an item through an alternate Catalog implementation |
+| Independent Checkout swapping | ✅ | Commerce bundle accepts an alternate Checkout implementation without changing the provider contract |
 | Real integrations | ⬜ | Payment, logistics, ERP, authentication, persistence, preview, and Docker remain outside this slice |
 
-Phase 8 first slice is complete. The next safe work is contract maintenance or a separately approved boundary slice; do not infer real-provider readiness from these local fakes.
+Phase 8 first and second local slices are complete. The next safe work is contract maintenance or a separately approved boundary slice; do not infer real-provider readiness from these local fakes. Full browser regression is stable when each browser project runs with one worker; a parallel run exposed a shared standalone mock-state race and was not treated as a product failure.

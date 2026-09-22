@@ -1,5 +1,10 @@
 export { mapAdapterError } from "./errors";
 export type { DomainError, DomainErrorCode } from "./errors";
+export {
+  validateCatalogQuery,
+  validateCartDto,
+  validateCheckoutRequestDto,
+} from "./boundary-validation";
 export type { ServiceResult } from "./result";
 export type { CatalogService } from "./catalog-service";
 export type { CartService } from "./cart-service";
