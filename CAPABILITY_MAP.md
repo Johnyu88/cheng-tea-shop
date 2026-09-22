@@ -318,3 +318,17 @@ Phase 9-A is **preparation-ready only**. Do not move human-validation or real-co
 | Real content imported | ⬜ | No real name, price, origin, year, image, or copy has been supplied or changed |
 
 The specification deliberately reserves fields not currently supported by the prototype runtime (`harvest_year`, `weight_g`, `aftertaste`, full brewing, evidence, and sort) without implementing them. Wait for store-provided data and evidence before any replacement.
+
+## R. Phase 9-A product import toolchain — ready, no real data loaded — 2026-09-22
+
+| Toolchain capability | Status | Evidence / boundary |
+|---|---:|---|
+| CSV／JSON empty templates | ✅ | Canonical CSV header and empty JSON array; no product content included |
+| Field/type validator | ✅ | `scripts/phase-9a-product-import.mjs` checks required fields, enum, integer TWD price, positive weight, sort, and publication evidence |
+| Duplicate／format checks | ✅ | Reports missing fields, duplicate IDs／sort orders, invalid price／weight, JSON／CSV shape errors |
+| Image ID/name validation | ✅ | Checks `<content-id>__<view>__vNN` naming, allowed extension, metadata, hash, and optional image directory existence |
+| Placeholder／synthetic map | ✅ | `phase-9a-placeholder-synthetic-map.md` records current values without treating them as import data |
+| Dry-run and error report | ✅ | CLI outputs JSON with `wouldWrite: false`; `--apply` is explicitly rejected; optional report output is separate |
+| Real data loaded | ⬜ | Waiting for store-provided package; current fixtures and placeholder remain unchanged |
+
+This is an offline validation toolchain only. It does not overwrite catalog data, upload images, call external services, or add business behavior.

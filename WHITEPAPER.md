@@ -525,3 +525,11 @@ GitHub 是正式文件與程式來源。聊天中的新指令若尚未寫入 Git
 - `harvest_year`、`weight_g`、`aftertaste`、完整 brewing、evidence、sort 等欄位目前只是匯入規格保留欄位；沒有修改現有 TypeScript domain、UI、資料庫或外部 adapter。
 - 驗證流程已定義格式／型別／事實證據／圖片／安全／發布核准／TypeScript／lint／build／axe／Chromium／WebKit 與真人理解閘門。本次沒有填寫任何真實商品內容，也沒有替換 placeholder。
 - 等待店家提供符合規格的資料包與證據後再進行審查；在此之前不匯入、不部署、不啟動付費服務。
+
+## 45. Phase 9-A 商品資料匯入工具鏈 — 2026-09-22
+
+- 建立空白 CSV／JSON 匯入模板與 placeholder／synthetic data 對照表；模板只有 canonical header 或空陣列，不包含任何真實或新增的商品內容。
+- 新增 `scripts/phase-9a-product-import.mjs`：支援 CSV／JSON parsing、必要欄位／enum／型別檢查、缺漏、重複 `content_id`／`sort_order`、價格／重量格式、圖片檔名與 `content_id` 對應、圖片 metadata／SHA-256、可選圖片目錄存在性與 published evidence 檢查。
+- 工具預設為 dry-run，輸出含 row／field／code／message 的清楚 JSON error report、warnings、accepted IDs 與 `wouldWrite: false`；`--apply` 明確拒絕，不會覆蓋既有 fixture、圖片或 placeholder。
+- `phase-9a-product-import.test.ts` focused 5/5 通過；preflight 會檢查模板、對照表、工具與關鍵安全 marker。此工具鏈不接外部服務、不上傳圖片、不新增業務功能。
+- 等待店家提供符合匯入規格的真實資料與證據後，才可另行審查 staging；目前 synthetic catalog 與 placeholder 完全不變。

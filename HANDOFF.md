@@ -367,3 +367,11 @@ Follow `RESUME_PROMPT.md`, `AGENTS.md`, and `WORKFLOW.md`. If newer explicit use
 - Covered fields: product name, tea type, origin, harvest year, weight, TWD price, aroma, taste, aftertaste, brewing guidance, inventory, product image, sort order, and publication status. No real values were entered.
 - The spec explicitly reserves fields not currently supported by the prototype domain without changing runtime code. Missing or unverified facts remain `null`; failed image/content validation preserves the existing synthetic fixture and labeled placeholder.
 - Waiting for the store to provide a data package, image permissions, fact sources, and reviewer information. Do not import, replace, deploy, or start paid/external services until then.
+
+## Phase 9-A product import toolchain — ready, waiting for store data — 2026-09-22
+
+- Added empty templates: `docs/testing/phase-9a-product-import-template.csv` and `.json`; added template usage notes and `phase-9a-placeholder-synthetic-map.md`. No real or fabricated product row was added to either template.
+- Added `scripts/phase-9a-product-import.mjs` with CSV/JSON parsing, required/type checks, duplicate ID/sort checks, price/weight validation, image filename-to-content-ID validation, metadata/hash checks, optional image-directory existence checks, placeholder warnings, and publication evidence gates.
+- The CLI is dry-run only: it emits a structured JSON report with `wouldWrite: false`; `--apply` is rejected, and it never overwrites existing fixtures or uploads files. Error reports include row, field, stable code, and readable message.
+- Added typed declaration coverage and `tests/phase-9a-product-import.test.ts`. Focused import tests passed 5/5; full Vitest remains the project regression gate. Phase 9-A preflight checks the templates, map, tool markers, and preparation docs.
+- No external service, database, payment, logistics, ERP, preview, or formal deployment was started. Wait for store data, image permissions, fact sources, and reviewer information.
