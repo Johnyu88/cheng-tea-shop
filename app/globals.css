@@ -248,7 +248,12 @@ h1 {
   margin-bottom: 0.75rem;
 }
 
-.catalog-count,
+.catalog-count {
+  color: var(--ink);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
 .product-taste {
   color: var(--tea-brown);
   font-size: 0.85rem;

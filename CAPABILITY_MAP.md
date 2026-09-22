@@ -201,3 +201,16 @@ Wave 5 verification was recorded in `.superpowers/sdd/2026-09-20-product-detail-
 | Wave 6 non-goals | ✅ | No real authentication, payment, persistence, ERP integration, file upload, customer/order data, or provider credentials were added |
 
 Wave 6's implementation and unit/component/integration coverage are verified locally, but its final build/browser/container gate remains incomplete. See `.superpowers/sdd/2026-09-21-wave-6-checkout-product-draft/final-verification-report.md` for exact commands and errors.
+
+## J. Wave 7-A frontend shopping quality gate — 2026-09-22
+
+| Capability | Status | Evidence / next action |
+|---|---:|---|
+| Frontend shopping journey Chromium gate | ✅ | 14/14 storefront, cart, checkout, product-draft, responsive, and accessibility journeys passed |
+| Primary storefront axe coverage | ✅ | Homepage plus product detail, cart, checkout, and product draft have no detectable axe violations |
+| Production build and static output | ✅ | Next.js Webpack build passed; standalone static/public assets synchronized for acceptance server |
+| WebKit gate | 🟡 | Blocked by missing `webkit-2359/Playwright.exe`; rerun on a clean runner with WebKit installed |
+| Docker smoke gate | 🟡 | Docker CLI unavailable locally; rerun in CI/clean runner |
+| Accessibility contrast repair | ✅ | Catalog count now uses an accessible foreground color; no new axe violations |
+| Real preview deployment | ⬜ | Requires explicit environment/credential authorization and cost review |
+| Older-user task-based validation | ⬜ | Requires real participants after the operable prototype is available |

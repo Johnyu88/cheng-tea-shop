@@ -241,9 +241,22 @@ Review the Wave 4 homepage/catalog preview in a browser and confirm its responsi
 - Pre-existing `next-env.d.ts` remains modified and intentionally unstaged; its working diff is line-ending normalization only.
 - Full evidence, limits, risks, and the next action are in `.superpowers/sdd/2026-09-21-wave-6-checkout-product-draft/final-verification-report.md`.
 
-## Current next action
+## Previous Wave 6 next action
 
-Resolve the worktree filesystem/lock restriction in a clean environment, rerun webpack build, Chromium acceptance, and `git diff --check` after the permitted spec-whitespace decision. Then run WebKit/Docker only where their executables are installed; do not add real authentication, payment, persistence, ERP, or upload behavior as part of that verification work.
+The Wave 6 filesystem/build limitation was carried into Wave 7-A and resolved for the local Webpack and Chromium gates in the isolated worktree; WebKit/Docker remain environment-limited.
+
+## Wave 7-A frontend shopping quality gate — 2026-09-22
+
+- Branch/worktree: `codex/wave-7-shopping-quality-gate`, based on merged Wave 6 commit `1aea1bb`; the base checkout and its pre-existing `next-env.d.ts` remain protected.
+- Implemented only evidence-backed fixes: improved catalog count contrast, corrected the stale cart e2e expectation to the `/checkout` link contract, and scoped checkout alert assertions away from Next's empty route-announcer alert.
+- Verification: Vitest 15 files / 96 tests, TypeScript, Webpack production build, full diff check, and Chromium 14/14 passed. Axe passed for homepage and the primary storefront routes: product detail, cart, checkout empty state, and product draft.
+- Full ESLint exited 0 with one existing `@next/next/no-img-element` warning in `features/product/components/product-detail-page.tsx`; secret/privacy scan had no matches.
+- Environment limits: WebKit could not launch because `webkit-2359/Playwright.exe` is absent; Docker CLI is unavailable. These are recorded as unverified, not passed.
+- GitHub state: `LOCAL_COMMITS_PENDING` until this Wave 7-A commit is pushed; no credentials, payment keys, API keys, or customer data were added.
+
+## Current next action after Wave 7-A
+
+Run WebKit and Docker on a clean runner when those capabilities are available. A preview deployment would require explicit environment/credential authorization and may incur cost, so do not initiate it automatically. Older-user task-based testing also requires human participants; keep the current frontend prototype stable until that can be arranged.
 
 ## Startup reminder
 

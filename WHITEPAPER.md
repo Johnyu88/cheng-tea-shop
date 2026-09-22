@@ -362,6 +362,14 @@ GitHub 是正式文件與程式來源。聊天中的新指令若尚未寫入 Git
 - Production webpack build 受本機檔案鎖定環境阻擋，Chromium 因無 fresh standalone build 未啟動；WebKit 執行檔與 Docker CLI 不在目前環境。
 - 最終原型仍明確不包含真實身份驗證、付款、持久化、照片上傳、ERP、顧客或訂單資料；完整證據與限制見 `final-verification-report.md`。
 
+## 32. Wave 7-A 前台購物品質關卡 — 2026-09-22
+
+- 在隔離的 `codex/wave-7-shopping-quality-gate` 分支，以 clean production build 執行前台購物品質關卡；完整 Vitest 15 個檔案／96 個測試、TypeScript、Webpack production build 與 diff check 通過。
+- Chromium storefront gate 通過 14/14：首頁、健康檢查、首頁 axe、商品詳情、購物車、checkout、重複提交保護、手機版 overflow 與商品草稿流程；新增主要 storefront routes 的 axe coverage，`/tea/mock-tea-001`、`/cart`、`/checkout`、`/admin/products/new` 均無 detectable violations。
+- 實際修正三項品質問題：`.catalog-count` 改用符合對比要求的前景色；購物車 e2e 更新為 Wave 6 已實作的 `/checkout` link contract；checkout e2e 的 alert assertion 排除 Next route-announcer 空 alert。
+- 全域 ESLint 以 0 errors 結束，保留既有 `product-detail-page.tsx` 一項 `@next/next/no-img-element` warning。WebKit 因 `webkit-2359` executable 不存在而未能啟動，Docker CLI 亦不可用；未將兩者宣稱為通過。
+- 本階段仍不擴充真實付款、登入、持久化、ERP、顧客資料或付費雲端部署。下一個需外部能力的階段是取得 WebKit/Docker clean runner，並在明確授權與可用憑證後評估非生產 preview；真實年長使用者走查仍需安排參與者。
+
 ### Wave 1 implementation status — 2026-09-16
 
 - Branch `feature/wave-1-reproducible-baseline` and draft PR #12 contain a clean Next.js 16.3.5 App Router baseline with Node 24.19.0, pnpm 11.19.0, strict TypeScript, Tailwind 4, shadcn conventions, Vitest/RTL contracts, a minimal health route, standalone non-root Dockerfile, and Chromium/WebKit plus axe checks.

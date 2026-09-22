@@ -18,7 +18,7 @@ test("customer can add, update, remove, and empty a cart line", async ({ page })
   await expect(page).toHaveURL(/\/cart$/);
   await expect(page.getByRole("heading", { level: 1, name: "購物車" })).toBeVisible();
   await expect(page.getByRole("region", { name: "購物車摘要" })).toContainText("小計：NT$1,020");
-  await expect(page.getByRole("button", { name: "前往結帳" })).toBeDisabled();
+  await expect(page.getByRole("link", { name: "前往結帳" })).toHaveAttribute("href", "/checkout");
 
   const quantity = page.getByRole("spinbutton", { name: "合成茶品 001數量" });
   await quantity.fill("3");

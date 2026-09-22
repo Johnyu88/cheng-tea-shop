@@ -42,12 +42,12 @@ test("checkout recovers from step errors without losing entered values", async (
   await addTeaAndOpenCheckout(page);
   await page.getByLabel("姓名").fill("陳小姐");
   await page.getByRole("button", { name: "下一步" }).click();
-  await expect(page.getByRole("alert")).toContainText("請填寫手機號碼");
+  await expect(page.getByRole("alert").filter({ hasText: "請填寫手機號碼" })).toContainText("請填寫手機號碼");
 
   await page.getByLabel("手機號碼").fill("0912000000");
   await page.getByRole("button", { name: "下一步" }).click();
   await page.getByRole("button", { name: "下一步" }).click();
-  await expect(page.getByRole("alert")).toContainText("宅配請填寫地址");
+  await expect(page.getByRole("alert").filter({ hasText: "宅配請填寫地址" })).toContainText("宅配請填寫地址");
 
   await page.getByLabel("宅配地址").fill("茶行路 1 號");
   await page.getByRole("button", { name: "下一步" }).click();
