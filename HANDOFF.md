@@ -360,3 +360,10 @@ Follow `RESUME_PROMPT.md`, `AGENTS.md`, and `WORKFLOW.md`. If newer explicit use
 - No human session has occurred. Do not report dry run/e2e as participant evidence. After a real session, update WHITEPAPER, HANDOFF, and CAPABILITY_MAP only with de-identified direct observations and linked issue IDs.
 - Waiting state: participant consent/session and store-approved real photo/copy evidence. No preview, paid service, formal deployment, authentication, persistence, payment, logistics, or ERP work is authorized in this preparation stage.
 - Preserve uncommitted environment files: `AGENTS.md` and `next-env.d.ts` remain untouched and excluded from commits.
+
+## Phase 9-A real product material import specification — ready, awaiting store data — 2026-09-22
+
+- Added `docs/testing/phase-9a-real-product-material-import-spec.md`. It defines the JSON canonical format, CSV header, required/null fields, image requirements, stable IDs, filename/version rules, validation gates, evidence fields, publication status, and placeholder replacement flow.
+- Covered fields: product name, tea type, origin, harvest year, weight, TWD price, aroma, taste, aftertaste, brewing guidance, inventory, product image, sort order, and publication status. No real values were entered.
+- The spec explicitly reserves fields not currently supported by the prototype domain without changing runtime code. Missing or unverified facts remain `null`; failed image/content validation preserves the existing synthetic fixture and labeled placeholder.
+- Waiting for the store to provide a data package, image permissions, fact sources, and reviewer information. Do not import, replace, deploy, or start paid/external services until then.

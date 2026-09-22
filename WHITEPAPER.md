@@ -516,3 +516,12 @@ GitHub 是正式文件與程式來源。聊天中的新指令若尚未寫入 Git
 - The project-owned homepage now has a semantic header, named primary navigation, responsive hero spacing, mist-green / warm-ivory / tea-brown tokens, visible focus treatment, and reduced-motion handling.
 - Product catalog, cart, checkout, orders, payment, ERP, authentication, and real customer data remain intentionally absent.
 - Local verification passed for frozen install, Vitest (2 files / 3 tests), ESLint, TypeScript, and production build. Playwright Chromium/WebKit browsers downloaded, but the six-test e2e run hung locally after browser launch and was stopped; e2e and Docker smoke remain unverified. ESLint is pinned to 9.39.1 because the planned 10.10.0 release is incompatible with the installed Next.js React lint plugin API.
+
+## 44. Phase 9-A 真實商品素材匯入規格 — 2026-09-22
+
+- 建立 `docs/testing/phase-9a-real-product-material-import-spec.md`，只定義真實商品素材的 JSON canonical shape、CSV header、欄位型別／空值規則、圖片格式／尺寸／授權／hash、檔案命名、排序、上下架與證據欄位。
+- 規格涵蓋商品名稱、茶類、產地、年份、重量、價格、香氣、口感、回甘、沖泡建議、庫存、商品圖、排序與上下架狀態；未提供或未證實的值必須是 `null`，不得以 synthetic 值或模型推測代替。
+- 圖片必須能追溯商品對應、來源、公開授權、alt text 與 SHA-256；未通過驗證時維持「商品照片準備中」placeholder。匯入一律先進受控 staging，失敗不覆蓋原 fixture。
+- `harvest_year`、`weight_g`、`aftertaste`、完整 brewing、evidence、sort 等欄位目前只是匯入規格保留欄位；沒有修改現有 TypeScript domain、UI、資料庫或外部 adapter。
+- 驗證流程已定義格式／型別／事實證據／圖片／安全／發布核准／TypeScript／lint／build／axe／Chromium／WebKit 與真人理解閘門。本次沒有填寫任何真實商品內容，也沒有替換 placeholder。
+- 等待店家提供符合規格的資料包與證據後再進行審查；在此之前不匯入、不部署、不啟動付費服務。

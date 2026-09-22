@@ -306,3 +306,15 @@ Phase 9 requires a separate scope decision and is intentionally not implemented 
 | Real content validation | ⬜ | Waiting for store-approved photos, copy, source evidence, and permission |
 
 Phase 9-A is **preparation-ready only**. Do not move human-validation or real-content capabilities to complete until direct evidence is recorded and the three project documents are updated from that evidence.
+
+## Q. Phase 9-A real product material import specification — defined, awaiting store data — 2026-09-22
+
+| Area | Status | Boundary |
+|---|---:|---|
+| Product import field contract | ✅ | JSON canonical shape and CSV header define name, tea type, origin, year, weight, price, aroma, taste, aftertaste, brewing, inventory, image, sort, and publication status |
+| Image requirements and naming | ✅ | Format, dimensions, size, alt text, permission, SHA-256, stable `content_id`, versioned filename rules documented |
+| Validation and evidence gates | ✅ | Type/range, source, permission, hash, safety, publication approval, and regression rules documented |
+| Placeholder replacement flow | ✅ | Staging-first, failure-preserves-placeholder, rollback/version, test and human-validation gates documented |
+| Real content imported | ⬜ | No real name, price, origin, year, image, or copy has been supplied or changed |
+
+The specification deliberately reserves fields not currently supported by the prototype runtime (`harvest_year`, `weight_g`, `aftertaste`, full brewing, evidence, and sort) without implementing them. Wait for store-provided data and evidence before any replacement.
