@@ -272,3 +272,23 @@ Phase 8 first and second local slices are complete. The next safe work is contra
 | ERP | ✅ | ✅ product／order | ✅ adapter mapping | ✅ simulated | ✅ | ✅ unchanged |
 
 All seven service boundaries have local contract hardening. This matrix does not mean any real provider, persistence, authentication, payment authorization, fulfillment, CMS publication, or ERP synchronization is implemented.
+
+## O. Phase 8 closure — completed / integration-ready prototype — 2026-09-22
+
+| Closure check | Status | Evidence |
+|---|---:|---|
+| Unified default service/adaptor factory | ✅ | `createInMemoryCommerceServices` plus `createInMemoryIntegrationAdapters` run the local storefront contracts |
+| Minimal integration smoke | ✅ | `tests/phase-8-integration-smoke.test.tsx`, 2/2: default flow, adapter replacement, error mapping, and UI boundary leakage check |
+| Existing frontend behavior | ✅ | Existing Chromium/WebKit storefront regression each 14/14 |
+| Phase 8 scope boundary | ✅ | No new service type; no real API, database, payment, logistics, ERP, preview, or paid service |
+| Phase 8 status | ✅ | Completed as an integration-ready prototype, not production integration |
+
+### Phase 9 candidates — not started
+
+1. 真人年長使用者走查與可理解性驗證。
+2. 真實商品／素材證據與內容治理。
+3. Preview／Docker／release pipeline readiness。
+4. Authentication、persistence、observability and backup design。
+5. Future tokenized payment、logistics、CMS and ERP integration planning.
+
+Phase 9 requires a separate scope decision and is intentionally not implemented in this closure.

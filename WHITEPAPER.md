@@ -487,6 +487,14 @@ GitHub 是正式文件與程式來源。聊天中的新指令若尚未寫入 Git
 - 驗證結果：focused integration contracts 14/14；完整 Vitest 16 files／112 tests；TypeScript 通過；ESLint 0 errors（既有 `<img>` warning）；Webpack production build 通過；Chromium/WebKit 各 14/14 通過（單 worker）。
 - 明確未完成：真實 ERP、CMS、資料庫、登入、持久化、付款授權、物流建立、preview、Docker 與真人走查。
 
+## 42. Phase 8 closure — completed / integration-ready prototype — 2026-09-22
+
+- 新增最小 integration smoke test：`tests/phase-8-integration-smoke.test.tsx`。它以預設 in-memory factories 完整跑 Catalog → Cart → Checkout，並呼叫 Payment、Logistics、Publishing、ERP local fakes。
+- Smoke 同時驗證任一 boundary adapter 可由 typed override 替換、替換後仍使用相同 `ServiceResult`／error mapping，且 `CommerceProvider` UI probe 只看 service contract，不渲染 `mock`、`simulated` 或 provider 細節。
+- Phase 8 收尾驗證：smoke 2/2；Vitest 17 files／114 tests；TypeScript 通過；ESLint 0 errors（既有 `<img>` warning）；Webpack production build 通過；Chromium 14/14；WebKit 14/14，均以單 worker 執行。
+- Phase 8 狀態標記為 **completed / integration-ready prototype**。此名稱只代表本機 adapter contract 已可替換與驗證，不代表 production-ready 或任何真實服務已接通。
+- Phase 9 僅整理候選：真人年長使用者走查、真實內容證據、preview／Docker／release readiness、身份驗證與持久化、可觀測性與備份，以及未來 tokenized payment／logistics／CMS／ERP integration planning。未開始任何 Phase 9 實作。
+
 ### Wave 1 implementation status — 2026-09-16
 
 - Branch `feature/wave-1-reproducible-baseline` and draft PR #12 contain a clean Next.js 16.3.5 App Router baseline with Node 24.19.0, pnpm 11.19.0, strict TypeScript, Tailwind 4, shadcn conventions, Vitest/RTL contracts, a minimal health route, standalone non-root Dockerfile, and Chromium/WebKit plus axe checks.
