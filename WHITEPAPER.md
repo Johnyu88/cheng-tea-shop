@@ -452,6 +452,16 @@ GitHub 是正式文件與程式來源。聊天中的新指令若尚未寫入 Git
 - `AGENTS.md`：目前無內容 diff，Git 狀態的 M 為工作樹／換行／索引狀態；內容 hash 與 HEAD 一致，未由本次施工圖工作修改或提交。Next dev 曾自動插入規則，但已不保留該內容。
 - `next-env.d.ts`：包含 Next.js 產生的 `.next/types` references 與 generated comment；在前一階段本機 Next build/dev 後已存在，並非本次文件整理產生。維持未提交，不覆蓋、不提交。
 
+## 38. Phase 8 integration-readiness contract hardening — 2026-09-22
+
+- 建立 `CatalogProductDto`、`CatalogPageDto`、`CartDto`、`CheckoutRequestDto`、`CheckoutReceiptDto`、`ProductDraftDto`，並建立 Payment、Logistics、ERP 的窄化 request/result DTO。Payment DTO 僅接受訂單參照、付款方式與金額，不接收 raw card number、security code、token 或其他付款憑證。
+- 新增 `PaymentService`、`LogisticsService`、`ErpService`，所有 adapter 操作回傳既有 `ServiceResult`；`mapAdapterError` 將 adapter source 正規化為 `payment-unavailable`、`logistics-unavailable`、`erp-unavailable`，保留訊息與 retryable 語意。
+- 新增 `createInMemoryCommerceServices`，將既有 Catalog、Cart、Checkout、Publishing mock 組成可替換 bundle；新增本機合成 Payment、Logistics、ERP fake adapters。這些 fake 只回傳 `simulated` 結果，不連線、不保存、不代表真實交易或同步成功。
+- 另以 `createInMemoryIntegrationAdapters` 將三個外部邊界 fake 集中成可整組替換的 local bundle，仍不接入前台 checkout。
+- `CommerceProvider` 的預設服務改由 in-memory bundle 建立，既有前台注入介面與 UI 行為不變；未把 Payment、Logistics、ERP 接入 checkout UI，避免擴大付款或流程範圍。
+- TDD 契約測試覆蓋 DTO shape、付款敏感欄位排除、錯誤映射、fake adapter 結果、adapter swapping 與可替換 interface。驗證結果：Vitest 16 files／103 tests、TypeScript 通過、ESLint 0 errors（保留既有 `no-img-element` warning）、Webpack production build 通過，Chromium/WebKit storefront regression 各 14/14 通過。
+- 本切片不新增真實付款、登入、持久化、物流、ERP、preview、Docker 或付費服務；真人走查仍是年長使用者易懂性、按鈕直覺性與商品資訊理解的唯一驗證方式。
+
 ### Wave 1 implementation status — 2026-09-16
 
 - Branch `feature/wave-1-reproducible-baseline` and draft PR #12 contain a clean Next.js 16.3.5 App Router baseline with Node 24.19.0, pnpm 11.19.0, strict TypeScript, Tailwind 4, shadcn conventions, Vitest/RTL contracts, a minimal health route, standalone non-root Dockerfile, and Chromium/WebKit plus axe checks.

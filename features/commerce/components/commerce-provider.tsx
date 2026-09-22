@@ -2,12 +2,7 @@
 
 import { createContext, useContext, useState, type ReactNode, type ReactElement } from "react";
 import type { CartService, CatalogService, CheckoutService, PublishingService } from "@/lib/domain";
-import {
-  createMockCartService,
-  createMockCatalogService,
-  createMockCheckoutService,
-  createMockPublishingService,
-} from "@/lib/domain";
+import { createInMemoryCommerceServices } from "@/lib/domain";
 
 export type CommerceContextValue = {
   catalogService: CatalogService;
@@ -24,14 +19,7 @@ type CommerceProviderProps = {
 const CommerceContext = createContext<CommerceContextValue | null>(null);
 
 const createDefaultServices = (): CommerceContextValue => {
-  const catalogService = createMockCatalogService();
-
-  return {
-    catalogService,
-    cartService: createMockCartService({ catalog: catalogService }),
-    checkoutService: createMockCheckoutService(),
-    publishingService: createMockPublishingService(),
-  };
+  return createInMemoryCommerceServices();
 };
 
 export function CommerceProvider({ children, services }: CommerceProviderProps): ReactElement {

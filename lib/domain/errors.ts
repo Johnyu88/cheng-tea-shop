@@ -1,3 +1,5 @@
+import type { AdapterError } from "./integration-types";
+
 export type DomainErrorCode =
   | "catalog-unavailable"
   | "product-not-found"
@@ -6,6 +8,10 @@ export type DomainErrorCode =
   | "purchase-limit-exceeded"
   | "invalid-draft"
   | "payment-failed"
+  | "payment-unavailable"
+  | "logistics-unavailable"
+  | "erp-unavailable"
+  | "adapter-invalid-response"
   | "checkout-unavailable"
   | "publishing-unavailable";
 
@@ -20,3 +26,13 @@ export const domainError = (
   message: string,
   retryable: boolean,
 ): DomainError => ({ code, message, retryable });
+
+export const mapAdapterError = (error: AdapterError): DomainError => {
+  const codeBySource = {
+    payment: "payment-unavailable",
+    logistics: "logistics-unavailable",
+    erp: "erp-unavailable",
+  } as const;
+
+  return domainError(codeBySource[error.source], error.message, error.retryable);
+};

@@ -237,3 +237,19 @@ Wave 6's implementation and unit/component/integration coverage are verified loc
 | Preview/Docker/external work | 🟡 | Docker, preview, real content, persistence, auth, payment, logistics, ERP, backup, monitoring |
 | Future API boundary map | ⬜ | Catalog, Cart, Checkout, tokenized Payment, Logistics, Publishing, and isolated ERP adapters are documented in WHITEPAPER |
 | Recommended next Phase | ⬜ | Phase 8 Integration-readiness contract hardening; local in-memory fake adapters and DTO/error contract tests |
+
+## M. Phase 8 integration-readiness contract hardening — 2026-09-22
+
+| Capability | Status | Evidence / boundary |
+|---|---:|---|
+| Catalog/Cart/Checkout/Publishing DTO aliases | ✅ | Explicit DTO exports preserve the existing domain shapes for adapter boundaries without changing UI payloads |
+| Payment/Logistics/ERP DTOs | ✅ | `lib/domain/integration-types.ts` defines narrow request/result DTOs; payment DTOs contain no raw card number, security code, or credential field |
+| Replaceable service interfaces | ✅ | `PaymentService`, `LogisticsService`, and `ErpService` are independent interfaces returning `ServiceResult` |
+| Normalized adapter error mapping | ✅ | `mapAdapterError` maps payment/logistics/ERP adapter failures to stable domain error codes and preserves message/retryability |
+| Local in-memory fake adapters | ✅ | Synthetic Payment, Logistics, and ERP adapters return `simulated` results only; no network, credential, persistence, or external provider |
+| Grouped integration adapter boundary | ✅ | `createInMemoryIntegrationAdapters` exposes Payment/Logistics/ERP as one replaceable local bundle |
+| Frontend service injection | ✅ | `CommerceProvider` now obtains its default Catalog/Cart/Checkout/Publishing bundle from `createInMemoryCommerceServices`; existing injection remains supported |
+| Contract/regression verification | ✅ | 16 Vitest files / 103 tests, TypeScript, lint, Webpack build, Chromium 14/14, WebKit 14/14 |
+| Real integrations | ⬜ | Payment, logistics, ERP, authentication, persistence, preview, and Docker remain outside this slice |
+
+Phase 8 first slice is complete. The next safe work is contract maintenance or a separately approved boundary slice; do not infer real-provider readiness from these local fakes.
