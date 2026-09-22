@@ -248,3 +248,11 @@ Resolve the worktree filesystem/lock restriction in a clean environment, rerun w
 ## Startup reminder
 
 Follow `RESUME_PROMPT.md`, `AGENTS.md`, and `WORKFLOW.md`. If newer explicit user instructions conflict with this handoff, the newer instruction wins and the discrepancy must be recorded.
+
+## Phase 10 ERP reuse & integration planning — planning complete, not integrated — 2026-09-23
+
+- Added `docs/erp/phase-10-erp-reuse-integration-planning.md` covering ERP capability requirements, module plan, candidate comparison, Website ↔ ERP contract, mapping, sync direction, errors, ownership, and minimal PoC.
+- ERPNext is the first fixture-mapping candidate; Odoo and Dolibarr are ERP alternatives; Medusa, Saleor, and Vendure are commerce baselines. No final ERP selection or license approval was made.
+- Future server-side adapters own mapping, idempotency, retries, reconciliation, and sensitive-field exclusion; website retains brand content, UX, SEO, human validation, and publishing approval.
+- Proposed next step only: Phase 10-B offline ERP-shaped fixture mapping contract PoC using synthetic data. It must not start ERP, database, Docker, payment, logistics, or production deployment.
+- Preserve local `next-env.d.ts` and any other pre-existing changes; do not stage unrelated files.

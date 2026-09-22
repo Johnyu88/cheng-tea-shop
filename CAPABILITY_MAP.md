@@ -201,3 +201,17 @@ Wave 5 verification was recorded in `.superpowers/sdd/2026-09-20-product-detail-
 | Wave 6 non-goals | ✅ | No real authentication, payment, persistence, ERP integration, file upload, customer/order data, or provider credentials were added |
 
 Wave 6's implementation and unit/component/integration coverage are verified locally, but its final build/browser/container gate remains incomplete. See `.superpowers/sdd/2026-09-21-wave-6-checkout-product-draft/final-verification-report.md` for exact commands and errors.
+
+## S. Phase 10 ERP reuse & integration planning — planning complete, no integration — 2026-09-23
+
+| Area | Status | Evidence / boundary |
+|---|---:|---|
+| ERP capability inventory | ✅ | Product/PIM, inventory, orders, customer, payment ledger, logistics, permissions, audit, import/export mapped |
+| Candidate comparison | ✅ | ERPNext, Odoo, Dolibarr compared as ERP candidates; Medusa, Saleor, Vendure as commerce baselines |
+| Website ↔ ERP contract | ✅ draft | Versioned DTO, correlation/idempotency metadata, normalized errors, retry and reconciliation rules defined; no endpoint exists |
+| Data mapping and sync | ✅ draft | Product/inventory ERP→Website; order/publish Website→ERP with explicit gates; payment/logistics stay provider adapters |
+| Capability ownership | ✅ | Direct ERP reuse vs adapter translation vs website-owned UX/content/human validation is explicit |
+| Minimal PoC | ✅ planned | 10-B synthetic fixture mapping; no ERP, database, external service, Docker, payment, logistics, or deployment |
+| Final ERP selection / integration | ⬜ | Waiting for license, security, backup review and explicit implementation authorization |
+
+Phase 10 is planning-only. No real customer or product data has been sent to an ERP, and no candidate has been adopted.

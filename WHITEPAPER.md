@@ -374,3 +374,9 @@ GitHub 是正式文件與程式來源。聊天中的新指令若尚未寫入 Git
 - The project-owned homepage now has a semantic header, named primary navigation, responsive hero spacing, mist-green / warm-ivory / tea-brown tokens, visible focus treatment, and reduced-motion handling.
 - Product catalog, cart, checkout, orders, payment, ERP, authentication, and real customer data remain intentionally absent.
 - Local verification passed for frozen install, Vitest (2 files / 3 tests), ESLint, TypeScript, and production build. Playwright Chromium/WebKit browsers downloaded, but the six-test e2e run hung locally after browser launch and was stopped; e2e and Docker smoke remain unverified. ESLint is pinned to 9.39.1 because the planned 10.10.0 release is incompatible with the installed Next.js React lint plugin API.
+
+## 46. Phase 10 ERP reuse & integration planning — 2026-09-23
+
+- 新增 `docs/erp/phase-10-erp-reuse-integration-planning.md`，整理 Catalog、Cart、Checkout、Payment、Logistics、Publishing、ERP boundary 的 ERP 必要能力、模組、候選、API contract、資料 mapping、同步與錯誤處理。
+- 候選僅做比較：ERPNext 為首個 fixture mapping 候選，Odoo／Dolibarr 為 ERP 備選，Medusa／Saleor／Vendure 為 headless commerce 基準；沒有最終導入或授權結論。
+- 下一個最小候選是 10-B：只用 synthetic fixture 做 ERP-shaped payload mapping contract PoC；本次不啟動外部服務、不新增 service type、不接資料庫、付款、物流或正式部署。
