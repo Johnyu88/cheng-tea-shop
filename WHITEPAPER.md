@@ -415,3 +415,12 @@ GitHub 是正式文件與程式來源。聊天中的新指令若尚未寫入 Git
 - Quality run [#21](https://github.com/Johnyu88/cheng-tea-shop/actions/runs/35813533756) passed for commit `b6ac4dce8ec9ffcf60c8af8eaee983eeebc9db46`. Run #20 was an install-policy failure before tests and is not counted as verification.
 - 新增 `docs/erp/phase-10c-erpnext-adapter-layer-design.md`，定義 server-only transport、auth provider、Catalog／Inventory／Order adapter、DTO mapper、normalized error、correlation／idempotency 與 secret/logging 邊界。這是設計文件，不是正式串接。
 - CI 通過只證明本次安全檢查可重現；本機 ERPNext synthetic API 驗證仍是 disposable sandbox evidence，不代表正式 ERP 採用、正式網站接通、付款／物流可用或 production readiness。
+
+## 51. Phase 9-A real tea sample intake — 2026-09-23
+
+- 第一批店家實拍資料已完成「保存、逐張核對、候選建檔」：八張茶樣照與一張手寫分類清單保留於 `raw-data/tea-samples-2026-09-23/photos/`，結構化資料為 `data/tea-samples-2026-09-23.json`。
+- 建檔欄位包含 id、name、category、variety、origin、inventory、packageSize、price、dryTeaDescription、aroma、taste、aftertaste、liquorColor、leafAppearance、notes、photoFiles、dataConfidence、needsConfirmation。看不清楚的手寫內容以 `null` 或待確認清單保留，不以推測填補。
+- 八筆樣本候選名稱可由包裝與清單交叉核對，但現有網站仍只有合成 catalog，沒有同名真實商品記錄。因此 `existingProductMappings` 保持空陣列，沒有把任何實拍照接至合成商品頁，避免誤覆蓋或建立重複商品。
+- `IMG_9606`／`IMG_9607`、`IMG_9608`／`IMG_9609` 的同品／不同等級關係、正式名稱、產地、包裝重量、價格與庫存單位仍屬待店家確認；清單列出的金萱黃茶、黑茶、特殊茶、老茶也尚未形成可發布商品資料。
+- 本階段只處理資料整理，不改變 UI、購物流程、service boundary、付款、ERP 或持久化行為。真實商品素材只有在店家確認後，才可另行建立正式 product mapping 與網站適用版本。
+- 驗證結果：JSON 欄位與照片存在性檢查通過；Vitest 17 files／101 tests、TypeScript、production build 通過；ESLint 0 errors，既有一項 `<img>` warning 未因本階段擴大處理。既存 `next-env.d.ts` 變更維持未提交。

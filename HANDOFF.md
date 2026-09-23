@@ -300,3 +300,17 @@ Follow `RESUME_PROMPT.md`, `AGENTS.md`, and `WORKFLOW.md`. If newer explicit use
 - Local verification also passed: 17 files／101 tests, focused 1 file／1 test, TypeScript, ESLint 0 errors with one existing image warning, secret scan, and diff check. The pre-existing `next-env.d.ts` remains unstaged.
 - Added `docs/erp/phase-10c-erpnext-adapter-layer-design.md`. It is a design-only boundary: server-side Catalog／Inventory／Order adapters, transport/auth injection, normalized errors, idempotency and logging rules. No adapter implementation or real service connection was added.
 - Phase 10-C now has a passed CI safety gate, but it is not formal ERP adoption or production integration. Next gate requires explicit approval for implementation after license, secrets, backup, isolation, and sandbox review.
+
+## Phase 9-A real tea sample intake — 2026-09-23
+
+- 店家提供的 `tea-samples-2026-09-23.zip` 已解壓核對；九個原始 JPEG 已保留於 `raw-data/tea-samples-2026-09-23/photos/`，未旋轉、裁切、壓縮或覆蓋。`IMG_9610(1).jpeg` 僅作手寫分類清單，不作商品照片。
+- 建立 `data/tea-samples-2026-09-23.json` 與 `raw-data/tea-samples-2026-09-23/README.md`。資料含八筆照片樣本、九筆檔名對應、指定商品欄位、資料信心與 `needsConfirmation`；不清楚的文字、產地、規格單位與重複樣本均未自行補全。
+- 可建立候選名稱的樣本為：台灣蜜香野生山茶、台灣佛手茶、烏龍綠茶、武夷玫瑰紅茶、兩筆白毛猴白茶候選、兩筆大葉／蜜香紅茶候選。`IMG_9606`／`IMG_9607` 與 `IMG_9608`／`IMG_9609` 是否同品或不同等級待店家確認。
+- 目前網站 catalog 仍只有 `mock-tea-001`～`mock-tea-048` 合成商品，沒有可安全使用的正式 `existingProductId`；因此本階段沒有把實拍照接到商品頁，也沒有建立重複商品或修改 UI。
+- 清單中的金萱黃茶、黑茶、特殊茶、老茶目前沒有可安全對應的完整實拍商品資料。正式商品名稱、茶類／品種、產地、包裝淨重、價格單位、庫存單位及照片 mapping 仍需店家確認。
+- 資料驗證：8 samples、9 photo mappings、9 originals、0 missing required fields、0 missing mapped photos。回歸驗證：Vitest 17 files／101 tests、TypeScript、production build 通過；ESLint 0 errors，保留既有一項 `@next/next/no-img-element` warning。
+- 本次刻意未納入既存未提交的 `next-env.d.ts` 變更；未提交密鑰、客戶資料、正式付款或外部服務設定。
+
+### Next action
+
+等待店家確認正式名稱、價格／重量／庫存單位與兩組疑似重複樣本。確認前不可把候選資料升級為正式商品、覆蓋既有資料或接入商品頁。
