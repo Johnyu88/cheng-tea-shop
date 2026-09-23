@@ -262,3 +262,15 @@ Phase 10 is planning-only. No real customer or product data has been sent to an 
 | API authentication／DTO mapping | ✅ | Session login resolved Administrator; Phase 10-C capture mapper test passes |
 
 The previous blocked-before-installation note is historical. This local disposable verification supersedes it; it does not constitute production approval or formal ERP adoption.
+
+## W. Phase 10-C CI safety gate and adapter design — 2026-09-23
+
+| Capability | Status | Evidence / boundary |
+|---|---:|---|
+| Feature-branch CI trigger | ✅ | Quality workflow now runs on `feature/wave-1-reproducible-baseline` pushes and pull requests |
+| Minimal safety CI | ✅ | Run [#21](https://github.com/Johnyu88/cheng-tea-shop/actions/runs/35813533756): install, 17/101 Vitest, focused 1/1, TypeScript, ESLint, secret scan all passed |
+| ERPNext adapter layering design | ✅ design-only | `docs/erp/phase-10c-erpnext-adapter-layer-design.md`; server-only Catalog／Inventory／Order boundaries defined |
+| Formal ERPNext adapter implementation | ⬜ | Requires explicit implementation approval and license／secret／backup／sandbox gates |
+| Formal website／payment／logistics integration | ⬜ | Not started and intentionally excluded |
+
+CI success is a reproducibility and safety-gate result, not production or formal ERP adoption evidence. `next-env.d.ts` remains a pre-existing uncommitted change.

@@ -408,3 +408,10 @@ GitHub 是正式文件與程式來源。聊天中的新指令若尚未寫入 Git
 - Synthetic-only API verification succeeded for Administrator session authentication, Item `SYN-TEA-001`, Standard Selling price TWD 150, Bin quantity 10, Customer `Synthetic Customer`, and submitted Sales Order `SAL-ORD-2026-00001` for TWD 300 with status `To Deliver and Bill`.
 - The project now contains a small physical-response boundary in `lib/domain/erpnext-physical-mapping.ts`, with a regression test in `tests/phase-10c-erpnext-physical-mapping.test.ts`. It maps captured Item, Price, Bin, Customer, and Sales Order shapes into existing project DTOs without changing UI consumers.
 - Focused Phase 10-C mapper verification passes 1/1. No persistent API key, password, session cookie, payment data, logistics integration, formal ERP adoption, or real customer data was added. The earlier blocked-before-installation note is historical and superseded by this local verification.
+
+## 50. Phase 10-C CI safety gate and ERPNext adapter design — 2026-09-23
+
+- `.github/workflows/quality.yml` now triggers on the Phase 10-C feature branch as well as pull requests and `main`. The minimal gate covers frozen dependency installation with third-party scripts disabled, full Vitest, the focused physical-mapping test, TypeScript, ESLint, and a credential-pattern scan.
+- Quality run [#21](https://github.com/Johnyu88/cheng-tea-shop/actions/runs/35813533756) passed for commit `b6ac4dce8ec9ffcf60c8af8eaee983eeebc9db46`. Run #20 was an install-policy failure before tests and is not counted as verification.
+- 新增 `docs/erp/phase-10c-erpnext-adapter-layer-design.md`，定義 server-only transport、auth provider、Catalog／Inventory／Order adapter、DTO mapper、normalized error、correlation／idempotency 與 secret/logging 邊界。這是設計文件，不是正式串接。
+- CI 通過只證明本次安全檢查可重現；本機 ERPNext synthetic API 驗證仍是 disposable sandbox evidence，不代表正式 ERP 採用、正式網站接通、付款／物流可用或 production readiness。

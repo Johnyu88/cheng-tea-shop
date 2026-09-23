@@ -291,3 +291,12 @@ Follow `RESUME_PROMPT.md`, `AGENTS.md`, and `WORKFLOW.md`. If newer explicit use
 - Added `lib/domain/erpnext-physical-mapping.ts` and `tests/phase-10c-erpnext-physical-mapping.test.ts`. The mapper composes the captured Item, Price, Bin, Customer, and Sales Order response shapes into the existing project DTO boundary.
 - Focused Phase 10-C mapper verification passes 1/1. This is a local disposable integration verification, not production approval, formal ERP adoption, payment/logistics integration, or real-customer-data authorization.
 - Pre-existing `next-env.d.ts` remains untouched and unstaged. The older blocked-before-installation entry above is historical and superseded by this checkpoint.
+
+## Phase 10-C CI safety gate and adapter design — 2026-09-23
+
+- Root cause of missing CI: `.github/workflows/quality.yml` only triggered on pull requests or pushes to `main`; the feature branch had no PR and therefore had no run.
+- Minimal workflow change committed as `af51e43`, then install-script handling corrected in `b6ac4dc`; both commits are pushed to `origin/feature/wave-1-reproducible-baseline`.
+- Quality run [#21](https://github.com/Johnyu88/cheng-tea-shop/actions/runs/35813533756) for `b6ac4dce8ec9ffcf60c8af8eaee983eeebc9db46` passed. Jobs passed: frozen install with `--ignore-scripts`, full Vitest, Phase 10-C focused test, TypeScript, ESLint, and secret scan. Run #20 failed before tests because pnpm build approval blocked `unrs-resolver`; it is superseded by #21.
+- Local verification also passed: 17 files／101 tests, focused 1 file／1 test, TypeScript, ESLint 0 errors with one existing image warning, secret scan, and diff check. The pre-existing `next-env.d.ts` remains unstaged.
+- Added `docs/erp/phase-10c-erpnext-adapter-layer-design.md`. It is a design-only boundary: server-side Catalog／Inventory／Order adapters, transport/auth injection, normalized errors, idempotency and logging rules. No adapter implementation or real service connection was added.
+- Phase 10-C now has a passed CI safety gate, but it is not formal ERP adoption or production integration. Next gate requires explicit approval for implementation after license, secrets, backup, isolation, and sandbox review.
