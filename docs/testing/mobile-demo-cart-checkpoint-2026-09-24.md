@@ -45,3 +45,8 @@
 - 新增本機操作員一次性 OTP 收碼箱、真實 socket peer + 同源 POST 驗證器，以及獨立高熵店家憑證的 30 分鐘 HttpOnly／Secure／SameSite=Strict cookie 契約；沒有開 HTTP 路由，Next Request 本身無法證明 peer。
 - 包裝照片儲存在非 public 私有目錄，限制 5 MiB 與 JPEG／PNG／WebP magic/MIME、隨機 ID、訂單綁定及授權，記錄訂單失敗時清除檔案；照片不會自動標記出貨。模擬通知 SQLite outbox 記錄排隊／模擬送達／失敗重試與無 Email 的查單替代，重複事件去重，分離資料庫故障後可 reconcile；沒有真實訊息發送。
 - 全套 Vitest 25 檔／159 測、TypeScript、Next Webpack build 通過；ESLint 0 error／一個既有 `<img>` warning。安全底層尚未接入已驗證的店家待辦／顧客 API 與手機介面；未做實體手機驗收，仍不得雲端測試部署。
+
+## 店家操作整合切片
+
+- 受店家 cookie 驗證的本機純服務整合列單、模擬付款確認、指定訂單包裝照片、人工標記交寄與送達、狀態通知入列及故障補登。未付款／未拍照禁止交寄；拍照只進入已包裝；通知故障明示並保留既有訂單轉移。
+- 新增整合測試涵蓋越權、錯單照片、重複轉移、SQLite 重啟恢復與通知補登；全套 Vitest 26 檔／162 測、TypeScript 與相關 ESLint 通過。此服務仍未開 HTTP route 或手機 UI，沒有實體手機驗收。
