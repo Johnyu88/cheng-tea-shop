@@ -28,3 +28,13 @@
 
 - 新增僅允許兩組合成手機號碼的服務內 OTP 挑戰：5 分鐘效期、5 次錯誤鎖定、60 秒重發冷卻、每小時 3 次、重發作廢舊碼、驗證後不可重用；回傳值沒有 OTP 本文。
 - OTP 尚未接到結帳或可安全收取模擬碼的通道，不能當成已完成手機驗證。Vitest 21 檔／140 測、TypeScript 通過；無 SMS 發送。
+
+## 最新整體回歸
+
+- `corepack pnpm --config.verifyDepsBeforeRun=false test:run`：21 檔／140 測通過；`tsc --noEmit --incremental false` 與 `next build --webpack` 通過。ESLint 0 error，僅商品頁原有 `<img>` warning。
+- 獨立 3017 埠重跑 Chromium 與 WebKit 的商品／購物車／結帳／商品草稿 Playwright：20/20 通過。這是瀏覽器模擬，不是實體手機或持久訂單端到端驗收。
+
+## 本機服務端結帳整合切片
+
+- 新增僅 Node 本機 `DEMO_COMMERCE_LOCAL=enabled`、production 禁用的純服務。合成 OTP 驗過且不可重用後，按伺服器商品 fixture 重算單價、庫存與限購，再建立唯一持久測試訂單；查單需完整密鑰。宅配人工覆核由受信任的 server callback 判斷，顧客偽造旗標會拒絕；通知隊列故障會回傳明確的 `queue-failed`，仍保留已成立訂單密鑰。
+- Vitest 22 檔／146 測、TypeScript 與相關 ESLint 通過。沒有 HTTP route、手機 OTP 收碼通道或店家身份入口；頁面目前仍以原型 Mock 訂單結帳，不能宣稱端到端或實體手機驗收完成。
