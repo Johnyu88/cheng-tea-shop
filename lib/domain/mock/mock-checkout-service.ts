@@ -2,6 +2,7 @@ import { domainError } from "../errors";
 import type { CheckoutService } from "../checkout-service";
 import type { Cart, CheckoutDraft, CheckoutReceipt } from "../types";
 import type { ServiceResult } from "../result";
+import { normalizeTaiwanMobile } from "../phone";
 
 const invalid = <T>(message: string): ServiceResult<T> => ({
   ok: false,
@@ -24,6 +25,8 @@ export const createMockCheckoutService = (
     if (cart.lines.length === 0) return cartEmpty();
     if (draft.name.trim().length === 0) return invalid("請填寫姓名。");
     if (draft.phone.trim().length === 0) return invalid("請填寫手機號碼。");
+    const phone = normalizeTaiwanMobile(draft.phone);
+    if (phone === null) return invalid("請填寫正確的台灣手機號碼。");
     if (draft.email !== undefined && !isValidEmail(draft.email)) {
       return invalid("Email 格式不正確。");
     }
@@ -38,7 +41,7 @@ export const createMockCheckoutService = (
     if (draft.deliveryMethod === "store-pickup" && !["credit-card", "line-pay", "pay-at-store"].includes(draft.paymentMethod)) {
       return invalid("到店取貨請選擇信用卡、LINE Pay 或到店付款。");
     }
-    return { ok: true, value: { ...draft } };
+    return { ok: true, value: { ...draft, phone } };
   },
 
   async submit(draft: CheckoutDraft, cart: Cart): Promise<ServiceResult<CheckoutReceipt>> {

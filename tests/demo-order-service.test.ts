@@ -1,0 +1,99 @@
+import { describe, expect, test } from "vitest";
+import { createDemoOrderService } from "@/lib/domain/demo-order-service";
+import type { Cart } from "@/lib/domain/types";
+
+const cart: Cart = {
+  lines: [{
+    productId: "tea-1", variantId: "tea-1-one-tael", productName: "陳年白茶",
+    specification: "一兩", unitPrice: { currency: "TWD", amount: 800 },
+    quantity: 2, inventoryStatus: "available", maxQuantity: 3,
+  }],
+  subtotal: { currency: "TWD", amount: 1600 },
+};
+describe("demo order service", () => {
+  test("creates opaque unique orders with independent high entropy lookup secrets", () => {
+    const service = createDemoOrderService();
+    const a = service.create(cart);
+    const b = service.create(cart);
+    expect(a.orderId).not.toEqual(b.orderId);
+    expect(a.accessSecret).not.toEqual(b.accessSecret);
+    expect(a.accessSecret).toMatch(/^[0-9a-f]{64}$/);
+    expect(a.orderId).toMatch(/^DEMO-[0-9a-f-]{36}$/);
+    expect(service.lookup(a.orderId, a.accessSecret)?.status).toBe("confirmed");
+  });
+  test("rejects an order number or phone suffix alone, invalid tokens and another order's token", () => {
+    const service = createDemoOrderService();
+    const a = service.create(cart);
+    const b = service.create(cart);
+    expect(service.lookup(a.orderId, "")).toBeNull();
+    expect(service.lookup(a.orderId, "000")).toBeNull();
+    expect(service.lookup(a.orderId, b.accessSecret)).toBeNull();
+    expect(service.lookup("DEMO-missing", a.accessSecret)).toBeNull();
+  });
+
+  test("stores only product and status snapshot, never contact or payment details", () => {
+    const service = createDemoOrderService();
+    const mutableCart = structuredClone(cart);
+    const order = service.create(mutableCart);
+    mutableCart.lines[0]!.productName = "改名";
+    const snapshot = service.lookup(order.orderId, order.accessSecret);
+    expect(snapshot?.lines[0]?.productName).toBe("陳年白茶");
+    expect(JSON.stringify(snapshot)).not.toMatch(/0912000000|tea@example.tw|茶行路|credit-card/);
+    expect(snapshot?.total).toEqual({ currency: "TWD", amount: 1600 });
+    if (snapshot) snapshot.lines[0]!.productName = "破壞";
+    expect(service.lookup(order.orderId, order.accessSecret)?.lines[0]?.productName).toBe("陳年白茶");
+  });
+
+  test("an unpaid packed order cannot ship until simulated payment confirmation", () => {
+    const service = createDemoOrderService();
+    const { orderId, accessSecret } = service.create(cart);
+    service.recordPackingPhoto(orderId, "photo-demo-2");
+    expect(service.lookup(orderId, accessSecret)?.status).toBe("packed");
+    expect(service.lookup(orderId, accessSecret)?.paymentStatus).toBe("pending");
+    expect(() => service.markShipped(orderId)).toThrow();
+    service.confirmSimulatedPayment(orderId);
+    expect(service.lookup(orderId, accessSecret)?.paymentStatus).toBe("simulated-confirmed");
+    service.markShipped(orderId);
+    expect(service.lookup(orderId, accessSecret)?.status).toBe("shipped");
+    expect(() => service.confirmSimulatedPayment(orderId)).toThrow();
+  });
+
+  test("requires packing photo record before shipment and keeps events in order", () => {
+    const service = createDemoOrderService();
+    const order = service.create(cart);
+    expect(() => service.markShipped(order.orderId)).toThrow();
+    service.recordPackingPhoto(order.orderId, "photo-demo-1");
+    expect(service.lookup(order.orderId, order.accessSecret)?.status).toBe("packed");
+    expect(service.lookup(order.orderId, order.accessSecret)?.packingPhotoId).toBe("photo-demo-1");
+    service.confirmSimulatedPayment(order.orderId);
+    service.markShipped(order.orderId);
+    expect(service.lookup(order.orderId, order.accessSecret)?.status).toBe("shipped");
+    service.markDelivered(order.orderId);
+    expect(service.lookup(order.orderId, order.accessSecret)?.events.map(e => e.status))
+      .toEqual(["confirmed", "packed", "shipped", "delivered"]);
+  });
+  test("rejects invalid photo references and repeated or regressive transitions", () => {
+    const service = createDemoOrderService();
+    const { orderId } = service.create(cart);
+    expect(() => service.recordPackingPhoto(orderId, "https://example.test/private.jpg")).toThrow();
+    expect(() => service.recordPackingPhoto(orderId, "")).toThrow();
+    service.recordPackingPhoto(orderId, "photo-demo-1");
+    expect(() => service.recordPackingPhoto(orderId, "photo-demo-2")).toThrow();
+    service.confirmSimulatedPayment(orderId);
+    service.markShipped(orderId);
+    expect(() => service.markShipped(orderId)).toThrow();
+  });
+
+  test("queues one simulated notification per event and audience without sending externally", () => {
+    const service = createDemoOrderService();
+    const { orderId } = service.create(cart);
+    const first = service.queueNotification(orderId, "confirmed", "customer");
+    const again = service.queueNotification(orderId, "confirmed", "customer");
+    const merchant = service.queueNotification(orderId, "confirmed", "merchant");
+    expect(first).toEqual(again);
+    expect(first).not.toEqual(merchant);
+    expect(service.listNotifications(orderId)).toHaveLength(2);
+    expect(service.listNotifications(orderId)[0]).toMatchObject({ delivery: "simulated", audience: "customer" });
+    expect(() => service.queueNotification(orderId, "shipped", "customer")).toThrow();
+  });
+});

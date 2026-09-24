@@ -36,6 +36,18 @@ test("requires a non-blank name and phone", async () => {
   });
 });
 
+test("rejects a malformed phone and normalizes a spaced Taiwan mobile number", async () => {
+  const service = createMockCheckoutService();
+  await expect(service.validate({ ...deliveryDraft, phone: "12345" }, cart)).resolves.toMatchObject({
+    ok: false,
+    error: { code: "invalid-draft", message: "請填寫正確的台灣手機號碼。" },
+  });
+  await expect(service.validate({ ...deliveryDraft, phone: "0912-000-000" }, cart)).resolves.toMatchObject({
+    ok: true,
+    value: { phone: "0912000000" },
+  });
+});
+
 test("accepts an omitted or valid optional email and rejects invalid email syntax", async () => {
   const service = createMockCheckoutService();
 

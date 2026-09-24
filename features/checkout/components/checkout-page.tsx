@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState, type JSX } from "react";
 import Link from "next/link";
 import type { Cart, CheckoutDraft, CheckoutReceipt, DomainError } from "@/lib/domain";
+import { normalizeTaiwanMobile } from "@/lib/domain/phone";
 import { useCommerce } from "@/features/commerce/components/commerce-provider";
 
 type Step = "contact" | "delivery" | "review";
@@ -44,7 +45,10 @@ export function CheckoutPage(): JSX.Element {
   const localError = (message: string) => { setSubmission("failure"); setError({ code: "invalid-draft", message, retryable: false }); };
   const nextContact = () => {
     if (!draft.phone.trim()) return localError("請填寫手機號碼。");
+    const phone = normalizeTaiwanMobile(draft.phone);
+    if (phone === null) return localError("請填寫正確的台灣手機號碼。");
     if (!draft.name.trim()) return localError("請填寫姓名。");
+    setDraft((current) => ({ ...current, phone }));
     setError(undefined); setSubmission("idle"); setStep("delivery");
   };
   const nextDelivery = () => {

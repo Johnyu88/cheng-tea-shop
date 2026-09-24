@@ -48,6 +48,9 @@ test("checkout recovers from step errors without losing entered values", async (
   await page.getByRole("button", { name: "下一步" }).click();
   await expect(page.getByRole("alert").filter({ hasText: "請填寫手機號碼" })).toContainText("請填寫手機號碼");
 
+  await page.getByLabel("手機號碼").fill("12345");
+  await page.getByRole("button", { name: "下一步" }).click();
+  await expect(page.getByRole("alert").filter({ hasText: "請填寫正確的台灣手機號碼" })).toContainText("請填寫正確的台灣手機號碼");
   await page.getByLabel("手機號碼").fill("0912000000");
   await page.getByRole("button", { name: "下一步" }).click();
   await page.getByRole("button", { name: "下一步" }).click();

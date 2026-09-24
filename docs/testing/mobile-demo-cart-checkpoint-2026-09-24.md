@@ -6,3 +6,10 @@
 - Vitest 18 files／119 tests、typecheck、Next Webpack build 通過；ESLint 0 errors／一項既有 `<img>` warning。Playwright 指定 Chromium v1243 已安裝；獨立埠 3013 的購物車／結帳 10/10 通過。新增 standalone 靜態資源測試啟動腳本；3000 埠既有 Node 進程未碰觸。
 - PR #15 的完整手機 Demo S1 門檻尚未達成：OTP、地址驗證與覆核、唯一持久化訂單、安全查單、通知去重及失敗、店家權限／拍照、人工出貨狀態均不存在。固定 `MOCK-ORDER-001` 僅為原型；不得雲端測試部署或宣稱可處理真實顧客／付款。
 - 下一段：服務端持久測試訂單、受控模擬 OTP 和安全查單；其後店家待辦、拍照、通知、人工交寄；最後手機驗收。正式金流、main 合併及正式部署均未進行。
+
+## 後續本機切片
+
+- 聯絡資料步驟新增台灣手機號碼 `09` 加八位數的檢查，可移除空白與連字號；Mock checkout service 同步執行並回傳正規化號碼。這只檢查格式，不代表持有人已通過 OTP。
+- 測試環境可用 `corepack pnpm --config.verifyDepsBeforeRun=false test:run` 呼叫緩存的 pnpm 11.19.0，並略過舊依賴工作樹的自動清理；不得將此視為新的 frozen install 證據。
+- Server-only 的 Demo 訂單契約以記憶體假資料測試唯一編號／高熵查單密鑰、狀態次序、照片 metadata 與模擬通知去重。未接入結帳、API 或畫面；沒有持久化、店家權限、真實照片上傳及實際發信。此切片只建立實作邊界，不能解除 PR #15 的 S1 阻塞。
+- 後續測試：Vitest 19 files／128 tests、Chromium 與 WebKit 購物車／結帳各 10/10 通過；TypeScript／build、ESLint 的最終結果以階段提交前複測為準。這不是實體 iPhone 驗收。

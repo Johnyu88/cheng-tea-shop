@@ -134,6 +134,15 @@ it("requires a phone number before contact can advance", async () => {
   expect(screen.getByRole("heading", { name: "聯絡資料" })).toBeInTheDocument();
 });
 
+it("keeps an invalid phone on the contact step", async () => {
+  renderCheckout();
+  await waitFor(() => expect(screen.getByRole("heading", { name: "聯絡資料" })).toBeInTheDocument());
+  fireEvent.change(screen.getByLabelText("手機號碼"), { target: { value: "12345" } });
+  fireEvent.click(screen.getByRole("button", { name: "下一步" }));
+  expect(screen.getByRole("alert")).toHaveTextContent("請填寫正確的台灣手機號碼");
+  expect(screen.getByRole("heading", { name: "聯絡資料" })).toBeInTheDocument();
+});
+
 it("requires a name before contact can advance", async () => {
   renderCheckout();
 
