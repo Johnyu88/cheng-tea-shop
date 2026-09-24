@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState, type JSX } from "react";
 import Link from "next/link";
 import type { Cart, CheckoutDraft, CheckoutReceipt, DomainError } from "@/lib/domain";
 import { normalizeTaiwanMobile } from "@/lib/domain/phone";
+import { assessDemoAddress } from "@/lib/domain/demo-address";
 import { useCommerce } from "@/features/commerce/components/commerce-provider";
 
 type Step = "contact" | "delivery" | "review";
@@ -52,7 +53,9 @@ export function CheckoutPage(): JSX.Element {
     setError(undefined); setSubmission("idle"); setStep("delivery");
   };
   const nextDelivery = () => {
-    if (draft.deliveryMethod === "home-delivery" && !draft.address?.trim()) return localError("宅配請填寫地址。");
+    const address = assessDemoAddress(draft.deliveryMethod, draft.address);
+    if (address.status === "invalid") return localError(address.reason);
+    if (address.status === "needs-review") setDraft((current) => ({ ...current, address: address.normalized }));
     setError(undefined); setSubmission("idle"); setStep("review");
   };
   const submit = useCallback(async () => {
@@ -91,7 +94,7 @@ function Delivery({ draft, change, back, next }: { draft: CheckoutDraft; change:
 
 function Review({ draft, processing, back, submit }: { draft: CheckoutDraft; processing: boolean; back: () => void; submit: () => void }): JSX.Element {
   const payment = draft.paymentMethod === "credit-card" ? "信用卡" : draft.paymentMethod === "line-pay" ? "LINE Pay" : "到店付款";
-  return <><p className="eyebrow">步驟 3／3</p><h1 id="checkout-review-heading" tabIndex={-1}>確認訂單</h1><dl className="mt-6 grid gap-3"><div><dt>配送</dt><dd>{draft.deliveryMethod === "home-delivery" ? `宅配至 ${draft.address}` : "到店取貨"}</dd></div><div><dt>付款</dt><dd>{payment}</dd></div></dl><p className="mt-6 rounded-lg bg-[var(--mist)] p-4">部分茶品數量有限；若庫存不足，我們會優先以電話與您聯絡後續安排。</p><div className="form-actions mt-8"><button className="filter-button" type="button" disabled={processing} onClick={back}>返回配送方式</button><button className="primary-action" type="button" disabled={processing} onClick={submit}>{processing ? "處理中" : "送出訂單"}</button></div></>;
+  return <><p className="eyebrow">步驟 3／3</p><h1 id="checkout-review-heading" tabIndex={-1}>確認訂單</h1><dl className="mt-6 grid gap-3"><div><dt>配送</dt><dd>{draft.deliveryMethod === "home-delivery" ? `宅配至 ${draft.address}` : "到店取貨"}</dd></div><div><dt>付款</dt><dd>{payment}</dd></div></dl>{draft.deliveryMethod === "home-delivery" && <p className="mt-6 rounded-lg bg-[var(--mist)] p-4">宅配地址格式已檢查，仍須由店家人工覆核後才能安排配送。</p>}<p className="mt-6 rounded-lg bg-[var(--mist)] p-4">部分茶品數量有限；若庫存不足，我們會優先以電話與您聯絡後續安排。</p><div className="form-actions mt-8"><button className="filter-button" type="button" disabled={processing} onClick={back}>返回配送方式</button><button className="primary-action" type="button" disabled={processing} onClick={submit}>{processing ? "處理中" : "送出訂單"}</button></div></>;
 }
 
 function Summary({ cart, expanded, toggle }: { cart: Cart; expanded: boolean; toggle: () => void }): JSX.Element {

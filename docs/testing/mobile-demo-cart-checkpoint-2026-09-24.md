@@ -13,3 +13,8 @@
 - 測試環境可用 `corepack pnpm --config.verifyDepsBeforeRun=false test:run` 呼叫緩存的 pnpm 11.19.0，並略過舊依賴工作樹的自動清理；不得將此視為新的 frozen install 證據。
 - Server-only 的 Demo 訂單契約以記憶體假資料測試唯一編號／高熵查單密鑰、狀態次序、照片 metadata 與模擬通知去重。未接入結帳、API 或畫面；沒有持久化、店家權限、真實照片上傳及實際發信。此切片只建立實作邊界，不能解除 PR #15 的 S1 阻塞。
 - 後續測試：Vitest 19 files／128 tests、Chromium 與 WebKit 購物車／結帳各 10/10 通過；TypeScript／build、ESLint 的最終結果以階段提交前複測為準。這不是實體 iPhone 驗收。
+
+## 地址覆核切片
+
+- 宅配地址新增長度（6 至 200 字）與控制字元檢查，收件前會整理空白；到店取貨不用地址。格式通過仍明示「店家人工覆核」，沒有外部地址服務或可配送保證。
+- 結帳頁及 Mock service 均採相同檢查；30 個相關 Vitest 測試通過。持久化訂單、OTP 與通知尚未接入頁面，本階段仍只展示原型。

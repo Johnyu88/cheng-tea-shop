@@ -161,6 +161,7 @@ it("moves through contact, delivery, and review steps", async () => {
 
   expect(screen.getByText("玉露清香")).toBeInTheDocument();
   expect(screen.getByText("小計：NT$1,600")).toBeInTheDocument();
+  expect(screen.getByText("宅配地址格式已檢查，仍須由店家人工覆核後才能安排配送。")).toBeInTheDocument();
 });
 
 it("requires an address for home delivery", async () => {
