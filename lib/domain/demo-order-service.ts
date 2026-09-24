@@ -38,6 +38,8 @@ type StoredOrder = {
 export interface DemoOrderService {
   create(cart: Cart): { orderId: string; accessSecret: string };
   lookup(orderId: string, accessSecret: string): DemoOrderSnapshot | null;
+  /** Internal merchant view; callers must enforce merchant authentication before invoking. */
+  listInternalForMerchant(): DemoOrderSnapshot[];
   /** Synthetic only: no payment gateway, charge, or financial confirmation. */
   confirmSimulatedPayment(orderId: string): void;
   recordPackingPhoto(orderId: string, photoId: string): void;
@@ -113,6 +115,10 @@ export const createDemoOrderService = (persistence?: DemoOrderPersistence): Demo
       const order = orders.get(orderId);
       if (!order || order.secretDigest.length !== 32 || !timingSafeEqual(order.secretDigest, digest(accessSecret))) return null;
       return clone(order.snapshot);
+    },
+    listInternalForMerchant() {
+      return [...orders.values()].map(order => clone(order.snapshot)).sort((a, b) =>
+        b.events[0]!.at.localeCompare(a.events[0]!.at));
     },
     confirmSimulatedPayment(orderId) {
       const order = checked(orders, orderId);

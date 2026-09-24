@@ -38,3 +38,10 @@
 
 - 新增僅 Node 本機 `DEMO_COMMERCE_LOCAL=enabled`、production 禁用的純服務。合成 OTP 驗過且不可重用後，按伺服器商品 fixture 重算單價、庫存與限購，再建立唯一持久測試訂單；查單需完整密鑰。宅配人工覆核由受信任的 server callback 判斷，顧客偽造旗標會拒絕；通知隊列故障會回傳明確的 `queue-failed`，仍保留已成立訂單密鑰。
 - Vitest 22 檔／146 測、TypeScript 與相關 ESLint 通過。沒有 HTTP route、手機 OTP 收碼通道或店家身份入口；頁面目前仍以原型 Mock 訂單結帳，不能宣稱端到端或實體手機驗收完成。
+
+## 本機營運安全底層切片
+
+- 訂單服務新增僅供已授權店家入口呼叫的內部列單拷貝，沒有查單密鑰；重啟後仍可列出。
+- 新增本機操作員一次性 OTP 收碼箱、真實 socket peer + 同源 POST 驗證器，以及獨立高熵店家憑證的 30 分鐘 HttpOnly／Secure／SameSite=Strict cookie 契約；沒有開 HTTP 路由，Next Request 本身無法證明 peer。
+- 包裝照片儲存在非 public 私有目錄，限制 5 MiB 與 JPEG／PNG／WebP magic/MIME、隨機 ID、訂單綁定及授權，記錄訂單失敗時清除檔案；照片不會自動標記出貨。模擬通知 SQLite outbox 記錄排隊／模擬送達／失敗重試與無 Email 的查單替代，重複事件去重，分離資料庫故障後可 reconcile；沒有真實訊息發送。
+- 全套 Vitest 25 檔／159 測、TypeScript、Next Webpack build 通過；ESLint 0 error／一個既有 `<img>` warning。安全底層尚未接入已驗證的店家待辦／顧客 API 與手機介面；未做實體手機驗收，仍不得雲端測試部署。

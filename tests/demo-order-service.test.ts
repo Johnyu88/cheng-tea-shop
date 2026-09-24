@@ -163,3 +163,23 @@ describe("demo order service", () => {
     expect(() => service.queueNotification(orderId, "shipped", "customer")).toThrow();
   });
 });
+
+test("internal merchant list is a safe copy without lookup secrets and survives restart", () => {
+  const directory = mkdtempSync(join(tmpdir(), "merchant-demo-"));
+  const path = join(directory, "orders.sqlite");
+  try {
+    const first = createSqliteDemoOrderService(path);
+    const receipt = first.create(cart);
+    const listed = first.listInternalForMerchant();
+    expect(listed.map(order => order.orderId)).toContain(receipt.orderId);
+    expect(JSON.stringify(listed)).not.toContain(receipt.accessSecret);
+    listed[0]!.lines[0]!.productName = "竄改";
+    expect(first.lookup(receipt.orderId, receipt.accessSecret)?.lines[0]?.productName).toBe("陳年白茶");
+    first.close();
+    const reopened = createSqliteDemoOrderService(path);
+    expect(reopened.listInternalForMerchant().map(order => order.orderId)).toContain(receipt.orderId);
+    reopened.close();
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
+});
