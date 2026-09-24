@@ -1,7 +1,7 @@
 import { createHash, randomBytes, randomUUID, timingSafeEqual } from "node:crypto";
 import type { Cart } from "./types";
 
-/** Demo-only process-local fake. It does not survive restarts or span server instances. */
+/** Demo-only state machine. Default store is process-local; optional SQLite persists across restarts. */
 export type DemoOrderStatus = "confirmed" | "packed" | "shipped" | "delivered";
 export type DemoOrderLine = Pick<Cart["lines"][number], "productId" | "variantId" | "productName" | "specification" | "unitPrice" | "quantity">;
 export type DemoOrderSnapshot = {
@@ -21,6 +21,15 @@ export type DemoNotification = {
   delivery: "simulated";
 };
 
+export type DemoOrderRecord = {
+  snapshot: DemoOrderSnapshot;
+  secretDigest: string;
+  notifications: DemoNotification[];
+};
+export type DemoOrderPersistence = {
+  load(): DemoOrderRecord[];
+  save(record: DemoOrderRecord): void;
+};
 type StoredOrder = {
   snapshot: DemoOrderSnapshot;
   secretDigest: Buffer;
@@ -54,9 +63,32 @@ const transition = (order: StoredOrder, from: DemoOrderStatus, to: DemoOrderStat
   order.snapshot.events.push({ status: to, at: new Date().toISOString() });
 };
 
-export const createDemoOrderService = (): DemoOrderService => {
-  // Deliberately instance-scoped; never mount as production order storage.
+export const createDemoOrderService = (persistence?: DemoOrderPersistence): DemoOrderService => {
   const orders = new Map<string, StoredOrder>();
+  for (const record of persistence?.load() ?? []) {
+    if (!/^DEMO-[0-9a-f-]{36}$/.test(record.snapshot?.orderId ?? "")) continue;
+    orders.set(record.snapshot.orderId, {
+      snapshot: clone(record.snapshot),
+      secretDigest: /^[0-9a-f]{64}$/.test(record.secretDigest) ? Buffer.from(record.secretDigest, "hex") : Buffer.alloc(0),
+      notifications: new Map(record.notifications.map(item => [`${item.status}:${item.audience}`, { ...item }])),
+    });
+  }
+  const save = (order: StoredOrder) => persistence?.save({
+    snapshot: clone(order.snapshot), secretDigest: order.secretDigest.toString("hex"),
+    notifications: [...order.notifications.values()].map(item => ({ ...item })),
+  });
+  const mutate = (order: StoredOrder, change: () => void) => {
+    const before = clone(order.snapshot);
+    const notifications = new Map(order.notifications);
+    try {
+      change();
+      save(order);
+    } catch (error) {
+      order.snapshot = before;
+      order.notifications = notifications;
+      throw error;
+    }
+  };
   return {
     create(cart) {
       if (cart.lines.length === 0 || !Number.isSafeInteger(cart.subtotal.amount) || cart.subtotal.amount < 0) {
@@ -71,13 +103,15 @@ export const createDemoOrderService = (): DemoOrderService => {
         total: { ...cart.subtotal }, packingPhotoId: null,
         events: [{ status: "confirmed", at: new Date().toISOString() }],
       };
-      orders.set(orderId, { snapshot, secretDigest: digest(accessSecret), notifications: new Map() });
+      const order = { snapshot, secretDigest: digest(accessSecret), notifications: new Map<string, DemoNotification>() };
+      save(order);
+      orders.set(orderId, order);
       return { orderId, accessSecret };
     },
     lookup(orderId, accessSecret) {
       if (!/^DEMO-[0-9a-f-]{36}$/.test(orderId) || !/^[0-9a-f]{64}$/.test(accessSecret)) return null;
       const order = orders.get(orderId);
-      if (!order || !timingSafeEqual(order.secretDigest, digest(accessSecret))) return null;
+      if (!order || order.secretDigest.length !== 32 || !timingSafeEqual(order.secretDigest, digest(accessSecret))) return null;
       return clone(order.snapshot);
     },
     confirmSimulatedPayment(orderId) {
@@ -85,23 +119,26 @@ export const createDemoOrderService = (): DemoOrderService => {
       if (order.snapshot.paymentStatus !== "pending" || order.snapshot.status === "shipped" || order.snapshot.status === "delivered") {
         throw new Error("Invalid simulated payment transition");
       }
-      order.snapshot.paymentStatus = "simulated-confirmed";
+      mutate(order, () => { order.snapshot.paymentStatus = "simulated-confirmed"; });
     },
     recordPackingPhoto(orderId, photoId) {
       // Only an opaque metadata reference; this fake accepts no image bytes or remote URLs.
       if (!/^photo-[a-zA-Z0-9_-]{1,64}$/.test(photoId)) throw new Error("Invalid demo photo reference");
       const order = checked(orders, orderId);
       if (order.snapshot.status !== "confirmed") throw new Error("Invalid demo order transition");
-      transition(order, "confirmed", "packed");
-      order.snapshot.packingPhotoId = photoId;
+      mutate(order, () => {
+        transition(order, "confirmed", "packed");
+        order.snapshot.packingPhotoId = photoId;
+      });
     },
     markShipped(orderId) {
       const order = checked(orders, orderId);
       if (order.snapshot.paymentStatus !== "simulated-confirmed") throw new Error("Unpaid demo order cannot ship");
-      transition(order, "packed", "shipped");
+      mutate(order, () => { transition(order, "packed", "shipped"); });
     },
     markDelivered(orderId) {
-      transition(checked(orders, orderId), "shipped", "delivered");
+      const order = checked(orders, orderId);
+      mutate(order, () => { transition(order, "shipped", "delivered"); });
     },
     queueNotification(orderId, status, audience) {
       if (!["customer", "merchant"].includes(audience)) throw new Error("Invalid audience");
@@ -115,7 +152,7 @@ export const createDemoOrderService = (): DemoOrderService => {
       const notification: DemoNotification = {
         id: randomUUID(), orderId, status, audience, delivery: "simulated",
       };
-      order.notifications.set(key, notification);
+      mutate(order, () => { order.notifications.set(key, notification); });
       return { ...notification };
     },
     listNotifications(orderId) {

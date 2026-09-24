@@ -1,6 +1,11 @@
 import { describe, expect, test } from "vitest";
 import { createDemoOrderService } from "@/lib/domain/demo-order-service";
 import type { Cart } from "@/lib/domain/types";
+import { createSqliteDemoOrderService } from "@/lib/domain/demo-order-storage";
+import { DatabaseSync } from "node:sqlite";
+import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 
 const cart: Cart = {
   lines: [{
@@ -82,6 +87,67 @@ describe("demo order service", () => {
     service.confirmSimulatedPayment(orderId);
     service.markShipped(orderId);
     expect(() => service.markShipped(orderId)).toThrow();
+  });
+
+  test("SQLite reopening retains lookup, notifications and payment/photo shipping gates", () => {
+    const dir = mkdtempSync(join(tmpdir(), "demo-orders-"));
+    const path = join(dir, "orders.sqlite");
+    try {
+      const first = createSqliteDemoOrderService(path);
+      const { orderId, accessSecret } = first.create(cart);
+      first.recordPackingPhoto(orderId, "photo-demo-3");
+      const note = first.queueNotification(orderId, "packed", "merchant");
+      first.close();
+      const second = createSqliteDemoOrderService(path);
+      expect(second.lookup(orderId, accessSecret)?.packingPhotoId).toBe("photo-demo-3");
+      expect(second.lookup(orderId, accessSecret)?.paymentStatus).toBe("pending");
+      expect(() => second.markShipped(orderId)).toThrow();
+      expect(second.queueNotification(orderId, "packed", "merchant")).toEqual(note);
+      second.confirmSimulatedPayment(orderId);
+      second.close();
+      const third = createSqliteDemoOrderService(path);
+      third.markShipped(orderId);
+      expect(third.lookup(orderId, accessSecret)?.status).toBe("shipped");
+      expect(third.listNotifications(orderId)).toHaveLength(1);
+      third.close();
+      expect(readFileSync(path).includes(Buffer.from(accessSecret))).toBe(false);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test("failed SQLite write does not leave a changed in-memory order", () => {
+    const dir = mkdtempSync(join(tmpdir(), "demo-orders-"));
+    try {
+      const service = createSqliteDemoOrderService(join(dir, "orders.sqlite"));
+      const { orderId, accessSecret } = service.create(cart);
+      service.close();
+      expect(() => service.recordPackingPhoto(orderId, "photo-demo-4")).toThrow();
+      expect(service.lookup(orderId, accessSecret)?.status).toBe("confirmed");
+      expect(service.lookup(orderId, accessSecret)?.packingPhotoId).toBeNull();
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test("SQLite reopening refuses wrong and corrupted lookup digests", () => {
+    const dir = mkdtempSync(join(tmpdir(), "demo-orders-"));
+    const path = join(dir, "orders.sqlite");
+    try {
+      const first = createSqliteDemoOrderService(path);
+      const { orderId, accessSecret } = first.create(cart);
+      first.close();
+      const db = new DatabaseSync(path);
+      db.prepare("UPDATE demo_orders SET secret_digest = ? WHERE order_id = ?")
+        .run("not-a-valid-digest", orderId);
+      db.close();
+      const second = createSqliteDemoOrderService(path);
+      expect(second.lookup(orderId, accessSecret)).toBeNull();
+      expect(second.lookup(orderId, "0".repeat(64))).toBeNull();
+      second.close();
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
   });
 
   test("queues one simulated notification per event and audience without sending externally", () => {
