@@ -108,7 +108,7 @@ export function CartPage(): JSX.Element {
         <div aria-label="購物車摘要" role="region">
           <p aria-label={`購物車總小計 ${formatMoney(cart.subtotal.amount)}`}>小計：{formatMoney(cart.subtotal.amount)}</p>
         </div>
-        <Link href="/#catalog">繼續選茶</Link>
+        <Link href="/#catalog">繼續購買</Link>
         <Link href="/checkout">前往結帳</Link>
       </section>
     </main>

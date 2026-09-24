@@ -1,4 +1,8 @@
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { vi } from "vitest";
+
+const { push } = vi.hoisted(() => ({ push: vi.fn() }));
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
 import { useState, type JSX, type MouseEvent } from "react";
 import type { Cart, CartService, CatalogService, CheckoutService, Product } from "@/lib/domain";
 import { createMockCheckoutService } from "@/lib/domain";

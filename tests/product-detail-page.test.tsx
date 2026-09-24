@@ -1,4 +1,8 @@
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { vi } from "vitest";
+
+const { push } = vi.hoisted(() => ({ push: vi.fn() }));
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
 import type { CartService, CatalogService, Product, ProductVariant } from "@/lib/domain";
 import { CommerceProvider } from "@/features/commerce/components/commerce-provider";
 import { ProductDetailPage } from "@/features/product/components/product-detail-page";
@@ -173,6 +177,7 @@ it("validates quantity and adds the selected product without resetting it", asyn
   fireEvent.click(screen.getByRole("button", { name: "加入購物車" }));
   await waitFor(() => expect(screen.getByRole("status")).toHaveTextContent("已加入購物車"));
   expect(added).toEqual(["tea-jade", "tea-jade-variant", 2]);
+  expect(push).toHaveBeenCalledWith("/cart");
   expect(quantity).toHaveValue(2);
 });
 

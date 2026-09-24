@@ -3,8 +3,7 @@ import { expect, test, type Page } from "@playwright/test";
 async function addTeaAndOpenCheckout(page: Page) {
   await page.goto("/tea/mock-tea-001");
   await page.getByRole("button", { name: "加入購物車" }).click();
-  await expect(page.getByRole("status")).toContainText("已加入購物車");
-  await page.getByRole("link", { name: "查看購物車" }).click();
+  await expect(page).toHaveURL(/\/cart$/);
   await expect(page.getByRole("link", { name: "前往結帳" })).toHaveAttribute("href", "/checkout");
   await page.getByRole("link", { name: "前往結帳" }).click();
   await expect(page).toHaveURL(/\/checkout$/);
