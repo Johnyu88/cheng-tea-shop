@@ -584,4 +584,4 @@ Wave 7 的修復只補本機 Demo 的資料與素材邊界：八款 2026-09-23 s
 
 購物車／checkout 已提供返回與取消路徑；Demo OTP 仍由服務端驗證，cooldown 重用有效 challenge，錯誤碼有明確提示。`/admin/products` 提供本機商品清單與上下架，publication 變更不刪資料，前台與 authoritative order boundary 同步拒絕下架商品。
 
-第九種茶的素材處理以明確標示的 Mock pipeline 呈現原始、檢查、辨識／拆解、合成預覽、人工確認、儲存與上架狀態；沒有影像 AI、付款、簡訊、物流、ERP 或正式服務串接。LAN Pixel 7 Chromium 2/2 與 webpack build 通過，但不等同真人手機驗收；正式合成照與真人操作仍待店家提供／執行。
+第九種茶的素材處理以明確標示的 Mock pipeline 呈現原始、檢查、辨識／拆解、合成預覽、人工確認、儲存與上架狀態；沒有影像 AI、付款、簡訊、物流、ERP 或正式服務串接。原始檔目前只在瀏覽器草稿預覽，publish 會保存首張 catalog media；raw archive 與 derived manifest 仍是未完成項。LAN Pixel 7 Chromium 2/2 與 webpack build 通過，但不等同真人手機驗收；正式合成照與真人操作仍待店家提供／執行。

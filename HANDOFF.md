@@ -417,9 +417,10 @@ Follow `RESUME_PROMPT.md`, `AGENTS.md`, and `WORKFLOW.md`. If newer explicit use
 - 購物車新增「返回上一頁」；checkout 新增「返回上一頁」與「取消本次結帳」回購物車。離開不建立訂單，也不清空既有購物車。
 - OTP 保留服務端驗證；同一有效 challenge 在 cooldown 期間重用，避免手機重按取得驗證碼卡死；錯誤 OTP 顯示明確提示。測試資料仍為允許的合成手機與 `123456`，不連接 SMS。
 - 新增 `/admin/products` 本機 Demo 商品工作台：列出商品、照片、分類、規格、價格、庫存與上下架操作。下架只改 publication、保留商品與歷史訂單；公開 Catalog 與 authoritative order boundary 皆拒絕下架商品。
-- 第九種素材流程以可替換 Mock 狀態展示「原始照片→檢查→拆解／辨識 Mock→合成預覽 Mock→人工確認→儲存→上架」；未宣稱真正 AI 辨識或合成，原始與衍生素材限本機／Git ignored Demo data。
+- 第九種素材流程以可替換 Mock 狀態展示「原始照片→檢查→拆解／辨識 Mock→合成預覽 Mock→人工確認→儲存→上架」；未宣稱真正 AI 辨識或合成。現階段原始檔只保留於瀏覽器草稿預覽，publish 會將首張圖片寫成 Demo catalog media；獨立 raw archive／derived manifest 尚未實作。
 - 驗證：focused Vitest 42/42；webpack production build 通過；LAN Pixel 7 Chromium 在全新隔離 Demo data 上 `catalog-persistence` + `mobile-order-loop` 2/2 通過。Turbopack 因 worktree `node_modules` symlink 被限制；production `next start` 仍由安全 guard 禁止 Demo API，安全邊界未放寬。
 - 不宣稱真人手機驗收通過。可供重跑網址：`http://172.20.10.4:3013`；後台：`/admin/products`、`/admin/products/new`、`/admin/orders`。正式合成照仍待店家提供；`AGENTS.md` 與 `next-env.d.ts` 為既有未提交環境變更，本階段未納入。
+- `/admin/products` 目前提供清單、前台檢視與上下架操作；既有商品的獨立編輯表單仍待後續 bounded slice，不以新增頁冒充編輯功能。
 
 ## 同一區域網路真實手機驗收準備 — 2026-09-26
 

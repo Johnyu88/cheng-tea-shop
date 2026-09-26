@@ -396,6 +396,7 @@ Phase 10 is planning-only. No real customer/product data has been sent to an ERP
 | Cart / checkout exit paths | ✅ local Demo | Back and cancel links preserve cart and do not create an order |
 | OTP retry / wrong-code feedback | ✅ local Demo | Active challenge reuse during cooldown; server verification retained; wrong code is visible |
 | `/admin/products` and publication toggle | ✅ local Demo | File-backed ignored catalog; draft hidden from public catalog and rejected by order boundary |
-| Ninth-product material workflow | ✅ Mock boundary | Raw/check/identify/compose/confirm/save/publish states are visible; no AI claim or external service |
+| Ninth-product material workflow | ⚠️ Mock boundary | Raw/check/identify/compose/confirm/save/publish states are visible; no AI claim or external service; separate raw archive/derived manifest remains pending |
+| Existing-product edit form | ⬜ pending | `/admin/products` has view and publication operations; no independent edit form yet |
 | LAN mobile regression | ✅ automated | Pixel 7 Chromium `catalog-persistence` + `mobile-order-loop` 2/2 on isolated data; not human-phone evidence |
 | Real phone acceptance | ⬜ pending | Re-run `http://172.20.10.4:3013` on a physical phone; no completion claimed |
