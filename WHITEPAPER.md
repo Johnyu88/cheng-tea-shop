@@ -620,3 +620,10 @@ The generated hero images are not a substitute for store-approved photography. T
 - Current LAN browser evidence completed homepage → product → cart → checkout → OTP → order → `/checkout/success`: order creation returned 200; the success page showed thanks, received order, status, home link, and explicit lookup link. It remains synthetic browser evidence and does not replace real-phone acceptance.
 - P1 image processing remains blocked and explicitly unclaimed: no `raw-data/` source photos or OCR／vision／composition provider exists in this worktree. The available built-in image generation tool is not a tea-fact recognition system; no generated image was substituted for real material.
 - Verification: Vitest 32 files／177 tests, TypeScript, Webpack build, ESLint 0 errors with 5 existing warnings, and Chromium 14/14. WebKit remains locally limited by the previously recorded hang／Avast environment constraint. No real payment, logistics, ERP, SMS, external notification, or production deployment was added.
+
+## 54. 第五輪補充驗收 — 2026-09-27
+
+- 以同一份 file-backed Demo Catalog 驗證第九種測試茶 `台灣野生紅茶`：價格 `888 → 999`、下架後公開 GET 隱藏、重新上架後恢復；重啟目前 Wave 7 3013 server 後仍為 `999`／`published`。這是本機合成資料證據，不是真人手機驗收。
+- 首頁導覽新增固定 360×800 viewport regression：`訂單查詢` link 可見，且整個 bounding box 在 viewport 內。現行 3013 LAN 瀏覽器截圖顯示品牌導覽列實際包含「訂單查詢」；手機若仍看不到，需在實體機重新載入 `http://172.20.10.4:3013/` 並回傳截圖，以排除舊 server、瀏覽器快取或連到錯誤工作樹。
+- 本輪未任意修改 CSS，因目前 Wave 7 版本已能重現並通過實際瀏覽器渲染；避免用無證據的版面變更掩蓋實體機環境問題。
+- 第九種茶的完整「原圖上傳→實際影像辨識→資料提取→合成主圖」仍未完成；只有可替換、清楚標示的 Mock pipeline。缺少店家 raw-data、授權 OCR／vision／composition 工具與人工確認產物前，不可宣稱 PASS。

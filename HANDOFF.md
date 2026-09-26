@@ -470,3 +470,12 @@ Follow `RESUME_PROMPT.md`, `AGENTS.md`, and `WORKFLOW.md`. If newer explicit use
 - LAN browser flow（360×800）驗證首頁「訂單查詢」、9 件 published 商品、OTP、`POST /api/demo/orders` 200、`/checkout/success` 感謝／訂單編號／狀態／返回首頁／主動查看訂單；無 pageerror／requestfailed。這仍是自動化 LAN 證據，不是真人手機驗收。
 - P1 未接入影像服務：`raw-data/` 不存在，專案沒有 OCR／茶品辨識／圖片合成服務；只有可選的內建 image generation 能力與 Next 間接依賴的 `sharp`，不能據此宣稱 P1 完成。
 - 驗證：Vitest 32 files／177 tests、TypeScript、Webpack build、ESLint 0 errors（5 warnings）、Chromium e2e 14/14；WebKit 仍受既知本機 hang／Avast 環境限制。`AGENTS.md`、`next-env.d.ts` 維持未提交。
+
+## 第五輪補充驗收 — 2026-09-27
+
+- 3013 已停止後由目前 `codex/wave-7-shopping-quality-gate` 工作樹重新啟動；重啟後 listener 為 `172.20.10.4:3013`，`GET /api/demo/catalog?limit=50` 回傳 HTTP 200。Windows 禁止查詢完整 Node command line，因此以啟動工作樹、啟動環境、listener 與 API 內容作版本證據；不能由此替代真人手機截圖。
+- 第九種合成測試茶 `台灣野生紅茶` 在同一份 `.demo-data/lan-demo-third-round-final-2/catalog.json` 完成 `888 → 999` 價格修改、`published → draft`（公開 Catalog 隱藏）、再 `draft → published`；重啟 3013 後仍為價格 999、`published`，公開總數為 9。未清空或重建資料。
+- 新增 360×800 Playwright 回歸關卡，確認品牌導覽中的「訂單查詢」可見且 bounding box 完整位於 viewport；對目前 Wave 7 渲染結果通過。證據圖為瀏覽器渲染，不是真人手機截圖：`docs/testing/evidence/fifth-round-2026-09-27-home-mobile.png`、`...-home-desktop.png`。
+- 實際影像辨識／資訊提取／主體合成仍 BLOCKED：目前只有明確標示的 Mock 流程，沒有 raw-data 茶樣來源、OCR／vision provider 或可驗證的衍生素材 manifest；不得把 Mock 預覽算作完成。
+- 本輪沒有新增網站業務功能或外部服務；`AGENTS.md`、`next-env.d.ts` 仍為既有未提交環境變更，未 staged、未提交。
+- 本輪新回歸測試與驗證：Vitest 32 files／177 tests、TypeScript、Webpack build、ESLint 0 errors／5 warnings、Chromium e2e 15/15；WebKit 未重新宣稱通過，仍受既知 Avast／managed Windows 限制。

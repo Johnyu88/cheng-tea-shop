@@ -436,3 +436,14 @@ Phase 10 is planning-only. No real customer/product data has been sent to an ERP
 | Checkout success navigation | ✅ LAN browser | OTP → order API 200 → `/checkout/success`; thanks, order id/status, home and lookup links visible |
 | P1 image recognition/composition | ⛔ blocked | No raw-data source or OCR/vision/composition provider in worktree; workflow remains explicitly Mock |
 | Real phone acceptance | ⬜ pending | Automated LAN browser evidence is not physical-phone evidence |
+
+## 第五輪補充驗收 — 2026-09-27
+
+| Capability | Status | Evidence / limitation |
+|---|---:|---|
+| Ninth test tea price 888→999 | ✅ local Demo | Same file-backed catalog; PATCH/GET and restart verified |
+| Ninth test tea unpublish / republish | ✅ local Demo | Public catalog hides draft, then exposes published record; historical record retained |
+| Mobile brand navigation order lookup | ✅ browser regression | 360×800 link visibility and viewport bounds pass; physical phone still requires operator evidence |
+| 3013 latest Wave 7 process | ✅ local evidence | Restarted from current worktree with explicit Demo flags; listener/API verified; full Windows command line unavailable |
+| Actual image recognition and composition | ⛔ blocked | No raw-data source, OCR/vision provider, or verifiable derived artifact; current UI remains explicit Mock |
+| Physical phone acceptance | ⬜ pending | Browser screenshots and automation do not replace real-device operation |
