@@ -627,3 +627,11 @@ The generated hero images are not a substitute for store-approved photography. T
 - 首頁導覽新增固定 360×800 viewport regression：`訂單查詢` link 可見，且整個 bounding box 在 viewport 內。現行 3013 LAN 瀏覽器截圖顯示品牌導覽列實際包含「訂單查詢」；手機若仍看不到，需在實體機重新載入 `http://172.20.10.4:3013/` 並回傳截圖，以排除舊 server、瀏覽器快取或連到錯誤工作樹。
 - 本輪未任意修改 CSS，因目前 Wave 7 版本已能重現並通過實際瀏覽器渲染；避免用無證據的版面變更掩蓋實體機環境問題。
 - 第九種茶的完整「原圖上傳→實際影像辨識→資料提取→合成主圖」仍未完成；只有可替換、清楚標示的 Mock pipeline。缺少店家 raw-data、授權 OCR／vision／composition 工具與人工確認產物前，不可宣稱 PASS。
+
+## 55. 2026-09-27 收尾修復
+
+- 公開品牌決策以最新需求為準：「陳老師茶行」是唯一對外品牌；metadata、首頁 header、aria-label 與測試已同步。歷史設計規格與舊證據不回寫，避免改變歷史紀錄。
+- Checkout success 的跨邊界修復：訂單 API 建立成功後，server route 從 query 取得 order id，直接交給 success component；只把查單所需 secret 留在同一瀏覽器 sessionStorage，不把 secret 放進 URL、DOM 或連結。這不是繞過 OTP，也沒有製造假成功。
+- Catalog 與 admin fields 仍沿用單一 file-backed Demo Catalog；商品編輯新增 aroma、taste、teaRegion、summary 的受控欄位，分類以中文顯示。未接 ERP、資料庫、付款、物流或外部服務。
+- 真實影像辨識／資訊提取／主體合成仍是 BLOCKED，而非 prototype PASS。需要店家原始照片、授權、可調用的 OCR／vision／image-processing 工具、輸出 schema 與人工確認流程。
+- 明日驗收邊界：先用同一 3013 URL 在實體手機重跑首頁查單入口與購物→OTP→建立訂單→感謝頁；自動化瀏覽器只能作工程證據，不能取代真人手機結果。

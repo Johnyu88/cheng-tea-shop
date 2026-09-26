@@ -53,6 +53,7 @@ export type ProductDraft = {
   summary?: string;
   photos?: ProductDraftPhoto[];
   origin?: string;
+  taste?: string;
   fermentation?: string;
   roast?: string;
   aroma?: string;

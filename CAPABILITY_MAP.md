@@ -447,3 +447,15 @@ Phase 10 is planning-only. No real customer/product data has been sent to an ERP
 | 3013 latest Wave 7 process | ✅ local evidence | Restarted from current worktree with explicit Demo flags; listener/API verified; full Windows command line unavailable |
 | Actual image recognition and composition | ⛔ blocked | No raw-data source, OCR/vision provider, or verifiable derived artifact; current UI remains explicit Mock |
 | Physical phone acceptance | ⬜ pending | Browser screenshots and automation do not replace real-device operation |
+
+## 2026-09-27 收尾修復
+
+| Capability | Status | Evidence / limitation |
+|---|---:|---|
+| Public brand consistency | ✅ | Metadata、首頁品牌導覽、aria-label 與 brand regression tests 使用「陳老師茶行」；歷史文件不改寫 |
+| Checkout success redirect | ✅ local Demo | API 200 後 server route 傳入 order id；LAN browser 顯示感謝、編號、狀態與導覽 |
+| Shared Catalog mutations | ✅ local Demo | 唯一 file-backed store；888→999、下架／上架、重啟持續已驗證 |
+| Admin product facts | ✅ local Demo | 中文茶類、價格、庫存、香氣、口感、產地、商品介紹可讀取／編輯 |
+| Mobile order lookup entry | ✅ browser / ⬜ physical phone | 360×800 與 1280×800 browser PASS；真人手機仍待重跑 |
+| Actual image recognition and composition | ⛔ blocked | No raw source/provider/derived manifest; Mock pipeline remains explicitly labelled |
+| Real payment / messaging / logistics / ERP | ⬜ prohibited | No production service or customer data enabled |

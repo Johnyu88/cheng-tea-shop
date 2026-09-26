@@ -479,3 +479,15 @@ Follow `RESUME_PROMPT.md`, `AGENTS.md`, and `WORKFLOW.md`. If newer explicit use
 - 實際影像辨識／資訊提取／主體合成仍 BLOCKED：目前只有明確標示的 Mock 流程，沒有 raw-data 茶樣來源、OCR／vision provider 或可驗證的衍生素材 manifest；不得把 Mock 預覽算作完成。
 - 本輪沒有新增網站業務功能或外部服務；`AGENTS.md`、`next-env.d.ts` 仍為既有未提交環境變更，未 staged、未提交。
 - 本輪新回歸測試與驗證：Vitest 32 files／177 tests、TypeScript、Webpack build、ESLint 0 errors／5 warnings、Chromium e2e 15/15；WebKit 未重新宣稱通過，仍受既知 Avast／managed Windows 限制。
+
+## 2026-09-27 收尾修復與明日交接
+
+- 工程現場：branch `codex/wave-7-shopping-quality-gate`；本節驗證交付點以 Git log 與遠端分支確認為準。`AGENTS.md`、`next-env.d.ts` 是既有 Next.js／環境未提交變更，未覆蓋、未 staged。3013 使用目前 worktree、`DEMO_DATA_DIR=.demo-data/lan-demo-third-round-final-2`、LAN Demo flags，未清空資料。
+- P0 品牌：公開 metadata、首頁品牌導覽與 aria-label 已統一為「陳老師茶行」；歷史 specs、舊證據與交接紀錄保留原貌。新增品牌一致性 tests，程式碼與 public storefront 不再暴露「龍映茗茶」。
+- P0 結帳根因：API 實際回傳 200 且已建立訂單，但 `/checkout/success` route 原先丟棄 `?order=`，只等待 client storage effect，造成手機看見「正在準備訂單資訊」。現在 server page 直接傳入非敏感 order id；同源 LAN Chromium 已實際顯示感謝、訂單編號、狀態、返回首頁、查看訂單，查單 secret 仍不渲染。
+- P0 Catalog：同一 file-backed store 的八種茶與測試茶保留；`台灣野生紅茶` 的 `888 → 999`、下架隱藏、重新上架、重啟持續結果已在前一階段驗證，未建立第二份商品清單。
+- P0 手機導覽：360×800 與 1280×800 LAN browser 均實際看見品牌導覽「訂單查詢」；實體手機仍須明日重新載入 3013 並由陳老師確認，瀏覽器證據不能替代真人驗收。
+- P1 後台欄位：既有／新增商品表單與 Catalog update boundary 已支援中文茶類、售價、庫存、香氣、口感、產地、商品介紹；既有八種 fixture 的 aroma／taste／teaRegion 會載入。圖片仍區分原始素材與未完成合成主圖，不宣稱 AI。
+- P1 影像流程仍 BLOCKED：工作樹沒有可用 raw-data 茶樣、OCR／vision／composition provider 或授權衍生 manifest；目前 Mock 流程只能作 UI boundary。明日唯一優先工作是實體手機重跑 P0 閉環；影像服務需另行提供來源、授權與工具後再決策。
+- 證據：`docs/testing/evidence/2026-09-27-finish/home-mobile.png`、`home-desktop.png`、`checkout-success.png`、`admin-product-fields.png`；均為 LAN Chromium 實際渲染，不是真人手機截圖。
+- GitHub PR #15：本機沒有 `gh` CLI，未宣稱已讀取 PR 狀態；不影響本地修復，明日可用 GitHub connector／瀏覽器補查。

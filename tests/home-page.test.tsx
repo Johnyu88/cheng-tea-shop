@@ -12,7 +12,7 @@ it("provides a named storefront shell for keyboard and assistive technology user
   render(<HomePage />);
 
   expect(screen.getByRole("banner")).toBeInTheDocument();
-  expect(screen.getByRole("link", { name: "龍映茗茶" })).toHaveAttribute("href", "#top");
+  expect(screen.getByRole("link", { name: "陳老師茶行" })).toHaveAttribute("href", "#top");
   expect(screen.getByRole("navigation", { name: "主要導覽" })).toBeInTheDocument();
 });
 
@@ -71,4 +71,12 @@ it("uses approved desktop/mobile composite candidates instead of a video", () =>
 it("exposes order lookup from the primary navigation", () => {
   render(<HomePage catalogService={createMockCatalogService()} />);
   expect(screen.getByRole("link", { name: "訂單查詢" })).toHaveAttribute("href", "/orders");
+});
+
+it("does not expose the retired brand name in the public storefront shell", () => {
+  render(<HomePage catalogService={createMockCatalogService()} />);
+
+  expect(screen.queryByText("龍映茗茶")).toBeNull();
+  expect(screen.queryByLabelText("龍映茗茶")).toBeNull();
+  expect(screen.getByRole("link", { name: "陳老師茶行" })).toBeInTheDocument();
 });

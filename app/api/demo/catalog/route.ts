@@ -27,7 +27,7 @@ export async function GET(request: Request) {
 export async function PATCH(request: Request) {
   try {
     assertLocalDemoHttpRequest(request, "PATCH", "json");
-    const body = await request.json() as { id?: unknown; publication?: unknown; name?: unknown; category?: unknown; specification?: unknown; price?: unknown; inventoryStatus?: unknown };
+    const body = await request.json() as { id?: unknown; publication?: unknown; name?: unknown; category?: unknown; specification?: unknown; price?: unknown; inventoryStatus?: unknown; aroma?: unknown; taste?: unknown; teaRegion?: unknown; summary?: unknown };
     if (typeof body.id !== "string") throw new Error("商品更新資料無效");
     if (body.publication === "draft" || body.publication === "published") {
       const product = await getDemoCatalogStore().setPublication(body.id, body.publication);
@@ -40,6 +40,10 @@ export async function PATCH(request: Request) {
     if (typeof body.specification === "string") changes.specification = body.specification;
     if (body.price && typeof body.price === "object") changes.price = body.price as { currency: "TWD"; amount: number };
     if (body.inventoryStatus === "available" || body.inventoryStatus === "sold-out") changes.inventoryStatus = body.inventoryStatus;
+    if (typeof body.aroma === "string") changes.aroma = body.aroma;
+    if (typeof body.taste === "string") changes.taste = body.taste;
+    if (typeof body.teaRegion === "string") changes.teaRegion = body.teaRegion;
+    if (typeof body.summary === "string") changes.summary = body.summary;
     if (Object.keys(changes).length === 0) throw new Error("商品編輯資料無效");
     const product = await getDemoCatalogStore().update(body.id, changes);
     if (!product) throw new Error("找不到商品");

@@ -84,8 +84,8 @@ export function HomePage({ catalogService = defaultCatalogService }: HomePagePro
   return (
     <div id="top" className="site-shell">
       <header className="site-header" role="banner">
-        <a className="brand-mark" href="#top" aria-label="龍映茗茶">
-          龍映茗茶
+        <a className="brand-mark" href="#top" aria-label="陳老師茶行">
+          陳老師茶行
         </a>
         <nav aria-label="主要導覽">
           <a href="#baseline">茶品導覽</a>

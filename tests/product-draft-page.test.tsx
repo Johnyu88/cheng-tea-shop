@@ -51,6 +51,9 @@ it("labels the prototype and presents the five minimum fields", () => {
   expect(screen.getByLabelText("茶類")).toBeInTheDocument();
   expect(screen.getByLabelText("有貨")).toBeInTheDocument();
   expect(screen.getByLabelText("售完")).toBeInTheDocument();
+  expect(screen.getByLabelText("口感（選填）")).toBeInTheDocument();
+  expect(screen.getByLabelText("香氣（選填）")).toBeInTheDocument();
+  expect(screen.getByLabelText("產地（選填）")).toBeInTheDocument();
 });
 
 it("shows a linked required-field summary before a draft can be saved", () => {

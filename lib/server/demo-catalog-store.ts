@@ -8,7 +8,17 @@ import { mockCatalogFixture } from "@/lib/domain/mock/catalog-fixture";
 
 type CatalogFile = { version: 1; products: Product[] };
 type StoreOptions = { filePath: string; mediaDirectory: string; seedProducts?: Product[] };
-export type ProductUpdate = { name?: string; category?: Product["category"]; specification?: string; price?: Product["variants"][number]["price"]; inventoryStatus?: Product["variants"][number]["inventoryStatus"] };
+export type ProductUpdate = {
+  name?: string;
+  category?: Product["category"];
+  specification?: string;
+  price?: Product["variants"][number]["price"];
+  inventoryStatus?: Product["variants"][number]["inventoryStatus"];
+  aroma?: string;
+  taste?: string;
+  teaRegion?: string;
+  summary?: string;
+};
 
 const clone = <T>(value: T): T => JSON.parse(JSON.stringify(value)) as T;
 
@@ -80,6 +90,10 @@ export const createDemoCatalogStore = ({ filePath, mediaDirectory, seedProducts 
           product.summary = product.summary || `茶名：${product.name}`;
         }
         if (changes.category) product.category = changes.category;
+        if (changes.aroma !== undefined) { if (changes.aroma.trim()) product.aroma = changes.aroma.trim(); else delete product.aroma; }
+        if (changes.taste !== undefined) { if (changes.taste.trim()) product.taste = changes.taste.trim(); else delete product.taste; }
+        if (changes.teaRegion !== undefined) { if (changes.teaRegion.trim()) product.teaRegion = changes.teaRegion.trim(); else delete product.teaRegion; }
+        if (changes.summary !== undefined && changes.summary.trim()) product.summary = changes.summary.trim();
         const variant = product.variants[0];
         if (variant) {
           if (changes.specification?.trim()) variant.specification = changes.specification.trim();
@@ -114,6 +128,9 @@ export const createDemoCatalogStore = ({ filePath, mediaDirectory, seedProducts 
           image,
           variants: [{ id: `${id}-variant`, specification: draft.specification.trim(), price: { ...draft.price }, inventoryStatus: draft.inventoryStatus, maxQuantity: 5 }],
           publication: "published",
+          ...(draft.origin?.trim() ? { teaRegion: draft.origin.trim() } : {}),
+          ...(draft.aroma?.trim() ? { aroma: draft.aroma.trim() } : {}),
+          ...(draft.taste?.trim() ? { taste: draft.taste.trim() } : {}),
         };
         catalog.products.push(product);
         await write(catalog);

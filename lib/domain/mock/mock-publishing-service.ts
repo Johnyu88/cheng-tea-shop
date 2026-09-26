@@ -51,6 +51,7 @@ const optionalFacts = [
   ["發酵", "fermentation"],
   ["焙火", "roast"],
   ["香氣", "aroma"],
+  ["口感", "taste"],
   ["沖泡", "brewing"],
   ["摘要", "summary"],
 ] as const;
