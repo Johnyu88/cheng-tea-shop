@@ -410,3 +410,13 @@ Follow `RESUME_PROMPT.md`, `AGENTS.md`, and `WORKFLOW.md`. If newer explicit use
 - 已通過 focused HTTP guard、runtime 與 mobile push preview tests，以及 Pixel 7 Chromium 顧客→店家→顧客閉環。正式付款、物流、SMS、Email、Web Push、會員、production、公開網路及正式客戶資料均未啟用。
 - 完整交付閘門已通過：Vitest 29 files／167 tests；TypeScript；ESLint 0 errors（1 個既有 `<img>` warning）；Webpack build；既有 Chromium 14/14；Pixel 7 focused mobile Chromium 1/1；`git diff --check` 與常見 secret pattern scan 均無問題。WebKit 未重跑，沿用既知 Avast 隔離環境限制，未修改防毒設定。
 - `AGENTS.md` 與 `next-env.d.ts` 是進場前既有環境變更，本階段未修改且不得納入提交。
+
+## 同一區域網路真實手機驗收準備 — 2026-09-26
+
+- 為實機展示增加明確 LAN opt-in：`DEMO_COMMERCE_LAN=enabled` 時，HTTP guard 只接受 RFC1918 私有 IPv4；未設定時仍只接受 loopback。production、公開／訪客網路與 `0.0.0.0` 綁定仍拒絕。
+- LAN 模式的店家 cookie 改用不帶 `Secure` 的 `HttpOnly; SameSite=Strict; Path=/` 合成 cookie，因 HTTP 手機測試無法使用 `__Host-` cookie；loopback 預設仍維持 `__Host-...; Secure`。這只為本機假資料 Demo，不能帶入正式環境。
+- 實機操作文件已補在 `docs/testing/mobile-demo-local-runbook.md`：取得私有 IP、啟動旗標、必要網址、手機與電腦同網、Windows 防火牆阻擋時停止並交由管理者處理，不自動修改安全設定。
+- 待執行的真人手機驗收：用同一區網手機完整走商品→購物車→結帳→查單→店家處理→出貨狀態；目前尚未把此流程宣稱為真人／店家走查結果。Pixel 7 Chromium 自動化 1/1 仍是腳本證據。
+- 本次已在本機私有介面 `172.20.10.4:3013` 啟動 Demo；必要網址為 `/`、`/cart`、`/checkout`、`/orders`、`/admin/orders`。主機 health／頁面可達；實際手機操作仍待陳老師在同一可信 Wi‑Fi 執行，不能由本機自動化代替。
+- 已以同一 LAN URL `http://172.20.10.4:3013` 重跑 Pixel 7 Chromium synthetic flow，1/1 通過；這證明 LAN host/origin 與完整合成流程相容，不代表真實手機或真人走查已完成。
+- 實機限制：HTTP LAN cookie 不具 Secure，故只允許假資料、假 OTP、假付款與假通知；不要輸入真實客戶／付款資料。Demo 結束應停止 server，並在確認路徑後清除 `.demo-data\lan-demo`。

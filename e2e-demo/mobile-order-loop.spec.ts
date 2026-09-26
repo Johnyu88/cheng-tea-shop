@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-const merchantSecret = "11".repeat(32);
+const merchantSecret = process.env.DEMO_MERCHANT_SECRET ?? "11".repeat(32);
 
 test("mobile synthetic order closes customer and merchant status loop", async ({ page }) => {
   await page.goto("/tea/mock-tea-001");
@@ -11,6 +11,7 @@ test("mobile synthetic order closes customer and merchant status loop", async ({
 
   await expect(page.getByRole("heading", { name: "身分確認" })).toBeVisible();
   await page.getByLabel("姓名").fill("合成顧客");
+  await page.getByLabel("合成手機").fill("0912000001");
   await page.getByLabel("Email（選填，僅模擬通知）").fill("demo@example.test");
   await page.getByRole("button", { name: "取得合成驗證碼" }).click();
   await expect(page.getByRole("status")).toContainText("123456");
@@ -36,6 +37,8 @@ test("mobile synthetic order closes customer and merchant status loop", async ({
   await page.getByRole("button", { name: "模擬成功" }).first().click();
 
   await page.goto(lookupHref!);
+  await page.getByLabel("合成手機").fill("0912000001");
+  await page.getByLabel("手機後三碼").fill("001");
   await page.getByRole("button", { name: "取得查單驗證碼" }).click();
   await expect(page.getByRole("status")).toContainText("123456");
   await page.getByLabel("驗證碼").fill("123456");

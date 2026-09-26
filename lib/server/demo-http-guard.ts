@@ -1,5 +1,17 @@
 const LOOPBACK_HOSTS = new Set(["localhost", "127.0.0.1", "[::1]"]);
 
+function isPrivateIpv4(hostname: string): boolean {
+  const octets = hostname.split(".").map(Number);
+  if (octets.length !== 4 || octets.some((part) => !Number.isInteger(part) || part < 0 || part > 255)) return false;
+  const [first, second = -1] = octets;
+  return first === 10 || (first === 172 && second >= 16 && second <= 31) || (first === 192 && second === 168);
+}
+
+function isAllowedDemoHost(hostname: string): boolean {
+  return LOOPBACK_HOSTS.has(hostname)
+    || (process.env.DEMO_COMMERCE_LAN === "enabled" && isPrivateIpv4(hostname));
+}
+
 type BodyKind = "json" | "multipart";
 
 /** Rejects requests unless the explicitly enabled demo is served directly on loopback. */
@@ -14,7 +26,7 @@ export function assertLocalDemoHttpRequest(
 
   const url = new URL(request.url);
   if (url.protocol !== "http:" || url.username || url.password
-    || !LOOPBACK_HOSTS.has(url.hostname) || request.method !== expectedMethod) {
+    || !isAllowedDemoHost(url.hostname) || request.method !== expectedMethod) {
     throw new Error("Local demo HTTP request rejected");
   }
 
@@ -28,9 +40,9 @@ export function assertLocalDemoHttpRequest(
   } catch {
     throw new Error("Local demo HTTP origin rejected");
   }
-  if (!LOOPBACK_HOSTS.has(hostUrl.hostname) || hostUrl.port !== url.port
+  if (!isAllowedDemoHost(hostUrl.hostname) || hostUrl.port !== url.port
     || (expectedMethod !== "GET" && (!originUrl || originUrl.protocol !== "http:"
-      || !LOOPBACK_HOSTS.has(originUrl.hostname) || originUrl.port !== hostUrl.port))) {
+      || !isAllowedDemoHost(originUrl.hostname) || originUrl.port !== hostUrl.port))) {
     throw new Error("Local demo HTTP origin rejected");
   }
 
@@ -38,7 +50,8 @@ export function assertLocalDemoHttpRequest(
     if (request.headers.has(header)) throw new Error("Forwarded demo requests are rejected");
   }
   const forwardedFor = request.headers.get("x-forwarded-for");
-  if (forwardedFor && !["127.0.0.1", "::1", "::ffff:127.0.0.1"].includes(forwardedFor.trim())) {
+  if (forwardedFor && !isAllowedDemoHost(forwardedFor.trim())
+    && !["::1", "::ffff:127.0.0.1"].includes(forwardedFor.trim())) {
     throw new Error("Forwarded demo requests are rejected");
   }
   const forwardedHost = request.headers.get("x-forwarded-host");
@@ -47,7 +60,7 @@ export function assertLocalDemoHttpRequest(
     let forwardedHostUrl: URL;
     try { forwardedHostUrl = new URL(`http://${forwardedHost}`); }
     catch { throw new Error("Forwarded demo requests are rejected"); }
-    if (!LOOPBACK_HOSTS.has(forwardedHostUrl.hostname) || forwardedHostUrl.port !== hostUrl.port) {
+    if (!isAllowedDemoHost(forwardedHostUrl.hostname) || forwardedHostUrl.port !== hostUrl.port) {
       throw new Error("Forwarded demo requests are rejected");
     }
   }

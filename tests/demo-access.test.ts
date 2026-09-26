@@ -16,7 +16,17 @@ beforeEach(() => {
 });
 afterEach(() => {
   delete process.env.DEMO_COMMERCE_LOCAL;
+  delete process.env.DEMO_COMMERCE_LAN;
   delete process.env.DEMO_MERCHANT_SECRET;
+});
+
+test("LAN demo cookie is browser-usable over explicit private-network HTTP only", () => {
+  process.env.DEMO_COMMERCE_LAN = "enabled";
+  const header = issueDemoMerchantCookie(process.env.DEMO_MERCHANT_SECRET!)!;
+  expect(header).toContain("demo_merchant=");
+  expect(header).not.toContain("Secure");
+  expect(header).toContain("HttpOnly; SameSite=Strict; Path=/");
+  expect(verifyDemoMerchantCookie(header.split(";")[0]!)).toBe(true);
 });
 
 describe("local demo access primitives", () => {

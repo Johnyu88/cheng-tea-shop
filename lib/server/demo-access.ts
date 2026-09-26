@@ -1,9 +1,13 @@
 import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 
-const cookieName = "__Host-demo_merchant";
+const loopbackCookieName = "__Host-demo_merchant";
+const lanCookieName = "demo_merchant";
 const durationMs = 30 * 60 * 1000;
 const context = "local-demo-merchant-v1";
 const loopback = new Set(["localhost", "127.0.0.1", "[::1]"]);
+function cookieName(): string {
+  return process.env.DEMO_COMMERCE_LAN === "enabled" ? lanCookieName : loopbackCookieName;
+}
 function assertEnabled(): void {
   if (process.release?.name !== "node" || process.env.NODE_ENV === "production"
     || process.env.DEMO_COMMERCE_LOCAL !== "enabled") {
@@ -44,18 +48,20 @@ export function issueDemoMerchantCookie(candidate: string, now = Date.now()): st
   if (supplied.length !== key.length || !timingSafeEqual(supplied, key)) return null;
   const payload = now + "." + randomBytes(16).toString("hex");
   const signature = mac(key, payload);
-  return cookieName + "=" + payload + "." + signature
-    + "; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=1800";
+  const secure = process.env.DEMO_COMMERCE_LAN === "enabled" ? "" : " Secure;";
+  return cookieName() + "=" + payload + "." + signature
+    + "; HttpOnly;" + secure + " SameSite=Strict; Path=/; Max-Age=1800";
 }
 
 /** Pass Cookie header only. Duplicate names and altered signatures fail closed. */
 export function verifyDemoMerchantCookie(cookieHeader: string | null, now = Date.now()): boolean {
   const key = secret();
   if (!cookieHeader || cookieHeader.length > 4096) return false;
+  const expectedName = cookieName();
   const matches = cookieHeader.split(";").map(part => part.trim())
-    .filter(part => part.startsWith(cookieName + "="));
+    .filter(part => part.startsWith(expectedName + "="));
   if (matches.length !== 1) return false;
-  const token = matches[0]!.slice(cookieName.length + 1);
+  const token = matches[0]!.slice(expectedName.length + 1);
   const match = /^(\d{1,16})\.([0-9a-f]{32})\.([0-9a-f]{64})$/.exec(token);
   if (!match) return false;
   const issued = Number(match[1]);

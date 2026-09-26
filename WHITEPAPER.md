@@ -560,3 +560,11 @@ GitHub 是正式文件與程式來源。聊天中的新指令若尚未寫入 Git
 - 店家端使用與顧客 token 分離的高熵憑證及短效 HttpOnly cookie。付款僅為模擬確認；包裝照片寫入 Git 排除的私有本機目錄；`packed → shipped → delivered` 皆維持明確狀態門檻，包裝不等於出貨。
 - Email／店家通知只進入可觀察、可失敗及重試的本機 outbox。手機推送只提供 `preview-only` DTO 與畫面預覽，沒有 service worker、provider、裝置註冊或送達宣稱。
 - 會員名單仍延後；真實付款、物流、SMS、Email、Push、production、公開部署與正式資料均不在本階段。此結果只能稱為本機合成 Demo 閉環，不是 production readiness 或真人驗收。
+
+## 50. 同一區域網路手機驗收準備（2026-09-26）
+
+- 新增 `DEMO_COMMERCE_LAN=enabled` opt-in；僅允許 RFC1918 私有 IPv4、非 production、HTTP 同源請求，預設 loopback 模式仍不變。伺服器應綁定明確私有 IP，不使用 `0.0.0.0`，不修改 Windows 防火牆。
+- LAN 驗收使用 `172.20.10.4:3013`（實際 IP 以當日 `ipconfig` 為準），手機與電腦需在同一可信私有網路。必要頁面為 `/`、`/cart`、`/checkout`、`/orders`、`/admin/orders`。
+- 為相容純 HTTP 手機測試，LAN 店家 cookie 為 HttpOnly／SameSite=Strict 的合成 cookie，loopback 預設仍為 Secure `__Host-` cookie。此差異只允許假資料 Demo，不能複製到 production。
+- 目前已啟動主機端 Demo 並完成可達性準備；真實手機由陳老師執行完整流程後，才可記錄真人／店家驗收結果。Pixel 7 Chromium 1/1 仍只代表自動化腳本證據。
+- 已以同一 LAN URL `http://172.20.10.4:3013` 執行 Pixel 7 Chromium synthetic flow，1/1 通過；此為 LAN host/origin 的自動化證據，不替代真實手機或真人走查。

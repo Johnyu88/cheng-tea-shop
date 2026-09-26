@@ -28,6 +28,32 @@ test("accepts a same-origin loopback JSON request only while local demo is enabl
   expect(() => assertLocalDemoHttpRequest(withFrameworkHeaders, "POST", "json")).not.toThrow();
 });
 
+test("accepts a private LAN request only with the explicit LAN opt-in", () => {
+  const request = new Request("http://172.20.10.4:3013/api/demo/otp", {
+    method: "POST",
+    headers: {
+      host: "172.20.10.4:3013",
+      origin: "http://172.20.10.4:3013",
+      "content-type": "application/json",
+    },
+  });
+  expect(() => assertLocalDemoHttpRequest(request, "POST", "json")).toThrow();
+  process.env.DEMO_COMMERCE_LAN = "enabled";
+  expect(() => assertLocalDemoHttpRequest(request, "POST", "json")).not.toThrow();
+  const forwardedLan = new Request("http://172.20.10.4:3013/api/demo/otp", {
+    method: "POST",
+    headers: {
+      host: "172.20.10.4:3013",
+      origin: "http://172.20.10.4:3013",
+      "content-type": "application/json",
+      "x-forwarded-for": "172.20.10.4",
+    },
+  });
+  expect(() => assertLocalDemoHttpRequest(forwardedLan, "POST", "json")).not.toThrow();
+  delete process.env.DEMO_COMMERCE_LAN;
+  expect(() => assertLocalDemoHttpRequest(request, "POST", "json")).toThrow();
+});
+
 test("rejects disabled, cross-origin, forwarded, non-loopback and wrong content type requests", () => {
   const make = (url: string, headers: Record<string, string> = {}) => new Request(url, {
     method: "POST",

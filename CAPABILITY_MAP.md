@@ -364,3 +364,14 @@ Phase 10 is planning-only. No real customer/product data has been sent to an ERP
 | Mobile Chromium closure | ✅ | Pixel 7 viewport customer → merchant → customer state loop |
 | Membership list | ⬜ deferred | Intentionally not allowed to delay the primary shopping/order loop |
 | Real payment / logistics / messaging / production | ⬜ prohibited | No provider, public binding, deployment, real credential, or customer data |
+
+## U. Same-LAN phone demo readiness — 2026-09-26
+
+| Check | Status | Evidence / limitation |
+|---|---:|---|
+| Explicit LAN opt-in | ✅ | `DEMO_COMMERCE_LAN=enabled`; RFC1918 private IPv4 only; loopback default unchanged |
+| Local server binding | ✅ prepared | `172.20.10.4:3013` started for this session; no `0.0.0.0`, no firewall change |
+| Required demo URLs | ✅ | `/`, `/cart`, `/checkout`, `/orders`, `/admin/orders` |
+| Synthetic-data boundary | ✅ | OTP `123456`, mock catalog, simulated payment／notifications, ignored `.demo-data` |
+| Real phone run | ⬜ pending | LAN URL synthetic Chromium 1/1 passed; Chen Tea Shop operator must still run the flow on a real phone; automation is not participant evidence |
+| Public／production access | ⬜ prohibited | No public binding, deployment, payment, logistics, ERP, or formal notification |
