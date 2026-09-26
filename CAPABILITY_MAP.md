@@ -392,6 +392,17 @@ Phase 10 is planning-only. No real customer/product data has been sent to an ERP
 | Publication synchronization | ✅ automated | Publish/reload/frontend display and unpublish/frontend hide are covered by Chromium evidence |
 | Real phone / human verification | ⬜ pending | Chromium and screenshots cannot replace physical phone or participant evidence |
 
+## P0 Catalog recovery evidence — 2026-09-27
+
+| Check | Status | Evidence / limitation |
+|---|---:|---|
+| Active 3013 process and worktree | ✅ verified | PID 36808 `node.exe` listens on `172.20.10.4:3013`; launch session is from this worktree; Windows command-line inspection is permission-limited |
+| `/api/demo/catalog` availability | ✅ verified | HTTP 200, 8 published products, same LAN origin used by browser evidence |
+| Storefront/admin data source | ✅ verified | Both use `/api/demo/catalog`; admin adds `includeUnpublished=true` over the same file-backed store |
+| Original eight products retained | ✅ verified | Eight published records remain in `.demo-data/lan-demo-third-round-final-2/catalog.json`; one existing ninth synthetic draft also remains |
+| Browser console/network/hydration | ✅ verified | 360×800 LAN inspection: no pageerror, requestfailed, catalog API failure, or hydration error |
+| Physical phone acceptance | ⬜ pending | Must reload the verified LAN URL after the P0 preflight; browser evidence is not real-phone evidence |
+
 | Capability | Status | Evidence / limitation |
 |---|---:|---|
 | Eight sample products and photos | ✅ local Demo | Confirmed sample fixture and preserved media; real-content approval remains separate |

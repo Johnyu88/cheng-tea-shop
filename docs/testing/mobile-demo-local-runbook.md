@@ -46,6 +46,18 @@ LAN 模式的店家 cookie 為 HTTP 可用的 HttpOnly／SameSite=Strict 合成 
 
 必要網址：首頁 `/`、購物車 `/cart`、結帳 `/checkout`、查單 `/orders`、店家端 `/admin/orders`。訂單建立成功頁會產生含查單 token 的一次性連結，勿分享或截圖外流。
 
+## P0 Catalog recovery preflight
+
+若手機看到空白商品，先不要重建或清空 `.demo-data`。在同一個啟動 PowerShell 視窗確認：
+
+1. `netstat -ano | Select-String ':3013.*LISTENING'` 的 PID 是本次啟動的 Node 程序。
+2. server 使用目前工作樹、明確的 `DEMO_DATA_DIR` 與 `--hostname <LAN_IP>`；不要使用舊 terminal、`localhost`（手機上的 localhost 是手機本身）或 `0.0.0.0`。
+3. 在提供手機網址前先執行 `curl.exe --noproxy "*" -i http://<LAN_IP>:3013/api/demo/catalog?limit=50`，必須是 HTTP 200，且 `value.total` 為目前 published 商品數。
+4. 若 API 不是 200，先修正 server／環境變數，不要以靜態卡片或另一份 fixture 掩蓋問題。
+5. 同一份 file-backed Catalog 位於 `$DEMO_DATA_DIR/catalog.json`；前台只顯示 published，`/admin/products` 以 `includeUnpublished=true` 讀取同一檔案。
+
+本次 P0 診斷確認 `http://172.20.10.4:3013` 的 API 及前後台瀏覽器讀取均正常；真實手機仍須重新載入此明確 LAN URL 才能完成實機驗收。
+
 ## 清理與限制
 
 停止開發伺服器後，可在確認目標位於本專案 `.demo-data/` 內再移除該次合成資料。不要上傳 `.demo-data/`、包裝照、查單 token 或店家密碼。會員名單、正式部署、真實付款與外部整合不在本階段。

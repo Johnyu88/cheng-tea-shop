@@ -603,3 +603,10 @@ The generated hero images are not a substitute for store-approved photography. T
 購物車／checkout 已提供返回與取消路徑；Demo OTP 仍由服務端驗證，cooldown 重用有效 challenge，錯誤碼有明確提示。`/admin/products` 提供本機商品清單與上下架，publication 變更不刪資料，前台與 authoritative order boundary 同步拒絕下架商品。
 
 第九種茶的素材處理以明確標示的 Mock pipeline 呈現原始、檢查、辨識／拆解、合成預覽、人工確認、儲存與上架狀態；沒有影像 AI、付款、簡訊、物流、ERP 或正式服務串接。原始檔目前只在瀏覽器草稿預覽，publish 會保存首張 catalog media；raw archive 與 derived manifest 仍是未完成項。LAN Pixel 7 Chromium 2/2 與 webpack build 通過，但不等同真人手機驗收；正式合成照與真人操作仍待店家提供／執行。
+
+## 52. P0 Catalog data recovery diagnosis — 2026-09-27
+
+- The active LAN server at `172.20.10.4:3013` returned HTTP 200 for `/api/demo/catalog?limit=50` with 8 published products. Its file-backed data directory contains those 8 published products and one pre-existing synthetic ninth draft; no catalog reset or fixture rebuild was performed.
+- Storefront and `/admin/products` both consume the same guarded `/api/demo/catalog` endpoint and `getDemoCatalogStore()` file boundary. Current 360×800 browser evidence found all 8 storefront products and all 9 admin records, with no console, page, request, hydration, or API failures. The active server log also records 200 responses for both public and unpublished-inclusive catalog reads.
+- The reported empty phone screen is therefore not reproduced as an application/data-loss failure in the verified process. The operational risk is stale server/worktree, wrong phone origin, disabled LAN/demo flags, or a different `DEMO_DATA_DIR`. `docs/testing/mobile-demo-local-runbook.md` now requires PID, explicit data-directory, API 200, and catalog-count checks before physical-phone use.
+- This remains a local synthetic Demo boundary. The screenshots under `docs/testing/evidence/p0-catalog-recovery-2026-09-27/` are browser evidence only; real-phone acceptance is still pending. No payment, ERP, logistics, external notification, or production change was made.

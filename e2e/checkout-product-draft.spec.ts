@@ -89,7 +89,7 @@ test("checkout controls stay visible without horizontal overflow on a phone view
 
 test("operator can save, edit a grounded draft, preview, confirm, and publish on desktop", async ({ page }) => {
   await page.goto("/admin/products/new");
-  await expect(page.getByText("這是原型頁面：尚未實作真實管理員驗證。")).toBeVisible();
+  await expect(page.getByText("這是本機 Demo：沒有真實管理員驗證，不會連接正式 ERP。")).toBeVisible();
   await completeMinimumProductDraft(page);
 
   await page.getByRole("button", { name: "儲存草稿" }).click();
