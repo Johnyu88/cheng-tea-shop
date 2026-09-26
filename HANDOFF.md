@@ -375,3 +375,38 @@ Follow `RESUME_PROMPT.md`, `AGENTS.md`, and `WORKFLOW.md`. If newer explicit use
 - The CLI is dry-run only: it emits a structured JSON report with `wouldWrite: false`; `--apply` is rejected, and it never overwrites existing fixtures or uploads files. Error reports include row, field, stable code, and readable message.
 - Added typed declaration coverage and `tests/phase-9a-product-import.test.ts`. Focused import tests passed 5/5; full Vitest remains the project regression gate. Phase 9-A preflight checks the templates, map, tool markers, and preparation docs.
 - No external service, database, payment, logistics, ERP, preview, or formal deployment was started. Wait for store data, image permissions, fact sources, and reviewer information.
+
+## Phase 10 ERP reuse & integration planning — planning complete, not integrated — 2026-09-22
+
+- Added `docs/erp/phase-10-erp-reuse-integration-planning.md` covering ERP capability requirements, module plan, candidate comparison, Website ↔ ERP contract, mapping, sync direction, normalized errors, ownership, implementation slices, and minimal PoC.
+- Research candidates: ERPNext is the first fixture-mapping candidate; Odoo and Dolibarr are ERP alternatives; Medusa, Saleor, and Vendure are commerce-oriented comparison baselines. No final ERP selection or license approval was made.
+- The plan preserves the current architecture: UI uses project-owned DTO/service boundaries; future server-side adapters own provider mapping, idempotency, retries, reconciliation, and sensitive-field exclusion. The website keeps brand content, UX, SEO, human validation, and publishing approval gates.
+- Proposed next step only: Phase 10-B offline ERP-shaped fixture mapping contract PoC using synthetic data. It must not start an ERP, database, Docker environment, payment, logistics, or production deployment.
+- Verification for this documentation-only slice: source links and capability mapping reviewed; no runtime code changed. Run `git diff --check` and the existing Vitest regression before commit.
+- Preserve existing local environment changes: `AGENTS.md` and `next-env.d.ts` remain untouched and must not be staged or committed.
+
+## 手機 Demo 購物車修正檢查點 — 2026-09-24
+
+- 工作樹 `codex/wave-7-shopping-quality-gate` 原有未提交的 AGENTS、CAPABILITY_MAP、HANDOFF、WHITEPAPER、商品頁導向、next-env.d.ts 及 `docs/erp/`；先盤點並保留。商品頁加入成功後 `router.push('/cart')` 為既有修改，本階段未重寫該功能。
+- 本階段修補商品頁及整合測試所需的 Router mock、驗證成功導向 `/cart`；購物車原有「繼續選茶」改為「繼續購買」，保留 `/checkout`；瀏覽器測試改為成功後直接檢查 `/cart`。
+- edea 的 `pnpm` 不在 PATH；Corepack 已緩存 pnpm 11.19.0。`corepack pnpm test:run` 因無 TTY 的 modules purge 提示失敗；使用已安裝的 `node_modules/.bin/*.cmd` 執行檢查，不刪除既有 node_modules。Node 24.21.0 與 package.json 要求的 24.19.0 不一致。
+- 驗證：Vitest 18 files／119 tests 通過；`tsc --noEmit --incremental false` 通過；ESLint 0 errors／1 個既有 `<img>` warning；`next build --webpack` 通過。Playwright Chromium 已安裝指定 v1243；獨立埠 3013 的購物車／結帳 10/10 通過。測試伺服器會將 build 的 static/public 複製到 standalone 目錄後啟動；3000 埠有既存 Node 進程，未碰觸。
+- PR #15 的 S1 門檻仍未達成：目前 checkout 無 OTP／地址核實，Mock 訂單使用固定 `MOCK-ORDER-001` 且無持久化；沒有安全查單、顧客／店家通知、受權店家待辦、照片歸檔或出貨狀態。不得將現有原型當成手機 Demo 驗收通過；雲端測試部署必須等待本機功能與實機驗收。
+- 下一步：建立服務端唯一且持久的測試訂單與受控模擬 OTP／查單權限，接著按狀態實作通知、店家拍照及人工交寄，再做手機驗收。正式金流與正式環境均未啟用。
+
+## 手機 Demo 下一個本機切片 — 2026-09-24
+
+- 增加台灣手機格式與正規化（前台、Mock service）；格式檢查不等於 SMS OTP，仍不能解鎖 PR #15 的後端驗證閘門。
+- 已找到 edea 缺少 `pnpm` PATH 的安全執行方式：`corepack pnpm --config.verifyDepsBeforeRun=false test:run`，使用緩存 pnpm 11.19.0 並保留既有 node_modules；未做新的 frozen install。Node 24.21.0 與宣告 24.19.0 仍不同。
+- 正在建立伺服端 Demo 訂單純記憶體契約與測試，沒有接入顧客／店家頁面，沒有持久化或真正通知。這只是下一階段的基礎，不代表手機 Demo 驗收完成。
+
+## 手機 Demo 本機閉環收尾 — 2026-09-26
+
+- 沿用既有 `router.push('/cart')`、SQLite Demo order/outbox、OTP、地址、merchant workflow 與 packing-photo 契約，沒有重寫已完成服務。新增 local-only runtime 與 API 組合，僅在 `DEMO_COMMERCE_LOCAL=enabled`、非 production、loopback／同源請求下可用。
+- `/checkout` 在 `NEXT_PUBLIC_DEMO_COMMERCE=enabled` 時切換到合成 OTP 結帳；預設 build 仍保留原 prototype。`/orders` 要求高熵 token、下單手機、後三碼及一次性 OTP；訂單另存手機摘要，另一支有效合成手機也不能查詢。
+- `/admin/orders` 使用獨立高熵店家密碼簽發短效 HttpOnly cookie，可模擬付款、上傳本機私有包裝照、明確人工出貨／送達、通知成功／失敗／重試。包裝完成只進入 `packed`，不會自動標為出貨。
+- Email 是 outbox 的 `simulated-email`；手機推送只產生 `preview-only` payload，不註冊 service worker、不排隊、不送達外部裝置。地址只有指定合成地址可通過受控覆核，其他地址維持「需要人工介入」。
+- 本機操作文件：`docs/testing/mobile-demo-local-runbook.md`。`.demo-data/` 已加入 Git ignore；測試資料、包裝照片、查單 token 與店家密碼不提交。
+- 已通過 focused HTTP guard、runtime 與 mobile push preview tests，以及 Pixel 7 Chromium 顧客→店家→顧客閉環。正式付款、物流、SMS、Email、Web Push、會員、production、公開網路及正式客戶資料均未啟用。
+- 完整交付閘門已通過：Vitest 29 files／167 tests；TypeScript；ESLint 0 errors（1 個既有 `<img>` warning）；Webpack build；既有 Chromium 14/14；Pixel 7 focused mobile Chromium 1/1；`git diff --check` 與常見 secret pattern scan 均無問題。WebKit 未重跑，沿用既知 Avast 隔離環境限制，未修改防毒設定。
+- `AGENTS.md` 與 `next-env.d.ts` 是進場前既有環境變更，本階段未修改且不得納入提交。

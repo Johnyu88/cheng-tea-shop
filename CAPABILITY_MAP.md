@@ -332,3 +332,35 @@ The specification deliberately reserves fields not currently supported by the pr
 | Real data loaded | ⬜ | Waiting for store-provided package; current fixtures and placeholder remain unchanged |
 
 This is an offline validation toolchain only. It does not overwrite catalog data, upload images, call external services, or add business behavior.
+
+## S. Phase 10 ERP reuse & integration planning — planning complete, no integration — 2026-09-22
+
+| Area | Status | Boundary / evidence |
+|---|---:|---|
+| ERP capability inventory | ✅ | Product/PIM, inventory, orders, customer, payment ledger, logistics, permissions, audit, import/export mapped to current service boundaries |
+| Candidate comparison | ✅ | ERPNext, Odoo, Dolibarr compared as ERP candidates; Medusa, Saleor, Vendure recorded as commerce baselines in `docs/erp/phase-10-erp-reuse-integration-planning.md` |
+| Website ↔ ERP contract | ✅ draft | Versioned DTO, correlation/idempotency metadata, normalized error envelope, retry and reconciliation rules defined; no real endpoint exists |
+| Data mapping and sync direction | ✅ draft | Product/inventory ERP→Website, order/publish Website→ERP with explicit gates; payment/logistics remain provider adapters |
+| Capability ownership | ✅ | Direct ERP reuse vs adapter-owned translation vs website-owned UX/content/human validation is explicit |
+| Minimal PoC | ✅ planned | 10-B synthetic fixture mapping contract PoC; no ERP, database, external service, Docker, payment, logistics, or deployment |
+| Final ERP selection / integration | ⬜ | Waiting for license/security/backup review and explicit implementation authorization |
+
+Phase 10 is planning-only. No real customer/product data has been sent to an ERP, and no candidate has been adopted.
+
+## T. Mobile demo local closure — 2026-09-26
+
+| Capability | Status | Evidence / boundary |
+|---|---:|---|
+| Add to cart → `/cart` | ✅ | Existing product flow retained and Chromium-verified; not reimplemented |
+| Continue shopping / checkout | ✅ | Existing `/cart` links plus mobile loop smoke |
+| Synthetic OTP checkout | ✅ local demo | Two allowlisted synthetic phones, visible local code, expiry/rate/attempt contract; no SMS |
+| Address validation | ✅ local gate | Unverifiable home address remains manual-intervention; no false success |
+| Persistent synthetic order | ✅ local demo | SQLite under ignored `.demo-data/`; authoritative fixture pricing; no customer production data |
+| Secure order lookup | ✅ local demo | Order token + bound phone + last three + one-time OTP; generic failure response |
+| Simulated Email / merchant notifications | ✅ local demo | SQLite outbox with queued, simulated-delivered, failed, retry states; no provider |
+| Mobile push | ✅ contract preview only | Typed `simulated-mobile-push` payload with `preview-only`; no registration or delivery |
+| Merchant work queue | ✅ local demo | Independent merchant credential, short-lived cookie, `/admin/orders` |
+| Packing photo / shipment | ✅ local demo | Private local image store; packing means `packed`; explicit payment and manual ship gates |
+| Mobile Chromium closure | ✅ | Pixel 7 viewport customer → merchant → customer state loop |
+| Membership list | ⬜ deferred | Intentionally not allowed to delay the primary shopping/order loop |
+| Real payment / logistics / messaging / production | ⬜ prohibited | No provider, public binding, deployment, real credential, or customer data |

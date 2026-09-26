@@ -533,3 +533,30 @@ GitHub 是正式文件與程式來源。聊天中的新指令若尚未寫入 Git
 - 工具預設為 dry-run，輸出含 row／field／code／message 的清楚 JSON error report、warnings、accepted IDs 與 `wouldWrite: false`；`--apply` 明確拒絕，不會覆蓋既有 fixture、圖片或 placeholder。
 - `phase-9a-product-import.test.ts` focused 5/5 通過；preflight 會檢查模板、對照表、工具與關鍵安全 marker。此工具鏈不接外部服務、不上傳圖片、不新增業務功能。
 - 等待店家提供符合匯入規格的真實資料與證據後，才可另行審查 staging；目前 synthetic catalog 與 placeholder 完全不變。
+
+## 46. Phase 10 ERP reuse & integration planning — 2026-09-22
+
+- 建立 `docs/erp/phase-10-erp-reuse-integration-planning.md`，把目前 Catalog、Cart、Checkout、Payment、Logistics、Publishing、ERP boundary 對照 ERP 必要模組、功能歸屬、API contract、資料 mapping、同步方向與錯誤處理。
+- 候選只做研究比較，不導入：ERPNext（首選 ERP fixture 候選）、Odoo、Dolibarr；Medusa、Saleor、Vendure 作為 headless commerce 技術基準。授權與商用適用性仍需依實際版本與部署方式正式審查。
+- 明確分出 ERP 可直接沿用的商品／庫存／訂單／營運稽核能力、必須由 adapter 處理的 DTO／狀態／付款／物流／重試 mapping，以及網站保留的品牌內容、UX、SEO、真人驗證與發布閘門。
+- 定義未來 server-side adapter 的 schema version、correlation ID、idempotency key、normalized error、retry／reconciliation 規則；不保存 raw payment credential，不讓 ERP provider field 洩漏到 UI。
+- Phase 10 下一個最小候選為 10-B：只用 synthetic fixture 做 ERP-shaped payload mapping contract PoC；本次不啟動外部服務、不新增 service type、不接資料庫、付款、物流、ERP 或正式部署。
+
+## 47. 手機 Demo 購物主線檢查點（2026-09-24）
+
+- 商品加入成功後直接前往購物車，保留繼續購買與前往結帳；測試須檢查畫面導向，不能依賴商品頁轉場前的成功訊息。
+- 目前仍是前端合成原型：固定訂單編號、無 OTP、無後端持久化或權限，不具備安全查單、店家營運處理與通知送達的條件。PR #15 中關於完整手機 Demo 的目標維持待實作，不能以現有 build 通過替代實機與流程驗收。
+
+## 48. 手機驗證與合成訂單服務邊界（2026-09-24）
+
+- 前台及 Mock Checkout 將台灣手機號碼做格式檢查與正規化；這只排除顯然錯誤的輸入，沒有發送或驗證 SMS OTP。
+- 新增獨立的伺服端 Demo 訂單記憶體假服務契約：唯一不可猜的編號、高熵查單密鑰、只存茶品快照、模擬通知去重、包裝照片 metadata、模擬付款確認及出貨轉移。未暴露 API，未接入現有結帳或管理頁；沒有持久化、授權、真實照片或訊息送達，不能宣稱符合 PR #15 的手機 Demo 驗收門檻。
+
+## 49. 手機購物與店家訂單的 local-only 閉環（2026-09-26）
+
+- 將既有 SQLite 訂單、通知 outbox、合成 OTP、地址評估、店家 cookie、包裝照片與狀態機組成單一 local runtime；沒有新增第二套訂單模型。HTTP boundary 限制為明確啟用、非 production、loopback、同埠同源與受控 Next 內部 loopback headers。
+- Demo checkout 以 feature flag 接入現有 `/checkout`，完成合成手機 OTP、聯絡資料、配送／地址與合成付款選項，再由服務端以 authoritative catalog 重算購物車。未啟用 flag 時，既有前台 prototype 行為不變。
+- 查單必須同時持有不可猜 token、下單手機、手機後三碼與一次性 OTP；手機以摘要綁定訂單，不保存真實客戶資料。後三碼不能單獨當作驗證因素。
+- 店家端使用與顧客 token 分離的高熵憑證及短效 HttpOnly cookie。付款僅為模擬確認；包裝照片寫入 Git 排除的私有本機目錄；`packed → shipped → delivered` 皆維持明確狀態門檻，包裝不等於出貨。
+- Email／店家通知只進入可觀察、可失敗及重試的本機 outbox。手機推送只提供 `preview-only` DTO 與畫面預覽，沒有 service worker、provider、裝置註冊或送達宣稱。
+- 會員名單仍延後；真實付款、物流、SMS、Email、Push、production、公開部署與正式資料均不在本階段。此結果只能稱為本機合成 Demo 閉環，不是 production readiness 或真人驗收。
