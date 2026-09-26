@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, type JSX } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import type { CatalogService, Product } from "@/lib/domain";
 import { createDemoCatalogService, createMockCatalogService } from "@/lib/domain";
@@ -90,6 +89,7 @@ export function HomePage({ catalogService = defaultCatalogService }: HomePagePro
         </a>
         <nav aria-label="主要導覽">
           <a href="#baseline">茶品導覽</a>
+          <Link href="/orders">訂單查詢</Link>
         </nav>
       </header>
 
@@ -106,32 +106,14 @@ export function HomePage({ catalogService = defaultCatalogService }: HomePagePro
             <p className="eyebrow">坐下來，聽陳老師說茶</p>
             <h2 id="teacher-story-heading">先認識泡茶的人，再慢慢找到喜歡的茶。</h2>
             <p>
-              這裡保留陳老師在茶行裡的照片與一段短片，讓第一次來的客人先感受到這間茶行的溫度。
+              這裡用陳老師與茶席的合成照，讓第一次來的客人先感受到這間茶行的溫度。
             </p>
           </div>
           <div className="teacher-story-media">
-            <div className="teacher-story-missing-media" role="img" aria-label="正式合成照尚未提供">
-              <p>正式合成照尚未提供；目前不以其他照片替代。</p>
-              <small>待店家提供正式合成素材後再接入首頁。</small>
-            </div>
-            <Image
-              src="/media/teacher-portrait.webp"
-              alt="陳老師在茶行裡的照片"
-              width={1200}
-              height={1600}
-              sizes="(max-width: 40rem) 100vw, 40vw"
-            />
-            <video
-              aria-label="陳老師茶行介紹影片"
-              controls
-              muted
-              playsInline
-              preload="metadata"
-              poster="/media/teacher-portrait.webp"
-            >
-              <source src="/media/teacher-story.mp4" type="video/mp4" />
-              您的瀏覽器不支援影片播放。
-              </video>
+            <picture>
+              <source media="(max-width: 40rem)" srcSet="/media/teacher-hero-mobile-candidate.png" />
+              <img src="/media/teacher-hero-desktop-candidate.png" srcSet="/media/teacher-hero-mobile-candidate.png 640w" alt="陳老師茶行首頁合成照" />
+            </picture>
             <div className="teacher-story-audio">
               <p>鳥鳴 2／茶園自然聲景</p>
               <audio aria-label="茶園鳥鳴 2 音效" controls preload="none">

@@ -1,5 +1,5 @@
 import { assertLocalDemoHttpRequest } from "@/lib/server/demo-http-guard";
-import { getDemoCatalogStore } from "@/lib/server/demo-catalog-store";
+import { getDemoCatalogStore, type ProductUpdate } from "@/lib/server/demo-catalog-store";
 import { demoFailure, demoSuccess } from "@/lib/server/demo-route-response";
 import { validateProductDraftDto } from "@/lib/domain";
 import type { CatalogQuery, ProductDraft, TeaCategory, TasteTag } from "@/lib/domain";
@@ -27,9 +27,21 @@ export async function GET(request: Request) {
 export async function PATCH(request: Request) {
   try {
     assertLocalDemoHttpRequest(request, "PATCH", "json");
-    const body = await request.json() as { id?: unknown; publication?: unknown };
-    if (typeof body.id !== "string" || (body.publication !== "draft" && body.publication !== "published")) throw new Error("商品上下架資料無效");
-    const product = await getDemoCatalogStore().setPublication(body.id, body.publication);
+    const body = await request.json() as { id?: unknown; publication?: unknown; name?: unknown; category?: unknown; specification?: unknown; price?: unknown; inventoryStatus?: unknown };
+    if (typeof body.id !== "string") throw new Error("商品更新資料無效");
+    if (body.publication === "draft" || body.publication === "published") {
+      const product = await getDemoCatalogStore().setPublication(body.id, body.publication);
+      if (!product) throw new Error("找不到商品");
+      return demoSuccess(product);
+    }
+    const changes: ProductUpdate = {};
+    if (typeof body.name === "string") changes.name = body.name;
+    if (typeof body.category === "string") changes.category = body.category as TeaCategory;
+    if (typeof body.specification === "string") changes.specification = body.specification;
+    if (body.price && typeof body.price === "object") changes.price = body.price as { currency: "TWD"; amount: number };
+    if (body.inventoryStatus === "available" || body.inventoryStatus === "sold-out") changes.inventoryStatus = body.inventoryStatus;
+    if (Object.keys(changes).length === 0) throw new Error("商品編輯資料無效");
+    const product = await getDemoCatalogStore().update(body.id, changes);
     if (!product) throw new Error("找不到商品");
     return demoSuccess(product);
   } catch (error) { return demoFailure(error); }

@@ -8,6 +8,7 @@ import { mockCatalogFixture } from "@/lib/domain/mock/catalog-fixture";
 
 type CatalogFile = { version: 1; products: Product[] };
 type StoreOptions = { filePath: string; mediaDirectory: string; seedProducts?: Product[] };
+export type ProductUpdate = { name?: string; category?: Product["category"]; specification?: string; price?: Product["variants"][number]["price"]; inventoryStatus?: Product["variants"][number]["inventoryStatus"] };
 
 const clone = <T>(value: T): T => JSON.parse(JSON.stringify(value)) as T;
 
@@ -65,6 +66,26 @@ export const createDemoCatalogStore = ({ filePath, mediaDirectory, seedProducts 
         const product = catalog.products.find((item) => item.id === id);
         if (!product) return undefined;
         product.publication = publication;
+        await write(catalog);
+        return clone(product);
+      });
+    },
+    async update(id: string, changes: ProductUpdate): Promise<Product | undefined> {
+      return serialized(async () => {
+        const catalog = await read();
+        const product = catalog.products.find((item) => item.id === id);
+        if (!product) return undefined;
+        if (changes.name?.trim()) {
+          product.name = changes.name.trim();
+          product.summary = product.summary || `茶名：${product.name}`;
+        }
+        if (changes.category) product.category = changes.category;
+        const variant = product.variants[0];
+        if (variant) {
+          if (changes.specification?.trim()) variant.specification = changes.specification.trim();
+          if (changes.price) variant.price = { ...changes.price };
+          if (changes.inventoryStatus) variant.inventoryStatus = changes.inventoryStatus;
+        }
         await write(catalog);
         return clone(product);
       });

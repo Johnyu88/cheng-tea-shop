@@ -25,9 +25,12 @@ test("mobile synthetic order closes customer and merchant status loop", async ({
   await expect(page.getByRole("heading", { name: "配送與地址" })).toBeVisible();
   await page.getByRole("button", { name: "下一步" }).click();
   await page.getByRole("button", { name: "建立示範訂單" }).click();
-  await expect(page.getByRole("heading", { name: "示範訂單已建立" })).toBeVisible();
-  const lookupHref = await page.getByRole("link", { name: "前往查單" }).getAttribute("href");
+  await expect(page).toHaveURL(/\/checkout\/success\?order=DEMO-/);
+  await expect(page.getByRole("heading", { name: "感謝您的購買" })).toBeVisible();
+  await expect(page.getByText("已收到您的示範訂單，店家將依序處理。", { exact: true })).toBeVisible();
+  const lookupHref = await page.getByRole("link", { name: "主動查看訂單" }).getAttribute("href");
   expect(lookupHref).toMatch(/^\/orders\?order=DEMO-/);
+  expect(lookupHref).not.toContain("token=");
 
   await page.goto("/admin/orders");
   await page.getByLabel("獨立店家 Demo 密碼").fill(merchantSecret);

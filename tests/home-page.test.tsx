@@ -52,26 +52,23 @@ it("explains when the catalog cannot be loaded", async () => {
   });
 });
 
-it("introduces the teacher with an accessible portrait", () => {
+it("introduces the teacher with the homepage composite", () => {
   render(<HomePage catalogService={createMockCatalogService()} />);
 
-  expect(screen.getByRole("img", { name: "陳老師在茶行裡的照片" }).getAttribute("src")).toContain(
-    "teacher-portrait.webp",
+  expect(screen.getByRole("img", { name: "陳老師茶行首頁合成照" }).getAttribute("src")).toContain(
+    "teacher-hero-desktop-candidate.png",
   );
 });
 
-it("keeps the teacher story video manual and muted", () => {
+it("uses approved desktop/mobile composite candidates instead of a video", () => {
   render(<HomePage catalogService={createMockCatalogService()} />);
 
-  const video = screen.getByLabelText("陳老師茶行介紹影片");
-  expect(video).toHaveAttribute("controls");
-  expect(video).toHaveProperty("muted", true);
-  expect(video).toHaveAttribute("playsinline");
-  expect(video).not.toHaveAttribute("autoplay");
+  expect(screen.getByRole("img", { name: "陳老師茶行首頁合成照" })).toHaveAttribute("src", expect.stringContaining("teacher-hero-desktop"));
+  expect(screen.getByRole("img", { name: "陳老師茶行首頁合成照" })).toHaveAttribute("srcSet", expect.stringContaining("teacher-hero-mobile"));
+  expect(screen.queryByLabelText("陳老師茶行介紹影片")).toBeNull();
 });
 
-it("does not present the synthetic composite as the official store photo", () => {
+it("exposes order lookup from the primary navigation", () => {
   render(<HomePage catalogService={createMockCatalogService()} />);
-  expect(screen.getByText("正式合成照尚未提供；目前不以其他照片替代。")).toBeInTheDocument();
-  expect(screen.queryByRole("img", { name: "茶包、茶湯、茶乾與葉底的合成示意圖" })).toBeNull();
+  expect(screen.getByRole("link", { name: "訂單查詢" })).toHaveAttribute("href", "/orders");
 });

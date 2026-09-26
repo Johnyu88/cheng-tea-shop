@@ -580,6 +580,24 @@ Wave 7 的修復只補本機 Demo 的資料與素材邊界：八款 2026-09-23 s
 
 ## W. 第三輪真人驗收修正 — 2026-09-27
 
+## X. 第四輪實際 UI 與完整商品流程修正 — 2026-09-27
+
+| Capability | Status | Evidence / limitation |
+|---|---:|---|
+| Homepage desktop/mobile candidate composite | ✅ browser-rendered candidate | `teacher-hero-desktop-candidate.png`／`teacher-hero-mobile-candidate.png` are generated from the existing portrait for layout validation; store approval and final source evidence are still pending |
+| Homepage video removal | ✅ | No `<video>` is rendered; original MP4 remains in the repository only as preserved source material |
+| Bird-call interaction | ✅ local UI | WAV remains an explicit controls-based click-to-play resource; no autoplay claim |
+| Primary order lookup entry | ✅ | Desktop/mobile responsive header links to `/orders` |
+| Checkout success boundary | ✅ local Demo | Independent `/checkout/success` shows order receipt/status and navigation; access secret is not rendered or placed in the lookup href |
+| Existing eight-product admin list | ✅ local Demo | Same file-backed Demo Catalog as storefront; evidence screenshot shows eight initial products |
+| Existing-product edit entry | ✅ local Demo | Bounded edit updates name/category/specification/price/inventory through guarded Catalog API; no ERP or database |
+| Ninth-product publication sync | ✅ automated local Demo | Synthetic publish/reload/frontend visibility and unpublish/foreground hiding are covered; historical data is retained |
+| Ninth-product image recognition/composition | ⚠️ explicit Mock | Workflow labels identify/compose as Mock; no actual vision or composition service is connected |
+| Screenshot evidence | ✅ browser evidence | Stored under `docs/testing/evidence/fourth-round-2026-09-27/`; not real-phone or participant evidence |
+| Physical phone / human acceptance | ⬜ pending | Final decision remains with Chen Tea Shop operator on a real phone |
+
+The generated hero images are not a substitute for store-approved photography. The implementation intentionally keeps the approval boundary visible: generated layout candidates can validate UI composition, while final publication still requires the owner’s source, permission, identity, and copy confirmation. No payment, logistics, ERP, public deployment, or external notification service was added.
+
 本輪只修正前台與本機 Demo 驗收阻塞：不再把 synthetic `tea-sample-composite.png` 當店家正式合成照；首頁在正式素材缺失時顯示待提供提示。原始人物照、影片及鳥鳴 WAV 維持，鳥鳴由使用者點擊播放。
 
 購物車／checkout 已提供返回與取消路徑；Demo OTP 仍由服務端驗證，cooldown 重用有效 challenge，錯誤碼有明確提示。`/admin/products` 提供本機商品清單與上下架，publication 變更不刪資料，前台與 authoritative order boundary 同步拒絕下架商品。

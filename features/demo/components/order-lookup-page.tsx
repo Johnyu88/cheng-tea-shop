@@ -3,12 +3,21 @@
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { demoApi, type DemoChallenge, type DemoLookup } from "../demo-api";
+import { demoCheckoutSuccessStorageKey } from "./demo-checkout-success-page";
 
 const labels = { confirmed: "訂單成立", packed: "已完成包裝，等待出貨", shipped: "已出貨", delivered: "已送達" } as const;
 export function OrderLookupPage() {
   const params = useSearchParams();
   const [orderId, setOrderId] = useState(params.get("order") ?? "");
-  const [accessSecret, setAccessSecret] = useState(params.get("token") ?? "");
+  const [accessSecret, setAccessSecret] = useState(() => {
+    const fromUrl = params.get("token");
+    if (fromUrl) return fromUrl;
+    if (typeof window === "undefined") return "";
+    try {
+      const stored = window.sessionStorage.getItem(demoCheckoutSuccessStorageKey);
+      return stored ? ((JSON.parse(stored) as { accessSecret?: string }).accessSecret ?? "") : "";
+    } catch { return ""; }
+  });
   const [phone, setPhone] = useState("0912000000");
   const [lastThree, setLastThree] = useState("000");
   const [challenge, setChallenge] = useState<DemoChallenge>();

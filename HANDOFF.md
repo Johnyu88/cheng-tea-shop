@@ -435,6 +435,17 @@ Follow `RESUME_PROMPT.md`, `AGENTS.md`, and `WORKFLOW.md`. If newer explicit use
 
 ## V. Real-phone acceptance repair — 2026-09-27
 
+## 第四輪實際 UI 與完整商品流程修正 — 2026-09-27
+
+- 首頁已移除原 `teacher-story.mp4` 播放介面，改以 `picture` 實際引用 `public/media/teacher-hero-desktop-candidate.png` 與 `teacher-hero-mobile-candidate.png`；兩張素材是依現有 `teacher-portrait.webp` 生成的設計候選，尚未取得店家正式核准，不可當作最終品牌素材。`tea-stream-birds.wav` 仍保留為明確點擊播放，未使用 autoplay。
+- 桌面／手機共用 header 已加入 `/orders`「訂單查詢」。下單後改導向獨立 `/checkout/success`，顯示感謝、訂單編號、收到訂單、狀態、返回首頁與查看訂單；查單 token 僅存於同一瀏覽器的 sessionStorage，不出現在成功頁 DOM 或查單連結。
+- `/admin/products` 仍使用前台相同的 file-backed Demo Catalog，初始列出八款商品；新增可用的編輯入口，能更新茶名、類別、規格、價格與庫存而不改商品 identity。上下架仍只改 publication，保留商品及歷史訂單。
+- 第九種流程維持清楚標示的本機 Mock：「原始照片→素材檢查→拆解／辨識 Mock→合成預覽 Mock→人工確認→儲存→上架」。沒有影像辨識／合成外部服務；不可把預覽或生成候選解讀為 AI 辨識已完成。原始照片的獨立 raw archive／derived manifest 仍未完成。
+- 回歸證據：完整 Vitest 31 files／175 tests、TypeScript、ESLint 0 errors（5 warnings，含既有 `<img>` 與內部導向提示）、Webpack build 均通過；乾淨 synthetic data 的 LAN Pixel 7 Chromium `catalog-persistence` + `mobile-order-loop` 2/2 通過；截圖 runner 1/1 通過。
+- 截圖證據保存在 `docs/testing/evidence/fourth-round-2026-09-27/`：`homepage-desktop.png`、`homepage-mobile.png`、`checkout-success.png`、`admin-products-eight.png`、`ninth-material-mock-workflow.png`、`admin-products-ninth-published.png`、`admin-products-ninth-unpublished.png`。這些是瀏覽器渲染證據，不是實體手機或真人走查結果。
+- 實體手機第三輪／第四輪驗收仍未宣稱通過；正式合成照、正式影像處理服務、正式付款、物流、ERP 與公開部署仍未啟用。建議下一步由陳老師在 `http://172.20.10.4:3013` 以合成資料實際操作並回報截圖／問題。
+- 本輪只提交本輪程式、測試、文件與證據；進場前既有 `AGENTS.md`、`next-env.d.ts` 未修改、未 staged、未提交。
+
 - Root causes confirmed: Wave 7 previously lacked the checked-in sample media and used process-only catalog publishing; the active 3013 server was also verified and restarted from the Wave 7 demo with an isolated local data directory.
 - Added the eight sample products and preserved photos, composite hero image, and bird-call WAV. Static checks against `http://172.20.10.4:3013` returned HTTP 200; audio is explicit click-to-play (`controls`, `preload="none"`), not autoplay.
 - Added guarded file-backed local catalog/media storage. Admin publish writes to ignored `.demo-data`, survives reload/restart, and never calls ERP or external services. Catalog/Cart/Publishing continue through service boundaries; published product IDs and encoded Unicode slugs are handled correctly.

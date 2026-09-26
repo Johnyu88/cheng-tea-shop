@@ -378,6 +378,20 @@ Phase 10 is planning-only. No real customer/product data has been sent to an ERP
 
 ## V. Real-phone acceptance repair — 2026-09-27
 
+## W. Fourth-round UI and product-flow repair — 2026-09-27
+
+| Capability | Status | Boundary |
+|---|---:|---|
+| Desktop/mobile homepage hero | ✅ candidate only | Uses generated desktop/mobile candidate files derived from the existing portrait; final store-approved composite remains pending |
+| Video replacement | ✅ | Homepage no longer renders the original video player; source file is preserved |
+| Order lookup navigation | ✅ | `/orders` is present in the primary responsive navigation |
+| Independent checkout success page | ✅ local Demo | `/checkout/success`; order id/status/navigation shown; token stays in same-browser storage and is absent from links |
+| Admin eight-product list | ✅ local Demo | Reads the same guarded file-backed catalog used by storefront; includes image, facts, price, inventory, publication and actions |
+| Product edit boundary | ✅ local Demo | Same Catalog API updates bounded editable facts without changing identity or history |
+| Ninth-product material workflow | ⚠️ Mock | Raw/check/Mock-identify/Mock-compose/human-confirm/save/publish states visible; actual AI service and raw/derived archival manifest are not present |
+| Publication synchronization | ✅ automated | Publish/reload/frontend display and unpublish/frontend hide are covered by Chromium evidence |
+| Real phone / human verification | ⬜ pending | Chromium and screenshots cannot replace physical phone or participant evidence |
+
 | Capability | Status | Evidence / limitation |
 |---|---:|---|
 | Eight sample products and photos | ✅ local Demo | Confirmed sample fixture and preserved media; real-content approval remains separate |

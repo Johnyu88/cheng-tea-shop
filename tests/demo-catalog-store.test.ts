@@ -52,4 +52,16 @@ describe("demo catalog persistence", () => {
     expect((await store.setPublication(product.id, "draft"))?.publication).toBe("draft");
     expect((await store.list()).find((item) => item.id === product.id)?.publication).toBe("draft");
   });
+
+  test("updates editable product facts without changing identity or history", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "cheng-tea-catalog-edit-"));
+    temporaryDirectories.push(directory);
+    const store = createDemoCatalogStore({ filePath: join(directory, "catalog.json"), mediaDirectory: join(directory, "media"), seedProducts: [] });
+    const product = await store.publish(draft);
+    const updated = await store.update(product.id, { name: "第九種修訂茶", specification: "二兩", price: { currency: "TWD", amount: 1200 }, inventoryStatus: "sold-out" });
+    expect(updated).toBeDefined();
+    if (!updated) throw new Error("expected updated product");
+    expect(updated).toMatchObject({ id: product.id, slug: product.slug, name: "第九種修訂茶", publication: "published" });
+    expect(updated.variants[0]).toMatchObject({ specification: "二兩", price: { amount: 1200 }, inventoryStatus: "sold-out" });
+  });
 });
