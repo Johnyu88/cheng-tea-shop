@@ -6,8 +6,10 @@ test("mobile synthetic order closes customer and merchant status loop", async ({
   await page.goto("/tea/taiwan-mi-xiang-wild-mountain-tea");
   await page.getByRole("button", { name: "加入購物車" }).click();
   await expect(page).toHaveURL(/\/cart$/);
+  await expect(page.getByRole("button", { name: "返回上一頁" })).toBeVisible();
   await expect(page.getByRole("link", { name: "繼續購買" })).toHaveAttribute("href", "/#catalog");
   await page.getByRole("link", { name: "前往結帳" }).click();
+  await expect(page.getByRole("link", { name: "取消本次結帳" })).toHaveAttribute("href", "/cart");
 
   await expect(page.getByRole("heading", { name: "身分確認" })).toBeVisible();
   await page.getByLabel("姓名").fill("合成顧客");
@@ -15,6 +17,9 @@ test("mobile synthetic order closes customer and merchant status loop", async ({
   await page.getByLabel("Email（選填，僅模擬通知）").fill("demo@example.test");
   await page.getByRole("button", { name: "取得合成驗證碼" }).click();
   await expect(page.getByRole("status")).toContainText("123456");
+  await page.getByLabel("驗證碼").fill("000000");
+  await page.getByRole("button", { name: "下一步" }).click();
+  await expect(page.locator("div[role=alert]").filter({ hasText: "驗證碼" })).toBeVisible();
   await page.getByLabel("驗證碼").fill("123456");
   await page.getByRole("button", { name: "下一步" }).click();
   await expect(page.getByRole("heading", { name: "配送與地址" })).toBeVisible();

@@ -411,6 +411,16 @@ Follow `RESUME_PROMPT.md`, `AGENTS.md`, and `WORKFLOW.md`. If newer explicit use
 - 完整交付閘門已通過：Vitest 29 files／167 tests；TypeScript；ESLint 0 errors（1 個既有 `<img>` warning）；Webpack build；既有 Chromium 14/14；Pixel 7 focused mobile Chromium 1/1；`git diff --check` 與常見 secret pattern scan 均無問題。WebKit 未重跑，沿用既知 Avast 隔離環境限制，未修改防毒設定。
 - `AGENTS.md` 與 `next-env.d.ts` 是進場前既有環境變更，本階段未修改且不得納入提交。
 
+## W. 第三輪真人驗收修正 — 2026-09-27
+
+- 已追查首頁素材：`public/media/tea-sample-composite.png` 是既有 synthetic 示意圖，不是店家正式合成照；本階段不再將它當正式首頁素材，首頁改為明確提示正式合成照尚未提供。原始人物照、影片與 `tea-stream-birds.wav` 保留；鳥叫需明確點擊播放。
+- 購物車新增「返回上一頁」；checkout 新增「返回上一頁」與「取消本次結帳」回購物車。離開不建立訂單，也不清空既有購物車。
+- OTP 保留服務端驗證；同一有效 challenge 在 cooldown 期間重用，避免手機重按取得驗證碼卡死；錯誤 OTP 顯示明確提示。測試資料仍為允許的合成手機與 `123456`，不連接 SMS。
+- 新增 `/admin/products` 本機 Demo 商品工作台：列出商品、照片、分類、規格、價格、庫存與上下架操作。下架只改 publication、保留商品與歷史訂單；公開 Catalog 與 authoritative order boundary 皆拒絕下架商品。
+- 第九種素材流程以可替換 Mock 狀態展示「原始照片→檢查→拆解／辨識 Mock→合成預覽 Mock→人工確認→儲存→上架」；未宣稱真正 AI 辨識或合成，原始與衍生素材限本機／Git ignored Demo data。
+- 驗證：focused Vitest 42/42；webpack production build 通過；LAN Pixel 7 Chromium 在全新隔離 Demo data 上 `catalog-persistence` + `mobile-order-loop` 2/2 通過。Turbopack 因 worktree `node_modules` symlink 被限制；production `next start` 仍由安全 guard 禁止 Demo API，安全邊界未放寬。
+- 不宣稱真人手機驗收通過。可供重跑網址：`http://172.20.10.4:3013`；後台：`/admin/products`、`/admin/products/new`、`/admin/orders`。正式合成照仍待店家提供；`AGENTS.md` 與 `next-env.d.ts` 為既有未提交環境變更，本階段未納入。
+
 ## 同一區域網路真實手機驗收準備 — 2026-09-26
 
 - 為實機展示增加明確 LAN opt-in：`DEMO_COMMERCE_LAN=enabled` 時，HTTP guard 只接受 RFC1918 私有 IPv4；未設定時仍只接受 loopback。production、公開／訪客網路與 `0.0.0.0` 綁定仍拒絕。
@@ -427,5 +437,5 @@ Follow `RESUME_PROMPT.md`, `AGENTS.md`, and `WORKFLOW.md`. If newer explicit use
 - Root causes confirmed: Wave 7 previously lacked the checked-in sample media and used process-only catalog publishing; the active 3013 server was also verified and restarted from the Wave 7 demo with an isolated local data directory.
 - Added the eight sample products and preserved photos, composite hero image, and bird-call WAV. Static checks against `http://172.20.10.4:3013` returned HTTP 200; audio is explicit click-to-play (`controls`, `preload="none"`), not autoplay.
 - Added guarded file-backed local catalog/media storage. Admin publish writes to ignored `.demo-data`, survives reload/restart, and never calls ERP or external services. Catalog/Cart/Publishing continue through service boundaries; published product IDs and encoded Unicode slugs are handled correctly.
-- Verification: Vitest 30 files / 171 tests; TypeScript passed; ESLint 0 errors with 3 existing image warnings; webpack production build passed. Turbopack remains blocked by the worktree `node_modules` symlink panic. LAN Pixel 7 Chromium `catalog-persistence` and `mobile-order-loop` passed 2/2 on clean isolated data.
+- Verification: Vitest 30 files / 173 tests; TypeScript passed; ESLint 0 errors with 4 existing image warnings; webpack production build passed. Turbopack remains blocked by the worktree `node_modules` symlink panic. LAN Pixel 7 Chromium `catalog-persistence` and `mobile-order-loop` passed 2/2 on clean isolated data.
 - Real physical phone acceptance is still pending at `http://172.20.10.4:3013`; automated Chromium is not human/real-device evidence. `AGENTS.md` and `next-env.d.ts` remain pre-existing uncommitted environment changes and were not staged.

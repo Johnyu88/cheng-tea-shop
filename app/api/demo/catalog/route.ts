@@ -14,12 +14,24 @@ export async function GET(request: Request) {
     if (category) query.category = category as TeaCategory;
     if (taste) query.taste = taste as TasteTag;
     const all = await getDemoCatalogStore().list();
-    const filtered = all.filter((product) => (query.category === undefined || product.category === query.category) && (query.taste === undefined || product.tasteTags.includes(query.taste)));
+    const includeUnpublished = url.searchParams.get("includeUnpublished") === "true";
+    const filtered = all.filter((product) => (includeUnpublished || product.publication === "published") && (query.category === undefined || product.category === query.category) && (query.taste === undefined || product.tasteTags.includes(query.taste)));
     const start = Number.parseInt(url.searchParams.get("cursor") ?? "0", 10);
     const limit = Math.min(Math.max(Number.parseInt(url.searchParams.get("limit") ?? "12", 10) || 12, 1), 50);
     const safeStart = Number.isInteger(start) && start >= 0 ? start : 0;
     const items = filtered.slice(safeStart, safeStart + limit);
     return demoSuccess({ items, nextCursor: safeStart + items.length < filtered.length ? String(safeStart + items.length) : null, total: filtered.length });
+  } catch (error) { return demoFailure(error); }
+}
+
+export async function PATCH(request: Request) {
+  try {
+    assertLocalDemoHttpRequest(request, "PATCH", "json");
+    const body = await request.json() as { id?: unknown; publication?: unknown };
+    if (typeof body.id !== "string" || (body.publication !== "draft" && body.publication !== "published")) throw new Error("商品上下架資料無效");
+    const product = await getDemoCatalogStore().setPublication(body.id, body.publication);
+    if (!product) throw new Error("找不到商品");
+    return demoSuccess(product);
   } catch (error) { return demoFailure(error); }
 }
 

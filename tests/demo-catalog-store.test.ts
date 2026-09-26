@@ -43,4 +43,13 @@ describe("demo catalog persistence", () => {
     expect(product.image.src).toMatch(/^\/api\/demo\/catalog\/media\/demo-published-/);
     await expect(store.readMedia(product.image.src!.split("/").pop()!)).resolves.toEqual(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]));
   });
+
+  test("changes publication state without deleting the product", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "cheng-tea-catalog-publication-"));
+    temporaryDirectories.push(directory);
+    const store = createDemoCatalogStore({ filePath: join(directory, "catalog.json"), mediaDirectory: join(directory, "media"), seedProducts: [] });
+    const product = await store.publish(draft);
+    expect((await store.setPublication(product.id, "draft"))?.publication).toBe("draft");
+    expect((await store.list()).find((item) => item.id === product.id)?.publication).toBe("draft");
+  });
 });

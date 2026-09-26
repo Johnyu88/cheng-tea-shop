@@ -576,4 +576,12 @@ Wave 7 的修復只補本機 Demo 的資料與素材邊界：八款 2026-09-23 s
 
 管理端新增商品透過 guarded Catalog API 寫入被 Git 忽略的 `.demo-data`，重新整理或重啟後可讀回；UI 仍只依 Catalog／Cart／Publishing service boundary，不接 ERP、付款、物流、Email、SMS、Push 或外部 API。此資料夾與既有 synthetic data 均不提交。
 
-本次證據為 Vitest 30 files／171 tests、TypeScript、ESLint（只有既有 warning）、webpack build，以及乾淨資料目錄上的 LAN Pixel 7 Chromium 2/2。真實手機與真人走查仍待執行，不能宣稱真人驗收或 production readiness。
+本次證據為 Vitest 30 files／173 tests、TypeScript、ESLint（4 個既有 image warning）、webpack build，以及乾淨資料目錄上的 LAN Pixel 7 Chromium 2/2。真實手機與真人走查仍待執行，不能宣稱真人驗收或 production readiness。
+
+## W. 第三輪真人驗收修正 — 2026-09-27
+
+本輪只修正前台與本機 Demo 驗收阻塞：不再把 synthetic `tea-sample-composite.png` 當店家正式合成照；首頁在正式素材缺失時顯示待提供提示。原始人物照、影片及鳥鳴 WAV 維持，鳥鳴由使用者點擊播放。
+
+購物車／checkout 已提供返回與取消路徑；Demo OTP 仍由服務端驗證，cooldown 重用有效 challenge，錯誤碼有明確提示。`/admin/products` 提供本機商品清單與上下架，publication 變更不刪資料，前台與 authoritative order boundary 同步拒絕下架商品。
+
+第九種茶的素材處理以明確標示的 Mock pipeline 呈現原始、檢查、辨識／拆解、合成預覽、人工確認、儲存與上架狀態；沒有影像 AI、付款、簡訊、物流、ERP 或正式服務串接。LAN Pixel 7 Chromium 2/2 與 webpack build 通過，但不等同真人手機驗收；正式合成照與真人操作仍待店家提供／執行。

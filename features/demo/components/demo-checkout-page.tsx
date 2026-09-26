@@ -31,6 +31,7 @@ export function DemoCheckoutPage() {
   const identityNext = () => {
     const phone = normalizeTaiwanMobile(draft.phone);
     if (!phone || !draft.name.trim() || !challenge || code.length !== 6) return setError("請完成姓名、合成手機與驗證碼確認。");
+    if (code !== challenge.demoCode) return setError("驗證碼不正確，請重新輸入本機 Demo 顯示的驗證碼。");
     change("phone", phone); setStep("delivery");
   };
   const deliveryNext = () => {

@@ -43,6 +43,8 @@ export function createDemoOtpService(options: Options = {}): DemoOtpService {
       const at = now();
       const sends = (sendHistory.get(phone) ?? []).filter(time => time > at - windowMs);
       if (sends.length && at - sends[sends.length - 1]! < cooldownMs) {
+        const active = [...challenges.entries()].find(([, challenge]) => challenge.phone === phone && at < challenge.expiresAt);
+        if (active) return { challengeId: active[0], expiresAt: active[1].expiresAt, delivery: "simulated" };
         throw new Error("Demo OTP resend cooldown");
       }
       if (sends.length >= maxSendsPerWindow) throw new Error("Demo OTP send limit");

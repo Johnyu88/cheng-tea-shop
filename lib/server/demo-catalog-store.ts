@@ -59,6 +59,16 @@ export const createDemoCatalogStore = ({ filePath, mediaDirectory, seedProducts 
       const products = await this.list();
       return products.find((product) => product.slug === slug);
     },
+    async setPublication(id: string, publication: Product["publication"]): Promise<Product | undefined> {
+      return serialized(async () => {
+        const catalog = await read();
+        const product = catalog.products.find((item) => item.id === id);
+        if (!product) return undefined;
+        product.publication = publication;
+        await write(catalog);
+        return clone(product);
+      });
+    },
     async publish(draft: ProductDraft): Promise<Product> {
       return serialized(async () => {
         const catalog = await read();

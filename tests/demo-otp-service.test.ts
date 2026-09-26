@@ -42,10 +42,10 @@ describe("isolated demo OTP service", () => {
     expect(service.verify(phone, issued.challengeId, code)).toBe(false);
   });
 
-  test("enforces resend cooldown and invalidates old challenge on resend", () => {
+  test("reuses the active challenge during resend cooldown", () => {
     const { service, advance } = setup();
     const first = service.issue(phone);
-    expect(() => service.issue(phone)).toThrow();
+    expect(service.issue(phone)).toEqual(first);
     advance(60_000);
     const second = service.issue(phone);
     expect(service.verify(phone, first.challengeId, code)).toBe(false);

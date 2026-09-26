@@ -69,3 +69,9 @@ it("keeps the teacher story video manual and muted", () => {
   expect(video).toHaveAttribute("playsinline");
   expect(video).not.toHaveAttribute("autoplay");
 });
+
+it("does not present the synthetic composite as the official store photo", () => {
+  render(<HomePage catalogService={createMockCatalogService()} />);
+  expect(screen.getByText("正式合成照尚未提供；目前不以其他照片替代。")).toBeInTheDocument();
+  expect(screen.queryByRole("img", { name: "茶包、茶湯、茶乾與葉底的合成示意圖" })).toBeNull();
+});

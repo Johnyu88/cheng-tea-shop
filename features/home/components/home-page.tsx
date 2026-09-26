@@ -110,13 +110,10 @@ export function HomePage({ catalogService = defaultCatalogService }: HomePagePro
             </p>
           </div>
           <div className="teacher-story-media">
-            <Image
-              src="/media/tea-sample-composite.png"
-              alt="茶包、茶湯、茶乾與葉底的合成示意圖"
-              width={1600}
-              height={1200}
-              sizes="(max-width: 40rem) 100vw, 40vw"
-            />
+            <div className="teacher-story-missing-media" role="img" aria-label="正式合成照尚未提供">
+              <p>正式合成照尚未提供；目前不以其他照片替代。</p>
+              <small>待店家提供正式合成素材後再接入首頁。</small>
+            </div>
             <Image
               src="/media/teacher-portrait.webp"
               alt="陳老師在茶行裡的照片"

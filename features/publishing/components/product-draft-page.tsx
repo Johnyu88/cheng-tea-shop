@@ -9,6 +9,7 @@ import { useCommerce } from "@/features/commerce/components/commerce-provider";
 
 type Operation = "idle" | "saving" | "generating" | "publishing";
 type PreviewMode = "mobile" | "desktop";
+type MaterialStage = "raw" | "checked" | "identified" | "composed" | "confirmed" | "saved" | "published";
 type FieldKey = "name" | "specification" | "price" | "category";
 type FormDraft = { name: string; specification: string; price: string; category: TeaCategory | ""; inventoryStatus: InventoryStatus; tasteTags: TasteTag[]; summary: string; origin: string; fermentation: string; roast: string; aroma: string; brewing: string };
 type FieldProblem = { field: FieldKey; label: string; message: string };
@@ -17,6 +18,7 @@ const initialDraft: FormDraft = { name: "", specification: "", price: "", catego
 const categories: Array<[TeaCategory, string]> = [["wild-mountain", "台灣野生山茶"], ["white", "白茶"], ["green", "綠茶"], ["yellow", "黃茶"], ["oolong", "青茶／烏龍茶"], ["black", "紅茶"], ["flower", "花茶"], ["dark", "黑茶"], ["special", "特殊茶"], ["aged", "老茶"], ["other", "其他茶類"]];
 const tasteTags: Array<[TasteTag, string]> = [["light", "清香"], ["sweet", "甘甜"], ["rich", "濃郁"], ["roasted", "焙火"]];
 const inProgressStatus: Record<Exclude<Operation, "idle">, string> = { saving: "正在儲存草稿。", generating: "正在產生介紹草稿。", publishing: "正在上架商品。" };
+const materialStages: Array<[MaterialStage, string]> = [["raw", "原始照片上傳"], ["checked", "素材檢查"], ["identified", "拆解／辨識結果（Mock）"], ["composed", "合成預覽（Mock）"], ["confirmed", "人工確認"], ["saved", "儲存"], ["published", "上架"]];
 
 function minimumProblems(draft: FormDraft): FieldProblem[] {
   const problems: FieldProblem[] = [];
@@ -54,6 +56,7 @@ export function ProductDraftPage(): JSX.Element {
   const [operation, setOperation] = useState<Operation>("idle");
   const [previewMode, setPreviewMode] = useState<PreviewMode | null>(null);
   const [confirmed, setConfirmed] = useState(false);
+  const [materialStage, setMaterialStage] = useState<MaterialStage>("raw");
   const [publishedProduct, setPublishedProduct] = useState<Product>();
   const [hydrated, setHydrated] = useState(false);
   const activeOperation = useRef<Operation>("idle");
@@ -92,21 +95,21 @@ export function ProductDraftPage(): JSX.Element {
     const submission = validate();
     if (!submission || !start("saving")) return;
     const result = await publishingService.saveDraft(submission);
-    if (result.ok) setStatus("草稿已儲存；這仍是暫存商品，尚未上架。"); else { setError(result.error); setStatus(result.error.message); }
+    if (result.ok) { setMaterialStage("saved"); setStatus("草稿已儲存；這仍是暫存商品，尚未上架。"); } else { setError(result.error); setStatus(result.error.message); }
     finish();
   };
   const generateSummary = async () => {
     const submission = validate();
     if (!submission || !start("generating")) return;
     const result = await publishingService.generateSummary(submission);
-    if (result.ok) { setDraft((current) => ({ ...current, summary: result.value })); setConfirmed(false); setStatus("已產生可編輯的介紹草稿；請由您確認後再上架。"); } else { setError(result.error); setStatus(result.error.message); }
+    if (result.ok) { setDraft((current) => ({ ...current, summary: result.value })); setMaterialStage("identified"); setConfirmed(false); setStatus("已產生可編輯的 Mock 辨識草稿；請由您確認後再上架。"); } else { setError(result.error); setStatus(result.error.message); }
     finish();
   };
   const publishDraft = async () => {
     const submission = validate();
     if (!submission || !confirmed || !start("publishing")) return;
     const result = await publishingService.publishDraft(submission, { confirmed: true });
-    if (result.ok) { setPublishedProduct(result.value); setStatus("商品已上架為合成展示資料。沒有儲存到正式系統。"); } else { setError(result.error); setStatus(result.error.message); }
+    if (result.ok) { setMaterialStage("published"); setPublishedProduct(result.value); setStatus("商品已上架為合成展示資料。沒有儲存到正式系統。"); } else { setError(result.error); setStatus(result.error.message); }
     finish();
   };
   const addPhotos = (event: ChangeEvent<HTMLInputElement>) => {
@@ -117,6 +120,7 @@ export function ProductDraftPage(): JSX.Element {
     if (photos.length + files.length > 3) { setError({ code: "invalid-draft", message: "商品照片最多三張；原本選擇的照片與文字都已保留。", retryable: false }); return; }
     const additions = files.map((file) => ({ id: `local-photo-${nextPhotoId.current++}`, previewUrl: URL.createObjectURL(file), fileName: file.name, alt: `${file.name} 預覽` }));
     setPhotos((current) => [...current, ...additions]);
+    setMaterialStage("checked");
     void Promise.all(files.map((file) => new Promise<string | undefined>((resolve) => {
       const reader = new FileReader();
       reader.onload = () => resolve(typeof reader.result === "string" ? reader.result : undefined);
@@ -146,7 +150,7 @@ export function ProductDraftPage(): JSX.Element {
     <p role="status" aria-live="polite" className="product-draft-status">{status}</p>
     <section aria-labelledby="product-draft-heading" className="product-draft-card">
       <p className="eyebrow">商品上架原型</p><h1 id="product-draft-heading">新增一項茶品</h1>
-      <p className="prototype-notice">這是本機 Demo：沒有真實管理員驗證，不會連接正式 ERP。</p><p>上架資料會寫入本機 `.demo-data`，供同一台 Demo server 重啟後重新讀取；照片只留在本機 Demo 目錄。</p>
+      <p className="prototype-notice">這是本機 Demo：沒有真實管理員驗證，不會連接正式 ERP。</p><p>上架資料會寫入本機 `.demo-data`，供同一台 Demo server 重啟後重新讀取；原始照片與衍生預覽只留在本機 Demo 目錄。</p><MaterialWorkflow stage={materialStage} />
       {fieldProblems.length > 0 && <ValidationSummary problems={fieldProblems} />}{error && <div role="alert" className="product-draft-alert">{error.message}</div>}
       <div className="product-draft-layout"><section aria-label="商品草稿欄位"><h2>先填這五項</h2><div className="product-draft-fields">
         <label className="form-field" htmlFor="product-name">茶名<input id="product-name" className="form-input" value={draft.name} onChange={(event) => change("name", event.target.value)} /></label>
@@ -158,13 +162,14 @@ export function ProductDraftPage(): JSX.Element {
       <PhotoPicker photos={photos} onAdd={addPhotos} onRemove={removePhoto} />
       <details className="product-draft-details"><summary>補充茶品事實（選填）</summary><div className="product-draft-fields mt-4"><fieldset className="form-fieldset"><legend>口感標籤（選填）</legend>{tasteTags.map(([value, label]) => <label className="form-option" key={value}><input type="checkbox" checked={draft.tasteTags.includes(value)} onChange={() => change("tasteTags", draft.tasteTags.includes(value) ? draft.tasteTags.filter((tag) => tag !== value) : [...draft.tasteTags, value])} />{label}</label>)}</fieldset><FactField label="產地（選填）" value={draft.origin} onChange={(value) => change("origin", value)} /><FactField label="發酵（選填）" value={draft.fermentation} onChange={(value) => change("fermentation", value)} /><FactField label="焙火（選填）" value={draft.roast} onChange={(value) => change("roast", value)} /><FactField label="香氣（選填）" value={draft.aroma} onChange={(value) => change("aroma", value)} /><FactField label="沖泡方式（選填）" value={draft.brewing} onChange={(value) => change("brewing", value)} /></div></details>
       <label className="form-field mt-6" htmlFor="product-summary">商品介紹草稿（可編輯）<textarea id="product-summary" className="form-textarea" value={draft.summary} onChange={(event) => change("summary", event.target.value)} /></label>
-      </section><aside className="product-draft-actions" aria-label="草稿操作"><h2>下一步</h2><p>介紹草稿只會使用您在此頁填寫的事實。請自行確認內容。</p><div className="form-actions"><button className="primary-action" type="button" disabled={operation === "saving"} onClick={() => void saveDraft()}>{operation === "saving" ? "儲存中" : "儲存草稿"}</button><button className="filter-button" type="button" disabled={operation === "generating"} onClick={() => void generateSummary()}>{operation === "generating" ? "產生中" : "產生介紹草稿"}</button><button className="filter-button" type="button" onClick={() => setPreviewMode("mobile")}>預覽手機版</button><button className="filter-button" type="button" onClick={() => setPreviewMode("desktop")}>預覽電腦版</button></div><label className="product-draft-confirmation"><input type="checkbox" checked={confirmed} onChange={(event) => setConfirmed(event.target.checked)} />我已確認內容，將上架這項商品</label><button className="primary-action product-draft-publish" type="button" disabled={!canPublish} onClick={() => void publishDraft()}>{operation === "publishing" ? "上架處理中" : "確認並上架"}</button></aside></div>
+      </section><aside className="product-draft-actions" aria-label="草稿操作"><h2>下一步</h2><p>介紹草稿只會使用您在此頁填寫的事實。請自行確認內容。</p><div className="form-actions"><button className="primary-action" type="button" disabled={operation === "saving"} onClick={() => void saveDraft()}>{operation === "saving" ? "儲存中" : "儲存草稿"}</button><button className="filter-button" type="button" disabled={operation === "generating"} onClick={() => void generateSummary()}>{operation === "generating" ? "產生中" : "產生介紹草稿"}</button><button className="filter-button" type="button" onClick={() => { setPreviewMode("mobile"); setMaterialStage("composed"); }}>預覽手機版</button><button className="filter-button" type="button" onClick={() => { setPreviewMode("desktop"); setMaterialStage("composed"); }}>預覽電腦版</button></div><label className="product-draft-confirmation"><input type="checkbox" checked={confirmed} onChange={(event) => { const next = event.target.checked; setConfirmed(next); if (next) setMaterialStage("confirmed"); }} />我已確認內容，將上架這項商品</label><button className="primary-action product-draft-publish" type="button" disabled={!canPublish} onClick={() => void publishDraft()}>{operation === "publishing" ? "上架處理中" : "確認並上架"}</button></aside></div>
       {previewMode && <ProductPreview draft={draft} mode={previewMode} />}
     </section>
   </main>;
 }
 
 function ValidationSummary({ problems }: { problems: FieldProblem[] }): JSX.Element { return <div role="alert" className="product-draft-alert"><strong>請先完成必填欄位：</strong><ul>{problems.map((problem) => <li key={problem.field}><a href={`#${fieldId(problem.field)}`}>{problem.label}</a>：{problem.message}</li>)}</ul></div>; }
+function MaterialWorkflow({ stage }: { stage: MaterialStage }): JSX.Element { const current = materialStages.findIndex(([value]) => value === stage); return <section aria-label="素材處理流程" className="product-material-workflow"><h2>素材處理流程（本機 Mock）</h2><p>不使用影像辨識或合成外部服務；原始照片保留，衍生預覽只代表可替換的 Mock 結果。</p><ol>{materialStages.map(([value, label], index) => <li key={value} data-status={index <= current ? "done" : "pending"}>{index <= current ? "✓" : "○"} {label}</li>)}</ol></section>; }
 function FactField({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }): JSX.Element { return <label className="form-field">{label}<input className="form-input" value={value} onChange={(event) => onChange(event.target.value)} /></label>; }
 function PhotoPicker({ photos, onAdd, onRemove }: { photos: ProductDraftPhoto[]; onAdd: (event: ChangeEvent<HTMLInputElement>) => void; onRemove: (id: string) => void }): JSX.Element { return <section className="product-draft-photos" aria-labelledby="product-photo-heading"><h2 id="product-photo-heading">商品照片（選填）</h2><p>可選 0 至 3 張，只在此頁顯示本機預覽，不會上傳。</p><label className="form-field" htmlFor="product-photos">選擇商品照片（最多三張）<input id="product-photos" className="form-input" type="file" accept="image/*" multiple onChange={onAdd} /></label><p>已選擇 {photos.length}／3 張照片</p>{photos.length > 0 && <ul className="product-draft-photo-list">{photos.map((photo) => <li key={photo.id}><img src={photo.previewUrl} alt={photo.alt} /><button className="text-button" type="button" onClick={() => onRemove(photo.id)}>移除 {photo.alt.replace(" 預覽", "")}</button></li>)}</ul>}</section>; }
 function ProductPreview({ draft, mode }: { draft: FormDraft; mode: PreviewMode }): JSX.Element { return <section className={`product-draft-preview product-draft-preview-${mode}`} aria-label="商品預覽" data-preview-mode={mode}><p className="eyebrow">{mode === "mobile" ? "手機版預覽" : "電腦版預覽"}</p><h2>{draft.name || "尚未命名的茶品"}</h2><p>{draft.specification || "尚未填寫規格"}・{draft.price ? `NT$${draft.price}` : "尚未填寫價格"}</p><p>{draft.summary || "尚未提供商品介紹。"}</p></section>; }
