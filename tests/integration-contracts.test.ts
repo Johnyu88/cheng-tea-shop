@@ -236,7 +236,6 @@ describe("Phase 8 integration contracts", () => {
 
   it("swaps Publishing and ERP adapters independently", () => {
     const alternatePublishing: PublishingService = {
-      generateSummary: async () => ({ ok: true, value: "替換摘要" }),
       saveDraft: async (draft) => ({ ok: true, value: draft }),
       publishDraft: async (draft) => ({
         ok: true,

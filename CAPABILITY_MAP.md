@@ -459,3 +459,14 @@ Phase 10 is planning-only. No real customer/product data has been sent to an ERP
 | Mobile order lookup entry | ✅ browser / ⬜ physical phone | 360×800 與 1280×800 browser PASS；真人手機仍待重跑 |
 | Actual image recognition and composition | ⛔ blocked | No raw source/provider/derived manifest; Mock pipeline remains explicitly labelled |
 | Real payment / messaging / logistics / ERP | ⬜ prohibited | No production service or customer data enabled |
+
+## 2026-09-27 後台商品管理簡化決策
+
+| Capability | Status | Evidence / limitation |
+|---|---:|---|
+| Shared add/edit product form | ✅ local Demo | `/admin/products/new` and `/admin/products` use the same `ProductFields` and validation; edit loads the current Catalog record |
+| Admin catalog list and mutations | ✅ local Demo | Existing products are listed from `/api/demo/catalog`; add, edit, publish and unpublish use the same file-backed store |
+| Product fact fields | ✅ local Demo | Photo metadata, tea name, category, specification, price, inventory, aroma, taste, origin and summary remain editable |
+| Built-in image recognition / extraction / composition | ❌ cancelled / out of scope | External preparation is required before upload; no Mock flow or fake progress is part of the website contract |
+| Existing eight products and history | ✅ preserved | No fixture reset, catalog duplication or historical-order deletion in this change |
+| Physical phone acceptance | ⬜ pending | Browser tests do not replace tomorrow's real-device walkthrough |

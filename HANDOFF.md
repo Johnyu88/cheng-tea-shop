@@ -491,3 +491,12 @@ Follow `RESUME_PROMPT.md`, `AGENTS.md`, and `WORKFLOW.md`. If newer explicit use
 - P1 影像流程仍 BLOCKED：工作樹沒有可用 raw-data 茶樣、OCR／vision／composition provider 或授權衍生 manifest；目前 Mock 流程只能作 UI boundary。明日唯一優先工作是實體手機重跑 P0 閉環；影像服務需另行提供來源、授權與工具後再決策。
 - 證據：`docs/testing/evidence/2026-09-27-finish/home-mobile.png`、`home-desktop.png`、`checkout-success.png`、`admin-product-fields.png`；均為 LAN Chromium 實際渲染，不是真人手機截圖。
 - GitHub PR #15：本機沒有 `gh` CLI，未宣稱已讀取 PR 狀態；不影響本地修復，明日可用 GitHub connector／瀏覽器補查。
+
+## 2026-09-27 後台商品管理簡化決策
+
+- 內建影像辨識、資訊提取、主體拆解、圖片合成與 Mock 進度流程正式取消；網站不再宣稱或提供這些能力。照片由店家自行拍攝或使用外部工具處理後，再以上傳素材進入網站。
+- `/admin/products` 改用 `ProductManagementPage`，新增頁與編輯頁共用 `ProductFields`、`minimumProblems` 與相同 Catalog PATCH／POST boundary。新增使用空白表單；編輯載入既有商品的名稱、類別、規格、價格、庫存、香氣、口感、產地與介紹。
+- 後台清單保留新增、編輯、上架、下架；前台與後台均讀取同一 `/api/demo/catalog` 與 file-backed Catalog Store。publication 變更只改狀態，不刪除商品或歷史訂單。
+- `PublishingService` 已移除 `generateSummary`，避免 service contract 保留已取消的 Mock 文案生成能力。既有八種茶與 Demo 資料未清空、未重建。
+- `AGENTS.md` 與 `next-env.d.ts` 的既有未提交變更仍未 staged；本階段不得覆蓋或提交。
+- 驗證：Vitest 35 files／176 tests、TypeScript、Webpack production build 通過；ESLint 0 errors、5 個既有 warning（圖片最佳化與 internal navigation）。真人手機驗收仍需由店家執行。影像 AI 現在是已取消／out of scope，不再是網站交付阻塞。

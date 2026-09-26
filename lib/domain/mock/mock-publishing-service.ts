@@ -46,47 +46,10 @@ const slugFor = (name: string, sequence: number): string => {
   return slug.length > 0 ? slug : `mock-product-${sequence}`;
 };
 
-const optionalFacts = [
-  ["產地", "origin"],
-  ["發酵", "fermentation"],
-  ["焙火", "roast"],
-  ["香氣", "aroma"],
-  ["口感", "taste"],
-  ["沖泡", "brewing"],
-  ["摘要", "summary"],
-] as const;
-
-const summaryFor = (draft: ProductDraft): string => {
-  const parts = [
-    `茶名：${draft.name.trim()}`,
-    `規格：${draft.specification.trim()}`,
-    `價格：${draft.price.currency} ${draft.price.amount}`,
-    `類別：${draft.category}`,
-    `供貨：${draft.inventoryStatus}`,
-    ...(draft.tasteTags.length > 0 ? [`口感：${draft.tasteTags.join("、")}`] : []),
-    ...optionalFacts.flatMap(([label, key]) => {
-      const value = draft[key]?.trim();
-      return value ? [`${label}：${value}`] : [];
-    }),
-  ];
-
-  if (optionalFacts.some(([, key]) => !draft[key]?.trim())) {
-    parts.push("部分補充資訊未提供。");
-  }
-
-  return parts.join("｜");
-};
-
 export const createMockPublishingService = (): PublishingService => {
   let sequence = 0;
 
   return {
-    async generateSummary(draft): Promise<ServiceResult<string>> {
-      const validated = validateDraft(draft);
-      if (!validated.ok) return validated;
-      return { ok: true, value: summaryFor(validated.value) };
-    },
-
     async saveDraft(draft): Promise<ServiceResult<ProductDraft>> {
       return validateDraft(draft);
     },

@@ -96,7 +96,6 @@ describe("Phase 8 integration smoke", () => {
       authorize: async (request) => ({ ok: true, value: { status: "simulated", reference: "ALT", amount: request.amount } }),
     };
     const alternatePublishing: PublishingService = {
-      generateSummary: async () => ({ ok: true, value: "替換摘要" }),
       saveDraft: async (draft) => ({ ok: true, value: draft }),
       publishDraft: async () => ({ ok: false, error: { code: "publishing-unavailable", message: "暫時無法發布。", retryable: true } }),
     };

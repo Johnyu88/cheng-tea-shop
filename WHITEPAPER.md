@@ -635,3 +635,11 @@ The generated hero images are not a substitute for store-approved photography. T
 - Catalog 與 admin fields 仍沿用單一 file-backed Demo Catalog；商品編輯新增 aroma、taste、teaRegion、summary 的受控欄位，分類以中文顯示。未接 ERP、資料庫、付款、物流或外部服務。
 - 真實影像辨識／資訊提取／主體合成仍是 BLOCKED，而非 prototype PASS。需要店家原始照片、授權、可調用的 OCR／vision／image-processing 工具、輸出 schema 與人工確認流程。
 - 明日驗收邊界：先用同一 3013 URL 在實體手機重跑首頁查單入口與購物→OTP→建立訂單→感謝頁；自動化瀏覽器只能作工程證據，不能取代真人手機結果。
+
+## 56. 後台商品管理簡化決策 — 2026-09-27
+
+- 產品策略正式取消網站內建影像辨識、資訊自動提取、主體拆解、圖片合成、Mock 辨識與假進度流程；店家可在外部完成照片處理後再上傳。這是範圍決策，不是待修復的 P1 blocker。
+- 新增／編輯商品共用 `ProductFields` 與 `minimumProblems`，欄位順序固定為茶名、規格、價格、茶類、庫存、香氣、口感、產地、商品介紹；新增為空白表單，編輯從同一 Catalog Store 載入。
+- `/admin/products` 的清單、編輯、上下架與 `/admin/products/new` 的新增均透過 `/api/demo/catalog`；不建立第二份前台商品陣列。Catalog Store 的 file-backed persistence、歷史訂單保留與既有八種茶不變。
+- `PublishingService` contract 不再包含 `generateSummary`，service adapter 只負責驗證、保存與發布店家已確認的資料。
+- 驗證結果：Vitest 35 files／176 tests、TypeScript、ESLint（0 errors／5 個既有 warning）與 Webpack production build 通過；未啟動正式服務，真人手機仍需另行驗收。

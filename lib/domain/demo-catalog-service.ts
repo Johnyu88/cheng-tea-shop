@@ -37,7 +37,6 @@ export const createDemoCatalogService = (): CatalogService => ({
 export const createDemoPublishingService = (): PublishingService => {
   const local = createMockPublishingService();
   return {
-    generateSummary: local.generateSummary,
     saveDraft: local.saveDraft,
     async publishDraft(draft: ProductDraft, confirmation): Promise<ServiceResult<Product>> {
       if (!confirmation.confirmed) return { ok: false, error: domainError("invalid-draft", "發布前必須明確確認。", false) };

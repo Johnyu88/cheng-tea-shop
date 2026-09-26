@@ -1,5 +1,5 @@
-import { ProductAdminPage } from "@/features/publishing/components/product-admin-page";
+import { ProductManagementPage } from "@/features/publishing/components/product-management-page";
 
 export default function Page() {
-  return <ProductAdminPage />;
+  return <ProductManagementPage />;
 }
