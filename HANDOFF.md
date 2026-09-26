@@ -461,3 +461,12 @@ Follow `RESUME_PROMPT.md`, `AGENTS.md`, and `WORKFLOW.md`. If newer explicit use
 - Current screenshots: `docs/testing/evidence/p0-catalog-recovery-2026-09-27/homepage-mobile.png` and `admin-products-mobile.png`. These are browser evidence, not real-phone evidence. The phone must reload `http://172.20.10.4:3013/` after the server/API preflight.
 - Focused regression: Vitest 4 files / 31 tests passed with the approved `corepack pnpm` invocation after the sandbox-only `spawn EPERM` retry. Existing `AGENTS.md` and `next-env.d.ts` changes remain untouched and must not be staged.
 - Final cross-browser check: Chromium e2e 14/14 passed after the stale-copy assertion was corrected. WebKit reached 8/14 and then hung without further output in this managed Windows environment; it was stopped rather than treated as a product pass/fail. No WebKit failure implicated the catalog API or the P0 data boundary.
+
+## 第五輪前後台閉環修正 — 2026-09-27
+
+- P0 Catalog 以目前同一份 `.demo-data/lan-demo-third-round-final-2/catalog.json` 完成 API 關卡：價格 `1500 → 1555 → 1500`；下架時 public GET 不回傳、admin GET 顯示 `draft`；重新上架後恢復 `published`。沒有建立第二份商品清單。
+- 目前資料為 10 筆：原始 8 件 published、既有 `第九種 UI 測試茶...` 1 件 draft、使用者新增的 `台灣野生紅茶` 1 件 published。重啟 server 後仍存在；public catalog total 9，admin-inclusive total 10。
+- 真正重現並修正的 checkout P0 是空白選填 Email：UI 初始送出 `email: ""`，server validator 正確回傳 `Invalid email`（400），因此未進成功頁。現在 `normalizeDemoCheckoutDraft` 空白時移除欄位，有內容時保留並交給原有 validator；OTP 與 server 驗證未移除。
+- LAN browser flow（360×800）驗證首頁「訂單查詢」、9 件 published 商品、OTP、`POST /api/demo/orders` 200、`/checkout/success` 感謝／訂單編號／狀態／返回首頁／主動查看訂單；無 pageerror／requestfailed。這仍是自動化 LAN 證據，不是真人手機驗收。
+- P1 未接入影像服務：`raw-data/` 不存在，專案沒有 OCR／茶品辨識／圖片合成服務；只有可選的內建 image generation 能力與 Next 間接依賴的 `sharp`，不能據此宣稱 P1 完成。
+- 驗證：Vitest 32 files／177 tests、TypeScript、Webpack build、ESLint 0 errors（5 warnings）、Chromium e2e 14/14；WebKit 仍受既知本機 hang／Avast 環境限制。`AGENTS.md`、`next-env.d.ts` 維持未提交。

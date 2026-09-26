@@ -425,3 +425,14 @@ Phase 10 is planning-only. No real customer/product data has been sent to an ERP
 | Existing-product edit form | ⬜ pending | `/admin/products` has view and publication operations; no independent edit form yet |
 | LAN mobile regression | ✅ automated | Pixel 7 Chromium `catalog-persistence` + `mobile-order-loop` 2/2 on isolated data; not human-phone evidence |
 | Real phone acceptance | ⬜ pending | Re-run `http://172.20.10.4:3013` on a physical phone; no completion claimed |
+
+## 第五輪閉環狀態 — 2026-09-27
+
+| Capability | Status | Evidence / limitation |
+|---|---:|---|
+| Shared catalog price/publication mutation | ✅ local Demo | PATCH→GET verified for price and draft/published state; same file-backed store, no static duplicate |
+| Ninth product persistence | ✅ local Demo | `台灣野生紅茶` remains after server restart; public/admin totals are 9/10 |
+| Optional email checkout boundary | ✅ local Demo | Blank optional email is omitted before order API; non-empty email remains validated; focused tests cover both |
+| Checkout success navigation | ✅ LAN browser | OTP → order API 200 → `/checkout/success`; thanks, order id/status, home and lookup links visible |
+| P1 image recognition/composition | ⛔ blocked | No raw-data source or OCR/vision/composition provider in worktree; workflow remains explicitly Mock |
+| Real phone acceptance | ⬜ pending | Automated LAN browser evidence is not physical-phone evidence |

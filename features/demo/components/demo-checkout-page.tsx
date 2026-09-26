@@ -12,6 +12,16 @@ type Step = "identity" | "delivery" | "review";
 const trustedAddress = "台北市中正區測試路 1 號";
 const initial: CheckoutDraft = { name: "", phone: "0912000000", email: "", deliveryMethod: "home-delivery", address: trustedAddress, paymentMethod: "credit-card" };
 
+export function normalizeDemoCheckoutDraft(draft: CheckoutDraft): CheckoutDraft {
+  const email = draft.email?.trim();
+  if (!email) {
+    const withoutEmail = { ...draft };
+    delete withoutEmail.email;
+    return withoutEmail;
+  }
+  return { ...draft, email };
+}
+
 export function DemoCheckoutPage() {
   const { cartService } = useCommerce();
   const [cart, setCart] = useState<Cart>();
@@ -42,7 +52,13 @@ export function DemoCheckoutPage() {
     if (!cart || !challenge) return;
     try {
       setBusy(true); setError("");
-      const result = await demoApi.placeOrder({ phone: draft.phone, challengeId: challenge.challengeId, code, draft, lines: cart.lines.map(({ productId, variantId, quantity }) => ({ productId, variantId, quantity })) });
+      const result = await demoApi.placeOrder({
+        phone: draft.phone,
+        challengeId: challenge.challengeId,
+        code,
+        draft: normalizeDemoCheckoutDraft(draft),
+        lines: cart.lines.map(({ productId, variantId, quantity }) => ({ productId, variantId, quantity })),
+      });
       window.sessionStorage.setItem(demoCheckoutSuccessStorageKey, JSON.stringify(result));
       window.location.assign(`/checkout/success?order=${encodeURIComponent(result.orderId)}`);
     } catch (caught) { setError(caught instanceof Error ? caught.message : "示範訂單建立失敗"); }
