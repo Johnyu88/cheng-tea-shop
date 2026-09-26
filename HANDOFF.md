@@ -420,3 +420,12 @@ Follow `RESUME_PROMPT.md`, `AGENTS.md`, and `WORKFLOW.md`. If newer explicit use
 - 本次已在本機私有介面 `172.20.10.4:3013` 啟動 Demo；必要網址為 `/`、`/cart`、`/checkout`、`/orders`、`/admin/orders`。主機 health／頁面可達；實際手機操作仍待陳老師在同一可信 Wi‑Fi 執行，不能由本機自動化代替。
 - 已以同一 LAN URL `http://172.20.10.4:3013` 重跑 Pixel 7 Chromium synthetic flow，1/1 通過；這證明 LAN host/origin 與完整合成流程相容，不代表真實手機或真人走查已完成。
 - 實機限制：HTTP LAN cookie 不具 Secure，故只允許假資料、假 OTP、假付款與假通知；不要輸入真實客戶／付款資料。Demo 結束應停止 server，並在確認路徑後清除 `.demo-data\lan-demo`。
+- 實機限制：HTTP LAN cookie 不具 Secure，故只允許假資料、假 OTP、假付款與假通知；不要輸入真實客戶／付款資料。Demo 結束應停止 server，並在確認路徑後清除 `.demo-data\lan-demo`。
+
+## V. Real-phone acceptance repair — 2026-09-27
+
+- Root causes confirmed: Wave 7 previously lacked the checked-in sample media and used process-only catalog publishing; the active 3013 server was also verified and restarted from the Wave 7 demo with an isolated local data directory.
+- Added the eight sample products and preserved photos, composite hero image, and bird-call WAV. Static checks against `http://172.20.10.4:3013` returned HTTP 200; audio is explicit click-to-play (`controls`, `preload="none"`), not autoplay.
+- Added guarded file-backed local catalog/media storage. Admin publish writes to ignored `.demo-data`, survives reload/restart, and never calls ERP or external services. Catalog/Cart/Publishing continue through service boundaries; published product IDs and encoded Unicode slugs are handled correctly.
+- Verification: Vitest 30 files / 171 tests; TypeScript passed; ESLint 0 errors with 3 existing image warnings; webpack production build passed. Turbopack remains blocked by the worktree `node_modules` symlink panic. LAN Pixel 7 Chromium `catalog-persistence` and `mobile-order-loop` passed 2/2 on clean isolated data.
+- Real physical phone acceptance is still pending at `http://172.20.10.4:3013`; automated Chromium is not human/real-device evidence. `AGENTS.md` and `next-env.d.ts` remain pre-existing uncommitted environment changes and were not staged.

@@ -44,7 +44,7 @@ function fillMinimumFields() {
 it("labels the prototype and presents the five minimum fields", () => {
   renderPage();
 
-  expect(screen.getByText("這是原型頁面：尚未實作真實管理員驗證。")).toBeInTheDocument();
+  expect(screen.getByText("這是本機 Demo：沒有真實管理員驗證，不會連接正式 ERP。")).toBeInTheDocument();
   expect(screen.getByLabelText("茶名")).toBeInTheDocument();
   expect(screen.getByLabelText("單一規格")).toBeInTheDocument();
   expect(screen.getByLabelText("價格（TWD）")).toBeInTheDocument();

@@ -1,4 +1,4 @@
-import type { Cart, CheckoutDraft } from "../domain/types";
+import type { Cart, CheckoutDraft, Product } from "../domain/types";
 import type { DemoOtpService } from "../domain/demo-otp-service";
 import type { DemoOrderService, DemoOrderSnapshot } from "../domain/demo-order-service";
 import { mockCatalogFixture } from "../domain/mock/catalog-fixture";
@@ -10,7 +10,7 @@ type OrderInput = {
   phone: string; challengeId: string; code: string;
   lines: LineInput[]; draft: CheckoutDraft;
 };
-type Dependencies = { otp: DemoOtpService; orders: DemoOrderService; reviewAddress?: (address: string) => boolean };
+type Dependencies = { otp: DemoOtpService; orders: DemoOrderService; reviewAddress?: (address: string) => boolean; catalogProducts?: () => Product[] };
 const syntheticPhones = new Set(["0912000000", "0912000001"]);
 function assertLocalDemo(): void {
   if (typeof process === "undefined" || process.release?.name !== "node" || process.env.NODE_ENV === "production"
@@ -50,7 +50,7 @@ function validateDraft(value: unknown, phone: string, reviewAddress?: (address: 
     throw new Error("Invalid simulated payment choice");
   }
 }
-function authoritativeCart(lines: unknown): Cart {
+function authoritativeCart(lines: unknown, products: Product[] = mockCatalogFixture): Cart {
   if (!Array.isArray(lines) || lines.length < 1 || lines.length > 20) throw new Error("Invalid lines");
   const seen = new Set<string>();
   const cartLines: Cart["lines"] = [];
@@ -61,7 +61,7 @@ function authoritativeCart(lines: unknown): Cart {
       || !Number.isSafeInteger(item.quantity) || (item.quantity as number) < 1) {
       throw new Error("Invalid line");
     }
-    const product = mockCatalogFixture.find(p => p.id === item.productId && p.publication === "published");
+    const product = products.find(p => p.id === item.productId && p.publication === "published");
     const variant = product?.variants.find(v => v.id === item.variantId);
     if (!product || !variant || variant.inventoryStatus !== "available"
       || (item.quantity as number) > variant.maxQuantity || seen.has(variant.id)) {
@@ -80,7 +80,7 @@ function authoritativeCart(lines: unknown): Cart {
   return { lines: cartLines, subtotal: { currency: "TWD", amount: subtotal } };
 }
 /** Local server contract; no HTTP handlers, SMS, real payment, or merchant authorization. */
-export function createLocalDemoCommerce({ otp, orders, reviewAddress }: Dependencies) {
+export function createLocalDemoCommerce({ otp, orders, reviewAddress, catalogProducts }: Dependencies) {
   assertLocalDemo();
   return {
     issueOtp(rawPhone: unknown) {
@@ -101,7 +101,7 @@ export function createLocalDemoCommerce({ otp, orders, reviewAddress }: Dependen
       if (!phone || !syntheticPhones.has(phone)) throw new Error("Synthetic phone required");
       const data = raw as OrderInput;
       validateDraft(data.draft, phone, reviewAddress);
-      const cart = authoritativeCart(data.lines);
+      const cart = authoritativeCart(data.lines, catalogProducts?.() ?? mockCatalogFixture);
       if (!otp.verify(phone, data.challengeId, data.code)) throw new Error("OTP verification failed");
       const receipt = orders.create(cart);
       let notificationStatus: "simulated-queued" | "queue-failed" = "simulated-queued";

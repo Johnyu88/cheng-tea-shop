@@ -14,7 +14,7 @@ type FormDraft = { name: string; specification: string; price: string; category:
 type FieldProblem = { field: FieldKey; label: string; message: string };
 
 const initialDraft: FormDraft = { name: "", specification: "", price: "", category: "", inventoryStatus: "available", tasteTags: [], summary: "", origin: "", fermentation: "", roast: "", aroma: "", brewing: "" };
-const categories: Array<[TeaCategory, string]> = [["white", "白茶"], ["green", "綠茶"], ["oolong", "烏龍茶"], ["black", "紅茶"], ["dark", "黑茶"], ["other", "其他茶類"]];
+const categories: Array<[TeaCategory, string]> = [["wild-mountain", "台灣野生山茶"], ["white", "白茶"], ["green", "綠茶"], ["yellow", "黃茶"], ["oolong", "青茶／烏龍茶"], ["black", "紅茶"], ["flower", "花茶"], ["dark", "黑茶"], ["special", "特殊茶"], ["aged", "老茶"], ["other", "其他茶類"]];
 const tasteTags: Array<[TasteTag, string]> = [["light", "清香"], ["sweet", "甘甜"], ["rich", "濃郁"], ["roasted", "焙火"]];
 const inProgressStatus: Record<Exclude<Operation, "idle">, string> = { saving: "正在儲存草稿。", generating: "正在產生介紹草稿。", publishing: "正在上架商品。" };
 
@@ -115,8 +115,20 @@ export function ProductDraftPage(): JSX.Element {
     if (files.length === 0) return;
     if (files.some((file) => !file.type.startsWith("image/"))) { setError({ code: "invalid-draft", message: "請選擇圖片檔案。", retryable: false }); return; }
     if (photos.length + files.length > 3) { setError({ code: "invalid-draft", message: "商品照片最多三張；原本選擇的照片與文字都已保留。", retryable: false }); return; }
-    const additions = files.map((file) => ({ id: `local-photo-${nextPhotoId.current++}`, previewUrl: URL.createObjectURL(file), alt: `${file.name} 預覽` }));
+    const additions = files.map((file) => ({ id: `local-photo-${nextPhotoId.current++}`, previewUrl: URL.createObjectURL(file), fileName: file.name, alt: `${file.name} 預覽` }));
     setPhotos((current) => [...current, ...additions]);
+    void Promise.all(files.map((file) => new Promise<string | undefined>((resolve) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(typeof reader.result === "string" ? reader.result : undefined);
+      reader.onerror = () => resolve(undefined);
+      reader.readAsDataURL(file);
+    }))).then((dataUrls) => {
+      setPhotos((current) => current.map((photo) => {
+        const additionIndex = additions.findIndex((addition) => addition.id === photo.id);
+        const dataUrl = additionIndex >= 0 ? dataUrls[additionIndex] : undefined;
+        return dataUrl ? { ...photo, dataUrl } : photo;
+      }));
+    });
     setConfirmed(false);
     setError(undefined);
   };
@@ -134,7 +146,7 @@ export function ProductDraftPage(): JSX.Element {
     <p role="status" aria-live="polite" className="product-draft-status">{status}</p>
     <section aria-labelledby="product-draft-heading" className="product-draft-card">
       <p className="eyebrow">商品上架原型</p><h1 id="product-draft-heading">新增一項茶品</h1>
-      <p className="prototype-notice">這是原型頁面：尚未實作真實管理員驗證。</p><p>資料只保留在目前畫面；不會上傳照片、儲存草稿或連接 ERP。</p>
+      <p className="prototype-notice">這是本機 Demo：沒有真實管理員驗證，不會連接正式 ERP。</p><p>上架資料會寫入本機 `.demo-data`，供同一台 Demo server 重啟後重新讀取；照片只留在本機 Demo 目錄。</p>
       {fieldProblems.length > 0 && <ValidationSummary problems={fieldProblems} />}{error && <div role="alert" className="product-draft-alert">{error.message}</div>}
       <div className="product-draft-layout"><section aria-label="商品草稿欄位"><h2>先填這五項</h2><div className="product-draft-fields">
         <label className="form-field" htmlFor="product-name">茶名<input id="product-name" className="form-input" value={draft.name} onChange={(event) => change("name", event.target.value)} /></label>
@@ -156,4 +168,4 @@ function ValidationSummary({ problems }: { problems: FieldProblem[] }): JSX.Elem
 function FactField({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }): JSX.Element { return <label className="form-field">{label}<input className="form-input" value={value} onChange={(event) => onChange(event.target.value)} /></label>; }
 function PhotoPicker({ photos, onAdd, onRemove }: { photos: ProductDraftPhoto[]; onAdd: (event: ChangeEvent<HTMLInputElement>) => void; onRemove: (id: string) => void }): JSX.Element { return <section className="product-draft-photos" aria-labelledby="product-photo-heading"><h2 id="product-photo-heading">商品照片（選填）</h2><p>可選 0 至 3 張，只在此頁顯示本機預覽，不會上傳。</p><label className="form-field" htmlFor="product-photos">選擇商品照片（最多三張）<input id="product-photos" className="form-input" type="file" accept="image/*" multiple onChange={onAdd} /></label><p>已選擇 {photos.length}／3 張照片</p>{photos.length > 0 && <ul className="product-draft-photo-list">{photos.map((photo) => <li key={photo.id}><img src={photo.previewUrl} alt={photo.alt} /><button className="text-button" type="button" onClick={() => onRemove(photo.id)}>移除 {photo.alt.replace(" 預覽", "")}</button></li>)}</ul>}</section>; }
 function ProductPreview({ draft, mode }: { draft: FormDraft; mode: PreviewMode }): JSX.Element { return <section className={`product-draft-preview product-draft-preview-${mode}`} aria-label="商品預覽" data-preview-mode={mode}><p className="eyebrow">{mode === "mobile" ? "手機版預覽" : "電腦版預覽"}</p><h2>{draft.name || "尚未命名的茶品"}</h2><p>{draft.specification || "尚未填寫規格"}・{draft.price ? `NT$${draft.price}` : "尚未填寫價格"}</p><p>{draft.summary || "尚未提供商品介紹。"}</p></section>; }
-function PublishedSuccess({ product }: { product: Product }): JSX.Element { const variant = product.variants[0]; return <main className="product-draft-page py-8 md:py-12"><section className="product-draft-card" aria-labelledby="product-published-heading"><p role="status" aria-live="polite">商品已上架為合成展示資料。</p><h1 id="product-published-heading">商品已上架</h1><p>合成商品編號：{product.id}</p><p>已上架商品：{product.name}</p>{variant && <p>規格：{variant.specification}／NT${variant.price.amount}</p>}<p>已建立 {product.variants.length} 個規格</p><p>這是原型結果，沒有真實管理員驗證、資料持久化或照片上傳。</p></section></main>; }
+function PublishedSuccess({ product }: { product: Product }): JSX.Element { const variant = product.variants[0]; return <main className="product-draft-page py-8 md:py-12"><section className="product-draft-card" aria-labelledby="product-published-heading"><p role="status" aria-live="polite">商品已上架為本機 Demo 合成資料。</p><h1 id="product-published-heading">商品已上架</h1><p>合成商品編號：{product.id}</p><p>已上架商品：{product.name}</p>{variant && <p>規格：{variant.specification}／NT${variant.price.amount}</p>}<p>已建立 {product.variants.length} 個規格</p><p>資料會保存在目前 Demo server 的 `.demo-data`，不會連接正式 ERP。</p></section></main>; }

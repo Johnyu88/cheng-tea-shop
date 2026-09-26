@@ -375,3 +375,15 @@ Phase 10 is planning-only. No real customer/product data has been sent to an ERP
 | Synthetic-data boundary | ✅ | OTP `123456`, mock catalog, simulated payment／notifications, ignored `.demo-data` |
 | Real phone run | ⬜ pending | LAN URL synthetic Chromium 1/1 passed; Chen Tea Shop operator must still run the flow on a real phone; automation is not participant evidence |
 | Public／production access | ⬜ prohibited | No public binding, deployment, payment, logistics, ERP, or formal notification |
+
+## V. Real-phone acceptance repair — 2026-09-27
+
+| Capability | Status | Evidence / limitation |
+|---|---:|---|
+| Eight sample products and photos | ✅ local Demo | Confirmed sample fixture and preserved media; real-content approval remains separate |
+| Composite image / bird audio | ✅ resource check | HTTP 200 from active LAN server; audio requires explicit user click |
+| Admin publish persistence | ✅ local Demo | Guarded API writes/reloads ignored `.demo-data`; no external persistence |
+| Ninth product visibility and purchase | ✅ automated LAN | Publish → reload → detail → cart passed in clean isolated data |
+| Customer / merchant / shipment loop | ✅ automated LAN | Pixel 7 Chromium 2/2; not physical-phone evidence |
+| Real phone acceptance | ⬜ pending | Operator must execute at `http://172.20.10.4:3013` using synthetic data |
+| Production integrations | ⬜ prohibited | No real payment, messaging, logistics, ERP, deployment, or customer data |

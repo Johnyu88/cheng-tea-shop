@@ -8,7 +8,7 @@ export type Money = {
 };
 
 export type InventoryStatus = "available" | "sold-out";
-export type TeaCategory = "white" | "green" | "oolong" | "black" | "dark" | "other";
+export type TeaCategory = "wild-mountain" | "white" | "green" | "yellow" | "oolong" | "black" | "flower" | "dark" | "special" | "aged" | "other";
 export type TasteTag = "light" | "sweet" | "rich" | "roasted";
 
 export type ProductImage = {
@@ -35,6 +35,12 @@ export type Product = {
   image: ProductImage;
   variants: ProductVariant[];
   publication: "draft" | "published";
+  inventoryQuantity?: number;
+  inventoryUnit?: "包" | "兩";
+  packageWeight?: string;
+  teaRegion?: string;
+  aroma?: string;
+  taste?: string;
 };
 
 export type ProductDraft = {
@@ -57,6 +63,8 @@ export type ProductDraftPhoto = {
   id: string;
   previewUrl: string;
   alt: string;
+  fileName?: string;
+  dataUrl?: string;
 };
 
 export type CartLine = {

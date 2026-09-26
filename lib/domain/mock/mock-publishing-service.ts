@@ -4,7 +4,7 @@ import type { Product, ProductDraft, ProductDraftPhoto, TeaCategory } from "../t
 import type { ServiceResult } from "../result";
 import { assertValidMoney } from "../validation";
 
-const categories: readonly TeaCategory[] = ["white", "green", "oolong", "black", "dark", "other"];
+const categories: readonly TeaCategory[] = ["wild-mountain", "white", "green", "yellow", "oolong", "black", "flower", "dark", "special", "aged", "other"];
 const inventoryStatuses = ["available", "sold-out"] as const;
 
 const invalid = <T>(message: string): ServiceResult<T> => ({

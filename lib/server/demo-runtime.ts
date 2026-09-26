@@ -6,12 +6,14 @@ import { normalizeTaiwanMobile } from "../domain/phone";
 import { createDemoOtpService } from "../domain/demo-otp-service";
 import { createSqliteDemoOrderService } from "../domain/demo-order-storage";
 import { createLocalDemoCommerce } from "./demo-commerce";
+import { readDemoCatalogProductsSync } from "./demo-catalog-store";
+import { mockCatalogFixture } from "../domain/mock/catalog-fixture";
 import { createSqliteDemoNotificationOutbox } from "./demo-notification-outbox";
 import { createDemoMerchantWorkflow } from "./demo-merchant-workflow";
-import type { CheckoutDraft } from "../domain/types";
+import type { CheckoutDraft, Product } from "../domain/types";
 
 type OtpPurpose = "checkout" | "lookup";
-type Options = { directory: string; otpCode?: string };
+type Options = { directory: string; otpCode?: string; catalogSeed?: Product[] };
 type PlaceOrderInput = {
   phone: string;
   challengeId: string;
@@ -32,7 +34,7 @@ const syntheticPhones = new Set(["0912000000", "0912000001"]);
 const phoneDigest = (phone: string) => createHash("sha256").update(`local-demo-phone-v1:${phone}`).digest();
 
 /** Composes the already-hardened local services. It never contacts an external provider. */
-export function createLocalDemoRuntime({ directory, otpCode = "123456" }: Options) {
+export function createLocalDemoRuntime({ directory, otpCode = "123456", catalogSeed = mockCatalogFixture }: Options) {
   const root = resolve(directory);
   mkdirSync(root, { recursive: true });
   const orders = createSqliteDemoOrderService(join(root, "orders.sqlite"));
@@ -46,6 +48,7 @@ export function createLocalDemoRuntime({ directory, otpCode = "123456" }: Option
   const commerce = createLocalDemoCommerce({
     otp: checkoutOtp,
     orders,
+    catalogProducts: () => readDemoCatalogProductsSync(root, catalogSeed),
     reviewAddress: address => address === "台北市中正區測試路 1 號",
   });
   const merchant = createDemoMerchantWorkflow({

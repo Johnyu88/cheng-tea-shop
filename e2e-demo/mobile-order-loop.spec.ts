@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 const merchantSecret = process.env.DEMO_MERCHANT_SECRET ?? "11".repeat(32);
 
 test("mobile synthetic order closes customer and merchant status loop", async ({ page }) => {
-  await page.goto("/tea/mock-tea-001");
+  await page.goto("/tea/taiwan-mi-xiang-wild-mountain-tea");
   await page.getByRole("button", { name: "加入購物車" }).click();
   await expect(page).toHaveURL(/\/cart$/);
   await expect(page.getByRole("link", { name: "繼續購買" })).toHaveAttribute("href", "/#catalog");

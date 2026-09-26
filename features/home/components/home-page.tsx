@@ -4,7 +4,7 @@ import { useEffect, useState, type JSX } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import type { CatalogService, Product } from "@/lib/domain";
-import { createMockCatalogService } from "@/lib/domain";
+import { createDemoCatalogService, createMockCatalogService } from "@/lib/domain";
 import { CatalogBrowser } from "@/features/catalog/components/catalog-browser";
 
 type HomePageProps = {
@@ -17,7 +17,7 @@ type CatalogState =
   | { status: "empty" }
   | { status: "error"; message: string };
 
-const defaultCatalogService = createMockCatalogService();
+const defaultCatalogService = process.env.NEXT_PUBLIC_DEMO_COMMERCE === "enabled" ? createDemoCatalogService() : createMockCatalogService();
 
 function CatalogPreview({ catalogService }: { catalogService: CatalogService }): JSX.Element {
   const [state, setState] = useState<CatalogState>({ status: "loading" });
@@ -58,8 +58,8 @@ function CatalogPreview({ catalogService }: { catalogService: CatalogService }):
             const variant = product.variants[0];
             return (
               <article className="product-card" key={product.id}>
-                <div className="product-placeholder" role="img" aria-label={product.image.alt}>
-                  {product.image.alt}
+              <div className="product-placeholder" role="img" aria-label={product.image.alt}>
+                {product.image.src ? <img src={product.image.src} alt={product.image.alt} /> : product.image.alt}
                 </div>
                 <div className="product-card-content">
                   <p className="product-taste">{product.tasteTags.join("・")}</p>
@@ -111,6 +111,13 @@ export function HomePage({ catalogService = defaultCatalogService }: HomePagePro
           </div>
           <div className="teacher-story-media">
             <Image
+              src="/media/tea-sample-composite.png"
+              alt="茶包、茶湯、茶乾與葉底的合成示意圖"
+              width={1600}
+              height={1200}
+              sizes="(max-width: 40rem) 100vw, 40vw"
+            />
+            <Image
               src="/media/teacher-portrait.webp"
               alt="陳老師在茶行裡的照片"
               width={1200}
@@ -127,7 +134,15 @@ export function HomePage({ catalogService = defaultCatalogService }: HomePagePro
             >
               <source src="/media/teacher-story.mp4" type="video/mp4" />
               您的瀏覽器不支援影片播放。
-            </video>
+              </video>
+            <div className="teacher-story-audio">
+              <p>鳥鳴 2／茶園自然聲景</p>
+              <audio aria-label="茶園鳥鳴 2 音效" controls preload="none">
+                <source src="/media/tea-stream-birds.wav" type="audio/wav" />
+                您的瀏覽器不支援音訊播放。
+              </audio>
+              <small>請點擊播放；不會自動出聲。</small>
+            </div>
           </div>
         </section>
 

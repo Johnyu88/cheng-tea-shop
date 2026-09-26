@@ -568,3 +568,12 @@ GitHub 是正式文件與程式來源。聊天中的新指令若尚未寫入 Git
 - 為相容純 HTTP 手機測試，LAN 店家 cookie 為 HttpOnly／SameSite=Strict 的合成 cookie，loopback 預設仍為 Secure `__Host-` cookie。此差異只允許假資料 Demo，不能複製到 production。
 - 目前已啟動主機端 Demo 並完成可達性準備；真實手機由陳老師執行完整流程後，才可記錄真人／店家驗收結果。Pixel 7 Chromium 1/1 仍只代表自動化腳本證據。
 - 已以同一 LAN URL `http://172.20.10.4:3013` 執行 Pixel 7 Chromium synthetic flow，1/1 通過；此為 LAN host/origin 的自動化證據，不替代真實手機或真人走查。
+- 已以同一 LAN URL `http://172.20.10.4:3013` 執行 Pixel 7 Chromium synthetic flow，1/1 通過；此為 LAN host/origin 的自動化證據，不替代真實手機或真人走查。
+
+## V. Real-phone acceptance repair — 2026-09-27
+
+Wave 7 的修復只補本機 Demo 的資料與素材邊界：八款 2026-09-23 sample fixture、保留商品照片、首頁合成圖與鳥鳴 WAV 均可由 LAN server 讀取。音效改為明確點擊播放，不假設手機允許 autoplay。
+
+管理端新增商品透過 guarded Catalog API 寫入被 Git 忽略的 `.demo-data`，重新整理或重啟後可讀回；UI 仍只依 Catalog／Cart／Publishing service boundary，不接 ERP、付款、物流、Email、SMS、Push 或外部 API。此資料夾與既有 synthetic data 均不提交。
+
+本次證據為 Vitest 30 files／171 tests、TypeScript、ESLint（只有既有 warning）、webpack build，以及乾淨資料目錄上的 LAN Pixel 7 Chromium 2/2。真實手機與真人走查仍待執行，不能宣稱真人驗收或 production readiness。
