@@ -21,6 +21,7 @@ const product: Product = {
 afterEach(() => vi.unstubAllGlobals());
 
 test("loads existing catalog data and saves edits through the shared catalog API", async () => {
+  const confirm = vi.spyOn(window, "confirm").mockReturnValue(true);
   const fetchMock = vi.fn()
     .mockResolvedValueOnce(new Response(JSON.stringify({ ok: true, value: { items: [product] } }), { status: 200 }))
     .mockResolvedValueOnce(new Response(JSON.stringify({ ok: true, value: { ...product, variants: [{ ...product.variants[0], price: { currency: "TWD", amount: 999 } }] } }), { status: 200 }));
@@ -35,6 +36,7 @@ test("loads existing catalog data and saves edits through the shared catalog API
   await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
   const patchRequest = fetchMock.mock.calls[1]?.[1] as RequestInit;
   expect(JSON.parse(String(patchRequest.body))).toMatchObject({ id: "tea-001", price: { currency: "TWD", amount: 999 } });
+  expect(confirm).toHaveBeenCalledWith(expect.stringContaining(product.name));
 });
 
 test("shows newly saved draft first with a clear unpublished count", async () => {
