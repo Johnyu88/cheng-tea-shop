@@ -53,6 +53,27 @@ describe("demo catalog persistence", () => {
     expect((await store.list()).find((item) => item.id === product.id)?.publication).toBe("draft");
   });
 
+
+  test("replaces only the selected product photo, persists it, and preserves the previous photo on failure", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "cheng-tea-photo-edit-"));
+    temporaryDirectories.push(directory);
+    const options = { filePath: join(directory, "catalog.json"), mediaDirectory: join(directory, "media"), seedProducts: [] };
+    const store = createDemoCatalogStore(options);
+    const target = await store.publish(draft, "draft");
+    const other = await store.publish({ ...draft, name: "其他茶品" });
+    const original = target.image;
+    const dataUrl = "data:image/png;base64,iVBORw0KGgo=";
+    const edited = await store.update(target.id, { imageDataUrl: dataUrl });
+    expect(edited?.image.src).toMatch(/^\/api\/demo\/catalog\/media\//);
+    expect(edited?.image.src).not.toBe(original.src);
+    await expect(store.readMedia(edited!.image.src!.split("/").pop()!)).resolves.toEqual(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]));
+    const reloaded = await createDemoCatalogStore(options).list();
+    expect(reloaded.find(p => p.id === target.id)?.image).toEqual(edited?.image);
+    expect(reloaded.find(p => p.id === other.id)?.image).toEqual(other.image);
+    await expect(store.update(target.id, { imageDataUrl: "data:image/heic;base64,AAAA" })).rejects.toThrow("原照片已保留");
+    expect((await store.list()).find(p => p.id === target.id)?.image).toEqual(edited?.image);
+  });
+
   test("updates editable product facts without changing identity or history", async () => {
     const directory = await mkdtemp(join(tmpdir(), "cheng-tea-catalog-edit-"));
     temporaryDirectories.push(directory);

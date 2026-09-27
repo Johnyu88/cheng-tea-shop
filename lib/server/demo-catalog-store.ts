@@ -18,6 +18,7 @@ export type ProductUpdate = {
   taste?: string;
   teaRegion?: string;
   summary?: string;
+  imageDataUrl?: string;
 };
 
 const clone = <T>(value: T): T => JSON.parse(JSON.stringify(value)) as T;
@@ -85,6 +86,14 @@ export const createDemoCatalogStore = ({ filePath, mediaDirectory, seedProducts 
         const catalog = await read();
         const product = catalog.products.find((item) => item.id === id);
         if (!product) return undefined;
+        if (changes.imageDataUrl !== undefined) {
+          const decoded = decodePhoto(changes.imageDataUrl);
+          if (!decoded || decoded.bytes.length === 0 || decoded.bytes.length > 5 * 1024 * 1024) throw new Error("商品照片只接受 JPEG、PNG、WebP，且不可超過 5MB。原照片已保留。");
+          await mkdir(mediaDirectory, { recursive: true });
+          const fileName = `${product.id}-photo-${randomUUID()}.${decoded.extension}`;
+          await writeFile(join(mediaDirectory, fileName), decoded.bytes);
+          product.image = { src: `/api/demo/catalog/media/${fileName}`, alt: `${product.name}商品照片`, isPlaceholder: false };
+        }
         if (changes.name?.trim()) {
           product.name = changes.name.trim();
           product.summary = product.summary || `茶名：${product.name}`;

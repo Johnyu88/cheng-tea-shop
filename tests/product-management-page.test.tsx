@@ -50,3 +50,25 @@ test("shows newly saved draft first with a clear unpublished count", async () =>
   expect(names).toEqual(["測試紅茶A", product.name]);
   expect(screen.getByText("上架狀態：草稿／未上架（顧客看不到）")).toBeInTheDocument();
 });
+
+test("shows photo upload preview and sends it only with explicit confirmed save", async () => {
+  const updated: Product = { ...product, image: { src: "/api/demo/catalog/media/new-photo.png", alt: "new photo", isPlaceholder: false } };
+  const fetchMock = vi.fn()
+    .mockResolvedValueOnce(new Response(JSON.stringify({ ok: true, value: { items: [product] } }), { status: 200 }))
+    .mockResolvedValueOnce(new Response(JSON.stringify({ ok: true, value: updated }), { status: 200 }));
+  vi.stubGlobal("fetch", fetchMock);
+  const confirm = vi.spyOn(window, "confirm").mockReturnValue(true);
+  render(<ProductManagementPage />);
+  await waitFor(() => expect(screen.getByText(product.name)).toBeInTheDocument());
+  fireEvent.click(screen.getByRole("button", { name: "編輯" }));
+  const picker = screen.getByLabelText(/更換／上傳商品照片/);
+  fireEvent.change(picker, { target: { files: [new File([new Uint8Array([137,80,78,71,13,10,26,10])], "sample.png", { type: "image/png" })] } });
+  expect(await screen.findByAltText("新照片預覽（尚未儲存）")).toBeInTheDocument();
+  expect(fetchMock).toHaveBeenCalledTimes(1);
+  fireEvent.click(screen.getByRole("button", { name: "儲存編輯" }));
+  await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+  const payload = JSON.parse(String((fetchMock.mock.calls[1]?.[1] as RequestInit).body));
+  expect(payload).toMatchObject({ id: product.id, imageDataUrl: expect.stringMatching(/^data:image\/png;base64,/) });
+  expect(confirm).toHaveBeenCalledWith(expect.stringContaining("將更換商品照片"));
+  expect(await screen.findByText(/資料與照片已儲存/)).toBeInTheDocument();
+});
