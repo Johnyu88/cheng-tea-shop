@@ -84,6 +84,7 @@ describe("demo catalog persistence", () => {
       specification: "二兩",
       price: { currency: "TWD", amount: 1200 },
       inventoryStatus: "sold-out",
+      fermentation: "輕發酵", roast: "微", brewing: "建議90度水", tasteTags: ["light", "sweet"],
       aroma: "桂花香",
       taste: "清甜回甘",
       teaRegion: "宜蘭",
@@ -93,6 +94,8 @@ describe("demo catalog persistence", () => {
     if (!updated) throw new Error("expected updated product");
     expect(updated).toMatchObject({ id: product.id, slug: product.slug, name: "第九種修訂茶", publication: "published" });
     expect(updated.variants[0]).toMatchObject({ specification: "二兩", price: { amount: 1200 }, inventoryStatus: "sold-out" });
+    expect(updated).toMatchObject({ fermentation: "輕發酵", roast: "微", brewing: "建議90度水", tasteTags: ["light", "sweet"] });
+    expect((await createDemoCatalogStore({ filePath: join(directory, "catalog.json"), mediaDirectory: join(directory, "media"), seedProducts: [] }).getBySlug(product.slug))).toMatchObject({ fermentation: "輕發酵", roast: "微", brewing: "建議90度水", tasteTags: ["light", "sweet"] });
     expect(updated).toMatchObject({ aroma: "桂花香", taste: "清甜回甘", teaRegion: "宜蘭", summary: "人工確認後的商品介紹。" });
   });
 });

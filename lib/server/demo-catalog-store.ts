@@ -18,6 +18,10 @@ export type ProductUpdate = {
   taste?: string;
   teaRegion?: string;
   summary?: string;
+  fermentation?: string;
+  roast?: string;
+  brewing?: string;
+  tasteTags?: Product["tasteTags"];
   imageDataUrl?: string;
 };
 
@@ -99,6 +103,13 @@ export const createDemoCatalogStore = ({ filePath, mediaDirectory, seedProducts 
           product.summary = product.summary || `茶名：${product.name}`;
         }
         if (changes.category) product.category = changes.category;
+        if (changes.tasteTags !== undefined) product.tasteTags = [...changes.tasteTags];
+        for (const key of ["fermentation", "roast", "brewing"] as const) {
+          if (changes[key] !== undefined) {
+            const value = changes[key].trim();
+            if (value) product[key] = value; else delete product[key];
+          }
+        }
         if (changes.aroma !== undefined) { if (changes.aroma.trim()) product.aroma = changes.aroma.trim(); else delete product.aroma; }
         if (changes.taste !== undefined) { if (changes.taste.trim()) product.taste = changes.taste.trim(); else delete product.taste; }
         if (changes.teaRegion !== undefined) { if (changes.teaRegion.trim()) product.teaRegion = changes.teaRegion.trim(); else delete product.teaRegion; }
@@ -140,6 +151,9 @@ export const createDemoCatalogStore = ({ filePath, mediaDirectory, seedProducts 
           ...(draft.origin?.trim() ? { teaRegion: draft.origin.trim() } : {}),
           ...(draft.aroma?.trim() ? { aroma: draft.aroma.trim() } : {}),
           ...(draft.taste?.trim() ? { taste: draft.taste.trim() } : {}),
+          ...(draft.fermentation?.trim() ? { fermentation: draft.fermentation.trim() } : {}),
+          ...(draft.roast?.trim() ? { roast: draft.roast.trim() } : {}),
+          ...(draft.brewing?.trim() ? { brewing: draft.brewing.trim() } : {}),
         };
         catalog.products.push(product);
         await write(catalog);

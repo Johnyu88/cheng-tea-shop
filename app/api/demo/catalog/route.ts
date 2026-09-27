@@ -27,7 +27,7 @@ export async function GET(request: Request) {
 export async function PATCH(request: Request) {
   try {
     assertLocalDemoHttpRequest(request, "PATCH", "json");
-    const body = await request.json() as { id?: unknown; publication?: unknown; name?: unknown; category?: unknown; specification?: unknown; price?: unknown; inventoryStatus?: unknown; aroma?: unknown; taste?: unknown; teaRegion?: unknown; summary?: unknown; imageDataUrl?: unknown };
+    const body = await request.json() as { id?: unknown; publication?: unknown; name?: unknown; category?: unknown; specification?: unknown; price?: unknown; inventoryStatus?: unknown; aroma?: unknown; taste?: unknown; teaRegion?: unknown; summary?: unknown; fermentation?: unknown; roast?: unknown; brewing?: unknown; tasteTags?: unknown; imageDataUrl?: unknown };
     if (typeof body.id !== "string") throw new Error("商品更新資料無效");
     if (body.publication === "draft" || body.publication === "published") {
       const product = await getDemoCatalogStore().setPublication(body.id, body.publication);
@@ -46,6 +46,14 @@ export async function PATCH(request: Request) {
     if (body.imageDataUrl !== undefined) {
       if (typeof body.imageDataUrl !== "string") throw new Error("商品照片資料無效");
       changes.imageDataUrl = body.imageDataUrl;
+    }
+    if (typeof body.fermentation === "string") changes.fermentation = body.fermentation;
+    if (typeof body.roast === "string") changes.roast = body.roast;
+    if (typeof body.brewing === "string") changes.brewing = body.brewing;
+    if (body.tasteTags !== undefined) {
+      const allowed = ["light", "sweet", "rich", "roasted"];
+      if (!Array.isArray(body.tasteTags) || body.tasteTags.some((tag) => typeof tag !== "string" || !allowed.includes(tag))) throw new Error("口感標籤無效");
+      changes.tasteTags = body.tasteTags as TasteTag[];
     }
     if (typeof body.summary === "string") changes.summary = body.summary;
     if (Object.keys(changes).length === 0) throw new Error("商品編輯資料無效");

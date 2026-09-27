@@ -35,6 +35,9 @@ export type Product = {
   image: ProductImage;
   variants: ProductVariant[];
   publication: "draft" | "published";
+  fermentation?: string;
+  roast?: string;
+  brewing?: string;
   inventoryQuantity?: number;
   inventoryUnit?: "包" | "兩";
   packageWeight?: string;
