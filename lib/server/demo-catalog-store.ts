@@ -1,4 +1,6 @@
 import { randomUUID } from "node:crypto";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { basename, dirname, join, resolve } from "node:path";
@@ -54,10 +56,25 @@ export const createDemoCatalogStore = ({ filePath, mediaDirectory, seedProducts 
     }
   };
 
+  const runFileReplace = promisify(execFile);
+  const windowsReplace = async (source: string, target: string): Promise<void> => {
+    const quoted = (value: string) => String.fromCharCode(39) + value.replaceAll(String.fromCharCode(39), String.fromCharCode(39).repeat(2)) + String.fromCharCode(39);
+    const command = "[System.IO.File]::Replace(" + quoted(source) + ", " + quoted(target) + ", " + quoted(target + ".last-good.bak") + ")";
+    await runFileReplace("powershell.exe", ["-NoProfile", "-NonInteractive", "-Command", command], { windowsHide: true, timeout: 15000 });
+  };
   const write = async (catalog: CatalogFile): Promise<void> => {
     const temporaryPath = `${filePath}.${process.pid}.tmp`;
     await writeFile(temporaryPath, JSON.stringify(catalog, null, 2), "utf8");
-    await rename(temporaryPath, filePath);
+    for (let attempt = 0; attempt < 12; attempt += 1) {
+      try { await rename(temporaryPath, filePath); return; }
+      catch (error) {
+        const code = (error as NodeJS.ErrnoException).code;
+        if (process.platform !== "win32" || !["EPERM", "EACCES", "EBUSY"].includes(code ?? "")) throw error;
+        try { await windowsReplace(temporaryPath, filePath); return; }
+        catch { if (attempt === 11) throw error; }
+        await new Promise((done) => setTimeout(done, 75 * (attempt + 1)));
+      }
+    }
   };
 
   const serialized = async <T>(operation: () => Promise<T>): Promise<T> => {
