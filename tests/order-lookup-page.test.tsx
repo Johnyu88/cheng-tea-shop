@@ -21,7 +21,7 @@ it("prioritizes customer name and last three digits while keeping saved order to
   expect(screen.getByLabelText("查單憑證")).toHaveValue("test-secret");
   expect(screen.getByRole("button", { name: "取得查單驗證碼" })).toBeInTheDocument();
   expect(document.body.textContent).not.toContain("test-secret");
-  expect(screen.queryByRole("link", { name: "返回首頁" })).not.toBeInTheDocument();
+  expect(screen.getByRole("link", { name: "返回首頁" })).toHaveAttribute("href", "/");
 });
 
 it("offers a home link after a successful verified lookup", async () => {
@@ -47,6 +47,7 @@ it("blocks OTP before a missing order credential is restored, without a request"
   const issue = vi.spyOn(demoApi, "issueOtp");
   render(<OrderLookupPage />);
   expect(screen.getByText(/目前尚無完整查單憑證/)).toBeInTheDocument();
+  expect(screen.getByRole("link", { name: "返回首頁" })).toHaveAttribute("href", "/");
   const button = screen.getByRole("button", { name: "取得查單驗證碼" });
   expect(button).toBeDisabled();
   expect(issue).not.toHaveBeenCalled();

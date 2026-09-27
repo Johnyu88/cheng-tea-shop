@@ -57,6 +57,7 @@ export function OrderLookupPage() {
     <p className="prototype-notice">本機合成訂單測試：姓名和手機後三碼方便顧客確認資料；仍須使用訂單憑證與驗證碼，不能只憑姓名及三碼查看訂單。本機驗證碼不會發送真實簡訊。</p>
     <section className="demo-panel">
       <h1>查詢訂單</h1>
+      <Link className="filter-button mt-4 inline-flex" href="/">返回首頁</Link>
       {error && <div role="alert" className="product-draft-alert">{error}</div>}
       {receipt.orderId && receipt.accessSecret && <p role="status">已帶入這個分頁剛才的訂單資料，不必複製查單憑證。</p>}
       {(!orderId || !accessSecret) && <p role="status" className="prototype-notice">目前尚無完整查單憑證。請使用原下單分頁，或展開「其他裝置查單／進階資訊」填入自己保存的資料。先補齊憑證，再取得 OTP；姓名與手機末三碼無法取代憑證。</p>}
@@ -78,8 +79,7 @@ export function OrderLookupPage() {
         <p>包裝照片：{result.order.packingPhotoId ? "已由店家上傳" : "尚未上傳"}</p>
         <h3>通知紀錄</h3><ul>{result.notifications.map(note => <li key={note.id}>{note.path}：{note.state}</li>)}</ul>
         <h3>手機推送預覽（未送出）</h3><p><strong>{result.mobilePushPreview.title}</strong><br />{result.mobilePushPreview.body}</p>
-        <p>狀態：preview-only；未註冊推送服務、未傳送至任何裝置。</p>
-        <Link className="primary-action mt-6 inline-flex" href="/">返回首頁</Link></article>}
+        <p>狀態：preview-only；未註冊推送服務、未傳送至任何裝置。</p></article>}
     </section>
   </main>;
 }
