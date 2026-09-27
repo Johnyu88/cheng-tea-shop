@@ -61,7 +61,8 @@ test("shows photo upload preview and sends it only with explicit confirmed save"
   render(<ProductManagementPage />);
   await waitFor(() => expect(screen.getByText(product.name)).toBeInTheDocument());
   fireEvent.click(screen.getByRole("button", { name: "編輯" }));
-  const picker = screen.getByLabelText(/更換／上傳商品照片/);
+  expect(screen.getByAltText(`目前照片：${product.name}`)).toHaveAttribute("src", product.image.src);
+  const picker = screen.getByLabelText(/選擇新照片以更換/);
   fireEvent.change(picker, { target: { files: [new File([new Uint8Array([137,80,78,71,13,10,26,10])], "sample.png", { type: "image/png" })] } });
   expect(await screen.findByAltText("新照片預覽（尚未儲存）")).toBeInTheDocument();
   expect(fetchMock).toHaveBeenCalledTimes(1);
