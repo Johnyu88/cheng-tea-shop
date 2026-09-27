@@ -514,3 +514,8 @@ Follow `RESUME_PROMPT.md`, `AGENTS.md`, and `WORKFLOW.md`. If newer explicit use
 - 游老師手機實際查單成功，截圖顯示訂單成立、模擬付款狀態及 preview-only 通知；指出結果卡片底部缺少返回首頁入口。這是已觀察到的真人 UI 缺口，不把通知預覽當作已推送。
 - `OrderLookupPage` 在成功結果卡片末端加入前往 `/` 的「返回首頁」連結，未修改查單 OTP、姓名／末三碼、查單憑證、限流或 Demo 資料。回歸測試同時驗證未查到結果前不顯示該連結、查詢成功後連結指向 `/`。
 - 本地驗證：focused Vitest 2/2、TypeScript `tsc --noEmit` 與 `git diff --check` 通過；未做真人手機第二次確認。`AGENTS.md`、`next-env.d.ts` 為原有未提交環境變更，保留不納入此修正。
+
+## 2026-09-27 店家手機導覽接續
+
+- 本機 3013 首頁與 `/admin/orders` 皆 HTTP 200；保留原有店家登入、付款確認、包裝照片、出貨及模擬通知。為店家訂單頁增加「返回首頁」連結，避免手機操作進入後無返回選項。
+- 對應 UI 與工作流 focused Vitest 3 files／6 tests、`tsc --noEmit`、`git diff --check` 通過。沒有建立、修改或刪除任何現存 Demo 訂單／商品，也沒有重啟 3013。真人店家端登入與包裝、出貨仍待操作驗收；請勿於聊天或 Git 分享店家密碼。
