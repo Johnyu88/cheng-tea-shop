@@ -1,10 +1,11 @@
 import { afterEach, expect, it, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { demoApi, type DemoLookup } from "@/features/demo/demo-api";
 import { OrderLookupPage } from "@/features/demo/components/order-lookup-page";
 import { demoCheckoutSuccessStorageKey } from "@/features/demo/components/demo-checkout-success-page";
 
 vi.mock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams("order=DEMO-12345678-1234-1234-1234-123456789abc") }));
-afterEach(() => window.sessionStorage.clear());
+afterEach(() => { window.sessionStorage.clear(); vi.restoreAllMocks(); });
 
 it("prioritizes customer name and last three digits while keeping saved order token out of the visible primary form", () => {
   window.sessionStorage.setItem(demoCheckoutSuccessStorageKey, JSON.stringify({
@@ -20,4 +21,24 @@ it("prioritizes customer name and last three digits while keeping saved order to
   expect(screen.getByLabelText("查單憑證")).toHaveValue("test-secret");
   expect(screen.getByRole("button", { name: "取得查單驗證碼" })).toBeInTheDocument();
   expect(document.body.textContent).not.toContain("test-secret");
+  expect(screen.queryByRole("link", { name: "返回首頁" })).not.toBeInTheDocument();
+});
+
+it("offers a home link after a successful verified lookup", async () => {
+  window.sessionStorage.setItem(demoCheckoutSuccessStorageKey, JSON.stringify({
+    orderId: "DEMO-12345678-1234-1234-1234-123456789abc", accessSecret: "test-secret",
+    customerName: "測試顧客", phone: "0912000000",
+  }));
+  vi.spyOn(demoApi, "issueOtp").mockResolvedValue({ challengeId: "challenge", expiresAt: "", demoCode: "123456" });
+  vi.spyOn(demoApi, "lookup").mockResolvedValue({
+    order: { status: "confirmed", paymentStatus: "pending" },
+    notifications: [],
+    mobilePushPreview: { title: "茶品訂單已成立", body: "示範訂單", state: "preview-only" },
+  } as unknown as DemoLookup);
+  render(<OrderLookupPage />);
+  fireEvent.click(screen.getByRole("button", { name: "取得查單驗證碼" }));
+  await screen.findByText("本機驗證碼：", { exact: false });
+  fireEvent.change(screen.getByLabelText("驗證碼"), { target: { value: "123456" } });
+  fireEvent.click(screen.getByRole("button", { name: "查詢訂單" }));
+  await waitFor(() => expect(screen.getByRole("link", { name: "返回首頁" })).toHaveAttribute("href", "/"));
 });

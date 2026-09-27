@@ -508,3 +508,9 @@ Follow `RESUME_PROMPT.md`, `AGENTS.md`, and `WORKFLOW.md`. If newer explicit use
 - `http://172.20.10.4:3013/` 及 `/api/demo/catalog?limit=50` 當下均回傳 200，後者 `value.total=8`。舊交接曾記錄公開 9 件、含草稿 10 件；須先核對現行 PID／`DEMO_DATA_DIR`／相對應的 catalog.json，不能據此推定資料遺失，也不得清空、重建或將 fixture 覆寫現存資料。
 - 保留進場前既有 `AGENTS.md`、`next-env.d.ts` 未提交改動；3013 正在運行，不任意終止。真正真人手機驗收、通知實際送達、正式支付與 ERP 均未完成。內建影像辨識及合成已取消，照片由外部處理後上傳。
 - 下一個單一優先步驟：核定唯一 Demo data directory、用同一個 LAN origin 在實體手機完成姓名／末三碼／OTP 查單與感謝頁，並檢查 429 提示；有可重現錯誤才做小範圍修正。
+
+## 2026-09-27 實機查單結果返回入口修正
+
+- 游老師手機實際查單成功，截圖顯示訂單成立、模擬付款狀態及 preview-only 通知；指出結果卡片底部缺少返回首頁入口。這是已觀察到的真人 UI 缺口，不把通知預覽當作已推送。
+- `OrderLookupPage` 在成功結果卡片末端加入前往 `/` 的「返回首頁」連結，未修改查單 OTP、姓名／末三碼、查單憑證、限流或 Demo 資料。回歸測試同時驗證未查到結果前不顯示該連結、查詢成功後連結指向 `/`。
+- 本地驗證：focused Vitest 2/2、TypeScript `tsc --noEmit` 與 `git diff --check` 通過；未做真人手機第二次確認。`AGENTS.md`、`next-env.d.ts` 為原有未提交環境變更，保留不納入此修正。
