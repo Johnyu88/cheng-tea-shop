@@ -36,3 +36,14 @@ test("loads existing catalog data and saves edits through the shared catalog API
   const patchRequest = fetchMock.mock.calls[1]?.[1] as RequestInit;
   expect(JSON.parse(String(patchRequest.body))).toMatchObject({ id: "tea-001", price: { currency: "TWD", amount: 999 } });
 });
+
+test("shows newly saved draft first with a clear unpublished count", async () => {
+  const draft: Product = { ...product, id: "draft-002", slug: "draft-002", name: "測試紅茶A", publication: "draft" };
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ ok: true, value: { items: [product, draft] } }), { status: 200 })));
+  render(<ProductManagementPage />);
+  await waitFor(() => expect(screen.getByText("測試紅茶A")).toBeInTheDocument());
+  expect(screen.getByRole("status")).toHaveTextContent("共 2 筆商品，其中 1 筆未上架");
+  const names = Array.from(document.querySelectorAll(".product-admin-item h2")).map((node) => node.textContent);
+  expect(names).toEqual(["測試紅茶A", product.name]);
+  expect(screen.getByText("上架狀態：草稿／未上架（顧客看不到）")).toBeInTheDocument();
+});
