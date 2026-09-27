@@ -500,3 +500,11 @@ Follow `RESUME_PROMPT.md`, `AGENTS.md`, and `WORKFLOW.md`. If newer explicit use
 - `PublishingService` 已移除 `generateSummary`，避免 service contract 保留已取消的 Mock 文案生成能力。既有八種茶與 Demo 資料未清空、未重建。
 - `AGENTS.md` 與 `next-env.d.ts` 的既有未提交變更仍未 staged；本階段不得覆蓋或提交。
 - 驗證：Vitest 35 files／176 tests、TypeScript、Webpack production build 通過；ESLint 0 errors、5 個既有 warning（圖片最佳化與 internal navigation）。真人手機驗收仍需由店家執行。影像 AI 現在是已取消／out of scope，不再是網站交付阻塞。
+
+## 2026-09-27 晚間接續檢查（未改動 Demo 商品資料）
+
+- 最新程式提交：`088926f` 保留結帳成功收據；`27326ed` 簡化姓名／手機末三碼查單介面；`17cb377` 為查單與 OTP 增加 SQLite Demo 限流。它們仍是本機合成 LAN Demo，不能視為正式驗證或正式推送服務。
+- 當次重跑 Vitest：40 files／192 tests 全部通過；前一次同一工作目錄的 TypeScript 呼叫沒有顯示編譯錯誤。Node 仍是 24.21.0，和 package.json 固定 24.19.0 不符。後續另一次未先切到工作樹的 Corepack 命令觸發不必要下載，已停止；不將該次列為成功驗證。
+- `http://172.20.10.4:3013/` 及 `/api/demo/catalog?limit=50` 當下均回傳 200，後者 `value.total=8`。舊交接曾記錄公開 9 件、含草稿 10 件；須先核對現行 PID／`DEMO_DATA_DIR`／相對應的 catalog.json，不能據此推定資料遺失，也不得清空、重建或將 fixture 覆寫現存資料。
+- 保留進場前既有 `AGENTS.md`、`next-env.d.ts` 未提交改動；3013 正在運行，不任意終止。真正真人手機驗收、通知實際送達、正式支付與 ERP 均未完成。內建影像辨識及合成已取消，照片由外部處理後上傳。
+- 下一個單一優先步驟：核定唯一 Demo data directory、用同一個 LAN origin 在實體手機完成姓名／末三碼／OTP 查單與感謝頁，並檢查 429 提示；有可重現錯誤才做小範圍修正。
