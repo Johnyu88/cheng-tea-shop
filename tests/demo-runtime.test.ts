@@ -40,6 +40,18 @@ function fixture() {
 }
 
 describe("local demo runtime composition", () => {
+  test("rejects an incorrect customer name for newly created orders", () => {
+    const runtime = fixture();
+    try {
+      const checkoutChallenge = runtime.issueOtp(phone, "checkout");
+      const placed = runtime.placeOrder({ phone, challengeId: checkoutChallenge.challengeId, code, draft: draftWithoutEmail,
+        lines: [{ productId: "mock-tea-001", variantId: "mock-tea-001-variant", quantity: 1 }] });
+      const lookupChallenge = runtime.issueOtp(phone, "lookup");
+      expect(() => runtime.lookupOrder({ orderId: placed.orderId, accessSecret: placed.accessSecret,
+        customerName: "其他顧客", phone, phoneLastThree: "000", challengeId: lookupChallenge.challengeId, code })).toThrow("Unable to verify demo order");
+    } finally { runtime.close(); }
+  });
+
   test("persists a checkout and records simulated email and merchant notifications", () => {
     const runtime = fixture();
     try {
@@ -92,6 +104,7 @@ describe("local demo runtime composition", () => {
         accessSecret: placed.accessSecret,
         phone,
         phoneLastThree: "000",
+        customerName: draft.name,
         challengeId: lookupChallenge.challengeId,
         code,
       });

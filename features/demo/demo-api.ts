@@ -20,7 +20,7 @@ export type DemoAdminOrder = { order: DemoOrderSnapshot; notifications: DemoOutb
 export const demoApi = {
   issueOtp: (phone: string, purpose: "checkout" | "lookup") => request<DemoChallenge>("/api/demo/otp", json({ phone, purpose })),
   placeOrder: (input: { phone: string; challengeId: string; code: string; draft: CheckoutDraft; lines: { productId: string; variantId: string; quantity: number }[] }) => request<DemoPlacedOrder>("/api/demo/orders", json(input)),
-  lookup: (input: { orderId: string; accessSecret: string; phone: string; phoneLastThree: string; challengeId: string; code: string }) => request<DemoLookup>("/api/demo/orders/lookup", json(input)),
+  lookup: (input: { orderId: string; accessSecret: string; phone: string; phoneLastThree: string; customerName?: string; challengeId: string; code: string }) => request<DemoLookup>("/api/demo/orders/lookup", json(input)),
   merchantLogin: (credential: string) => request<{ authenticated: true }>("/api/demo/admin/session", json({ credential })),
   adminOrders: () => request<DemoAdminOrder[]>("/api/demo/admin/orders", { method: "GET" }),
   adminAction: (orderId: string, action: string, detail: Record<string, unknown> = {}) => request<unknown>(`/api/demo/admin/orders/${encodeURIComponent(orderId)}`, json({ action, ...detail })),

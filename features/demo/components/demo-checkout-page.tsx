@@ -64,7 +64,7 @@ export function DemoCheckoutPage() {
         lines: cart.lines.map(({ productId, variantId, quantity }) => ({ productId, variantId, quantity })),
       });
       setCompleted(result);
-      try { window.sessionStorage.setItem(demoCheckoutSuccessStorageKey, JSON.stringify(result)); } catch { /* receipt remains visible even when storage is blocked */ }
+      try { window.sessionStorage.setItem(demoCheckoutSuccessStorageKey, JSON.stringify({ ...result, customerName: draft.name.trim(), phone: draft.phone })); } catch { /* receipt remains visible even when storage is blocked */ }
       try { window.location.assign(`/checkout/success?order=${encodeURIComponent(result.orderId)}`); } catch { /* keep the confirmed receipt on screen if navigation is unavailable */ }
     } catch (caught) { setError(caught instanceof Error ? caught.message : "示範訂單建立失敗"); }
     finally { setBusy(false); }

@@ -26,12 +26,14 @@ type LookupInput = {
   accessSecret: string;
   phone: string;
   phoneLastThree: string;
+  customerName?: string;
   challengeId: string;
   code: string;
 };
 
 const syntheticPhones = new Set(["0912000000", "0912000001"]);
 const phoneDigest = (phone: string) => createHash("sha256").update(`local-demo-phone-v1:${phone}`).digest();
+const nameDigest = (name: string) => createHash("sha256").update(`local-demo-name-v1:${name.trim().normalize("NFC")}`).digest();
 
 /** Composes the already-hardened local services. It never contacts an external provider. */
 export function createLocalDemoRuntime({ directory, otpCode = "123456", catalogSeed = mockCatalogFixture }: Options) {
@@ -41,8 +43,10 @@ export function createLocalDemoRuntime({ directory, otpCode = "123456", catalogS
   const outbox = createSqliteDemoNotificationOutbox(join(root, "outbox.sqlite"), orders);
   const identities = new DatabaseSync(join(root, "identities.sqlite"));
   identities.exec("CREATE TABLE IF NOT EXISTS demo_order_identity (order_id TEXT PRIMARY KEY, phone_digest BLOB NOT NULL)");
-  const saveIdentity = identities.prepare("INSERT INTO demo_order_identity (order_id, phone_digest) VALUES (?, ?)");
-  const findIdentity = identities.prepare("SELECT phone_digest FROM demo_order_identity WHERE order_id = ?");
+  const columns = identities.prepare("PRAGMA table_info(demo_order_identity)").all() as { name: string }[];
+  if (!columns.some((column) => column.name === "name_digest")) identities.exec("ALTER TABLE demo_order_identity ADD COLUMN name_digest BLOB");
+  const saveIdentity = identities.prepare("INSERT INTO demo_order_identity (order_id, phone_digest, name_digest) VALUES (?, ?, ?)");
+  const findIdentity = identities.prepare("SELECT phone_digest, name_digest FROM demo_order_identity WHERE order_id = ?");
   const checkoutOtp = createDemoOtpService({ codeFactory: () => otpCode });
   const lookupOtp = createDemoOtpService({ codeFactory: () => otpCode });
   const commerce = createLocalDemoCommerce({
@@ -69,7 +73,7 @@ export function createLocalDemoRuntime({ directory, otpCode = "123456", catalogS
       const placed = commerce.placeOrder(input);
       const normalizedPhone = normalizeTaiwanMobile(input.phone);
       if (!normalizedPhone) throw new Error("Synthetic phone required");
-      saveIdentity.run(placed.orderId, phoneDigest(normalizedPhone));
+      saveIdentity.run(placed.orderId, phoneDigest(normalizedPhone), nameDigest(input.draft.name));
       let notificationStatus = placed.notificationStatus;
       try {
         const email = typeof input === "object" && input !== null && "draft" in input
@@ -88,11 +92,17 @@ export function createLocalDemoRuntime({ directory, otpCode = "123456", catalogS
       if (!phone || !syntheticPhones.has(phone) || !/^\d{3}$/.test(input.phoneLastThree)
         || !phone.endsWith(input.phoneLastThree)
         || !lookupOtp.verify(phone, input.challengeId, input.code)) return genericFailure();
-      const identity = findIdentity.get(input.orderId) as { phone_digest?: Uint8Array } | undefined;
+      const identity = findIdentity.get(input.orderId) as { phone_digest?: Uint8Array; name_digest?: Uint8Array } | undefined;
       const storedDigest = identity?.phone_digest ? Buffer.from(identity.phone_digest) : Buffer.alloc(0);
       const suppliedDigest = phoneDigest(phone);
       if (storedDigest.length !== suppliedDigest.length || !timingSafeEqual(storedDigest, suppliedDigest)) {
         return genericFailure();
+      }
+      if (identity?.name_digest) {
+        if (typeof input.customerName !== "string" || !input.customerName.trim()) return genericFailure();
+        const expected = Buffer.from(identity.name_digest);
+        const supplied = nameDigest(input.customerName);
+        if (expected.length !== supplied.length || !timingSafeEqual(expected, supplied)) return genericFailure();
       }
       const order = commerce.lookup(input.orderId, input.accessSecret);
       if (!order) return genericFailure();
