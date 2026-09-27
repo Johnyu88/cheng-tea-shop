@@ -77,6 +77,13 @@ it("loads product details from the catalog service", async () => {
   expect(screen.getByRole("img", { name: "商品照片準備中" })).toBeInTheDocument();
 });
 
+it("offers a direct way back to the storefront without entering the cart", async () => {
+  renderPage();
+  await waitFor(() => expect(screen.getByRole("heading", { name: product.name })).toBeInTheDocument());
+  expect(screen.getByRole("navigation", { name: "茶品頁導覽" }).getElementsByTagName("a")[0]).toHaveAttribute("href", "/#catalog");
+  expect(screen.getByRole("link", { name: "返回首頁／繼續選茶" })).toHaveAttribute("href", "/#catalog");
+});
+
 it("shows a not-found state for an unknown slug", async () => {
   const services = makeServices({
     getProductBySlug: async () => ({

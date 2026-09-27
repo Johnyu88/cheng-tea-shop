@@ -135,6 +135,7 @@ export function ProductDetailPage({ slug }: ProductDetailPageProps): JSX.Element
 
   return (
     <main>
+      <nav aria-label="茶品頁導覽"><Link href="/#catalog">← 返回首頁／繼續選茶</Link></nav>
       <article aria-labelledby="product-detail-heading">
         <div role="img" aria-label={readyProduct.image.alt}>
           {readyProduct.image.src === null ? readyProduct.image.alt : <img src={readyProduct.image.src} alt={readyProduct.image.alt} />}
@@ -181,6 +182,7 @@ export function ProductDetailPage({ slug }: ProductDetailPageProps): JSX.Element
         <button type="button" disabled={soldOut || addState.status === "adding"} onClick={addToCart}>
           加入購物車
         </button>
+        <p><Link href="/#catalog">返回首頁／繼續選茶</Link></p>
       </article>
     </main>
   );
