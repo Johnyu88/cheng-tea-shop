@@ -519,3 +519,10 @@ Follow `RESUME_PROMPT.md`, `AGENTS.md`, and `WORKFLOW.md`. If newer explicit use
 
 - 本機 3013 首頁與 `/admin/orders` 皆 HTTP 200；保留原有店家登入、付款確認、包裝照片、出貨及模擬通知。為店家訂單頁增加「返回首頁」連結，避免手機操作進入後無返回選項。
 - 對應 UI 與工作流 focused Vitest 3 files／6 tests、`tsc --noEmit`、`git diff --check` 通過。沒有建立、修改或刪除任何現存 Demo 訂單／商品，也沒有重啟 3013。真人店家端登入與包裝、出貨仍待操作驗收；請勿於聊天或 Git 分享店家密碼。
+
+## 2026-09-27 查單憑證遺失的 OTP 前置防護
+
+- 實體手機查詢舊訂單時，因原下單分頁被覆蓋、查單憑證未帶入，先前仍能領取 Demo OTP，到提交查單才提示憑證缺失。這不代表舊訂單被刪除；伺服器僅持有查單憑證摘要，不能反推原憑證。
+- 現已在取得 OTP 前檢查完整訂單編號與查單憑證；缺少時停用按鈕並明確提示原下單分頁或自己保存的憑證。查單原有姓名、手機末三碼、一次性 OTP、查單憑證及限流安全條件全部保留。敏感憑證不放入 URL、公開畫面或持久化 localStorage。
+- 驗證：focused Vitest 2 files／5 tests、TypeScript `tsc --noEmit`、`git diff --check` 通過。此功能僅防止無謂領取 OTP，**沒有**完成舊憑證補發、跨分頁自動同步、正式簡訊或顧客實體手機再次驗收。若未來設計補發，需獨立核准身分確認、濫用限制與一次性換發契約。
+- 現有 Demo 資料（8 published／11 total catalog、歷史訂單）未修改；`AGENTS.md`、`next-env.d.ts` 是原有未提交環境變更，不納入提交。

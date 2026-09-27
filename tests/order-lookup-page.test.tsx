@@ -15,7 +15,7 @@ it("prioritizes customer name and last three digits while keeping saved order to
   render(<OrderLookupPage />);
   expect(screen.getByLabelText("顧客姓名")).toHaveValue("測試顧客");
   expect(screen.getByLabelText("手機末三碼")).toHaveValue("000");
-  expect(screen.getByText("已帶入剛才的訂單資料，不必複製查單 token。")).toBeInTheDocument();
+  expect(screen.getByText("已帶入這個分頁剛才的訂單資料，不必複製查單憑證。")).toBeInTheDocument();
   expect(screen.getByText("其他裝置查單／進階資訊")).toBeInTheDocument();
   expect(screen.getByLabelText("查單憑證")).toHaveAttribute("type", "password");
   expect(screen.getByLabelText("查單憑證")).toHaveValue("test-secret");
@@ -41,4 +41,16 @@ it("offers a home link after a successful verified lookup", async () => {
   fireEvent.change(screen.getByLabelText("驗證碼"), { target: { value: "123456" } });
   fireEvent.click(screen.getByRole("button", { name: "查詢訂單" }));
   await waitFor(() => expect(screen.getByRole("link", { name: "返回首頁" })).toHaveAttribute("href", "/"));
+});
+
+it("blocks OTP before a missing order credential is restored, without a request", () => {
+  const issue = vi.spyOn(demoApi, "issueOtp");
+  render(<OrderLookupPage />);
+  expect(screen.getByText(/目前尚無完整查單憑證/)).toBeInTheDocument();
+  const button = screen.getByRole("button", { name: "取得查單驗證碼" });
+  expect(button).toBeDisabled();
+  expect(issue).not.toHaveBeenCalled();
+  fireEvent.change(screen.getByLabelText("查單憑證"), { target: { value: "self-saved-test-secret" } });
+  expect(button).toBeEnabled();
+  expect(issue).not.toHaveBeenCalled();
 });

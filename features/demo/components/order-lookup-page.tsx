@@ -36,6 +36,7 @@ export function OrderLookupPage() {
   const [advanced, setAdvanced] = useState(!orderId || !accessSecret);
   const issue = async () => {
     try {
+      if (!orderId.trim() || !accessSecret.trim()) throw new Error("這個瀏覽器分頁沒有完整查單憑證。請回到原下單分頁，或在「進階資訊」填入當時自行保存的訂單編號與憑證；未取得前不會消耗驗證碼次數。");
       if (!customerName.trim() || !/^\d{3}$/.test(lastThree) || !phone.endsWith(lastThree)) throw new Error("請填寫顧客姓名及正確手機後三碼。");
       setBusy(true);
       setChallenge(await demoApi.issueOtp(phone, "lookup")); setError("");
@@ -57,7 +58,8 @@ export function OrderLookupPage() {
     <section className="demo-panel">
       <h1>查詢訂單</h1>
       {error && <div role="alert" className="product-draft-alert">{error}</div>}
-      {receipt.orderId && <p role="status">已帶入剛才的訂單資料，不必複製查單 token。</p>}
+      {receipt.orderId && receipt.accessSecret && <p role="status">已帶入這個分頁剛才的訂單資料，不必複製查單憑證。</p>}
+      {(!orderId || !accessSecret) && <p role="status" className="prototype-notice">目前尚無完整查單憑證。請使用原下單分頁，或展開「其他裝置查單／進階資訊」填入自己保存的資料。先補齊憑證，再取得 OTP；姓名與手機末三碼無法取代憑證。</p>}
       <label className="form-field mt-6">顧客姓名<input className="form-input" autoComplete="name" value={customerName} onChange={e => setCustomerName(e.target.value)} /></label>
       <label className="form-field mt-4">手機末三碼<input className="form-input" inputMode="numeric" maxLength={3} value={lastThree} onChange={e => setLastThree(e.target.value.replace(/\D/g, "").slice(0, 3))} /></label>
       <details className="mt-6" open={advanced} onToggle={e => setAdvanced(e.currentTarget.open)}>
@@ -67,7 +69,7 @@ export function OrderLookupPage() {
         <label className="form-field mt-4">查單憑證<input className="form-input" type="password" autoComplete="off" value={accessSecret} onChange={e => setAccessSecret(e.target.value)} /></label>
         <label className="form-field mt-4">驗證用手機<input className="form-input" inputMode="tel" autoComplete="off" value={phone} onChange={e => setPhone(e.target.value)} /></label>
       </details>
-      <button className="filter-button mt-4" disabled={busy} onClick={() => void issue()}>取得查單驗證碼</button>
+      <button className="filter-button mt-4" disabled={busy || !orderId.trim() || !accessSecret.trim()} onClick={() => void issue()}>取得查單驗證碼</button>
       {challenge && <p role="status" className="prototype-notice">本機驗證碼：<strong>{challenge.demoCode}</strong></p>}
       <label className="form-field mt-4">驗證碼<input className="form-input" inputMode="numeric" value={code} onChange={e => setCode(e.target.value)} /></label>
       <button className="primary-action mt-6" disabled={busy} onClick={() => void lookup()}>查詢訂單</button>
