@@ -532,3 +532,9 @@ Follow `RESUME_PROMPT.md`, `AGENTS.md`, and `WORKFLOW.md`. If newer explicit use
 - 實體手機在缺少原查單憑證時，查單頁只顯示憑證前置警示、無可見返回首頁入口；原本連結誤放在 `result` 成功條件內。本輪改為頁面標題下方固定顯示「返回首頁」，不依賴登入、OTP、憑證或查單結果；成功結果不重複顯示第二個同名連結。
 - 回歸測試覆蓋有保存收據、成功查單、缺少憑證時首頁連結均可見。focused Vitest 2 files／5 tests、TypeScript 與 diff check 通過。未重啟 3013、未清除或修改商品及訂單；截圖左下角顯示 2 Issues，尚未讀取開發 overlay 詳細錯誤，不能宣稱已修復。
 - 先前要求游老師從新訂單開始的流程還未得到成功頁截圖，該驗收不能標註通過。下一步應先由手機驗證固定返回入口，再調查新訂單為何未帶入同分頁查單憑證；不得降低 OTP／查單憑證安全要求。
+
+## 2026-09-27 成功頁同分頁收據重新讀取
+
+- 發現 `/checkout/success?order=...` 的 server props 已有 orderId 時，原版 `DemoCheckoutSuccessPage` 的 effect 直接略過 `sessionStorage`，不會再核對或讀取原下單分頁完整收據；手機另開分頁時 sessionStorage 可能不存在。這是流程銜接問題，不能單憑此認定某筆手機訂單的唯一失敗原因。
+- 修正：成功頁仍以 server 傳來的訂單編號立即顯示，但 client effect 只接受 `orderId` 完全相符的同分頁收據，不接受其他訂單的憑證；當收據缺失時明確說明同分頁限制，仍不在畫面或 URL 顯示 secret。查單端仍需原查單憑證、姓名／末三碼及 OTP，沒有實作繞過驗證的補發。
+- focused Vitest 4 files／8 tests、`tsc --noEmit`、diff check 通過。既有本機 Demo 仍在 3013，未重啟或修改資料；本修正尚未取得真人手機新訂單完整驗收。`AGENTS.md` 與 `next-env.d.ts` 原有環境改動不納入提交。
