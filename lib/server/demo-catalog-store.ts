@@ -104,7 +104,7 @@ export const createDemoCatalogStore = ({ filePath, mediaDirectory, seedProducts 
         return clone(product);
       });
     },
-    async publish(draft: ProductDraft): Promise<Product> {
+    async publish(draft: ProductDraft, publication: Product["publication"] = "published"): Promise<Product> {
       return serialized(async () => {
         const catalog = await read();
         const id = `demo-published-${randomUUID()}`;
@@ -127,7 +127,7 @@ export const createDemoCatalogStore = ({ filePath, mediaDirectory, seedProducts 
           summary: draft.summary?.trim() || `茶名：${draft.name.trim()}｜規格：${draft.specification.trim()}｜價格：TWD ${draft.price.amount}`,
           image,
           variants: [{ id: `${id}-variant`, specification: draft.specification.trim(), price: { ...draft.price }, inventoryStatus: draft.inventoryStatus, maxQuantity: 5 }],
-          publication: "published",
+          publication,
           ...(draft.origin?.trim() ? { teaRegion: draft.origin.trim() } : {}),
           ...(draft.aroma?.trim() ? { aroma: draft.aroma.trim() } : {}),
           ...(draft.taste?.trim() ? { taste: draft.taste.trim() } : {}),

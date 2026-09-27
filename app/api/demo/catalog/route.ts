@@ -54,9 +54,10 @@ export async function PATCH(request: Request) {
 export async function POST(request: Request) {
   try {
     assertLocalDemoHttpRequest(request, "POST", "json");
+    const publication = new URL(request.url).searchParams.get("publication") === "draft" ? "draft" : "published";
     const validated = validateProductDraftDto(await request.json());
     if (!validated.ok) return demoFailure(new Error(validated.error.message));
-    const product = await getDemoCatalogStore().publish(validated.value as ProductDraft);
+    const product = await getDemoCatalogStore().publish(validated.value as ProductDraft, publication);
     return demoSuccess(product, { status: 201 });
   } catch (error) { return demoFailure(error); }
 }

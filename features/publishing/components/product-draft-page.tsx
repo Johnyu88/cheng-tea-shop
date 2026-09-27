@@ -4,6 +4,7 @@
 /* eslint-disable @next/next/no-img-element */
 
 import { useEffect, useRef, useState, type ChangeEvent, type JSX } from "react";
+import Link from "next/link";
 import type { DomainError, Product, ProductDraft, ProductDraftPhoto } from "@/lib/domain";
 import { useCommerce } from "@/features/commerce/components/commerce-provider";
 import { initialDraft, minimumProblems, ProductFields, toProductDraft, type FieldProblem, type FormDraft } from "./product-form";
@@ -21,6 +22,7 @@ export function ProductDraftPage(): JSX.Element {
   const [operation, setOperation] = useState<Operation>("idle");
   const [confirmed, setConfirmed] = useState(false);
   const [publishedProduct, setPublishedProduct] = useState<Product>();
+  const [savedDraftName, setSavedDraftName] = useState("");
   const [hydrated, setHydrated] = useState(false);
   const activeOperation = useRef<Operation>("idle");
   const photosRef = useRef<ProductDraftPhoto[]>([]);
@@ -58,7 +60,7 @@ export function ProductDraftPage(): JSX.Element {
     const submission = validate();
     if (!submission || !start("saving")) return;
     const result = await publishingService.saveDraft(submission);
-    if (result.ok) setStatus("商品資料已儲存，尚未上架。已保留目前欄位與照片。"); else { setError(result.error); setStatus(result.error.message); }
+    if (result.ok) { setStatus("商品草稿已儲存，尚未上架。"); setSavedDraftName(submission.name); } else { setError(result.error); setStatus(result.error.message); }
     finish();
   };
   const publishDraft = async () => {
@@ -100,6 +102,7 @@ export function ProductDraftPage(): JSX.Element {
   };
   const canPublish = minimumProblems(draft).length === 0 && confirmed && operation !== "publishing";
   if (publishedProduct) return <PublishedSuccess product={publishedProduct} />;
+  if (savedDraftName) return <SavedDraftSuccess name={savedDraftName} />;
 
   return <main className="product-draft-page py-8 md:py-12" data-hydrated={hydrated ? "true" : "false"}>
     <p role="status" aria-live="polite" className="product-draft-status">{status}</p>
@@ -109,10 +112,12 @@ export function ProductDraftPage(): JSX.Element {
       {fieldProblems.length > 0 && <ValidationSummary problems={fieldProblems} />}{error && <div role="alert" className="product-draft-alert">{error.message}</div>}
       <div className="product-draft-layout"><section aria-label="商品資料欄位"><h2>商品資料</h2><ProductFields draft={draft} onChange={change} />
       <PhotoPicker photos={photos} onAdd={addPhotos} onRemove={removePhoto} />
-      </section><aside className="product-draft-actions" aria-label="商品操作"><h2>儲存與上架</h2><p>新增與編輯使用相同欄位。請確認內容後再上架。</p><div className="form-actions"><button className="primary-action" type="button" disabled={operation !== "idle"} onClick={() => void saveDraft()}>{operation === "saving" ? "儲存中" : "儲存商品"}</button></div><label className="product-draft-confirmation"><input type="checkbox" checked={confirmed} onChange={(event) => setConfirmed(event.target.checked)} />我已確認照片與商品資料</label><button className="primary-action product-draft-publish" type="button" disabled={!canPublish} onClick={() => void publishDraft()}>{operation === "publishing" ? "上架處理中" : "確認並上架"}</button></aside></div>
+      </section><aside className="product-draft-actions" aria-label="商品操作"><h2>儲存與上架</h2><p>新增與編輯使用相同欄位。請確認內容後再上架。</p><div className="form-actions"><button className="primary-action" type="button" disabled={operation !== "idle"} onClick={() => void saveDraft()}>{operation === "saving" ? "儲存中" : "儲存商品"}</button><Link className="text-button" href="/admin/products" aria-disabled={operation !== "idle"} onClick={(event) => { if (operation !== "idle") event.preventDefault(); }}>取消新增／返回商品管理</Link></div><label className="product-draft-confirmation"><input type="checkbox" checked={confirmed} onChange={(event) => setConfirmed(event.target.checked)} />我已確認照片與商品資料</label><button className="primary-action product-draft-publish" type="button" disabled={!canPublish} onClick={() => void publishDraft()}>{operation === "publishing" ? "上架處理中" : "確認並上架"}</button></aside></div>
     </section>
   </main>;
 }
+
+function SavedDraftSuccess({ name }: { name: string }): JSX.Element { return <main className="product-draft-page py-8 md:py-12"><section className="product-draft-card" aria-labelledby="draft-saved-heading"><p role="status" aria-live="polite">商品草稿已儲存，尚未上架。</p><h1 id="draft-saved-heading">儲存成功</h1><p>「{name}」已保存到商品管理，顧客目前看不到這項草稿。</p><div className="form-actions"><Link className="primary-action" href="/admin/products">返回商品管理</Link><Link className="text-button" href="/admin/products/new">繼續新增商品</Link></div></section></main>; }
 
 function ValidationSummary({ problems }: { problems: FieldProblem[] }): JSX.Element { return <div role="alert" className="product-draft-alert"><strong>請先完成必填欄位：</strong><ul>{problems.map((problem) => <li key={problem.field}>{problem.label}：{problem.message}</li>)}</ul></div>; }
 function PhotoPicker({ photos, onAdd, onRemove }: { photos: ProductDraftPhoto[]; onAdd: (event: ChangeEvent<HTMLInputElement>) => void; onRemove: (id: string) => void }): JSX.Element { return <section className="product-draft-photos" aria-labelledby="product-photo-heading"><h2 id="product-photo-heading">商品照片（選填）</h2><p>照片由店家自行拍攝或於外部工具處理後上傳；網站只保存已確認的照片。</p><label className="form-field" htmlFor="product-photos">選擇商品照片（最多三張）<input id="product-photos" className="form-input" type="file" accept="image/*" multiple onChange={onAdd} /></label><p>已選擇 {photos.length}／3 張照片</p>{photos.length > 0 && <ul className="product-draft-photo-list">{photos.map((photo) => <li key={photo.id}><img src={photo.previewUrl} alt={photo.alt} /><button className="text-button" type="button" onClick={() => onRemove(photo.id)}>移除 {photo.alt.replace(" 預覽", "")}</button></li>)}</ul>}</section>; }

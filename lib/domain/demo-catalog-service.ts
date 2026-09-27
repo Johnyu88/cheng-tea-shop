@@ -37,7 +37,12 @@ export const createDemoCatalogService = (): CatalogService => ({
 export const createDemoPublishingService = (): PublishingService => {
   const local = createMockPublishingService();
   return {
-    saveDraft: local.saveDraft,
+    async saveDraft(draft: ProductDraft): Promise<ServiceResult<ProductDraft>> {
+      const validated = await local.saveDraft(draft);
+      if (!validated.ok) return validated;
+      const persisted = await demoJson<Product>("/api/demo/catalog?publication=draft", { method: "POST", body: JSON.stringify(validated.value) });
+      return persisted.ok ? { ok: true, value: validated.value } : persisted;
+    },
     async publishDraft(draft: ProductDraft, confirmation): Promise<ServiceResult<Product>> {
       if (!confirmation.confirmed) return { ok: false, error: domainError("invalid-draft", "發布前必須明確確認。", false) };
       return demoJson<Product>("/api/demo/catalog", { method: "POST", body: JSON.stringify(draft) }) as Promise<ServiceResult<Product>>;

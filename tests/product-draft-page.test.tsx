@@ -1,6 +1,6 @@
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { vi } from "vitest";
-import type { Product, PublishingService } from "@/lib/domain";
+import type { Product, ProductDraft, PublishingService } from "@/lib/domain";
 import { CommerceProvider } from "@/features/commerce/components/commerce-provider";
 import { ProductDraftPage } from "@/features/publishing/components/product-draft-page";
 
@@ -119,6 +119,20 @@ it("does not expose retired image AI or fake progress controls", () => {
   expect(screen.queryByText(/Mock|辨識|合成預覽|產生介紹/)).not.toBeInTheDocument();
   expect(screen.queryByRole("button", { name: "產生介紹草稿" })).not.toBeInTheDocument();
   expect(screen.getByText(/照片由店家自行拍攝/)).toBeInTheDocument();
+});
+
+it("shows a persistent save confirmation, navigation and a cancel link without a second save", async () => {
+  const saveDraft = vi.fn(async (draft: ProductDraft) => ({ ok: true as const, value: draft }));
+  renderPage(createPublishingService({ saveDraft }));
+  expect(screen.getByRole("link", { name: "取消新增／返回商品管理" })).toHaveAttribute("href", "/admin/products");
+  fillMinimumFields();
+  fireEvent.click(screen.getByRole("button", { name: "儲存商品" }));
+  expect(await screen.findByRole("heading", { name: "儲存成功" })).toBeInTheDocument();
+  expect(screen.getByRole("status")).toHaveTextContent("尚未上架");
+  expect(screen.getByRole("link", { name: "返回商品管理" })).toHaveAttribute("href", "/admin/products");
+  expect(screen.getByRole("link", { name: "繼續新增商品" })).toHaveAttribute("href", "/admin/products/new");
+  expect(screen.queryByRole("button", { name: "儲存商品" })).not.toBeInTheDocument();
+  expect(saveDraft).toHaveBeenCalledTimes(1);
 });
 
 it("preserves the draft after a save failure", async () => {
