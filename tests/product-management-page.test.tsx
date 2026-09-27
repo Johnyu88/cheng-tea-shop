@@ -69,7 +69,26 @@ test("shows photo upload preview and sends it only with explicit confirmed save"
   fireEvent.click(screen.getByRole("button", { name: "儲存編輯" }));
   await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
   const payload = JSON.parse(String((fetchMock.mock.calls[1]?.[1] as RequestInit).body));
-  expect(payload).toMatchObject({ id: product.id, imageDataUrl: expect.stringMatching(/^data:image\/png;base64,/) });
+  expect(payload).toMatchObject({ id: product.id, fermentation: "", roast: "", brewing: "", tasteTags: ["light"], imageDataUrl: expect.stringMatching(/^data:image\/png;base64,/) });
   expect(confirm).toHaveBeenCalledWith(expect.stringContaining("將更換商品照片"));
   expect(await screen.findByText(/資料與照片已儲存/)).toBeInTheDocument();
+});
+
+test("loads optional tea facts back into the editor and includes them on save", async () => {
+  const persisted: Product = { ...product, tasteTags: ["sweet"], fermentation: "輕發酵", roast: "微", brewing: "建議90度水" };
+  const fetchMock = vi.fn()
+    .mockResolvedValueOnce(new Response(JSON.stringify({ ok: true, value: { items: [persisted] } }), { status: 200 }))
+    .mockResolvedValueOnce(new Response(JSON.stringify({ ok: true, value: persisted }), { status: 200 }));
+  vi.stubGlobal("fetch", fetchMock);
+  vi.spyOn(window, "confirm").mockReturnValue(true);
+  render(<ProductManagementPage />);
+  await waitFor(() => expect(screen.getByText(product.name)).toBeInTheDocument());
+  fireEvent.click(screen.getByRole("button", { name: "編輯" }));
+  expect(screen.getByLabelText("發酵（選填）")).toHaveValue("輕發酵");
+  expect(screen.getByLabelText("焙火（選填）")).toHaveValue("微");
+  expect(screen.getByLabelText("沖泡方式（選填）")).toHaveValue("建議90度水");
+  fireEvent.click(screen.getByRole("button", { name: "儲存編輯" }));
+  await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+  const saved = JSON.parse(String((fetchMock.mock.calls[1]?.[1] as RequestInit).body));
+  expect(saved).toMatchObject({ id: product.id, tasteTags: ["sweet"], fermentation: "輕發酵", roast: "微", brewing: "建議90度水" });
 });
