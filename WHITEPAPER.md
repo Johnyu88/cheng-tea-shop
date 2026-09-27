@@ -643,3 +643,11 @@ The generated hero images are not a substitute for store-approved photography. T
 - `/admin/products` 的清單、編輯、上下架與 `/admin/products/new` 的新增均透過 `/api/demo/catalog`；不建立第二份前台商品陣列。Catalog Store 的 file-backed persistence、歷史訂單保留與既有八種茶不變。
 - `PublishingService` contract 不再包含 `generateSummary`，service adapter 只負責驗證、保存與發布店家已確認的資料。
 - 驗證結果：Vitest 35 files／176 tests、TypeScript、ESLint（0 errors／5 個既有 warning）與 Webpack production build 通過；未啟動正式服務，真人手機仍需另行驗收。
+
+## 57. 2026-09-27 真人手機完整購物查單與按鈕視覺驗收
+
+- 游老師手機使用同一 3013 LAN Demo 建立新合成訂單：結帳三步（姓名與合成 OTP、配送資料、總額確認）、感謝購買與訂單編號、主動查看訂單均依序通過。查單自動帶入同分頁憑證、顧客 Yu 和手機末三碼 000；再次取得本機 OTP 後成功查到「訂單成立／待模擬付款確認」。此為使用者提供截圖的真人手機驗收，不只是自動化測試。
+- 同分頁憑證不放入 URL／DOM；缺少憑證時先停用取得 OTP。姓名及手機末三碼不能取代查單憑證，也未完成失憑證補發機制。
+- 查單頁頂端固定有返回首頁，成功結果卡片底部也增設返回首頁，以免使用者捲到下方看不到出口。全站共用按鈕已改深綠色實心、白色粗體字，保留焦點、選中及停用視覺差異；游老師手機回饋「舒服多了」。底部新增入口通過程式測試，但尚待真人另行點擊確認。
+- 實際 Email／手機推送、金流及物流均未接入；queued／preview-only 為合成通知。內建影像辨識與合成依第 56 節決策取消，圖片由外部處理後上傳。紅色 Next.js 開發 Issues 尚未取得完整詳細錯誤，不宣稱已修復。
+- 主要提交：9b6de1f、b93fe0f、cd3d447、2870803。最後修正 focused Vitest 3 files／6 tests 及 TypeScript 通過。下一輪檢查 dev Issues、資料目錄及導覽，逐步測店家包裝／出貨與顧客狀態；勿要求重做已通過的顧客新訂單。

@@ -538,3 +538,11 @@ Follow `RESUME_PROMPT.md`, `AGENTS.md`, and `WORKFLOW.md`. If newer explicit use
 - 發現 `/checkout/success?order=...` 的 server props 已有 orderId 時，原版 `DemoCheckoutSuccessPage` 的 effect 直接略過 `sessionStorage`，不會再核對或讀取原下單分頁完整收據；手機另開分頁時 sessionStorage 可能不存在。這是流程銜接問題，不能單憑此認定某筆手機訂單的唯一失敗原因。
 - 修正：成功頁仍以 server 傳來的訂單編號立即顯示，但 client effect 只接受 `orderId` 完全相符的同分頁收據，不接受其他訂單的憑證；當收據缺失時明確說明同分頁限制，仍不在畫面或 URL 顯示 secret。查單端仍需原查單憑證、姓名／末三碼及 OTP，沒有實作繞過驗證的補發。
 - focused Vitest 4 files／8 tests、`tsc --noEmit`、diff check 通過。既有本機 Demo 仍在 3013，未重啟或修改資料；本修正尚未取得真人手機新訂單完整驗收。`AGENTS.md` 與 `next-env.d.ts` 原有環境改動不納入提交。
+
+## 2026-09-27 晚間最終交接 — 真人手機驗收完成
+
+- 游老師本人手機依序完成結帳 1/3 身分與合成 OTP、2/3 配送地址、3/3 確認，看到感謝購買與新訂單編號，再進入同分頁查單；姓名 Yu、末三碼 000、同筆憑證自動帶入，取得查單 OTP 後顯示「訂單成立／待模擬確認」。不要再寫成未經真人驗收或要求重新下同一筆訂單。
+- 查單頂端固定返回入口已真人確認；結果底部再次找不到入口，已於 2870803 新增第二個返回首頁並完成程式測試，但尚未單獨點擊驗收。全站深色實心白粗字按鈕方向已獲真人手機回饋「舒服多了」。
+- Demo 店家密碼僅存 4090 本機權限限制的桌面文字檔，不可納入 Git／聊天；原資料目錄與備份保留，禁止清空商品、訂單。店家登入已真人完成，包裝拍照與出貨端到端仍需逐步真人驗收。
+- 通知僅 preview-only；紅色 Next dev Issues 尚未定位詳情；影像辨識與合成已取消。保留既有 AGENTS.md 與 next-env.d.ts 未提交環境變動，勿 stage／覆寫。
+- 明日先讀 README、AGENTS、WORKFLOW、HANDOFF、WHITEPAPER 和 Git；驗證 3013 與資料目錄，定位 dev Issues，再檢查查單底部返回入口與店家包裝出貨。不得碰正式金流、ERP 或宣稱正式通知完成。
