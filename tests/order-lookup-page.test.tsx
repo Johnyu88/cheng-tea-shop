@@ -40,7 +40,8 @@ it("offers a home link after a successful verified lookup", async () => {
   await screen.findByText("本機驗證碼：", { exact: false });
   fireEvent.change(screen.getByLabelText("驗證碼"), { target: { value: "123456" } });
   fireEvent.click(screen.getByRole("button", { name: "查詢訂單" }));
-  await waitFor(() => expect(screen.getByRole("link", { name: "返回首頁" })).toHaveAttribute("href", "/"));
+  await waitFor(() => expect(screen.getAllByRole("link", { name: "返回首頁" })).toHaveLength(2));
+  screen.getAllByRole("link", { name: "返回首頁" }).forEach(link => expect(link).toHaveAttribute("href", "/"));
 });
 
 it("blocks OTP before a missing order credential is restored, without a request", () => {

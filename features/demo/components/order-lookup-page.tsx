@@ -79,7 +79,8 @@ export function OrderLookupPage() {
         <p>包裝照片：{result.order.packingPhotoId ? "已由店家上傳" : "尚未上傳"}</p>
         <h3>通知紀錄</h3><ul>{result.notifications.map(note => <li key={note.id}>{note.path}：{note.state}</li>)}</ul>
         <h3>手機推送預覽（未送出）</h3><p><strong>{result.mobilePushPreview.title}</strong><br />{result.mobilePushPreview.body}</p>
-        <p>狀態：preview-only；未註冊推送服務、未傳送至任何裝置。</p></article>}
+        <p>狀態：preview-only；未註冊推送服務、未傳送至任何裝置。</p>
+        <Link className="primary-action mt-6 inline-flex" href="/">返回首頁</Link></article>}
     </section>
   </main>;
 }

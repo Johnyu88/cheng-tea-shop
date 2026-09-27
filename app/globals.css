@@ -87,20 +87,22 @@ main {
 .load-more-button,
 .text-button {
   min-height: 3rem;
-  border: 1px solid color-mix(in srgb, var(--ink) 22%, transparent);
+  border: 2px solid var(--ink);
   border-radius: 999px;
   padding: 0.75rem 1rem;
-  color: var(--ink);
-  background: var(--white);
+  color: var(--white);
+  background: var(--ink);
   font: inherit;
-  font-weight: 700;
+  font-weight: 750;
+  text-decoration: none;
+  text-align: center;
   cursor: pointer;
 }
 
-.filter-button[aria-pressed="true"],
-.load-more-button {
-  color: var(--white);
-  background: var(--ink);
+.filter-button[aria-pressed="true"] {
+  border-color: var(--tea-brown);
+  background: var(--tea-brown);
+  box-shadow: 0 0 0 3px var(--ink);
 }
 
 .load-more-button {
@@ -220,8 +222,26 @@ h1 {
   display: inline-block;
   min-height: 3rem;
   padding: 0.85rem 1.4rem;
+  border: 2px solid var(--ink);
   color: var(--white);
   background: var(--ink);
+  font-weight: 750;
+}
+
+.primary-action:focus-visible,
+.filter-button:focus-visible,
+.load-more-button:focus-visible,
+.text-button:focus-visible {
+  outline: 3px solid var(--tea-brown);
+  outline-offset: 4px;
+}
+
+.primary-action:disabled,
+.filter-button:disabled,
+.load-more-button:disabled,
+.text-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 .catalog-preview {
