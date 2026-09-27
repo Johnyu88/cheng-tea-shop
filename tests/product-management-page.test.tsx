@@ -43,6 +43,7 @@ test("shows newly saved draft first with a clear unpublished count", async () =>
   const draft: Product = { ...product, id: "draft-002", slug: "draft-002", name: "測試紅茶A", publication: "draft" };
   vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ ok: true, value: { items: [product, draft] } }), { status: 200 })));
   render(<ProductManagementPage />);
+  expect(screen.getByRole("link", { name: "前往購物前台" })).toHaveAttribute("href", "/");
   await waitFor(() => expect(screen.getByText("測試紅茶A")).toBeInTheDocument());
   expect(screen.getByRole("status")).toHaveTextContent("共 2 筆商品，其中 1 筆未上架");
   const names = Array.from(document.querySelectorAll(".product-admin-item h2")).map((node) => node.textContent);
