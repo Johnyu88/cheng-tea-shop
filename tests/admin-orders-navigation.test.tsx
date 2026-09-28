@@ -28,6 +28,19 @@ it("shows only credential length and ignores pasted outer whitespace without exp
   expect(submit).toBeDisabled();
   fireEvent.change(field, { target: { value: " " + "a".repeat(64) + "\n" } });
   expect(screen.getByText(/64\/64 個字元/)).toBeInTheDocument();
-  expect(screen.getByText(/已自動忽略前後空白/)).toBeInTheDocument();
+  expect(screen.getByText(/已忽略前後空白/)).toBeInTheDocument();
   expect(submit).toBeEnabled();
+});
+
+
+it("explains a 64-character non-hex paste and allows clearing it safely", () => {
+  render(<AdminOrdersPage />);
+  const field = screen.getByLabelText("獨立店家 Demo 密碼");
+  const submit = screen.getByRole("button", { name: "確認店家身分" });
+  fireEvent.change(field, { target: { value: "g" + "a".repeat(63) } });
+  expect(screen.getByText(/含 1 個非 0–9、a–f 字元/)).toBeInTheDocument();
+  expect(submit).toBeDisabled();
+  fireEvent.click(screen.getByRole("button", { name: "清空重貼" }));
+  expect(field).toHaveValue("");
+  expect(field).toHaveAttribute("type", "password");
 });
