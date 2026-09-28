@@ -560,6 +560,10 @@ a:focus-visible {
   padding: 0.75rem 1rem;
 }
 
+.checkout-exit-nav {
+  align-items: center;
+}
+
 .form-option {
   display: inline-flex;
   align-items: center;
@@ -752,6 +756,16 @@ a:focus-visible {
 }
 
 @media (max-width: 40rem) {
+  .checkout-exit-nav {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .checkout-exit-nav > a,
+  .checkout-exit-nav > button {
+    width: 100%;
+  }
+
   .form-actions {
     display: grid;
     grid-template-columns: 1fr;

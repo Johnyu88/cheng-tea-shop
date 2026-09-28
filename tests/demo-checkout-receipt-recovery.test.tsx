@@ -14,7 +14,7 @@ it("shows an existing confirmed receipt instead of an empty checkout when the ca
   render(<DemoCheckoutPage />);
   expect(await screen.findByRole("heading", { name: "感謝您的購買" })).toBeInTheDocument();
   expect(screen.getByText("訂單編號：" + orderId)).toBeInTheDocument();
-  expect(screen.getByRole("link", { name: "返回首頁" })).toHaveAttribute("href", "/");
+  expect(screen.getByRole("link", { name: "回到首頁" })).toHaveAttribute("href", "/");
   expect(screen.getByRole("link", { name: "主動查看訂單" })).toHaveAttribute("href", "/orders?order=" + orderId);
   expect(screen.queryByText("購物車是空的")).not.toBeInTheDocument();
   expect(screen.queryByText("取消本次結帳")).not.toBeInTheDocument();

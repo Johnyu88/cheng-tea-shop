@@ -651,3 +651,11 @@ The generated hero images are not a substitute for store-approved photography. T
 - 查單頁頂端固定有返回首頁，成功結果卡片底部也增設返回首頁，以免使用者捲到下方看不到出口。全站共用按鈕已改深綠色實心、白色粗體字，保留焦點、選中及停用視覺差異；游老師手機回饋「舒服多了」。底部新增入口通過程式測試，但尚待真人另行點擊確認。
 - 實際 Email／手機推送、金流及物流均未接入；queued／preview-only 為合成通知。內建影像辨識與合成依第 56 節決策取消，圖片由外部處理後上傳。紅色 Next.js 開發 Issues 尚未取得完整詳細錯誤，不宣稱已修復。
 - 主要提交：9b6de1f、b93fe0f、cd3d447、2870803。最後修正 focused Vitest 3 files／6 tests 及 TypeScript 通過。下一輪檢查 dev Issues、資料目錄及導覽，逐步測店家包裝／出貨與顧客狀態；勿要求重做已通過的顧客新訂單。
+
+## 2026-09-28 查單導覽安全補強（待實機驗收）
+- 成功頁若缺少同分頁 sessionStorage 查單憑證，顯示補填及聯絡店家說明，入口改為「前往安全的訂單查詢」；不將秘密放入 URL、公開 DOM 或 localStorage，也不繞過 OTP、姓名、末三碼與限流。
+- 查單錯誤提供明確重試、成功後可查另一筆；結帳離開導覽加強深色按鈕及手機寬度排列。只改 UI／提示及其測試，沒有清理 Demo 資料。
+- 先前 Codex 執行 Vitest 遇 spawn EPERM；重新以現有 vitest.cmd 啟動後完成 41 files / 196 tests，TypeScript 與 focused ESLint 均通過，git diff --check 通過。新分頁缺憑證的提示與安全查單入口已增加回歸斷言。
+- edea 3013 LAN dev server 已恢復並讀到既有 catalog 8 件 published；沿用 .demo-data/lan-demo-third-round-final-2，不重建 catalog、orders 或 outbox；非正式對外部署。
+- 待游老師實體手機確認：同分頁下單查詢、新分頁缺憑證復原、查詢另一筆、返回首頁、店家包裝及出貨。正式付款、簡訊、Email/Web Push、ERP 仍未啟用。
+- AGENTS.md 和 next-env.d.ts 是進場前未提交的環境變更，本階段不修改、不 stage、不 commit。

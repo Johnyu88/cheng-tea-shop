@@ -546,3 +546,11 @@ Follow `RESUME_PROMPT.md`, `AGENTS.md`, and `WORKFLOW.md`. If newer explicit use
 - Demo 店家密碼僅存 4090 本機權限限制的桌面文字檔，不可納入 Git／聊天；原資料目錄與備份保留，禁止清空商品、訂單。店家登入已真人完成，包裝拍照與出貨端到端仍需逐步真人驗收。
 - 通知僅 preview-only；紅色 Next dev Issues 尚未定位詳情；影像辨識與合成已取消。保留既有 AGENTS.md 與 next-env.d.ts 未提交環境變動，勿 stage／覆寫。
 - 明日先讀 README、AGENTS、WORKFLOW、HANDOFF、WHITEPAPER 和 Git；驗證 3013 與資料目錄，定位 dev Issues，再檢查查單底部返回入口與店家包裝出貨。不得碰正式金流、ERP 或宣稱正式通知完成。
+
+## 2026-09-28 查單導覽安全補強（待實機驗收）
+- 成功頁若缺少同分頁 sessionStorage 查單憑證，顯示補填及聯絡店家說明，入口改為「前往安全的訂單查詢」；不將秘密放入 URL、公開 DOM 或 localStorage，也不繞過 OTP、姓名、末三碼與限流。
+- 查單錯誤提供明確重試、成功後可查另一筆；結帳離開導覽加強深色按鈕及手機寬度排列。只改 UI／提示及其測試，沒有清理 Demo 資料。
+- 先前 Codex 執行 Vitest 遇 spawn EPERM；重新以現有 vitest.cmd 啟動後完成 41 files / 196 tests，TypeScript 與 focused ESLint 均通過，git diff --check 通過。新分頁缺憑證的提示與安全查單入口已增加回歸斷言。
+- edea 3013 LAN dev server 已恢復並讀到既有 catalog 8 件 published；沿用 .demo-data/lan-demo-third-round-final-2，不重建 catalog、orders 或 outbox；非正式對外部署。
+- 待游老師實體手機確認：同分頁下單查詢、新分頁缺憑證復原、查詢另一筆、返回首頁、店家包裝及出貨。正式付款、簡訊、Email/Web Push、ERP 仍未啟用。
+- AGENTS.md 和 next-env.d.ts 是進場前未提交的環境變更，本階段不修改、不 stage、不 commit。

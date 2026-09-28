@@ -58,7 +58,7 @@ export function OrderLookupPage() {
     <section className="demo-panel">
       <h1>查詢訂單</h1>
       <Link className="filter-button mt-4 inline-flex" href="/">返回首頁</Link>
-      {error && <div role="alert" className="product-draft-alert">{error}</div>}
+      {error && <div role="alert" className="product-draft-alert"><p>{error}</p>{challenge && <button className="filter-button mt-3" type="button" disabled={busy} onClick={() => void issue()}>重新取得驗證碼</button>}<p className="mt-3">若仍無法查詢，請確認訂單編號、查詢密語、訂購人姓名與手機末三碼；查詢密語遺失時請聯絡店家協助。</p></div>}
       {receipt.orderId && receipt.accessSecret && <p role="status">已帶入這個分頁剛才的訂單資料，不必複製查單憑證。</p>}
       {(!orderId || !accessSecret) && <p role="status" className="prototype-notice">目前尚無完整查單憑證。請使用原下單分頁，或展開「其他裝置查單／進階資訊」填入自己保存的資料。先補齊憑證，再取得 OTP；姓名與手機末三碼無法取代憑證。</p>}
       <label className="form-field mt-6">顧客姓名<input className="form-input" autoComplete="name" value={customerName} onChange={e => setCustomerName(e.target.value)} /></label>
@@ -74,6 +74,7 @@ export function OrderLookupPage() {
       {challenge && <p role="status" className="prototype-notice">本機驗證碼：<strong>{challenge.demoCode}</strong></p>}
       <label className="form-field mt-4">驗證碼<input className="form-input" inputMode="numeric" value={code} onChange={e => setCode(e.target.value)} /></label>
       <button className="primary-action mt-6" disabled={busy} onClick={() => void lookup()}>查詢訂單</button>
+      <Link className="filter-button mt-4 inline-flex" href="/orders">查詢其他訂單</Link>
       {result && <article className="demo-result"><h2>{labels[result.order.status]}</h2>
         <p>付款狀態：{result.order.paymentStatus === "simulated-confirmed" ? "模擬確認" : "待模擬確認"}</p>
         <p>包裝照片：{result.order.packingPhotoId ? "已由店家上傳" : "尚未上傳"}</p>

@@ -36,5 +36,17 @@ export function DemoCheckoutSuccessPage(props: SuccessData): JSX.Element {
     return () => window.clearTimeout(timer);
   }, [props.orderId]);
   if (!data) return <main className="py-8"><section className="demo-panel"><h1>訂單成功頁</h1><p role="status">正在準備訂單資訊。</p><Link className="primary-action mt-6" href="/">返回首頁</Link></section></main>;
-  return <main className="py-8"><section className="demo-panel" aria-labelledby="checkout-success-heading"><p className="prototype-notice">合成展示：沒有真實扣款、簡訊或資料傳送。</p><h1 id="checkout-success-heading">感謝您的購買</h1><p>已收到您的示範訂單，店家將依序處理。</p><p>訂單編號：{data.orderId}</p><p>訂單狀態：{statusLabels[data.status]}</p>{!data.accessSecret && <p role="status" className="prototype-notice">此分頁沒有完整查單憑證；若是從其他分頁開啟，請回原下單分頁查看。僅有訂單編號不能完成查單。</p>}<div className="form-actions mt-6"><Link className="filter-button" href="/">返回首頁</Link><Link className="primary-action" href={`/orders?order=${encodeURIComponent(data.orderId)}`}>主動查看訂單</Link></div></section></main>;
+  const lookupHref = `/orders?order=${encodeURIComponent(data.orderId)}`;
+  return <main className="py-8"><section className="demo-panel" aria-labelledby="checkout-success-heading">
+    <p className="prototype-notice">這是本機 Demo 的合成訂單結果，不代表真實付款或出貨。</p>
+    <h1 id="checkout-success-heading">感謝您的購買</h1>
+    <p>已收到您的示範訂單，店家將依序處理。</p>
+    <p>訂單編號：{data.orderId}</p>
+    <p>訂單狀態：{statusLabels[data.status]}</p>
+    {!data.accessSecret && <p role="status" className="prototype-notice">此分頁沒有完整查單憑證，查詢頁不會自動登入。請輸入訂單編號、查詢密語、訂購人姓名與手機末三碼，再完成一次性驗證；密語遺失時請直接聯絡店家協助。密語不會放在網址或公開畫面中。</p>}
+    <div className="form-actions mt-6">
+      <Link className="filter-button" href="/">回到首頁</Link>
+      <Link className="primary-action" href={lookupHref}>{data.accessSecret ? "主動查看訂單" : "前往安全的訂單查詢"}</Link>
+    </div>
+  </section></main>;
 }
