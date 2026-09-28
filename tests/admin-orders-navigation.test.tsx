@@ -1,9 +1,21 @@
 import { expect, it } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { AdminOrdersPage } from "@/features/demo/components/admin-orders-page";
 
 it("provides a clear home link without logging in or modifying an order", () => {
   render(<AdminOrdersPage />);
   expect(screen.getByRole("link", { name: "返回首頁" })).toHaveAttribute("href", "/");
   expect(screen.getByRole("button", { name: "確認店家身分" })).toBeInTheDocument();
+});
+
+it("shows and hides the local demo password without submitting or changing it", () => {
+  render(<AdminOrdersPage />);
+  const field = screen.getByLabelText("獨立店家 Demo 密碼");
+  fireEvent.change(field, { target: { value: "sample-not-a-real-secret" } });
+  expect(field).toHaveAttribute("type", "password");
+  fireEvent.click(screen.getByRole("button", { name: "顯示密碼" }));
+  expect(field).toHaveAttribute("type", "text");
+  expect(field).toHaveValue("sample-not-a-real-secret");
+  fireEvent.click(screen.getByRole("button", { name: "隱藏密碼" }));
+  expect(field).toHaveAttribute("type", "password");
 });
