@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { demoApi, type DemoAdminOrder, type DemoLookupSecretRotation } from "../demo-api";
+import { DemoOrderProgress } from "./demo-order-progress";
 
 const statusLabel = { confirmed: "已確認", packed: "已打包", shipped: "已出貨", delivered: "已送達" } as const;
 
@@ -107,6 +108,7 @@ export function AdminOrdersPage() {
           {orders.length === 0 && <p>目前沒有示範訂單。</p>}
           {orders.map(({ order, notifications }) => <article className="demo-order-card" key={order.orderId}>
             <h2>{statusLabel[order.status]}</h2><p>{order.orderId}</p>
+            <DemoOrderProgress order={order} />
             <p>付款：{order.paymentStatus === "simulated-confirmed" ? "已模擬確認" : "待模擬確認"}</p>
             {order.paymentStatus === "pending" && <button className="filter-button" disabled={busy} onClick={() => void act(order.orderId, "confirm-payment")}>模擬確認付款</button>}
             {order.status === "confirmed" && <label className="form-field mt-4">打包照片

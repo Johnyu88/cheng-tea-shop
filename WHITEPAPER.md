@@ -667,3 +667,6 @@ The generated hero images are not a substitute for store-approved photography. T
 - 補發只接受通過現有 HttpOnly 店家 session 驗證且明確勾選「已透過店外方式確認顧客身分」的操作。密語只在當次授權 API 回應／店家介面顯示，禁止 URL、public list、日誌、localStorage 或通知；回應 Cache-Control: no-store。顧客後續仍須完整身份資料、密語及 OTP。
 - 這是合成資料／LAN Demo；正式上線前須另設可稽核的核身、交付方式、權限、撤銷/重放與資安審核，不能直接沿用勾選框作為真實身分驗證。
 - 2026-09-28 程式驗證：41 files / 205 tests、tsc passed；實機補發與顧客已出貨同步仍待驗收。原有茶行資料未重建。
+
+## 59. 2026-09-28 訂單進度燈號
+- 顧客與店家共用唯讀五階段進度燈號，完成綠色／未完成紅色，另有明確文字與無障礙標籤。以後端狀態及包裝照片為準；本機 Demo 不代表真實付款、物流或通知送達。顧客須先通過既有密語、OTP。全套 42 files / 208 tests 通過，實機視覺驗收待確認。

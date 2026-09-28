@@ -563,3 +563,7 @@ Follow `RESUME_PROMPT.md`, `AGENTS.md`, and `WORKFLOW.md`. If newer explicit use
 - 顧客仍需使用訂單編號、完整合成手機號碼、姓名、更新後的查單密語及獨立 OTP；沒有姓名與末三碼直接繞過的捷徑。補發不改付款、出貨、包裝照片或通知紀錄，不自動寄送任何訊息。
 - Codex 交付 commit 78ed6a0，補強 no-store 與可選取密語的兩個檔案尚需本輪單獨提交。獨立驗證：TypeScript 通過；focused 3 files / 22 tests；全套 41 files / 205 tests 通過（Vitest 限定 threads、單 worker，避開 Windows spawn EPERM）。尚未執行真人手機補發/重新查單驗收；不能宣稱端到端完成。
 - 原本 AGENTS.md、next-env.d.ts 未提交修改保留；沒有清除或重建既有 .demo-data；沒有正式金流、物流、Email、推送。店家登入憑證保留在本機私有檔，勿發到聊天。
+
+## 2026-09-28 顧客與店家共用訂單進度燈號（待手機視覺驗收）
+- 五個固定關卡：訂單成立、模擬付款確認、完成包裝、確認出貨、確認送達；完成綠燈、未完成紅燈，搭配文字。依授權 API 訂單狀態判定，顧客仍需 OTP。通知 queued/preview-only 不視為實際送達。手機單欄版。
+- TypeScript、focused 3 files / 12 tests、全套 42 files / 208 tests 通過。未清除既有資料，手機視覺驗收待確認。AGENTS.md、next-env.d.ts 既有修改不動。

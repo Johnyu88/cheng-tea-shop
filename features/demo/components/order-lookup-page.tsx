@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { demoApi, type DemoChallenge, type DemoLookup } from "../demo-api";
 import { demoCheckoutSuccessStorageKey } from "./demo-checkout-success-page";
+import { DemoOrderProgress } from "./demo-order-progress";
 
 const labels = { confirmed: "訂單成立", packed: "已完成包裝，等待出貨", shipped: "已出貨", delivered: "已送達" } as const;
 type StoredReceipt = { orderId?: string; accessSecret?: string; customerName?: string; phone?: string };
@@ -109,6 +110,7 @@ export function OrderLookupPage() {
       <button className="primary-action mt-6" disabled={busy} onClick={() => void lookup()}>查詢訂單</button>
       <Link className="filter-button mt-4 inline-flex" href="/orders">查詢其他訂單</Link>
       {result && <article className="demo-result"><h2>{labels[result.order.status]}</h2>
+        <DemoOrderProgress order={result.order} />
         <p>付款狀態：{result.order.paymentStatus === "simulated-confirmed" ? "模擬確認" : "待模擬確認"}</p>
         <p>包裝照片：{result.order.packingPhotoId ? "已由店家上傳" : "尚未上傳"}</p>
         <h3>通知紀錄</h3><ul>{result.notifications.map(note => <li key={note.id}>{note.path}：{note.state}</li>)}</ul>

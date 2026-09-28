@@ -1,0 +1,11 @@
+.progress { margin-block: 1.25rem; padding: 1rem; background: #fff; color: #20352e; border: 1px solid #bdcfc5; border-radius: 1rem; }
+.heading { font-size: 1.15rem; font-weight: 750; margin: 0 0 .3rem; }
+.legend,.note { margin: .25rem 0 .75rem; font-size: .88rem; line-height: 1.5; }
+.note { margin: .75rem 0 0; }
+.steps { display: grid; grid-template-columns: repeat(auto-fit,minmax(145px,1fr)); gap: .6rem; padding: 0; margin: 0; list-style: none; }
+.step { display: grid; grid-template-columns: 17px 1fr; gap: .2rem .5rem; align-items: center; border: 1px solid #d1d9d4; border-radius: .65rem; padding: .6rem; font-size: .92rem; background: #f8faf8; }
+.step strong { grid-column: 2; font-size: .8rem; font-weight: 700; }
+.complete,.pending { width: 15px; height: 15px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 0 1px #42554b; }
+.complete { background: #188348; }
+.pending { background: #cf3434; }
+@media (max-width: 560px) { .steps { grid-template-columns: 1fr; } .step { grid-template-columns: 18px 1fr auto; } .step strong { grid-column: 3; } }
