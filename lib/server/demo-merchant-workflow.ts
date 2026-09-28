@@ -8,6 +8,7 @@ type Outbox = {
 };
 type Options = { orders: DemoOrderService; outbox: Outbox; privatePhotoDirectory: string };
 type ActionResult = { order: DemoOrderSnapshot; notifications: DemoOutboxEntry[] };
+type LookupSecretRotation = { order: DemoOrderSnapshot; accessSecret: string };
 
 export class DemoMerchantNotificationError extends Error {
   constructor(readonly orderId: string, readonly status: DemoOrderStatus) {
@@ -53,6 +54,11 @@ export function createDemoMerchantWorkflow({ orders, outbox, privatePhotoDirecto
     listOrders(cookieHeader: string | null): DemoOrderSnapshot[] {
       authorize(cookieHeader);
       return orders.listInternalForMerchant();
+    },
+    rotateLookupSecret(cookieHeader: string | null, orderId: string, confirmed: boolean): LookupSecretRotation {
+      find(cookieHeader, orderId);
+      if (confirmed !== true) throw new Error("Merchant identity confirmation required");
+      return orders.rotateLookupSecret(orderId);
     },
     confirmSimulatedPayment(cookieHeader: string | null, orderId: string): DemoOrderSnapshot {
       find(cookieHeader, orderId);

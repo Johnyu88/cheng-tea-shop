@@ -36,6 +36,20 @@ describe("demo order service", () => {
     expect(service.lookup("DEMO-missing", a.accessSecret)).toBeNull();
   });
 
+  test("rotates the lookup secret, invalidates the old one, and preserves the order snapshot", () => {
+    const service = createDemoOrderService();
+    const original = service.create(cart);
+    service.recordPackingPhoto(original.orderId, "photo-rotate-1");
+    const before = service.lookup(original.orderId, original.accessSecret)!;
+    const rotated = service.rotateLookupSecret(original.orderId);
+
+    expect(rotated.accessSecret).toMatch(/^[0-9a-f]{64}$/);
+    expect(rotated.accessSecret).not.toBe(original.accessSecret);
+    expect(service.lookup(original.orderId, original.accessSecret)).toBeNull();
+    expect(service.lookup(original.orderId, rotated.accessSecret)).toEqual(before);
+    expect(JSON.stringify(service.listInternalForMerchant())).not.toContain(rotated.accessSecret);
+  });
+
   test("stores only product and status snapshot, never contact or payment details", () => {
     const service = createDemoOrderService();
     const mutableCart = structuredClone(cart);
@@ -128,6 +142,35 @@ describe("demo order service", () => {
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
+  });
+
+  test("failed secret rotation rolls the digest back", () => {
+    let saves = 0;
+    const service = createDemoOrderService({
+      load: () => [],
+      save: () => { saves += 1; if (saves > 1) throw new Error("simulated persistence failure"); },
+    });
+    const original = service.create(cart);
+    expect(() => service.rotateLookupSecret(original.orderId)).toThrow("persistence failure");
+    expect(service.lookup(original.orderId, original.accessSecret)?.status).toBe("confirmed");
+    expect(service.listInternalForMerchant()[0]?.status).toBe("confirmed");
+  });
+
+  test("rotated secret survives SQLite reopen without changing status", () => {
+    const dir = mkdtempSync(join(tmpdir(), "demo-rotate-"));
+    const path = join(dir, "orders.sqlite");
+    try {
+      const first = createSqliteDemoOrderService(path);
+      const original = first.create(cart);
+      first.recordPackingPhoto(original.orderId, "photo-rotate-2");
+      const rotated = first.rotateLookupSecret(original.orderId);
+      first.close();
+      const reopened = createSqliteDemoOrderService(path);
+      expect(reopened.lookup(original.orderId, original.accessSecret)).toBeNull();
+      expect(reopened.lookup(original.orderId, rotated.accessSecret)).toMatchObject({ status: "packed", packingPhotoId: "photo-rotate-2" });
+      expect(reopened.listInternalForMerchant()[0]?.status).toBe("packed");
+      reopened.close();
+    } finally { rmSync(dir, { recursive: true, force: true }); }
   });
 
   test("SQLite reopening refuses wrong and corrupted lookup digests", () => {

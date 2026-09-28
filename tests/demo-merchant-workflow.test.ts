@@ -56,6 +56,21 @@ describe("authenticated local demo merchant workflow", () => {
       expect(f.outbox.list(orderId)).toEqual([]);
     } finally { f.outbox.close(); f.orders.close(); }
   });
+  test("requires explicit identity confirmation and rotates only for an authenticated merchant", () => {
+    const f = fixture();
+    try {
+      const original = f.orders.create(cart);
+      expect(() => f.workflow.rotateLookupSecret(null, original.orderId, true)).toThrow("access denied");
+      expect(() => f.workflow.rotateLookupSecret(f.cookie, original.orderId, false)).toThrow("confirmation required");
+      expect(f.orders.lookup(original.orderId, original.accessSecret)?.status).toBe("confirmed");
+
+      const rotated = f.workflow.rotateLookupSecret(f.cookie, original.orderId, true);
+      expect(rotated.accessSecret).toMatch(/^[0-9a-f]{64}$/);
+      expect(f.orders.lookup(original.orderId, original.accessSecret)).toBeNull();
+      expect(f.orders.lookup(original.orderId, rotated.accessSecret)?.status).toBe("confirmed");
+      expect(JSON.stringify(f.workflow.listOrders(f.cookie))).not.toContain(rotated.accessSecret);
+    } finally { f.outbox.close(); f.orders.close(); }
+  });
   test("photo stays bound to its order; payment and photo gate manual shipping", async () => {
     const f = fixture();
     try {

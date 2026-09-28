@@ -38,6 +38,7 @@ type StoredOrder = {
 export interface DemoOrderService {
   create(cart: Cart): { orderId: string; accessSecret: string };
   lookup(orderId: string, accessSecret: string): DemoOrderSnapshot | null;
+  rotateLookupSecret(orderId: string): { order: DemoOrderSnapshot; accessSecret: string };
   /** Internal merchant view; callers must enforce merchant authentication before invoking. */
   listInternalForMerchant(): DemoOrderSnapshot[];
   /** Synthetic only: no payment gateway, charge, or financial confirmation. */
@@ -81,12 +82,14 @@ export const createDemoOrderService = (persistence?: DemoOrderPersistence): Demo
   });
   const mutate = (order: StoredOrder, change: () => void) => {
     const before = clone(order.snapshot);
+    const secretDigest = Buffer.from(order.secretDigest);
     const notifications = new Map(order.notifications);
     try {
       change();
       save(order);
     } catch (error) {
       order.snapshot = before;
+      order.secretDigest = secretDigest;
       order.notifications = notifications;
       throw error;
     }
@@ -115,6 +118,12 @@ export const createDemoOrderService = (persistence?: DemoOrderPersistence): Demo
       const order = orders.get(orderId);
       if (!order || order.secretDigest.length !== 32 || !timingSafeEqual(order.secretDigest, digest(accessSecret))) return null;
       return clone(order.snapshot);
+    },
+    rotateLookupSecret(orderId) {
+      const order = checked(orders, orderId);
+      const accessSecret = randomBytes(32).toString("hex");
+      mutate(order, () => { order.secretDigest = digest(accessSecret); });
+      return { order: clone(order.snapshot), accessSecret };
     },
     listInternalForMerchant() {
       return [...orders.values()].map(order => clone(order.snapshot)).sort((a, b) =>
