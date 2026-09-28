@@ -56,3 +56,22 @@ it("blocks OTP before a missing order credential is restored, without a request"
   expect(button).toBeEnabled();
   expect(issue).not.toHaveBeenCalled();
 });
+
+it("restores a matching tab receipt using the explicit recovery action without bypassing OTP", () => {
+  render(<OrderLookupPage />);
+  window.sessionStorage.setItem(demoCheckoutSuccessStorageKey, JSON.stringify({
+    orderId: "DEMO-12345678-1234-1234-1234-123456789abc", accessSecret: "recovered-secret",
+    customerName: "Yu", phone: "0912000000",
+  }));
+  fireEvent.click(screen.getByRole("button", { name: "重新載入本分頁訂單資料" }));
+  expect(screen.getByDisplayValue("recovered-secret")).toHaveValue("recovered-secret");
+  expect(screen.getByRole("button", { name: "取得查單驗證碼" })).toBeEnabled();
+  expect(screen.queryByText(/訂單成立/)).not.toBeInTheDocument();
+});
+
+it("does not invent a missing credential during recovery", () => {
+  render(<OrderLookupPage />);
+  fireEvent.click(screen.getByRole("button", { name: "重新載入本分頁訂單資料" }));
+  expect(screen.getByText(/本分頁沒有可恢復的完整查單憑證/)).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "取得查單驗證碼" })).toBeDisabled();
+});

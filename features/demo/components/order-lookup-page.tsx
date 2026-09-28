@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { demoApi, type DemoChallenge, type DemoLookup } from "../demo-api";
 import { demoCheckoutSuccessStorageKey } from "./demo-checkout-success-page";
 
@@ -34,6 +34,37 @@ export function OrderLookupPage() {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [advanced, setAdvanced] = useState(!orderId || !accessSecret);
+  const [recoveryMessage, setRecoveryMessage] = useState("");
+  const restoreReceipt = () => {
+    const recovered = getReceipt(orderParam);
+    if (!recovered.orderId || !recovered.accessSecret) {
+      setRecoveryMessage("本分頁沒有可恢復的完整查單憑證。請展開「其他裝置查單／進階資訊」填入自行保存的資料；若已遺失查詢密語，請聯絡店家協助。");
+      setAdvanced(true);
+      return;
+    }
+    setOrderId(recovered.orderId);
+    setAccessSecret(recovered.accessSecret);
+    setCustomerName(recovered.customerName ?? "");
+    const recoveredPhone = recovered.phone ?? "0912000000";
+    setPhone(recoveredPhone);
+    setLastThree(recoveredPhone.slice(-3));
+    setChallenge(undefined);
+    setCode("");
+    setResult(undefined);
+    setError("");
+    setAdvanced(false);
+    setRecoveryMessage("已重新帶入本分頁訂單資料，請重新取得一次性驗證碼。");
+  };
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      const recovered = getReceipt(orderParam);
+      if (recovered.orderId && recovered.accessSecret && !accessSecret) restoreReceipt();
+    }, 0);
+    return () => window.clearTimeout(timer);
+    // Restore after hydration; never fetch a credential from the server or URL.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [orderParam]);
+
   const issue = async () => {
     try {
       if (!orderId.trim() || !accessSecret.trim()) throw new Error("這個瀏覽器分頁沒有完整查單憑證。請回到原下單分頁，或在「進階資訊」填入當時自行保存的訂單編號與憑證；未取得前不會消耗驗證碼次數。");
@@ -59,6 +90,8 @@ export function OrderLookupPage() {
       <h1>查詢訂單</h1>
       <Link className="filter-button mt-4 inline-flex" href="/">返回首頁</Link>
       {error && <div role="alert" className="product-draft-alert"><p>{error}</p>{challenge && <button className="filter-button mt-3" type="button" disabled={busy} onClick={() => void issue()}>重新取得驗證碼</button>}<p className="mt-3">若仍無法查詢，請確認訂單編號、查詢密語、訂購人姓名與手機末三碼；查詢密語遺失時請聯絡店家協助。</p></div>}
+      <button className="filter-button mt-4" type="button" onClick={restoreReceipt}>重新載入本分頁訂單資料</button>
+      {recoveryMessage && <p role="status" className="prototype-notice mt-3">{recoveryMessage}</p>}
       {receipt.orderId && receipt.accessSecret && <p role="status">已帶入這個分頁剛才的訂單資料，不必複製查單憑證。</p>}
       {(!orderId || !accessSecret) && <p role="status" className="prototype-notice">目前尚無完整查單憑證。請使用原下單分頁，或展開「其他裝置查單／進階資訊」填入自己保存的資料。先補齊憑證，再取得 OTP；姓名與手機末三碼無法取代憑證。</p>}
       <label className="form-field mt-6">顧客姓名<input className="form-input" autoComplete="name" value={customerName} onChange={e => setCustomerName(e.target.value)} /></label>
