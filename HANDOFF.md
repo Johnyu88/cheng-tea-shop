@@ -554,3 +554,12 @@ Follow `RESUME_PROMPT.md`, `AGENTS.md`, and `WORKFLOW.md`. If newer explicit use
 - edea 3013 LAN dev server 已恢復並讀到既有 catalog 8 件 published；沿用 .demo-data/lan-demo-third-round-final-2，不重建 catalog、orders 或 outbox；非正式對外部署。
 - 待游老師實體手機確認：同分頁下單查詢、新分頁缺憑證復原、查詢另一筆、返回首頁、店家包裝及出貨。正式付款、簡訊、Email/Web Push、ERP 仍未啟用。
 - AGENTS.md 和 next-env.d.ts 是進場前未提交的環境變更，本階段不修改、不 stage、不 commit。
+
+
+## 2026-09-28 店家協助補發查單密語（待手機實機驗收）
+
+- 游老師手機已驗收：顧客下單、OTP 查單、店家模擬付款、上傳包裝照片、確認出貨。原訂單 DEMO-a2afefc2-e142-4469-b8b4-fe82afdd6ff5 在店家端為 shipped；顧客端刷新後 sessionStorage 遺失查單密語，無法驗證同步狀態，不能視為顧客端出貨查詢通過。
+- 已加同分頁憑證重新讀取；若瀏覽器憑證真的遺失，必須由店家先以其他方式核對顧客身分，再於本機 Demo 店家已登入畫面針對單一訂單手動確認並輪替查單密語。舊密語立即失效，新的 32-byte random 密語只在授權回應和當次店家頁面顯示，不能從雜湊還原。回應 no-store，畫面可選取及複製；請勿透過公開聊天傳遞。正式網站尚未實作此功能。
+- 顧客仍需使用訂單編號、完整合成手機號碼、姓名、更新後的查單密語及獨立 OTP；沒有姓名與末三碼直接繞過的捷徑。補發不改付款、出貨、包裝照片或通知紀錄，不自動寄送任何訊息。
+- Codex 交付 commit 78ed6a0，補強 no-store 與可選取密語的兩個檔案尚需本輪單獨提交。獨立驗證：TypeScript 通過；focused 3 files / 22 tests；全套 41 files / 205 tests 通過（Vitest 限定 threads、單 worker，避開 Windows spawn EPERM）。尚未執行真人手機補發/重新查單驗收；不能宣稱端到端完成。
+- 原本 AGENTS.md、next-env.d.ts 未提交修改保留；沒有清除或重建既有 .demo-data；沒有正式金流、物流、Email、推送。店家登入憑證保留在本機私有檔，勿發到聊天。

@@ -124,7 +124,11 @@ export function AdminOrdersPage() {
               <button className="filter-button mt-3" disabled={busy || confirmedOrderId !== order.orderId} onClick={() => void rotate(order.orderId)}>更新查詢憑證</button>
               {rotation?.orderId === order.orderId && <div role="status" className="prototype-notice mt-3">
                 <p>新憑證只顯示一次，請手動交給已確認身分的顧客；離開此頁、重新整理或進行其他操作後會清除。</p>
-                <p><strong>{rotation.accessSecret}</strong></p>
+                <label className="form-field mt-3">補發查單密語（只限已核對身分的店家查看）
+                  <textarea className="form-input" readOnly rows={3} spellCheck={false} autoComplete="off"
+                    value={rotation.accessSecret} onFocus={e => e.currentTarget.select()} onClick={e => e.currentTarget.select()} />
+                </label>
+                <p className="muted">若瀏覽器無法自動複製，可長按上方欄位選取全部，再複製；請勿拍照或傳到公開訊息。</p>
                 <button className="text-button" type="button" onClick={() => void copyRotation()}>複製新憑證</button>
                 {copyMessage && <p role="status">{copyMessage}</p>}
               </div>}

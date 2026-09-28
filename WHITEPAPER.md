@@ -659,3 +659,11 @@ The generated hero images are not a substitute for store-approved photography. T
 - edea 3013 LAN dev server 已恢復並讀到既有 catalog 8 件 published；沿用 .demo-data/lan-demo-third-round-final-2，不重建 catalog、orders 或 outbox；非正式對外部署。
 - 待游老師實體手機確認：同分頁下單查詢、新分頁缺憑證復原、查詢另一筆、返回首頁、店家包裝及出貨。正式付款、簡訊、Email/Web Push、ERP 仍未啟用。
 - AGENTS.md 和 next-env.d.ts 是進場前未提交的環境變更，本階段不修改、不 stage、不 commit。
+
+
+## 58. 2026-09-28 查單憑證遺失時的 Demo 店家人工補發
+
+- 原始查單密語僅存雜湊，無法找回明文；採單筆隨機密語輪替，舊密語失效、持久化失敗回滾，不變更訂單狀態與通知。
+- 補發只接受通過現有 HttpOnly 店家 session 驗證且明確勾選「已透過店外方式確認顧客身分」的操作。密語只在當次授權 API 回應／店家介面顯示，禁止 URL、public list、日誌、localStorage 或通知；回應 Cache-Control: no-store。顧客後續仍須完整身份資料、密語及 OTP。
+- 這是合成資料／LAN Demo；正式上線前須另設可稽核的核身、交付方式、權限、撤銷/重放與資安審核，不能直接沿用勾選框作為真實身分驗證。
+- 2026-09-28 程式驗證：41 files / 205 tests、tsc passed；實機補發與顧客已出貨同步仍待驗收。原有茶行資料未重建。
