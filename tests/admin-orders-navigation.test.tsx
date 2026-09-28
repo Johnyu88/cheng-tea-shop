@@ -19,3 +19,15 @@ it("shows and hides the local demo password without submitting or changing it", 
   fireEvent.click(screen.getByRole("button", { name: "隱藏密碼" }));
   expect(field).toHaveAttribute("type", "password");
 });
+
+
+it("shows only credential length and ignores pasted outer whitespace without exposing value", () => {
+  render(<AdminOrdersPage />);
+  const field = screen.getByLabelText("獨立店家 Demo 密碼");
+  const submit = screen.getByRole("button", { name: "確認店家身分" });
+  expect(submit).toBeDisabled();
+  fireEvent.change(field, { target: { value: " " + "a".repeat(64) + "\n" } });
+  expect(screen.getByText(/64\/64 個字元/)).toBeInTheDocument();
+  expect(screen.getByText(/已自動忽略前後空白/)).toBeInTheDocument();
+  expect(submit).toBeEnabled();
+});
