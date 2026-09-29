@@ -23,12 +23,12 @@ function getReceipt(orderParam: string): StoredReceipt {
 export function OrderLookupPage() {
   const params = useSearchParams();
   const orderParam = params.get("order") ?? "";
-  const [receipt] = useState(() => getReceipt(orderParam));
-  const [orderId, setOrderId] = useState(orderParam || receipt.orderId || "");
-  const [accessSecret, setAccessSecret] = useState(() => receipt.accessSecret ?? "");
-  const [customerName, setCustomerName] = useState(() => receipt.customerName ?? "");
-  const [phone, setPhone] = useState(() => receipt.phone ?? "0912000000");
-  const [lastThree, setLastThree] = useState(() => (receipt.phone ?? "0912000000").slice(-3));
+  const [receipt, setReceipt] = useState<StoredReceipt>({});
+  const [orderId, setOrderId] = useState(orderParam);
+  const [accessSecret, setAccessSecret] = useState("");
+  const [customerName, setCustomerName] = useState("");
+  const [phone, setPhone] = useState("0912000000");
+  const [lastThree, setLastThree] = useState("000");
   const [challenge, setChallenge] = useState<DemoChallenge>();
   const [code, setCode] = useState("");
   const [result, setResult] = useState<DemoLookup>();
@@ -43,6 +43,7 @@ export function OrderLookupPage() {
       setAdvanced(true);
       return;
     }
+    setReceipt(recovered);
     setOrderId(recovered.orderId);
     setAccessSecret(recovered.accessSecret);
     setCustomerName(recovered.customerName ?? "");

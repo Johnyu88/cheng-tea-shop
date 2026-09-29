@@ -7,6 +7,7 @@ const baseURL = process.env.DEMO_BASE_URL ?? `http://127.0.0.1:${port}`;
 
 export default defineConfig({
   testDir: "./e2e-demo",
+  workers: 1,
   reporter: "line",
   use: { baseURL, trace: "on-first-retry" },
   webServer: {

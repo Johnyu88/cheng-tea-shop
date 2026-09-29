@@ -73,7 +73,8 @@ describe("local-only demo commerce", () => {
       ...home.draft, phone: "0912000001" } })).toThrow("contact");
     expect(approved.service.placeOrder({ ...approved.request, draft: {
       ...home.draft, paymentMethod: "line-voice-confirmation" } }).orderId).toMatch(/^DEMO-/);
-    expect(approved.service.placeOrder({ ...approved.request, draft: home.draft }).orderId).toMatch(/^DEMO-/);
+    const approvedAgain = setup(address => address === "台北市中正區測試路 1 號");
+    expect(approvedAgain.service.placeOrder({ ...approvedAgain.request, draft: home.draft }).orderId).toMatch(/^DEMO-/);
   });
   test("returns order access even if simulated notification queue fails after create", () => {
     const underlying = createDemoOrderService();

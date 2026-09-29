@@ -9,20 +9,20 @@ test("mobile synthetic order closes customer and merchant status loop", async ({
   await expect(page.getByRole("button", { name: "返回上一頁" })).toBeVisible();
   await expect(page.getByRole("link", { name: "繼續購買" })).toHaveAttribute("href", "/#catalog");
   await page.getByRole("link", { name: "前往結帳" }).click();
-  await expect(page.getByRole("link", { name: "取消本次結帳" })).toHaveAttribute("href", "/cart");
+  await expect(page.getByRole("link", { name: "返回購物車" })).toHaveAttribute("href", "/cart");
 
   await expect(page.getByRole("heading", { name: "身分確認" })).toBeVisible();
   await page.getByLabel("姓名").fill("合成顧客");
   await page.getByLabel("合成手機").fill("0912000001");
   await page.getByLabel("Email（選填，僅模擬通知）").fill("demo@example.test");
   await page.getByRole("button", { name: "取得合成驗證碼" }).click();
-  await expect(page.getByRole("status")).toContainText("123456");
+  await expect(page.getByText("本機驗證碼：", { exact: false })).toContainText("123456");
   await page.getByLabel("驗證碼").fill("000000");
   await page.getByRole("button", { name: "下一步" }).click();
   await expect(page.locator("div[role=alert]").filter({ hasText: "驗證碼" })).toBeVisible();
   await page.getByLabel("驗證碼").fill("123456");
   await page.getByRole("button", { name: "下一步" }).click();
-  await expect(page.getByRole("heading", { name: "配送與地址" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "配送與付款" })).toBeVisible();
   await page.getByRole("button", { name: "下一步" }).click();
   await page.getByRole("button", { name: "建立示範訂單" }).click();
   await expect(page).toHaveURL(/\/checkout\/success\?order=DEMO-/);
@@ -49,10 +49,10 @@ test("mobile synthetic order closes customer and merchant status loop", async ({
   await page.getByRole("button", { name: "模擬成功" }).first().click();
 
   await page.goto(lookupHref!);
-  await page.getByLabel("合成手機").fill("0912000001");
-  await page.getByLabel("手機後三碼").fill("001");
+  await page.getByLabel("顧客姓名").fill("合成顧客");
+  await page.getByLabel("手機末三碼").fill("001");
   await page.getByRole("button", { name: "取得查單驗證碼" }).click();
-  await expect(page.getByRole("status")).toContainText("123456");
+  await expect(page.getByText("本機驗證碼：", { exact: false })).toContainText("123456");
   await page.getByLabel("驗證碼").fill("123456");
   await page.getByRole("button", { name: "查詢訂單" }).click();
   await expect(page.getByRole("heading", { name: "已送達" })).toBeVisible();
