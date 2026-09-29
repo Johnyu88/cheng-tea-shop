@@ -33,15 +33,19 @@ test("mobile synthetic order closes customer and merchant status loop", async ({
   expect(lookupHref).not.toContain("token=");
 
   await page.goto("/admin/orders");
-  await page.getByLabel("獨立店家 Demo 密碼").fill(merchantSecret);
-  await page.getByRole("button", { name: "確認店家身分" }).click();
-  await expect(page.getByRole("heading", { name: "訂單成立" })).toBeVisible();
-  await page.getByRole("button", { name: "模擬付款確認" }).click();
+  await page.getByLabel("商家 Demo 憑證").fill(merchantSecret);
+  await page.getByRole("button", { name: "登入商家 Demo" }).click();
+  const orderCard = page.locator(".demo-order-card").filter({ hasText: lookupHref!.match(/DEMO-[^&]+/)?.[0] ?? "" }).first();
+  await expect(orderCard).toBeVisible();
+  await expect(orderCard).toContainText("待人工確認");
+  await orderCard.getByRole("button", { name: "人工確認付款" }).click();
   const png = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=", "base64");
-  await page.getByLabel("店家包裝照片").setInputFiles({ name: "packing.png", mimeType: "image/png", buffer: png });
-  await expect(page.getByRole("heading", { name: "已包裝／待出貨" })).toBeVisible();
-  await page.getByRole("button", { name: "人工確認出貨" }).click();
-  await expect(page.getByRole("heading", { name: "已出貨" })).toBeVisible();
+  await orderCard.getByLabel("打包照片").setInputFiles({ name: "packing.png", mimeType: "image/png", buffer: png });
+  await expect(orderCard).toContainText("已打包");
+  await orderCard.getByRole("button", { name: "人工確認出貨" }).click();
+  await expect(orderCard).toContainText("已出貨");
+  await orderCard.getByRole("button", { name: "模擬送達" }).click();
+  await expect(orderCard).toContainText("已送達");
   await page.getByRole("button", { name: "模擬成功" }).first().click();
 
   await page.goto(lookupHref!);
@@ -51,7 +55,7 @@ test("mobile synthetic order closes customer and merchant status loop", async ({
   await expect(page.getByRole("status")).toContainText("123456");
   await page.getByLabel("驗證碼").fill("123456");
   await page.getByRole("button", { name: "查詢訂單" }).click();
-  await expect(page.getByRole("heading", { name: "已出貨" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "已送達" })).toBeVisible();
   await expect(page.getByText("包裝照片：已由店家上傳")).toBeVisible();
   await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(412);
 });

@@ -44,10 +44,8 @@ function validateDraft(value: unknown, phone: string, reviewAddress?: (address: 
   if (assessment.status === "invalid" || (assessment.status === "needs-review" && !reviewAddress?.(assessment.normalized))) {
     throw new Error("Address requires review");
   }
-  if (value.deliveryMethod === "store-pickup"
-    ? !["pay-at-store", "credit-card", "line-pay"].includes(String(value.paymentMethod))
-    : !["credit-card", "line-pay"].includes(String(value.paymentMethod))) {
-    throw new Error("Invalid simulated payment choice");
+  if (!["bank-transfer", "cash", "phone-confirmation", "line-voice-confirmation"].includes(String(value.paymentMethod))) {
+    throw new Error("Invalid traditional payment choice");
   }
 }
 function authoritativeCart(lines: unknown, products: Product[] = mockCatalogFixture): Cart {
@@ -103,7 +101,7 @@ export function createLocalDemoCommerce({ otp, orders, reviewAddress, catalogPro
       validateDraft(data.draft, phone, reviewAddress);
       const cart = authoritativeCart(data.lines, catalogProducts?.() ?? mockCatalogFixture);
       if (!otp.verify(phone, data.challengeId, data.code)) throw new Error("OTP verification failed");
-      const receipt = orders.create(cart);
+      const receipt = orders.create(cart, data.draft.paymentMethod);
       let notificationStatus: "simulated-queued" | "queue-failed" = "simulated-queued";
       try {
         orders.queueNotification(receipt.orderId, "confirmed", "customer");

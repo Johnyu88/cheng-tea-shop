@@ -109,12 +109,12 @@ export function AdminOrdersPage() {
           {orders.map(({ order, notifications }) => <article className="demo-order-card" key={order.orderId}>
             <h2>{statusLabel[order.status]}</h2><p>{order.orderId}</p>
             <DemoOrderProgress order={order} />
-            <p>付款：{order.paymentStatus === "simulated-confirmed" ? "已模擬確認" : "待模擬確認"}</p>
-            {order.paymentStatus === "pending" && <button className="filter-button" disabled={busy} onClick={() => void act(order.orderId, "confirm-payment")}>模擬確認付款</button>}
+            <p>付款：{order.paymentStatus === "manual-confirmed" ? "已人工確認" : "待人工確認"}</p>
+            {order.paymentStatus === "pending-manual-verification" && <button className="filter-button" disabled={busy} onClick={() => void act(order.orderId, "confirm-payment")}>人工確認付款</button>}
             {order.status === "confirmed" && <label className="form-field mt-4">打包照片
               <input className="form-input" type="file" accept="image/jpeg,image/png,image/webp" capture="environment" onChange={e => void photo(order.orderId, e.target.files?.[0])} />
             </label>}
-            {order.status === "packed" && <button className="primary-action mt-4" disabled={busy || order.paymentStatus !== "simulated-confirmed"} onClick={() => void act(order.orderId, "ship")}>模擬出貨</button>}
+            {order.status === "packed" && <button className="primary-action mt-4" disabled={busy || order.paymentStatus !== "manual-confirmed"} onClick={() => void act(order.orderId, "ship")}>人工確認出貨</button>}
             {order.status === "shipped" && <button className="primary-action mt-4" disabled={busy} onClick={() => void act(order.orderId, "deliver")}>模擬送達</button>}
             <section className="mt-6" aria-labelledby={`recovery-${order.orderId}`}>
               <h3 id={`recovery-${order.orderId}`}>遺失查詢憑證</h3>

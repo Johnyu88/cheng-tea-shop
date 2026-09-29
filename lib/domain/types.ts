@@ -93,7 +93,7 @@ export type CheckoutDraft = {
   email?: string;
   deliveryMethod: "home-delivery" | "store-pickup";
   address?: string;
-  paymentMethod: "credit-card" | "line-pay" | "pay-at-store";
+  paymentMethod: "bank-transfer" | "cash" | "phone-confirmation" | "line-voice-confirmation";
 };
 
 export type CheckoutReceipt = {

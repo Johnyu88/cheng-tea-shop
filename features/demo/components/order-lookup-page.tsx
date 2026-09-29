@@ -111,7 +111,8 @@ export function OrderLookupPage() {
       <Link className="filter-button mt-4 inline-flex" href="/orders">查詢其他訂單</Link>
       {result && <article className="demo-result"><h2>{labels[result.order.status]}</h2>
         <DemoOrderProgress order={result.order} />
-        <p>付款狀態：{result.order.paymentStatus === "simulated-confirmed" ? "模擬確認" : "待模擬確認"}</p>
+        <p>付款方式：{({ "bank-transfer": "銀行轉帳", cash: "現金", "phone-confirmation": "電話確認", "line-voice-confirmation": "LINE 語音確認" } as const)[result.order.paymentMethod]}</p>
+        <p>付款狀態：{result.order.paymentStatus === "manual-confirmed" ? "已人工確認" : "待人工確認"}</p>
         <p>包裝照片：{result.order.packingPhotoId ? "已由店家上傳" : "尚未上傳"}</p>
         <h3>通知紀錄</h3><ul>{result.notifications.map(note => <li key={note.id}>{note.path}：{note.state}</li>)}</ul>
         <h3>手機推送預覽（未送出）</h3><p><strong>{result.mobilePushPreview.title}</strong><br />{result.mobilePushPreview.body}</p>

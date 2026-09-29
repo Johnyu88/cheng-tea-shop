@@ -33,13 +33,8 @@ export const createMockCheckoutService = (
     }
     const address = assessDemoAddress(draft.deliveryMethod, draft.address);
     if (address.status === "invalid") return invalid(address.reason);
-    if (draft.deliveryMethod === "home-delivery") {
-      if (draft.paymentMethod !== "credit-card" && draft.paymentMethod !== "line-pay") {
-        return invalid("宅配請選擇信用卡或 LINE Pay。");
-      }
-    }
-    if (draft.deliveryMethod === "store-pickup" && !["credit-card", "line-pay", "pay-at-store"].includes(draft.paymentMethod)) {
-      return invalid("到店取貨請選擇信用卡、LINE Pay 或到店付款。");
+    if (!["bank-transfer", "cash", "phone-confirmation", "line-voice-confirmation"].includes(draft.paymentMethod)) {
+      return invalid("請選擇銀行轉帳、現金、電話確認或 LINE 語音確認。");
     }
     return { ok: true, value: { ...draft, phone, ...(address.status === "needs-review" ? { address: address.normalized } : {}) } };
   },

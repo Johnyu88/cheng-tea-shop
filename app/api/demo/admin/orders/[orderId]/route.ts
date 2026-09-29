@@ -15,7 +15,7 @@ export async function POST(request: Request, { params }: Context) {
     if (body.action === "rotate-lookup-secret") {
       return demoSuccess(runtime.merchant.rotateLookupSecret(cookie, orderId, body.confirmed === true), { headers: { "Cache-Control": "no-store" } });
     }
-    if (body.action === "confirm-payment") return demoSuccess(runtime.merchant.confirmSimulatedPayment(cookie, orderId));
+    if (body.action === "confirm-payment") return demoSuccess(runtime.merchant.confirmManualPayment(cookie, orderId));
     if (body.action === "ship") return demoSuccess(runtime.merchant.markShipped(cookie, orderId));
     if (body.action === "deliver") return demoSuccess(runtime.merchant.markDelivered(cookie, orderId));
     if (body.action === "simulate-notification" && typeof body.notificationId === "string"

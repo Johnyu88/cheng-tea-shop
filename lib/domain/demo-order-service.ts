@@ -7,7 +7,8 @@ export type DemoOrderLine = Pick<Cart["lines"][number], "productId" | "variantId
 export type DemoOrderSnapshot = {
   orderId: string;
   status: DemoOrderStatus;
-  paymentStatus: "pending" | "simulated-confirmed";
+  paymentMethod: "bank-transfer" | "cash" | "phone-confirmation" | "line-voice-confirmation";
+  paymentStatus: "pending-manual-verification" | "manual-confirmed";
   lines: DemoOrderLine[];
   total: { currency: "TWD"; amount: number };
   packingPhotoId: string | null;
@@ -36,13 +37,13 @@ type StoredOrder = {
   notifications: Map<string, DemoNotification>;
 };
 export interface DemoOrderService {
-  create(cart: Cart): { orderId: string; accessSecret: string };
+  create(cart: Cart, paymentMethod?: DemoOrderSnapshot["paymentMethod"]): { orderId: string; accessSecret: string };
   lookup(orderId: string, accessSecret: string): DemoOrderSnapshot | null;
   rotateLookupSecret(orderId: string): { order: DemoOrderSnapshot; accessSecret: string };
   /** Internal merchant view; callers must enforce merchant authentication before invoking. */
   listInternalForMerchant(): DemoOrderSnapshot[];
   /** Synthetic only: no payment gateway, charge, or financial confirmation. */
-  confirmSimulatedPayment(orderId: string): void;
+  confirmManualPayment(orderId: string): void;
   recordPackingPhoto(orderId: string, photoId: string): void;
   markShipped(orderId: string): void;
   markDelivered(orderId: string): void;
@@ -70,8 +71,10 @@ export const createDemoOrderService = (persistence?: DemoOrderPersistence): Demo
   const orders = new Map<string, StoredOrder>();
   for (const record of persistence?.load() ?? []) {
     if (!/^DEMO-[0-9a-f-]{36}$/.test(record.snapshot?.orderId ?? "")) continue;
+    const legacyStatus = (record.snapshot as unknown as { paymentStatus?: string }).paymentStatus;
+    const paymentStatus = legacyStatus === "simulated-confirmed" ? "manual-confirmed" : legacyStatus === "pending" ? "pending-manual-verification" : legacyStatus;
     orders.set(record.snapshot.orderId, {
-      snapshot: clone(record.snapshot),
+      snapshot: { ...clone(record.snapshot), paymentMethod: record.snapshot.paymentMethod ?? "cash", paymentStatus: paymentStatus === "manual-confirmed" ? "manual-confirmed" : "pending-manual-verification" },
       secretDigest: /^[0-9a-f]{64}$/.test(record.secretDigest) ? Buffer.from(record.secretDigest, "hex") : Buffer.alloc(0),
       notifications: new Map(record.notifications.map(item => [`${item.status}:${item.audience}`, { ...item }])),
     });
@@ -95,14 +98,17 @@ export const createDemoOrderService = (persistence?: DemoOrderPersistence): Demo
     }
   };
   return {
-    create(cart) {
+    create(cart, paymentMethod = "cash") {
       if (cart.lines.length === 0 || !Number.isSafeInteger(cart.subtotal.amount) || cart.subtotal.amount < 0) {
         throw new Error("Invalid demo cart");
+      }
+      if (!["bank-transfer", "cash", "phone-confirmation", "line-voice-confirmation"].includes(paymentMethod)) {
+        throw new Error("Invalid traditional payment method");
       }
       const orderId = `DEMO-${randomUUID()}`;
       const accessSecret = randomBytes(32).toString("hex");
       const snapshot: DemoOrderSnapshot = {
-        orderId, status: "confirmed", paymentStatus: "pending",
+        orderId, status: "confirmed", paymentMethod, paymentStatus: "pending-manual-verification",
         lines: cart.lines.map(({ productId, variantId, productName, specification, unitPrice, quantity }) =>
           ({ productId, variantId, productName, specification, unitPrice: { ...unitPrice }, quantity })),
         total: { ...cart.subtotal }, packingPhotoId: null,
@@ -129,12 +135,12 @@ export const createDemoOrderService = (persistence?: DemoOrderPersistence): Demo
       return [...orders.values()].map(order => clone(order.snapshot)).sort((a, b) =>
         b.events[0]!.at.localeCompare(a.events[0]!.at));
     },
-    confirmSimulatedPayment(orderId) {
+    confirmManualPayment(orderId) {
       const order = checked(orders, orderId);
-      if (order.snapshot.paymentStatus !== "pending" || order.snapshot.status === "shipped" || order.snapshot.status === "delivered") {
-        throw new Error("Invalid simulated payment transition");
+      if (order.snapshot.paymentStatus !== "pending-manual-verification" || order.snapshot.status === "shipped" || order.snapshot.status === "delivered") {
+        throw new Error("Invalid manual payment transition");
       }
-      mutate(order, () => { order.snapshot.paymentStatus = "simulated-confirmed"; });
+      mutate(order, () => { order.snapshot.paymentStatus = "manual-confirmed"; });
     },
     recordPackingPhoto(orderId, photoId) {
       // Only an opaque metadata reference; this fake accepts no image bytes or remote URLs.
@@ -148,7 +154,7 @@ export const createDemoOrderService = (persistence?: DemoOrderPersistence): Demo
     },
     markShipped(orderId) {
       const order = checked(orders, orderId);
-      if (order.snapshot.paymentStatus !== "simulated-confirmed") throw new Error("Unpaid demo order cannot ship");
+      if (order.snapshot.paymentStatus !== "manual-confirmed") throw new Error("Unpaid demo order cannot ship");
       mutate(order, () => { transition(order, "packed", "shipped"); });
     },
     markDelivered(orderId) {

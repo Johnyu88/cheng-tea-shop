@@ -567,3 +567,12 @@ Follow `RESUME_PROMPT.md`, `AGENTS.md`, and `WORKFLOW.md`. If newer explicit use
 ## 2026-09-28 顧客與店家共用訂單進度燈號（待手機視覺驗收）
 - 五個固定關卡：訂單成立、模擬付款確認、完成包裝、確認出貨、確認送達；完成綠燈、未完成紅燈，搭配文字。依授權 API 訂單狀態判定，顧客仍需 OTP。通知 queued/preview-only 不視為實際送達。手機單欄版。
 - TypeScript、focused 3 files / 12 tests、全套 42 files / 208 tests 通過。未清除既有資料，手機視覺驗收待確認。AGENTS.md、next-env.d.ts 既有修改不動。
+
+## 2026-09-30 Wave 7 shopping quality gate / issue #17
+
+- Customer payment is now traditional/manual only: bank transfer, cash, phone confirmation, or LINE voice confirmation. Credit-card and LINE Pay integration are not implemented. Orders record the selected method and start as `pending-manual-verification`.
+- Only the authenticated merchant workflow can move an order to `manual-confirmed`; packing photo, shipment, and delivered remain separate states. Customer lookup shows the payment method and manual-payment state through the existing OTP and lookup-secret gates.
+- Mobile checkout visibly includes the four traditional choices and explains the no-charge/manual-confirmation boundary. Primary navigation links are dark, high-contrast pill controls. Existing Catalog Store coverage verifies image replacement persistence across reload; the mobile e2e flow now covers delivered status.
+- Scope guard: no AI image composition, OCR/vision provider, ERP expansion, external payment, real notification, or production deployment was added.
+- Actual verification: `tsc --noEmit` passed; focused ESLint passed with 0 errors and 1 existing Next navigation warning; `git diff --check` passed. Vitest could not start because Vite config bundling hit the known Windows worktree symlink `spawn EPERM`; Turbopack hit the known invalid external `node_modules` symlink panic; `next build --webpack` also hit environment `spawn EPERM`. Full lint still reports only the two pre-existing generated `.demo-data/*.cjs` errors plus existing warnings.
+- GitHub state is `LOCAL_COMMITS_PENDING` until commit/push. Local `gh` and the browser connector could not read PR #15; this is recorded as an external read limitation. Existing uncommitted `AGENTS.md` and `next-env.d.ts` changes remain untouched, unstaged, and uncommitted.

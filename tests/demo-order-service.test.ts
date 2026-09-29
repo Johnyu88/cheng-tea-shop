@@ -18,13 +18,13 @@ const cart: Cart = {
 describe("demo order service", () => {
   test("creates opaque unique orders with independent high entropy lookup secrets", () => {
     const service = createDemoOrderService();
-    const a = service.create(cart);
+    const a = service.create(cart, "line-voice-confirmation");
     const b = service.create(cart);
     expect(a.orderId).not.toEqual(b.orderId);
     expect(a.accessSecret).not.toEqual(b.accessSecret);
     expect(a.accessSecret).toMatch(/^[0-9a-f]{64}$/);
     expect(a.orderId).toMatch(/^DEMO-[0-9a-f-]{36}$/);
-    expect(service.lookup(a.orderId, a.accessSecret)?.status).toBe("confirmed");
+    expect(service.lookup(a.orderId, a.accessSecret)).toMatchObject({ status: "confirmed", paymentMethod: "line-voice-confirmation", paymentStatus: "pending-manual-verification" });
   });
   test("rejects an order number or phone suffix alone, invalid tokens and another order's token", () => {
     const service = createDemoOrderService();
@@ -57,7 +57,7 @@ describe("demo order service", () => {
     mutableCart.lines[0]!.productName = "改名";
     const snapshot = service.lookup(order.orderId, order.accessSecret);
     expect(snapshot?.lines[0]?.productName).toBe("陳年白茶");
-    expect(JSON.stringify(snapshot)).not.toMatch(/0912000000|tea@example.tw|茶行路|credit-card/);
+    expect(JSON.stringify(snapshot)).not.toMatch(/0912000000|tea@example.tw|茶行路|bank-transfer/);
     expect(snapshot?.total).toEqual({ currency: "TWD", amount: 1600 });
     if (snapshot) snapshot.lines[0]!.productName = "破壞";
     expect(service.lookup(order.orderId, order.accessSecret)?.lines[0]?.productName).toBe("陳年白茶");
@@ -68,13 +68,13 @@ describe("demo order service", () => {
     const { orderId, accessSecret } = service.create(cart);
     service.recordPackingPhoto(orderId, "photo-demo-2");
     expect(service.lookup(orderId, accessSecret)?.status).toBe("packed");
-    expect(service.lookup(orderId, accessSecret)?.paymentStatus).toBe("pending");
+    expect(service.lookup(orderId, accessSecret)?.paymentStatus).toBe("pending-manual-verification");
     expect(() => service.markShipped(orderId)).toThrow();
-    service.confirmSimulatedPayment(orderId);
-    expect(service.lookup(orderId, accessSecret)?.paymentStatus).toBe("simulated-confirmed");
+    service.confirmManualPayment(orderId);
+    expect(service.lookup(orderId, accessSecret)?.paymentStatus).toBe("manual-confirmed");
     service.markShipped(orderId);
     expect(service.lookup(orderId, accessSecret)?.status).toBe("shipped");
-    expect(() => service.confirmSimulatedPayment(orderId)).toThrow();
+    expect(() => service.confirmManualPayment(orderId)).toThrow();
   });
 
   test("requires packing photo record before shipment and keeps events in order", () => {
@@ -84,7 +84,7 @@ describe("demo order service", () => {
     service.recordPackingPhoto(order.orderId, "photo-demo-1");
     expect(service.lookup(order.orderId, order.accessSecret)?.status).toBe("packed");
     expect(service.lookup(order.orderId, order.accessSecret)?.packingPhotoId).toBe("photo-demo-1");
-    service.confirmSimulatedPayment(order.orderId);
+    service.confirmManualPayment(order.orderId);
     service.markShipped(order.orderId);
     expect(service.lookup(order.orderId, order.accessSecret)?.status).toBe("shipped");
     service.markDelivered(order.orderId);
@@ -98,7 +98,7 @@ describe("demo order service", () => {
     expect(() => service.recordPackingPhoto(orderId, "")).toThrow();
     service.recordPackingPhoto(orderId, "photo-demo-1");
     expect(() => service.recordPackingPhoto(orderId, "photo-demo-2")).toThrow();
-    service.confirmSimulatedPayment(orderId);
+    service.confirmManualPayment(orderId);
     service.markShipped(orderId);
     expect(() => service.markShipped(orderId)).toThrow();
   });
@@ -114,10 +114,10 @@ describe("demo order service", () => {
       first.close();
       const second = createSqliteDemoOrderService(path);
       expect(second.lookup(orderId, accessSecret)?.packingPhotoId).toBe("photo-demo-3");
-      expect(second.lookup(orderId, accessSecret)?.paymentStatus).toBe("pending");
+      expect(second.lookup(orderId, accessSecret)?.paymentStatus).toBe("pending-manual-verification");
       expect(() => second.markShipped(orderId)).toThrow();
       expect(second.queueNotification(orderId, "packed", "merchant")).toEqual(note);
-      second.confirmSimulatedPayment(orderId);
+      second.confirmManualPayment(orderId);
       second.close();
       const third = createSqliteDemoOrderService(path);
       third.markShipped(orderId);

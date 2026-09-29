@@ -6,7 +6,7 @@ const base = {
   phone: "0912000000",
   deliveryMethod: "home-delivery" as const,
   address: "台北市中正區測試路 1 號",
-  paymentMethod: "credit-card" as const,
+  paymentMethod: "bank-transfer" as const,
 };
 
 describe("demo checkout draft boundary", () => {

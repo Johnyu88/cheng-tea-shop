@@ -38,7 +38,7 @@ export function DemoCheckoutSuccessPage(props: SuccessData): JSX.Element {
   if (!data) return <main className="py-8"><section className="demo-panel"><h1>訂單成功頁</h1><p role="status">正在準備訂單資訊。</p><Link className="primary-action mt-6" href="/">返回首頁</Link></section></main>;
   const lookupHref = `/orders?order=${encodeURIComponent(data.orderId)}`;
   return <main className="py-8"><section className="demo-panel" aria-labelledby="checkout-success-heading">
-    <p className="prototype-notice">這是本機 Demo 的合成訂單結果，不代表真實付款或出貨。</p>
+    <p className="prototype-notice">這是本機 Demo 的合成訂單結果。付款方式為傳統人工確認，訂單目前是「待人工確認」，不代表已收款或出貨。</p>
     <h1 id="checkout-success-heading">感謝您的購買</h1>
     <p>已收到您的示範訂單，店家將依序處理。</p>
     <p>訂單編號：{data.orderId}</p>

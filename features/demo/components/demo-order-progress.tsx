@@ -8,7 +8,7 @@ export function DemoOrderProgress({ order }: { order: Progress }) {
   const shipped = order.status === "shipped" || order.status === "delivered";
   const steps = [
     { label: "訂單成立", complete: true },
-    { label: "付款確認", complete: order.paymentStatus === "simulated-confirmed" },
+    { label: "人工付款確認", complete: order.paymentStatus === "manual-confirmed" },
     { label: "完成包裝", complete: packed && Boolean(order.packingPhotoId) },
     { label: "確認出貨", complete: shipped },
     { label: "確認送達", complete: order.status === "delivered" },

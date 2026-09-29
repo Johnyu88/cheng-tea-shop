@@ -22,13 +22,13 @@ test("requires a phone and rejects an incompatible home-delivery payment", async
     name: "陳小姐",
     phone: "",
     deliveryMethod: "home-delivery",
-    paymentMethod: "credit-card",
+    paymentMethod: "bank-transfer",
   }, cart);
   const incompatible = await service.validate({
     name: "陳小姐",
     phone: "0912000000",
     deliveryMethod: "home-delivery",
-    paymentMethod: "pay-at-store",
+    paymentMethod: "cash",
   }, cart);
   expect(missingPhone).toMatchObject({ ok: false, error: { code: "invalid-draft" } });
   expect(incompatible).toMatchObject({ ok: false, error: { code: "invalid-draft" } });

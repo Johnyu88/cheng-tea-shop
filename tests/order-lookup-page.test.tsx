@@ -31,7 +31,7 @@ it("offers a home link after a successful verified lookup", async () => {
   }));
   vi.spyOn(demoApi, "issueOtp").mockResolvedValue({ challengeId: "challenge", expiresAt: "", demoCode: "123456" });
   vi.spyOn(demoApi, "lookup").mockResolvedValue({
-    order: { status: "confirmed", paymentStatus: "pending" },
+    order: { status: "confirmed", paymentStatus: "pending-manual-verification" },
     notifications: [],
     mobilePushPreview: { title: "茶品訂單已成立", body: "示範訂單", state: "preview-only" },
   } as unknown as DemoLookup);

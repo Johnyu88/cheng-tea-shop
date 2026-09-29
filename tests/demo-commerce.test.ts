@@ -8,7 +8,7 @@ const code = "123456";
 const line = { productId: "mock-tea-001", variantId: "mock-tea-001-variant", quantity: 2 };
 const draft = {
   name: "測試顧客", phone, deliveryMethod: "store-pickup" as const,
-  paymentMethod: "pay-at-store" as const,
+  paymentMethod: "cash" as const,
 };
 const setup = (reviewAddress?: (address: string) => boolean) => {
   const orders = createDemoOrderService();
@@ -58,11 +58,11 @@ describe("local-only demo commerce", () => {
     expect(service.lookup(placed.orderId, placed.accessSecret)?.total.amount).toBe(1020);
     expect(service.lookup(placed.orderId, "000")).toBeNull();
   });
-  test("requires explicit human address review, compatible choice and matching verified phone", () => {
+  test("requires explicit human address review and matching verified phone", () => {
     const { service, request } = setup();
     const home = {
       ...request, draft: {
-        ...draft, deliveryMethod: "home-delivery", paymentMethod: "credit-card",
+        ...draft, deliveryMethod: "home-delivery", paymentMethod: "bank-transfer",
         address: "台北市中正區測試路 1 號",
       },
     };
@@ -71,8 +71,8 @@ describe("local-only demo commerce", () => {
     const approved = setup(address => address === "台北市中正區測試路 1 號");
     expect(() => approved.service.placeOrder({ ...approved.request, draft: {
       ...home.draft, phone: "0912000001" } })).toThrow("contact");
-    expect(() => approved.service.placeOrder({ ...approved.request, draft: {
-      ...home.draft, paymentMethod: "pay-at-store" } })).toThrow("payment");
+    expect(approved.service.placeOrder({ ...approved.request, draft: {
+      ...home.draft, paymentMethod: "line-voice-confirmation" } }).orderId).toMatch(/^DEMO-/);
     expect(approved.service.placeOrder({ ...approved.request, draft: home.draft }).orderId).toMatch(/^DEMO-/);
   });
   test("returns order access even if simulated notification queue fails after create", () => {

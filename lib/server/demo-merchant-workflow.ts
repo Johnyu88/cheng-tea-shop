@@ -60,9 +60,9 @@ export function createDemoMerchantWorkflow({ orders, outbox, privatePhotoDirecto
       if (confirmed !== true) throw new Error("Merchant identity confirmation required");
       return orders.rotateLookupSecret(orderId);
     },
-    confirmSimulatedPayment(cookieHeader: string | null, orderId: string): DemoOrderSnapshot {
+    confirmManualPayment(cookieHeader: string | null, orderId: string): DemoOrderSnapshot {
       find(cookieHeader, orderId);
-      orders.confirmSimulatedPayment(orderId);
+      orders.confirmManualPayment(orderId);
       return find(cookieHeader, orderId);
     },
     async uploadPackingPhoto(cookieHeader: string | null, orderId: string,

@@ -670,3 +670,11 @@ The generated hero images are not a substitute for store-approved photography. T
 
 ## 59. 2026-09-28 訂單進度燈號
 - 顧客與店家共用唯讀五階段進度燈號，完成綠色／未完成紅色，另有明確文字與無障礙標籤。以後端狀態及包裝照片為準；本機 Demo 不代表真實付款、物流或通知送達。顧客須先通過既有密語、OTP。全套 42 files / 208 tests 通過，實機視覺驗收待確認。
+
+## 60. 2026-09-30 Wave 7 shopping quality gate / issue #17
+
+The storefront payment boundary is explicitly traditional and manual: bank transfer, cash, phone confirmation, or LINE voice confirmation. Credit-card and LINE Pay integration are outside the confirmed product scope. Every synthetic order begins in `pending-manual-verification`; an authenticated merchant explicitly moves it to `manual-confirmed` before shipment, while `packed`, `shipped`, and `delivered` remain distinct states.
+
+The mobile demo path is product → cart → three-step checkout → thank-you page → secure order lookup. The selected traditional payment method is persisted in the local synthetic order record and shown on lookup. File-backed image replacement remains the single catalog boundary and is covered by persistence tests. Navigation links used as primary mobile exits use dark, high-contrast controls.
+
+This remains a local synthetic Demo. No AI image composition, image-recognition provider, ERP expansion, external payment service, real notification service, or production deployment was added. TypeScript, focused lint, and diff checks passed for this change; Vitest/build environment failures are documented in `HANDOFF.md` and are not represented as product passes.

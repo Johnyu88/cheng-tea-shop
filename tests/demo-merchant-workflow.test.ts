@@ -45,14 +45,14 @@ describe("authenticated local demo merchant workflow", () => {
       const bad = f.cookie.slice(0, -1) + (f.cookie.endsWith("0") ? "1" : "0");
       expect(() => f.workflow.listOrders(null)).toThrow("access denied");
       expect(() => f.workflow.listOrders(bad)).toThrow("access denied");
-      expect(() => f.workflow.confirmSimulatedPayment(bad, orderId)).toThrow("access denied");
+      expect(() => f.workflow.confirmManualPayment(bad, orderId)).toThrow("access denied");
       expect(() => f.workflow.markShipped(null, orderId)).toThrow("access denied");
       expect(() => f.workflow.markDelivered(bad, orderId)).toThrow("access denied");
       expect(() => f.workflow.reconcileNotifications(null, orderId, "confirmed")).toThrow("access denied");
       await expect(f.workflow.uploadPackingPhoto(null, orderId, "image/jpeg", jpeg)).rejects.toThrow("access denied");
       await expect(f.workflow.readPackingPhoto(null, orderId, "photo-missing")).rejects.toThrow("access denied");
-      expect(() => f.workflow.confirmSimulatedPayment(f.cookie, "DEMO-missing")).toThrow("access denied");
-      expect(f.orders.listInternalForMerchant()[0]?.paymentStatus).toBe("pending");
+      expect(() => f.workflow.confirmManualPayment(f.cookie, "DEMO-missing")).toThrow("access denied");
+      expect(f.orders.listInternalForMerchant()[0]?.paymentStatus).toBe("pending-manual-verification");
       expect(f.outbox.list(orderId)).toEqual([]);
     } finally { f.outbox.close(); f.orders.close(); }
   });
@@ -77,7 +77,7 @@ describe("authenticated local demo merchant workflow", () => {
       const { orderId, accessSecret } = f.orders.create(cart);
       const { orderId: otherId } = f.orders.create(cart);
       expect(() => f.workflow.markShipped(f.cookie, orderId)).toThrow("Unpaid");
-      f.workflow.confirmSimulatedPayment(f.cookie, orderId);
+      f.workflow.confirmManualPayment(f.cookie, orderId);
       expect(() => f.workflow.markShipped(f.cookie, orderId)).toThrow("transition");
       const packed = await f.workflow.uploadPackingPhoto(f.cookie, orderId, "image/jpeg", jpeg);
       expect(packed.order.status).toBe("packed");

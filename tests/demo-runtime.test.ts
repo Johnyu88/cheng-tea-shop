@@ -13,7 +13,7 @@ const draft = {
   phone,
   email: "demo@example.test",
   deliveryMethod: "store-pickup" as const,
-  paymentMethod: "pay-at-store" as const,
+  paymentMethod: "cash" as const,
 };
 const draftWithoutEmail = {
   name: draft.name,

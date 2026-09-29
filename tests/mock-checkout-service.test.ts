@@ -20,7 +20,7 @@ const deliveryDraft = {
   phone: "0912000000",
   deliveryMethod: "home-delivery" as const,
   address: "茶行路 1 號",
-  paymentMethod: "credit-card" as const,
+  paymentMethod: "bank-transfer" as const,
 };
 
 test("requires a non-blank name and phone", async () => {
@@ -73,13 +73,13 @@ test("requires an address for home delivery but not store pickup", async () => {
   }, cart)).resolves.toMatchObject({ ok: true });
 });
 
-test("accepts every approved payment choice for its delivery method", async () => {
+test("accepts every traditional payment choice for either delivery method", async () => {
   const service = createMockCheckoutService();
 
-  for (const paymentMethod of ["credit-card", "line-pay"] as const) {
+  for (const paymentMethod of ["bank-transfer", "cash", "phone-confirmation", "line-voice-confirmation"] as const) {
     await expect(service.validate({ ...deliveryDraft, paymentMethod }, cart)).resolves.toMatchObject({ ok: true });
   }
-  for (const paymentMethod of ["credit-card", "line-pay", "pay-at-store"] as const) {
+  for (const paymentMethod of ["bank-transfer", "cash", "phone-confirmation", "line-voice-confirmation"] as const) {
     await expect(service.validate({
       name: deliveryDraft.name,
       phone: deliveryDraft.phone,
