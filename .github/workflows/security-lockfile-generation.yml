@@ -17,6 +17,10 @@ jobs:
         with:
           node-version: 24.19.0
       - name: Regenerate lockfile with dependency scripts disabled
-        run: pnpm install --lockfile-only --ignore-scripts
+        run: |
+          cp pnpm-lock.yaml /tmp/security-lock-before.yaml
+          pnpm install --lockfile-only --ignore-scripts
       - name: Return generated public lockfile for review
-        run: node -e "process.stdout.write('GENERATED_LOCKFILE_BASE64=' + require('node:fs').readFileSync('pnpm-lock.yaml').toString('base64') + '\\n')"
+        run: |
+          diff -u --label pnpm-lock.yaml --label pnpm-lock.yaml /tmp/security-lock-before.yaml pnpm-lock.yaml > /tmp/security-lock.patch || test "$?" -eq 1
+          node -e "process.stdout.write('GENERATED_LOCK_PATCH_BASE64=' + require('node:fs').readFileSync('/tmp/security-lock.patch').toString('base64') + '\\n')"
