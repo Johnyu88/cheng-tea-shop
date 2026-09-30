@@ -38,6 +38,8 @@ jobs:
         run: pnpm build
       - name: Browser and accessibility tests
         run: pnpm test:e2e
+      - name: Synthetic mobile order and catalog tests
+        run: pnpm exec playwright test --config=playwright.demo.config.ts
       - name: Dependency audit
         run: pnpm audit --audit-level=high
       - name: Production dependency audit
