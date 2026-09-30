@@ -678,3 +678,11 @@ The storefront payment boundary is explicitly traditional and manual: bank trans
 The mobile demo path is product → cart → three-step checkout → thank-you page → secure order lookup. The selected traditional payment method is persisted in the local synthetic order record and shown on lookup. File-backed image replacement remains the single catalog boundary and is covered by persistence tests. Navigation links used as primary mobile exits use dark, high-contrast controls.
 
 This remains a local synthetic Demo. No AI image composition, image-recognition provider, ERP expansion, external payment service, real notification service, or production deployment was added. TypeScript, focused lint, and diff checks passed for this change; Vitest/build environment failures are documented in `HANDOFF.md` and are not represented as product passes.
+
+## 61. 2026-09-30 私人雲端手機測試版（尚未部署）
+
+- 為兩台電腦關機時仍可測試，新增明確啟用且隔離的 Render 雲端 Demo 模式：HTTPS 固定來源、私人預覽 Basic 登入、獨立店家憑證與 Secure/HttpOnly cookie；所有 Demo API 另行驗證權限及來源。商品管理與未發布商品須店家登入。
+- 程式提交55c5c34通過完整 Quality run36669259766：232單元測試、32瀏覽器測試、2合成手機測試、雲端正式建置/API完整訂單流程/手機尺寸瀏覽器流程、Docker建置與健康檢查。匯款訂單仍先待人工確認，再由店家確認、包裝、出貨、送達與安全查單。這些均為合成自動化證據。
+- 生產依賴稽核無已知漏洞；整體稽核仍有2項開發依賴中度問題，未宣稱全部依賴無漏洞。
+- Render插件已連線並確認工作區，但建立免費測試站時回報私人GitHub倉庫無法讀取，目前無服務、無可交付測試網址。需先完成Render的GitHub部署授權並允許cheng-tea-shop，再重試部署及檢查實際HTTPS。
+- 雲端預覽資料會隨重啟或部署消失，只供合成測試；沒有真實付款、物流或通知。未合併main、未正式上線。**新匯款流程仍未經游老師親自測試，人工驗收待完成。**
