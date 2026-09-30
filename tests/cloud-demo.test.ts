@@ -41,6 +41,7 @@ describe("private synthetic cloud demo", () => {
   it("allows top-level authenticated page navigation but no cross-site GET", () => {
     expect(() => assertCloudDemoRequest(request("GET", { "sec-fetch-site": "none" }))).not.toThrow();
     expect(() => assertCloudDemoRequest(request("GET", { "sec-fetch-site": "cross-site" }))).toThrow();
+    expect(() => assertCloudDemoRequest(request("GET", { "sec-fetch-site": "cross-site", "sec-fetch-mode": "navigate", "sec-fetch-dest": "document" }))).not.toThrow();
   });
   it("does not allow cloud via the client flag or local flag in production", () => {
     vi.stubEnv("DEMO_COMMERCE_CLOUD", "");
