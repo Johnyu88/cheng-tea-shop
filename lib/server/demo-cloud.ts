@@ -20,7 +20,8 @@ export function assertDemoEnabled(): void {
     cloudDemoOrigin();
     if (process.env.DEMO_COMMERCE_LOCAL === "enabled" || process.env.DEMO_COMMERCE_LAN === "enabled"
       || !/^[a-f0-9]{64}$/.test(process.env.DEMO_PREVIEW_TOKEN_SHA256 ?? "")
-      || !/^[a-fA-F0-9]{64}$/.test(process.env.DEMO_MERCHANT_SECRET ?? "")) {
+      || !/^[a-fA-F0-9]{64}$/.test(process.env.DEMO_MERCHANT_SECRET ?? "")
+      || process.env.DEMO_MERCHANT_SECRET === "11".repeat(32)) {
       throw new Error("Cloud demo configuration is incomplete");
     }
     return;
@@ -56,7 +57,10 @@ export function assertCloudDemoRequest(request: Request): void {
     throw new Error("Preview origin rejected");
   }
   const site = request.headers.get("sec-fetch-site");
-  if (site && !["same-origin", "none"].includes(site)) throw new Error("Cross-site preview request rejected");
+  const navigation = ["GET", "HEAD"].includes(request.method)
+    && request.headers.get("sec-fetch-mode") === "navigate"
+    && request.headers.get("sec-fetch-dest") === "document";
+  if (site && !["same-origin", "none"].includes(site) && !navigation) throw new Error("Cross-site preview request rejected");
   if (!["GET", "HEAD"].includes(request.method)
     && (request.headers.get("origin") !== origin.origin || (site && site !== "same-origin"))) {
     throw new Error("Preview origin rejected");
