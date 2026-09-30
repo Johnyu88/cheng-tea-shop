@@ -129,7 +129,7 @@ export function AdminOrdersPage() {
   };
 
   return <main className="py-8">
-    <p className="prototype-notice">Demo 專用：不會寄送真實通知，也不會連接付款或外部服務。</p>
+    <p className="prototype-notice">訂單 Demo：付款由人工確認；商家登入簡訊依服務設定發送。</p>
     <section className="demo-panel">
       <h1>商家訂單 Demo</h1>
       <Link className="filter-button mt-4 inline-flex" href="/">回到首頁</Link>
@@ -137,7 +137,7 @@ export function AdminOrdersPage() {
       {!authenticated ? <>
         <h2 className="mt-6">手機驗證登入</h2>
         {!loginStatus && <p role="status">正在讀取登入設定…</p>}
-        {loginStatus?.state === "binding-pending" && <p role="status" className="prototype-notice mt-3">尚未完成陳老師本人確認與手機綁定。請由陳老師本人確認後，再開啟手機登入。</p>}
+        {loginStatus?.state === "binding-pending" && <p role="status" className="prototype-notice mt-3">尚未完成陳老師本人確認與手機綁定。請聯絡授權管理員協助本人確認及綁定；請勿提供驗證碼給管理員。</p>}
         {loginStatus?.state === "sms-pending" && <p role="status" className="prototype-notice mt-3">手機已完成本人確認；簡訊服務尚未啟用。</p>}
         {loginStatus?.simulated && <p className="prototype-notice mt-3">模擬簡訊：不會發送真實簡訊，驗證碼由受保護的操作員收件匣交付。</p>}
         <label className="form-field mt-6">已綁定手機

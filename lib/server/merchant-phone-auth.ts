@@ -1,5 +1,6 @@
 import { createHmac, randomBytes, randomInt, timingSafeEqual } from "node:crypto";
 import { assertDemoEnabled } from "./demo-cloud";
+import { merchantSmsConfigured, sendMerchantSms } from "./merchant-sms";
 
 type AuditEvent = { event: "issue" | "issue-denied" | "verify-success" | "verify-denied"; identity: string; at: number };
 type Entry = { digest: Buffer; identity: string; expires: number; attempts: number; provisioning: string; code?: string };
@@ -10,7 +11,8 @@ export function merchantPhoneStatus(): { state: "ready" | "binding-pending" | "s
   const bound = /^09\d{8}$/.test(process.env.DEMO_MERCHANT_PHONE ?? "")
     && process.env.DEMO_MERCHANT_PHONE_CONFIRMED === "yes";
   const simulated = process.env.DEMO_MERCHANT_SMS_MODE === "simulated";
-  return { state: !bound ? "binding-pending" : !simulated ? "sms-pending" : "ready", simulated };
+  const transportReady = simulated || (process.env.DEMO_MERCHANT_SMS_MODE === "twilio" && merchantSmsConfigured());
+  return { state: !bound ? "binding-pending" : !transportReady ? "sms-pending" : "ready", simulated };
 }
 function key(): Buffer {
   assertDemoEnabled();
@@ -40,7 +42,7 @@ export function createMerchantPhoneAuth(options: { now?: () => number; audit?: (
   const record = (event: AuditEvent["event"], phone: string, at: number) =>
     audit({ event, identity: digest(phone).toString("hex"), at });
   return {
-    async issue(phone: string): Promise<{ challengeId: string; expiresInSeconds: number; resendAfterSeconds: number; simulated: true }> {
+    async issue(phone: string): Promise<{ challengeId: string; expiresInSeconds: number; resendAfterSeconds: number; simulated: boolean }> {
       key(); assertReady();
       const at = now(); housekeeping(at);
       issued++;
@@ -53,11 +55,24 @@ export function createMerchantPhoneAuth(options: { now?: () => number; audit?: (
       }
       const challengeId = randomBytes(16).toString("hex");
       const code = randomInt(0, 1000000).toString().padStart(6, "0");
+      const simulated = merchantPhoneStatus().simulated;
+      const provision = provisioning();
       entries.clear();
       entries.set(challengeId, { digest: digest(challengeId + ":" + code), identity: digest(phone).toString("hex"),
-        expires: at + expiryMs, attempts: 0, provisioning: provisioning(), code });
-      lastIssue = at; record("issue", phone, at);
-      return { challengeId, expiresInSeconds: 300, resendAfterSeconds: 60, simulated: true };
+        expires: at + expiryMs, attempts: 0, provisioning: provision, ...(simulated ? { code } : {}) });
+      lastIssue = at;
+      if (!simulated) {
+        try {
+          await sendMerchantSms(phone, code);
+          if (provision !== provisioning() || merchantPhoneStatus().state !== "ready") throw new Error(failure);
+        } catch {
+          entries.delete(challengeId);
+          record("issue-denied", "bound-merchant", at);
+          throw new Error("簡訊傳送失敗，請稍後重試。");
+        }
+      }
+      record("issue", phone, at);
+      return { challengeId, expiresInSeconds: 300, resendAfterSeconds: 60, simulated };
     },
     verify(phone: string, challengeId: string, code: string): boolean {
       key();
@@ -79,7 +94,7 @@ export function createMerchantPhoneAuth(options: { now?: () => number; audit?: (
     takeForOperator(challengeId: string, candidate: string): string | null {
       const expected = key();
       if (!/^[a-fA-F0-9]{64}$/.test(candidate) || !timingSafeEqual(expected, Buffer.from(candidate, "hex"))
-        || merchantPhoneStatus().state !== "ready") return null;
+        || merchantPhoneStatus().state !== "ready" || !merchantPhoneStatus().simulated) return null;
       const at = now(); housekeeping(at);
       const entry = entries.get(challengeId);
       if (!entry || entry.provisioning !== provisioning()) return null;

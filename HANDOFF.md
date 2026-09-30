@@ -665,3 +665,14 @@ Follow `RESUME_PROMPT.md`, `AGENTS.md`, and `WORKFLOW.md`. If newer explicit use
 - New Yu / TWD800 seed is synthetic reconstruction, not a backup. Free preview storage is ephemeral; no database clearing is performed.
 - Yu final acceptance and teacher authorization remain required; keep issue #24 open.
 
+
+## First merchant binding continuation (2026-10-01 Taipei)
+
+- User accepted creation/lookup of 261001-001; preserve the live preview containing this order.
+- Administrator-assisted enrollment procedure: docs/merchant-first-binding.md. Shared preview access does not authorize binding. Teacher consent and phone possession must be confirmed; teacher alone enters received OTP.
+- Real SMS adapter work: Twilio fixed HTTPS Messages endpoint; configuration via protected TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_MESSAGING_SERVICE_SID and DEMO_MERCHANT_SMS_MODE=twilio. No provider calls without valid protected configuration.
+- Activation blockers: actual teacher confirmation/phone and authorized SMS account configuration unavailable. Never fabricate confirmation or reuse simulated inbox as real SMS.
+- Deployment blocker: current service is free with ephemeral /tmp storage; no complete backup route exists. Do not redeploy or change env (which restarts service) before consistent full backup and verified restore of databases/catalog/media/photos. Existing source changes may safely push because autoDeploy is off.
+- No cloud environment, original service, or live order data changed in this continuation. Do not mark issue complete or ask Yu to test merchant actions until binding, real OTP and data protection are actually ready.
+- Verified continuation: 50 test files / 257 tests pass; TypeScript exit 0; lint exit 0 (0 errors / 9 existing warnings). Real-provider tests mock HTTP: no real SMS or handset delivery claimed.
+- Production build --webpack exit 0. Independent security review approved adapter/auth; deployment remains blocked to protect live order.

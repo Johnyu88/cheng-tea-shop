@@ -19,7 +19,7 @@ export type DemoAdminOrder = { order: DemoOrderSnapshot; notifications: DemoOutb
 export type DemoLookupSecretRotation = { order: DemoOrderSnapshot; accessSecret: string };
 
 export type DemoMerchantStatus = { state: "ready" | "binding-pending" | "sms-pending"; simulated: boolean; authenticated?: boolean };
-export type DemoMerchantChallenge = { challengeId: string; expiresInSeconds: number; resendAfterSeconds: number; simulated: true };
+export type DemoMerchantChallenge = { challengeId: string; expiresInSeconds: number; resendAfterSeconds: number; simulated: boolean };
 
 export const demoApi = {
   merchantStatus: () => request<DemoMerchantStatus>("/api/demo/admin/session", { method: "GET" }),

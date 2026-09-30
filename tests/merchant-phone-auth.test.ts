@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, expect, test } from "vitest";
+import { afterEach, beforeEach, expect, test, vi } from "vitest";
 import { randomBytes } from "node:crypto";
 import { createMerchantPhoneAuth, merchantPhoneStatus } from "@/lib/server/merchant-phone-auth";
 
@@ -13,7 +13,9 @@ beforeEach(() => {
 });
 afterEach(() => {
   for (const name of ["DEMO_COMMERCE_LOCAL", "DEMO_MERCHANT_SECRET", "DEMO_MERCHANT_PHONE",
-    "DEMO_MERCHANT_PHONE_CONFIRMED", "DEMO_MERCHANT_SMS_MODE"]) delete process.env[name];
+    "DEMO_MERCHANT_PHONE_CONFIRMED", "DEMO_MERCHANT_SMS_MODE", "TWILIO_ACCOUNT_SID",
+    "TWILIO_AUTH_TOKEN", "TWILIO_MESSAGING_SERVICE_SID"]) delete process.env[name];
+  vi.restoreAllMocks();
 });
 test("binding and transport fail closed without teacher confirmation", async () => {
   const auth = createMerchantPhoneAuth();
@@ -105,4 +107,38 @@ test("phone challenge establishes signed session through guarded HTTP route", as
     method: "POST", headers: request.headers, body: JSON.stringify({ phone, challengeId: receipt.challengeId, code }),
   }));
   expect(replay.status).toBe(403);
+});
+test("real SMS requires provider configuration and exposes no operator OTP", async () => {
+  process.env.DEMO_MERCHANT_SMS_MODE = "twilio";
+  expect(merchantPhoneStatus()).toEqual({ state: "sms-pending", simulated: false });
+  process.env.TWILIO_ACCOUNT_SID = "AC" + "a".repeat(32);
+  process.env.TWILIO_AUTH_TOKEN = "b".repeat(32);
+  process.env.TWILIO_MESSAGING_SERVICE_SID = "MG" + "c".repeat(32);
+  expect(merchantPhoneStatus()).toEqual({ state: "ready", simulated: false });
+  let sentCode = "";
+  vi.spyOn(globalThis, "fetch").mockImplementation(async (_, init) => {
+    const message = new URLSearchParams(String(init!.body)).get("Body")!;
+    sentCode = /\d{6}/.exec(message)![0];
+    return new Response(null, { status: 201 });
+  });
+  const auth = createMerchantPhoneAuth();
+  const receipt = await auth.issue(phone);
+  expect(receipt.simulated).toBe(false);
+  expect(JSON.stringify(receipt)).not.toContain(sentCode);
+  expect(auth.takeForOperator(receipt.challengeId, secret)).toBeNull();
+  expect(auth.verify(phone, receipt.challengeId, sentCode)).toBe(true);
+});
+test("real send failure rejects issuance generically and invalidates older challenge", async () => {
+  let now = 1000;
+  const auth = createMerchantPhoneAuth({ now: () => now });
+  const previous = await auth.issue(phone);
+  const previousCode = auth.takeForOperator(previous.challengeId, secret)!;
+  now += 60000;
+  process.env.DEMO_MERCHANT_SMS_MODE = "twilio";
+  process.env.TWILIO_ACCOUNT_SID = "AC" + "a".repeat(32);
+  process.env.TWILIO_AUTH_TOKEN = "b".repeat(32);
+  process.env.TWILIO_MESSAGING_SERVICE_SID = "MG" + "c".repeat(32);
+  vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("private provider details"));
+  await expect(auth.issue(phone)).rejects.toThrow(/^簡訊傳送失敗，請稍後重試。$/);
+  expect(auth.verify(phone, previous.challengeId, previousCode)).toBe(false);
 });
