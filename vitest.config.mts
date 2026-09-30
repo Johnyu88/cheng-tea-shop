@@ -8,6 +8,6 @@ export default defineConfig({
     environment: "jsdom",
     globals: true,
     setupFiles: ["./tests/setup.ts"],
-    exclude: ["**/e2e/**", "**/e2e-demo/**", "**/node_modules/**", "**/.superpowers/**", "**/.next/**"],
+    exclude: ["**/sandboxes/**", "**/e2e/**", "**/e2e-demo/**", "**/node_modules/**", "**/.superpowers/**", "**/.next/**"],
   },
 });
