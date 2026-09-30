@@ -11,7 +11,7 @@ const token = randomBytes(16).toString("hex");
 const merchant = randomBytes(32).toString("hex");
 const origin = "https://tea-ci.onrender.com";
 const base = "http://127.0.0.1:3138";
-const child = spawn(process.execPath, ["scripts/start-playwright-standalone.mjs"], {
+const child = spawn(process.execPath, ["start-cloud-demo.mjs"], {
   stdio: ["ignore", "inherit", "inherit"],
   env: { ...process.env, PORT: "3138", HOSTNAME: "127.0.0.1", NODE_ENV: "production",
     NEXT_PUBLIC_DEMO_COMMERCE: "enabled", DEMO_COMMERCE_CLOUD: "enabled",
@@ -123,8 +123,10 @@ try {
     await page.getByLabel("姓名", { exact: true }).fill("合成顧客");
     await page.getByLabel("合成手機").fill("0912000001");
     await page.getByRole("button", { name: "取得合成驗證碼" }).click();
+    await expect(page.getByText("本機驗證碼：", { exact: false })).toContainText("123456");
     await page.getByLabel("驗證碼", { exact: true }).fill("123456");
     await page.getByRole("button", { name: "下一步", exact: true }).click();
+    await expect(page.getByRole("heading", { name: "配送與付款" })).toBeVisible();
     await page.getByRole("radio", { name: "銀行轉帳", exact: true }).check();
     await page.getByRole("button", { name: "下一步", exact: true }).click();
     await expect(page.getByText("付款狀態：待人工確認（不會扣款）", { exact: true })).toBeVisible();
