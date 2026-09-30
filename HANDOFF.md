@@ -644,3 +644,15 @@ Follow `RESUME_PROMPT.md`, `AGENTS.md`, and `WORKFLOW.md`. If newer explicit use
 - Verify actual Render live status, HTTPS health/authentication/origin checks and synthetic workflow before delivering URL and access credentials. No main merge or production release authorized/performed.
 - Free service preview storage is ephemeral across restart/deployment; use synthetic entries only. Arbitrary real personal data is not fully prevented by the application. No real payment, shipment or external notification enabled.
 - **游老師尚未實測新匯款流程；人工驗收未完成。** Automated evidence must not be promoted to human acceptance.
+
+## 2026-09-30 13:34 Taipei — Render private preview LIVE (supersedes external blocker above)
+
+- User screenshot confirms Git Deployment Credentials Johnyu88 and Render GitHub app installed with All repositories. Repository access retry succeeded; no additional permissions changed by agent.
+- Created authorized free Singapore Node service `srv-dau9s69srm7s73bd3deg`, cheng-tea-private-preview, in confirmed workspace `tea-dau8esugekts73ddbt5g`. URL https://cheng-tea-private-preview.onrender.com ; dashboard https://dashboard.render.com/web/srv-dau9s69srm7s73bd3deg .
+- Deployment `dep-dau9s7hsrm7s73bd3jp0` is LIVE for commit `efd047f8575b6cbd2806ba9f616fdf7caa2b7770`; initial build finished2026-09-30T05:30:30Z. autoDeploy remains OFF; these checkpoint-only commits do not redeploy.
+- Actual public HTTPS verification PASSED: generic unauth health200; protected HTML/API/image401; authenticated homepage200/no-store/DENY; missing/null/wrong Origin and wrong forwarded host401; unpublished catalog denied before merchant session; catalog read; synthetic bank-transfer order using allowed phone0912000001; secure __Host-demo_merchant cookie; merchant manual payment confirmation; packing PNG; ship; deliver; secret+OTP protected lookup delivered.
+- Live smoke initially used an unsupported synthetic phone0912000002, correctly rejected400. Corrected harness to allowed0912000001; full rerun exited0. No product validation relaxed. Execution needed HTTPS environment proxy because direct Node DNS was unavailable; Python/proxied Node both reached actual HTTPS origin.
+- Render log backend temporarily returned503 during build; this is a provider log-query outage, not application failure. App health and complete live API smoke are independently verified.
+- Preview username is `preview`; preview access token and separate merchant credential are held outside Git. Supply preview token privately in the user's chat for access; merchant credential when guiding authorized merchant testing. Never put credentials into URL/docs/logs.
+- Only synthetic testing; ephemeral preview storage resets on restart/deployment. Allowlisted synthetic phones0912000000/0912000001 and synthetic OTP123456. No genuine bank transfer, external notification or fulfilment.
+- Remaining: **游老師親自測試新匯款流程** on actual phone; automation and live API evidence do not satisfy user acceptance. No main merge or production release performed.
