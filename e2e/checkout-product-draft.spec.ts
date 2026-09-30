@@ -92,7 +92,8 @@ test("operator can edit supplied facts and explicitly confirm publication on des
   await expect(page.getByText("這是本機 Demo：沒有真實管理員驗證，不會連接正式 ERP 或外部影像服務。")).toBeVisible();
   await completeMinimumProductDraft(page);
   await expect(page.getByRole("button", { name: "產生介紹草稿" })).toHaveCount(0);
-  const summary = page.getByLabel("商品介紹", { exact: true });
+  await expect(page.getByLabel("商品介紹", { exact: true })).toBeVisible();
+  const summary = page.locator("#product-summary");
   await summary.fill("由店家提供的春茶介紹");
 
   const publish = page.getByRole("button", { name: "確認並上架" });
