@@ -92,7 +92,10 @@ export function createLocalDemoRuntime({ directory, otpCode = "123456", catalogS
       if (!phone || !syntheticPhones.has(phone) || !/^\d{3}$/.test(input.phoneLastThree)
         || !phone.endsWith(input.phoneLastThree)
         || !lookupOtp.verify(phone, input.challengeId, input.code)) return genericFailure();
-      const identity = findIdentity.get(input.orderId) as { phone_digest?: Uint8Array; name_digest?: Uint8Array } | undefined;
+      const order = commerce.lookup(input.orderId, input.accessSecret);
+      if (!order) return genericFailure();
+      if (/^[0-9]{6}-[0-9]{3,}$/.test(input.orderId) && (typeof input.customerName !== "string" || !input.customerName.trim())) return genericFailure();
+      const identity = findIdentity.get(order.orderId) as { phone_digest?: Uint8Array; name_digest?: Uint8Array } | undefined;
       const storedDigest = identity?.phone_digest ? Buffer.from(identity.phone_digest) : Buffer.alloc(0);
       const suppliedDigest = phoneDigest(phone);
       if (storedDigest.length !== suppliedDigest.length || !timingSafeEqual(storedDigest, suppliedDigest)) {
@@ -104,8 +107,6 @@ export function createLocalDemoRuntime({ directory, otpCode = "123456", catalogS
         const supplied = nameDigest(input.customerName);
         if (expected.length !== supplied.length || !timingSafeEqual(expected, supplied)) return genericFailure();
       }
-      const order = commerce.lookup(input.orderId, input.accessSecret);
-      if (!order) return genericFailure();
       return order;
     },
     notifications(orderId: string) {

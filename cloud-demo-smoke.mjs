@@ -17,7 +17,7 @@ const child = spawn(process.execPath, ["start-cloud-demo.mjs"], {
     NEXT_PUBLIC_DEMO_COMMERCE: "enabled", DEMO_COMMERCE_CLOUD: "enabled",
     DEMO_COMMERCE_LOCAL: "", DEMO_COMMERCE_LAN: "", DEMO_CLOUD_ORIGIN: origin,
     DEMO_PREVIEW_TOKEN_SHA256: createHash("sha256").update(token).digest("hex"),
-    DEMO_MERCHANT_SECRET: merchant, DEMO_DATA_DIR: directory },
+    DEMO_MERCHANT_SECRET: merchant, DEMO_DATA_DIR: directory, DEMO_MERCHANT_PHONE: "0912000000", DEMO_MERCHANT_PHONE_CONFIRMED: "yes", DEMO_MERCHANT_SMS_MODE: "simulated" },
 });
 const headers = { host: "tea-ci.onrender.com", "x-forwarded-proto": "https",
   authorization: "Basic " + Buffer.from("preview:" + token).toString("base64") };
@@ -76,7 +76,11 @@ try {
   const draft = { name: "合成顧客", phone: "0912000001", deliveryMethod: "store-pickup", paymentMethod: "bank-transfer" };
   const order = await value(await json("/api/demo/orders", { phone: draft.phone, challengeId: otp.challengeId, code: otp.demoCode, draft,
     lines: [{ productId: product.id, variantId: product.variants[0].id, quantity: 1 }] }));
-  const login = await json("/api/demo/admin/session", { credential: merchant });
+  assert.match(order.orderNumber, /^\d{6}-\d{3,}$/);
+  assert.equal((await json("/api/demo/admin/session", { credential: merchant })).ok, false);
+  const merchantOtp = await value(await json("/api/demo/admin/otp", { phone: "0912000000" }));
+  const inbox = await value(await call("/api/demo/admin/otp/operator", { method: "POST", headers: { origin, "content-type": "application/json", "x-demo-merchant-operator": merchant }, body: JSON.stringify({challengeId: merchantOtp.challengeId}) }));
+  const login = await json("/api/demo/admin/session", { phone: "0912000000", challengeId: merchantOtp.challengeId, code: inbox.code });
   await value(login);
   const cookie = login.headers.get("set-cookie");
   assert.match(cookie, /__Host-demo_merchant=/);
@@ -91,7 +95,7 @@ try {
   await value(await json("/api/demo/admin/orders/" + order.orderId, { action: "ship" }, session));
   await value(await json("/api/demo/admin/orders/" + order.orderId, { action: "deliver" }, session));
   const lookupOtp = await value(await json("/api/demo/otp", { phone: draft.phone, purpose: "lookup" }));
-  const lookup = await value(await json("/api/demo/orders/lookup", { orderId: order.orderId, accessSecret: order.accessSecret, phone: draft.phone,
+  const lookup = await value(await json("/api/demo/orders/lookup", { orderId: order.orderNumber, accessSecret: order.accessSecret, phone: draft.phone,
     phoneLastThree: "001", customerName: draft.name, challengeId: lookupOtp.challengeId, code: lookupOtp.demoCode }));
   assert.equal(lookup.order.status, "delivered");
   // A test-only local edge emulates Render. Browser auth/cookies are unchanged.
@@ -115,6 +119,7 @@ try {
   try {
     const context = await browser.newContext({ baseURL: browserBase, viewport: { width: 412, height: 915 },
       httpCredentials: { username: "preview", password: token } });
+    await context.addCookies([{ name: "__Host-demo_merchant", value: session.split("=")[1], url: browserBase.replace("http:", "https:"), secure: true, httpOnly: true, sameSite: "Strict" }]);
     const page = await context.newPage();
     await page.goto("/tea/taiwan-mi-xiang-wild-mountain-tea");
     await page.getByRole("button", { name: "加入購物車" }).click();
@@ -127,14 +132,12 @@ try {
     await page.getByLabel("驗證碼", { exact: true }).fill("123456");
     await page.getByRole("button", { name: "下一步", exact: true }).click();
     await expect(page.getByRole("heading", { name: "配送與付款" })).toBeVisible();
-    await page.getByRole("radio", { name: "銀行轉帳", exact: true }).check();
+    await expect(page.getByRole("heading", { name: "付款與聯絡資訊（展示資料）" })).toBeVisible();
     await page.getByRole("button", { name: "下一步", exact: true }).click();
     await expect(page.getByText("付款狀態：待人工確認（不會扣款）", { exact: true })).toBeVisible();
     await page.getByRole("button", { name: "建立示範訂單" }).click();
     await expect(page.getByRole("heading", { name: "感謝您的購買" })).toBeVisible();
     await page.goto("/admin/orders");
-    await page.getByLabel("商家 Demo 憑證").fill(merchant);
-    await page.getByRole("button", { name: "登入商家 Demo" }).click();
     await expect(page.locator(".demo-order-card").first()).toBeVisible();
     await page.goto("/admin/products");
     await expect(page.getByRole("heading", { name: "商品管理", exact: true })).toBeVisible();

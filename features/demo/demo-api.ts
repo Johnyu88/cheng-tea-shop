@@ -13,12 +13,18 @@ async function request<T>(url: string, init: RequestInit): Promise<T> {
 const json = (body: unknown): RequestInit => ({ method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
 
 export type DemoChallenge = { challengeId: string; expiresAt: string; demoCode: string };
-export type DemoPlacedOrder = { orderId: string; accessSecret: string; total: Cart["subtotal"]; notificationStatus: string };
+export type DemoPlacedOrder = { orderId: string; orderNumber?: string; accessSecret: string; total: Cart["subtotal"]; notificationStatus: string };
 export type DemoLookup = { order: DemoOrderSnapshot; notifications: DemoOutboxEntry[]; mobilePushPreview: DemoMobilePushPreview };
 export type DemoAdminOrder = { order: DemoOrderSnapshot; notifications: DemoOutboxEntry[] };
 export type DemoLookupSecretRotation = { order: DemoOrderSnapshot; accessSecret: string };
 
+export type DemoMerchantStatus = { state: "ready" | "binding-pending" | "sms-pending"; simulated: boolean; authenticated?: boolean };
+export type DemoMerchantChallenge = { challengeId: string; expiresInSeconds: number; resendAfterSeconds: number; simulated: true };
+
 export const demoApi = {
+  merchantStatus: () => request<DemoMerchantStatus>("/api/demo/admin/session", { method: "GET" }),
+  merchantIssueOtp: (phone: string) => request<DemoMerchantChallenge>("/api/demo/admin/otp", json({ phone })),
+  merchantPhoneLogin: (input: { phone: string; challengeId: string; code: string }) => request<{ authenticated: true }>("/api/demo/admin/session", json(input)),
   issueOtp: (phone: string, purpose: "checkout" | "lookup") => request<DemoChallenge>("/api/demo/otp", json({ phone, purpose })),
   placeOrder: (input: { phone: string; challengeId: string; code: string; draft: CheckoutDraft; lines: { productId: string; variantId: string; quantity: number }[] }) => request<DemoPlacedOrder>("/api/demo/orders", json(input)),
   lookup: (input: { orderId: string; accessSecret: string; phone: string; phoneLastThree: string; customerName?: string; challengeId: string; code: string }) => request<DemoLookup>("/api/demo/orders/lookup", json(input)),

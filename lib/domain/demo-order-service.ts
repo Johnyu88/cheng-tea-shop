@@ -6,6 +6,7 @@ export type DemoOrderStatus = "confirmed" | "packed" | "shipped" | "delivered";
 export type DemoOrderLine = Pick<Cart["lines"][number], "productId" | "variantId" | "productName" | "specification" | "unitPrice" | "quantity">;
 export type DemoOrderSnapshot = {
   orderId: string;
+  orderNumber?: string;
   status: DemoOrderStatus;
   paymentMethod: "bank-transfer" | "cash" | "phone-confirmation" | "line-voice-confirmation";
   paymentStatus: "pending-manual-verification" | "manual-confirmed";
@@ -30,6 +31,7 @@ export type DemoOrderRecord = {
 export type DemoOrderPersistence = {
   load(): DemoOrderRecord[];
   save(record: DemoOrderRecord): void;
+  allocateOrderNumber?(date: Date): string;
 };
 type StoredOrder = {
   snapshot: DemoOrderSnapshot;
@@ -37,7 +39,7 @@ type StoredOrder = {
   notifications: Map<string, DemoNotification>;
 };
 export interface DemoOrderService {
-  create(cart: Cart, paymentMethod?: DemoOrderSnapshot["paymentMethod"]): { orderId: string; accessSecret: string };
+  create(cart: Cart, paymentMethod?: DemoOrderSnapshot["paymentMethod"]): { orderId: string; orderNumber: string; accessSecret: string };
   lookup(orderId: string, accessSecret: string): DemoOrderSnapshot | null;
   rotateLookupSecret(orderId: string): { order: DemoOrderSnapshot; accessSecret: string };
   /** Internal merchant view; callers must enforce merchant authentication before invoking. */
@@ -67,10 +69,32 @@ const transition = (order: StoredOrder, from: DemoOrderStatus, to: DemoOrderStat
   order.snapshot.events.push({ status: to, at: new Date().toISOString() });
 };
 
+export const taiwanOrderDate = (date: Date): string => new Date(date.getTime() + 8 * 60 * 60_000).toISOString().slice(2, 10).replaceAll("-", "");
+
 export const createDemoOrderService = (persistence?: DemoOrderPersistence): DemoOrderService => {
   const orders = new Map<string, StoredOrder>();
-  for (const record of persistence?.load() ?? []) {
+  const sequences = new Map<string, number>();
+  const allocateNumber = (date: Date): string => {
+    if (persistence?.allocateOrderNumber) return persistence.allocateOrderNumber(date);
+    const day = taiwanOrderDate(date);
+    const next = (sequences.get(day) ?? 0) + 1;
+    sequences.set(day, next);
+    return `${day}-${String(next).padStart(3, "0")}`;
+  };
+  const loaded = persistence?.load() ?? [];
+  for (const record of loaded) {
+    const number = record.snapshot?.orderNumber?.match(/^([0-9]{6})-([0-9]+)$/);
+    if (number) sequences.set(number[1]!, Math.max(sequences.get(number[1]!) ?? 0, Number(number[2])));
+  }
+  for (const record of loaded) {
     if (!/^DEMO-[0-9a-f-]{36}$/.test(record.snapshot?.orderId ?? "")) continue;
+    if (!record.snapshot.orderNumber) {
+      const date = new Date(record.snapshot.events[0]?.at ?? Date.now());
+      record.snapshot.orderNumber = allocateNumber(Number.isNaN(date.getTime()) ? new Date() : date);
+      persistence?.save(record);
+    }
+    const number = record.snapshot.orderNumber.match(/^([0-9]{6})-([0-9]+)$/);
+    if (number) sequences.set(number[1]!, Math.max(sequences.get(number[1]!) ?? 0, Number(number[2])));
     const legacyStatus = (record.snapshot as unknown as { paymentStatus?: string }).paymentStatus;
     const paymentStatus = legacyStatus === "simulated-confirmed" ? "manual-confirmed" : legacyStatus === "pending" ? "pending-manual-verification" : legacyStatus;
     orders.set(record.snapshot.orderId, {
@@ -107,8 +131,9 @@ export const createDemoOrderService = (persistence?: DemoOrderPersistence): Demo
       }
       const orderId = `DEMO-${randomUUID()}`;
       const accessSecret = randomBytes(32).toString("hex");
+      const orderNumber = allocateNumber(new Date());
       const snapshot: DemoOrderSnapshot = {
-        orderId, status: "confirmed", paymentMethod, paymentStatus: "pending-manual-verification",
+        orderId, orderNumber, status: "confirmed", paymentMethod, paymentStatus: "pending-manual-verification",
         lines: cart.lines.map(({ productId, variantId, productName, specification, unitPrice, quantity }) =>
           ({ productId, variantId, productName, specification, unitPrice: { ...unitPrice }, quantity })),
         total: { ...cart.subtotal }, packingPhotoId: null,
@@ -117,11 +142,11 @@ export const createDemoOrderService = (persistence?: DemoOrderPersistence): Demo
       const order = { snapshot, secretDigest: digest(accessSecret), notifications: new Map<string, DemoNotification>() };
       save(order);
       orders.set(orderId, order);
-      return { orderId, accessSecret };
+      return { orderId, orderNumber, accessSecret };
     },
     lookup(orderId, accessSecret) {
-      if (!/^DEMO-[0-9a-f-]{36}$/.test(orderId) || !/^[0-9a-f]{64}$/.test(accessSecret)) return null;
-      const order = orders.get(orderId);
+      if ((!/^DEMO-[0-9a-f-]{36}$/.test(orderId) && !/^[0-9]{6}-[0-9]{3,}$/.test(orderId)) || !/^[0-9a-f]{64}$/.test(accessSecret)) return null;
+      const order = orders.get(orderId) ?? [...orders.values()].find(item => item.snapshot.orderNumber === orderId);
       if (!order || order.secretDigest.length !== 32 || !timingSafeEqual(order.secretDigest, digest(accessSecret))) return null;
       return clone(order.snapshot);
     },

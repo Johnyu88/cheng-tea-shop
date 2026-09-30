@@ -15,6 +15,9 @@ export default defineConfig({
     env: {
       DEMO_COMMERCE_LOCAL: "enabled",
       DEMO_MERCHANT_SECRET: merchantSecret,
+      DEMO_MERCHANT_PHONE: "0912000000",
+      DEMO_MERCHANT_PHONE_CONFIRMED: "yes",
+      DEMO_MERCHANT_SMS_MODE: "simulated",
       DEMO_DATA_DIR: resolve(`.demo-data/playwright-${process.pid}`),
       NEXT_PUBLIC_DEMO_COMMERCE: "enabled",
     },

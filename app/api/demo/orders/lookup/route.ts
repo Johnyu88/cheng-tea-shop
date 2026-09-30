@@ -15,8 +15,8 @@ export async function POST(request: Request) {
     const order = runtime.lookupOrder(body as Parameters<typeof runtime.lookupOrder>[0]);
     return demoSuccess({
       order,
-      notifications: runtime.notifications(order.orderId).filter(item => item.audience === "customer"),
-      mobilePushPreview: createDemoMobilePushPreview(order.orderId, order.status),
+      notifications: runtime.notifications(order.orderId).filter(item => item.audience === "customer").map(item => ({ ...item, orderId: order.orderNumber ?? order.orderId })),
+      mobilePushPreview: createDemoMobilePushPreview(order.orderNumber ?? order.orderId, order.status),
     });
   } catch (error) {
     if (error instanceof DemoRateLimitError) return Response.json({ ok: false, error: error.message }, { status: 429, headers: { "Retry-After": String(error.retryAfterSeconds) } });

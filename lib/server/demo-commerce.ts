@@ -86,7 +86,7 @@ export function createLocalDemoCommerce({ otp, orders, reviewAddress, catalogPro
       if (!phone || !syntheticPhones.has(phone)) throw new Error("Synthetic phone required");
       return otp.issue(phone);
     },
-    placeOrder(raw: unknown): { orderId: string; accessSecret: string; total: Cart["subtotal"]; notificationStatus: "simulated-queued" | "queue-failed" } {
+    placeOrder(raw: unknown): { orderId: string; orderNumber: string; accessSecret: string; total: Cart["subtotal"]; notificationStatus: "simulated-queued" | "queue-failed" } {
       assertLocalDemo();
       if (!record(raw) || !fields(raw, ["phone", "challengeId", "code", "lines", "draft"])
         || typeof raw.phone !== "string" || typeof raw.challengeId !== "string"

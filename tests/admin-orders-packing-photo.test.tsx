@@ -18,15 +18,20 @@ const order: DemoAdminOrder = {
 };
 
 const login = async () => {
-  fireEvent.change(screen.getByLabelText("商家 Demo 憑證"), { target: { value: "a".repeat(64) } });
-  fireEvent.click(screen.getByRole("button", { name: "登入商家 Demo" }));
+  fireEvent.change(screen.getByLabelText("已綁定手機"), { target: { value: "0912000000" } });
+  await waitFor(() => expect(screen.getByRole("button", { name: "傳送驗證碼" })).toBeEnabled());
+  fireEvent.click(screen.getByRole("button", { name: "傳送驗證碼" }));
+  fireEvent.change(await screen.findByLabelText("六位數驗證碼"), { target: { value: "001234" } });
+  fireEvent.click(screen.getByRole("button", { name: "驗證並登入" }));
   await waitFor(() => expect(screen.getByRole("heading", { name: "已確認" })).toBeInTheDocument());
 };
 
 describe("admin packing photo confirmation flow", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
-    vi.spyOn(demoApi, "merchantLogin").mockResolvedValue({ authenticated: true });
+    vi.spyOn(demoApi, "merchantStatus").mockResolvedValue({ state: "ready", simulated: true });
+    vi.spyOn(demoApi, "merchantIssueOtp").mockResolvedValue({ challengeId: "a".repeat(32), expiresInSeconds: 300, resendAfterSeconds: 60, simulated: true });
+    vi.spyOn(demoApi, "merchantPhoneLogin").mockResolvedValue({ authenticated: true });
     vi.spyOn(demoApi, "adminOrders").mockResolvedValue([order]);
     vi.spyOn(demoApi, "packingPhoto").mockResolvedValue({});
     vi.spyOn(URL, "createObjectURL").mockReturnValue("blob:packing-preview");
