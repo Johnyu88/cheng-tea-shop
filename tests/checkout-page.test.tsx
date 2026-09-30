@@ -189,6 +189,7 @@ it("shows every traditional payment choice for the selected delivery", async () 
   expect(screen.getByLabelText("LINE 語音確認")).toBeInTheDocument();
   expect(screen.getByLabelText("現金")).toBeInTheDocument();
   expect(screen.getByLabelText("電話確認")).toBeInTheDocument();
+  expect(screen.queryByLabelText(/信用卡|LINE Pay/i)).not.toBeInTheDocument();
   fireEvent.click(screen.getByLabelText("到店取貨"));
   expect(screen.getByLabelText("現金")).toBeInTheDocument();
 });
