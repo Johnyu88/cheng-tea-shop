@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import http from "node:http";
 import { spawn } from "node:child_process";
 import { createHash, randomBytes } from "node:crypto";
 import { mkdtempSync, rmSync } from "node:fs";
@@ -21,7 +22,25 @@ const child = spawn(process.execPath, ["scripts/start-playwright-standalone.mjs"
 const headers = { host: "tea-ci.onrender.com", "x-forwarded-proto": "https",
   authorization: "Basic " + Buffer.from("preview:" + token).toString("base64") };
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
-async function call(path, init = {}) { return fetch(base + path, { ...init, redirect: "manual", headers: { ...headers, ...(init.headers ?? {}) } }); }
+async function call(path, init = {}) {
+  // Native http preserves the canonical Host; Node fetch intentionally overwrites it.
+  const request = new Request(base + path, { ...init, headers: { ...headers, ...(init.headers ?? {}) } });
+  const body = request.body ? Buffer.from(await request.arrayBuffer()) : undefined;
+  return new Promise((resolve, reject) => {
+    const outgoing = http.request(base + path, { method: request.method, headers: Object.fromEntries(request.headers) }, incoming => {
+      const chunks = [];
+      incoming.on("data", chunk => chunks.push(chunk));
+      incoming.on("end", () => {
+        const responseHeaders = new Headers();
+        for (let i = 0; i < incoming.rawHeaders.length; i += 2) responseHeaders.append(incoming.rawHeaders[i], incoming.rawHeaders[i + 1]);
+        resolve(new Response(Buffer.concat(chunks), { status: incoming.statusCode, headers: responseHeaders }));
+      });
+      incoming.on("error", reject);
+    });
+    outgoing.on("error", reject);
+    outgoing.end(body);
+  });
+}
 async function json(path, body, cookie) {
   return call(path, { method: "POST", headers: { origin, "content-type": "application/json", ...(cookie ? { cookie } : {}) }, body: JSON.stringify(body) });
 }
