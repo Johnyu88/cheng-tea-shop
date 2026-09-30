@@ -656,3 +656,12 @@ Follow `RESUME_PROMPT.md`, `AGENTS.md`, and `WORKFLOW.md`. If newer explicit use
 - Preview username is `preview`; preview access token and separate merchant credential are held outside Git. Supply preview token privately in the user's chat for access; merchant credential when guiding authorized merchant testing. Never put credentials into URL/docs/logs.
 - Only synthetic testing; ephemeral preview storage resets on restart/deployment. Allowlisted synthetic phones0912000000/0912000001 and synthetic OTP123456. No genuine bank transfer, external notification or fulfilment.
 - Remaining: **游老師親自測試新匯款流程** on actual phone; automation and live API evidence do not satisfy user acceptance. No main merge or production release performed.
+
+## Issue 24 preview handoff (2026-09-30)
+- Implementation: 8d12431; PR #25 targets feature/private-cloud-demo; main remains unchanged.
+- Verified: 49 files / 252 tests, TypeScript, production build, 2 mobile E2E cases, production cloud API/browser smoke. Lint: 0 errors / 9 warnings.
+- Isolated Render preview: https://cheng-tea-issue24-preview.onrender.com (srv-daujlk093c1s73egl1r0). Original preview and orders untouched.
+- Teacher phone binding remains pending; real SMS integration is unavailable. Simulated OTP is explicitly labeled and protected.
+- New Yu / TWD800 seed is synthetic reconstruction, not a backup. Free preview storage is ephemeral; no database clearing is performed.
+- Yu final acceptance and teacher authorization remain required; keep issue #24 open.
+
