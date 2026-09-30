@@ -676,3 +676,12 @@ Follow `RESUME_PROMPT.md`, `AGENTS.md`, and `WORKFLOW.md`. If newer explicit use
 - No cloud environment, original service, or live order data changed in this continuation. Do not mark issue complete or ask Yu to test merchant actions until binding, real OTP and data protection are actually ready.
 - Verified continuation: 50 test files / 257 tests pass; TypeScript exit 0; lint exit 0 (0 errors / 9 existing warnings). Real-provider tests mock HTTP: no real SMS or handset delivery claimed.
 - Production build --webpack exit 0. Independent security review approved adapter/auth; deployment remains blocked to protect live order.
+
+## Password Demo acceptance continuation (2026-10-01 Taipei)
+
+Latest user decision supersedes SMS prerequisite: provider-selected DemoPasswordProvider now used for isolated Demo; retain SmsOtpProvider implementation for later formal integration. Both use common merchant session; business APIs unchanged.
+No changes to old Render service srv-daujlk093c1s73egl1r0 or original srv-dau9s69srm7s73bd3deg. Orders 261001-001/002 remain only in their old temporary-data environment; no migration claimed. New password acceptance station uses separate fresh data and credentials, autoDeploy off.
+Source/verification work continues on the same feature/issue-24-mobile-login branch and PR #25. Do not write credentials/OTP into GitHub, logs, screenshots or URLs. Deliver private Demo access to authorized Yu only.
+
+- Password backup verification: production build passed; mobile SMS E2E 2 passed; cloud password and SMS full API/browser loops passed including initial/final lookup and camera/gallery cancel/reselect/explicit confirmation. OTP issue/operator refuse non-SMS provider.
+- Latest user strategy: stop new self-built authentication; evaluate Better Auth/passkey 1.7.6 in separate sandboxes/passkey-lock app. Install/test native library, verify server session plus separate merchant allowlist, then AuthProvider-only integration after testing. Business API source remains unchanged. Physical Face ID/fingerprint requires human phone acceptance; virtual-authenticator evidence must be labeled.

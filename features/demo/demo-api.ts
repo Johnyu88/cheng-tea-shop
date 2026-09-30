@@ -18,10 +18,11 @@ export type DemoLookup = { order: DemoOrderSnapshot; notifications: DemoOutboxEn
 export type DemoAdminOrder = { order: DemoOrderSnapshot; notifications: DemoOutboxEntry[] };
 export type DemoLookupSecretRotation = { order: DemoOrderSnapshot; accessSecret: string };
 
-export type DemoMerchantStatus = { state: "ready" | "binding-pending" | "sms-pending"; simulated: boolean; authenticated?: boolean };
+export type DemoMerchantStatus = { provider?: "password" | "sms"; state: "ready" | "binding-pending" | "sms-pending" | "password-pending"; simulated: boolean; authenticated?: boolean };
 export type DemoMerchantChallenge = { challengeId: string; expiresInSeconds: number; resendAfterSeconds: number; simulated: boolean };
 
 export const demoApi = {
+  merchantPasswordLogin: (password: string) => request<{ authenticated: true }>("/api/demo/admin/session", json({ password })),
   merchantStatus: () => request<DemoMerchantStatus>("/api/demo/admin/session", { method: "GET" }),
   merchantIssueOtp: (phone: string) => request<DemoMerchantChallenge>("/api/demo/admin/otp", json({ phone })),
   merchantPhoneLogin: (input: { phone: string; challengeId: string; code: string }) => request<{ authenticated: true }>("/api/demo/admin/session", json(input)),

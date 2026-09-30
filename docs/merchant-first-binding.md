@@ -36,3 +36,7 @@
 已確認顧客短編號 `261001-001` 建立與查詢通過。本人確認、真實手機號碼、簡訊供應商帳號設定尚未取得，不能宣稱綁定或簡訊已啟用。
 目前線上版本只支援模擬 SMS；真實 SMS 接線須通過安全測試後才能部署。管理員操作流程文件不等於本人同意紀錄。
 完整備份還須包含 outbox.sqlite、catalog.json、media 與 packing-photos。必須在私密位置驗證還原後 UUID、短編號、查詢授權、狀態與照片皆一致，才解除部署資料保護閘門。
+
+## 最新 Demo 決策（取代本文件中的 Demo 登入前置）
+
+2026-10-01：游老師決定獨立 Demo 使用 DemoPasswordProvider 完成業務驗收，不再等待本人手機綁定或真實 SMS。本文件保留作為日後 SmsOtpProvider 啟用流程，不能用來阻擋目前 Demo。新隔離站操作與資料界線見 password-demo-handoff.md。

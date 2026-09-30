@@ -8,6 +8,7 @@ import { DemoOrderProgress } from "./demo-order-progress";
 const statusLabel = { confirmed: "已確認", packed: "已打包", shipped: "已出貨", delivered: "已送達" } as const;
 
 export function AdminOrdersPage() {
+  const [password, setPassword] = useState("");
   const [phone, setPhone] = useState("");
   const [code, setCode] = useState("");
   const [challenge, setChallenge] = useState<DemoMerchantChallenge>();
@@ -61,6 +62,15 @@ export function AdminOrdersPage() {
       const receipt = await demoApi.merchantIssueOtp(phone);
       setChallenge(receipt); setCode(""); setResendSeconds(receipt.resendAfterSeconds); setError("");
     } catch (e) { setError(e instanceof Error ? e.message : "驗證碼傳送失敗"); }
+    finally { setBusy(false); }
+  };
+  const passwordLogin = async () => {
+    try {
+      setBusy(true);
+      await demoApi.merchantPasswordLogin(password);
+      setPassword("");
+      await refresh(); setAuthenticated(true); setError("");
+    } catch (e) { setPassword(""); setError(e instanceof Error ? e.message : "登入失敗，請稍後重試。"); }
     finally { setBusy(false); }
   };
   const login = async () => {
@@ -135,6 +145,17 @@ export function AdminOrdersPage() {
       <Link className="filter-button mt-4 inline-flex" href="/">回到首頁</Link>
       {error && <div role="alert" className="product-draft-alert">{error}</div>}
       {!authenticated ? <>
+        {loginStatus?.provider === "password" ? <>
+          <h2 className="mt-6">Demo 密碼登入</h2>
+          <p className="muted mt-3">請輸入授權驗收人員取得的 Demo 密碼。</p>
+          {loginStatus.state !== "ready" && <p role="status">Demo 密碼登入尚未設定，請聯絡管理員。</p>}
+          <form onSubmit={event => { event.preventDefault(); if (!busy && password && loginStatus.state === "ready") void passwordLogin(); }}>
+            <label className="form-field mt-4">Demo 密碼
+              <input className="form-input" type="password" autoComplete="current-password" maxLength={128} value={password} onChange={event => setPassword(event.target.value)} />
+            </label>
+            <button className="primary-action mt-4" type="submit" disabled={busy || !password || loginStatus.state !== "ready"}>{busy ? "登入中…" : "登入"}</button>
+          </form>
+        </> : <>
         <h2 className="mt-6">手機驗證登入</h2>
         {!loginStatus && <p role="status">正在讀取登入設定…</p>}
         {loginStatus?.state === "binding-pending" && <p role="status" className="prototype-notice mt-3">尚未完成陳老師本人確認與手機綁定。請聯絡授權管理員協助本人確認及綁定；請勿提供驗證碼給管理員。</p>}
@@ -154,6 +175,7 @@ export function AdminOrdersPage() {
               onChange={e => { setCode(e.target.value.replace(/\D/g, "").slice(0, 6)); setError(""); }} />
           </label>
           <button className="primary-action mt-4" disabled={busy || !/^\d{6}$/.test(code)} onClick={() => void login()}>驗證並登入</button>
+        </>}
         </>}
       </> : <>
         <button className="filter-button mt-6" onClick={() => void refresh()}>重新載入</button>

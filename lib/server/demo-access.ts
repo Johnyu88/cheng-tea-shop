@@ -1,5 +1,5 @@
 import { assertDemoEnabled, cloudDemoRequested } from "./demo-cloud";
-import { merchantPhoneAuth, merchantPhoneStatus } from "./merchant-phone-auth";
+import { getMerchantAuthProvider, merchantAuthSessionContext, merchantAuthStatus, providerSessionRequired, type MerchantAuthInput } from "./merchant-auth-provider";
 import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 
 const loopbackCookieName = "__Host-demo_merchant";
@@ -21,11 +21,8 @@ function secret(): Buffer {
   }
   return Buffer.from(value, "hex");
 }
-const phoneSession = () => cloudDemoRequested() || process.env.DEMO_MERCHANT_PHONE_CONFIRMED === "yes";
 const mac = (key: Buffer, payload: string) =>
-  createHmac("sha256", key).update(phoneSession()
-    ? ["merchant-phone-session-v1", process.env.DEMO_MERCHANT_PHONE,
-      process.env.DEMO_MERCHANT_PHONE_CONFIRMED, process.env.DEMO_MERCHANT_SMS_MODE].join("|") : context)
+  createHmac("sha256", key).update(providerSessionRequired() ? merchantAuthSessionContext() : context)
     .update(":").update(payload).digest("hex");
 
 /** Caller must pass the real socket peer; headers alone do not prove locality. */
@@ -47,16 +44,20 @@ export function assertLocalDemoPost(request: Request, peerAddress: string): void
 /** The independent merchant credential is never stored in a cookie. */
 export function issueDemoMerchantCookie(candidate: string, now = Date.now()): string | null {
   const key = secret();
-  if (cloudDemoRequested() || process.env.DEMO_MERCHANT_PHONE_CONFIRMED === "yes") return null;
+  if (providerSessionRequired()) return null;
   const supplied = /^[0-9a-fA-F]{64,}$/.test(candidate) && candidate.length % 2 === 0
     ? Buffer.from(candidate, "hex") : Buffer.alloc(0);
   if (supplied.length !== key.length || !timingSafeEqual(supplied, key)) return null;
   return signCookie(now);
 }
 
-export function issueDemoMerchantPhoneCookie(phone: string, challengeId: string, code: string): string | null {
-  if (!merchantPhoneAuth.verify(phone, challengeId, code)) return null;
+export function issueDemoMerchantAuthCookie(input: MerchantAuthInput): string | null {
+  if (!getMerchantAuthProvider().verify(input)) return null;
   return signCookie(Date.now());
+}
+export function issueDemoMerchantPhoneCookie(phone: string, challengeId: string, code: string): string | null {
+  if (merchantAuthStatus().provider !== "sms") return null;
+  return issueDemoMerchantAuthCookie({ phone, challengeId, code });
 }
 function signCookie(now: number): string {
   const key = secret();
@@ -70,7 +71,7 @@ function signCookie(now: number): string {
 /** Pass Cookie header only. Duplicate names and altered signatures fail closed. */
 export function verifyDemoMerchantCookie(cookieHeader: string | null, now = Date.now()): boolean {
   const key = secret();
-  if (phoneSession() && merchantPhoneStatus().state !== "ready") return false;
+  if (providerSessionRequired() && merchantAuthStatus().state !== "ready") return false;
   if (!cookieHeader || cookieHeader.length > 4096) return false;
   const expectedName = cookieName();
   const matches = cookieHeader.split(";").map(part => part.trim())

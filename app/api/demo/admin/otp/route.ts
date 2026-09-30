@@ -1,9 +1,11 @@
 import { merchantPhoneAuth } from "@/lib/server/merchant-phone-auth";
+import { getMerchantAuthProvider, SmsOtpProvider } from "@/lib/server/merchant-auth-provider";
 import { assertLocalDemoHttpRequest } from "@/lib/server/demo-http-guard";
 import { demoFailure, demoSuccess } from "@/lib/server/demo-route-response";
 export async function POST(request: Request) {
   try {
     assertLocalDemoHttpRequest(request, "POST", "json");
+    if (getMerchantAuthProvider() !== SmsOtpProvider) throw new Error("SMS login is not selected");
     const text = await request.text();
     if (text.length > 256) throw new Error("Invalid request");
     const body = JSON.parse(text) as { phone?: unknown };

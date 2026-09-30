@@ -704,3 +704,14 @@ This remains a local synthetic Demo. No AI image composition, image-recognition 
 游老師已驗收短編號 261001-001 建立與查詢。首次綁定由已授權 Render 工作區管理員協助陳老師本人確認同意，受限紀錄保留操作者／時間／方式／手機末三碼；預覽共用帳密不具有綁定權限。本人自行輸入收到的驗證碼，管理員不得代收或代填。
 真實 SMS 採獨立 Twilio Messages adapter，固定 HTTPS 端點、逾時限制、無 redirect；程式介面不回傳 OTP，真實模式不提供模擬收件匣。本人確認與供應商設定未完成時維持拒絕登入。
 部署資料保護：現站 free /tmp 已含驗收訂單，不重部署／改環境直到完整資料備份與還原驗證完成。重建種子不代替原始訂單。操作詳見 docs/merchant-first-binding.md。
+
+## 64. Demo 認證 Provider 與隔離驗收（2026-10-01）
+
+最新決策：Demo 暫停手機綁定／簡訊作為登入前置。商家以單一密碼欄位登入；DemoPasswordProvider 與保留的 SmsOtpProvider 使用一致簽名商家工作階段，下游訂單／付款／包裝照片／出貨／送達 API 不依賴登入方式。正式站禁止簡易密碼 Provider。
+密碼僅配置於 Render 私密環境變數，獨立於 Cookie 簽名金鑰與站點存取憑證；驗證具節流、錯誤次數限制與鎖定，使用 HttpOnly／Secure／SameSite=Strict Cookie。切換 Provider 或撤銷設定使舊工作階段失效。
+原 issue24 測試站已含 261001-001、261001-002，無完整備份途徑前不變更其部署或環境。另建 cheng-tea-password-demo 隔離驗收站，使用獨立資料目錄與憑證；新站從新資料開始，不宣稱既有訂單已遷移。新 free 站資料也屬暫存，不作正式營運儲存。
+
+## 65. 現成 Passkey 模組沙盒驗證（2026-10-01）
+
+最新策略停止擴寫自行開發認證，採維護中的 Better Auth 與官方 @better-auth/passkey 1.7.6。先在 sandboxes/passkey-lock 獨立 Next.js 應用、套件安裝與資料庫測試，驗證成功後才透過既有 AuthProvider 對接，不修改訂單／付款／照片／出貨 API。獨立 Demo 密碼 Provider 保留作備援，實際密碼只由私密環境注入。
+供應商 native handler/client 負責 WebAuthn 驗證及 Session；受驗證 Session 與店家權限分開，沙盒帳號不自動取得茶行店家權限。虛擬驗證器測試不等於手機 Face ID／指紋通過，實機驗收需另列結果。
