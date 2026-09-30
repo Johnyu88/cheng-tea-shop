@@ -628,3 +628,14 @@ Follow `RESUME_PROMPT.md`, `AGENTS.md`, and `WORKFLOW.md`. If newer explicit use
 - All-dependency audit: 0 high/critical, 2 moderate findings remain. Production dependency audit: no known vulnerabilities. Audit thresholds/commands were not weakened. The high-filtered log does not identify the two moderate advisory details; collect native full JSON audit and assess them in follow-up before release, review by 2026-10-07. Do not claim all dependencies vulnerability-free.
 - New traditional bank-transfer flow has automated synthetic coverage only. **游老師尚未實測新匯款流程；人工驗收未完成。** No real payment, notification, fulfilment, deployment or merge performed.
 - Next: preserve and review stacked PRs #19→#20→#21→#22; prepare a safe test deployment using existing verified permissions/environment, then arrange user's bank-transfer→order→merchant verification→customer lookup walk-through. Merge/release remain separate approved actions.
+
+
+## Private Render phone preview — 2026-09-30
+
+- User connected Render and explicitly confirmed workspace 馭靈's workspace.
+- Branch feature/private-cloud-demo; draft PR23 https://github.com/Johnyu88/cheng-tea-shop/pull/23 based on security PR22, latest code 4a1231a74cf5a6f62d94900ea18520d5795c074b.
+- Added explicit cloud mode, exact HTTPS Render origin, independent high-entropy Basic preview access gate, independent API rechecks, secure merchant cookies, merchant-only catalog mutations/unpublished reads, fail-closed startup and cloud production/browser smoke.
+- Existing local-only demo was not cloud deployable; CI success alone did not supply a public test URL. This is corrected by the isolated staging mode; no production deployment or main merge.
+- First cloud contract red test rejected production access as expected; local new contract passed after change. Clean Actions lint/typecheck/unit/32 browser/2 mobile/cloud builds and Docker passed on earlier commits, but cloud smoke path initially failed because scripts/cloud-demo-smoke.mjs could not be created through connector. Script now resides at repository root and workflow path is corrected. Final run36667793003 is pending; do not mark deployed/ready yet.
+- Next: complete final CI and QA review, create one free Singapore Render service using branch, pinned Node/pnpm and start-cloud-demo.mjs; configure independently generated secrets without committing them; verify live provider status, generic health and authenticated requests before sending URL.
+- Free preview data is temporary; only synthetic entries, no real orders/remittances or notifications. New remittance flow remains pending 游老師's manual acceptance.
