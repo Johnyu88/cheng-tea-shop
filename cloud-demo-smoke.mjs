@@ -121,7 +121,7 @@ try {
     await expect(page).toHaveURL(/\/cart$/);
     await page.getByRole("link", { name: "前往結帳" }).click();
     await page.getByLabel("姓名", { exact: true }).fill("合成顧客");
-    await page.getByLabel("合成手機").fill("0912000001");
+    await page.getByLabel("合成手機").fill("0912000000");
     await page.getByRole("button", { name: "取得合成驗證碼" }).click();
     await expect(page.getByText("本機驗證碼：", { exact: false })).toContainText("123456");
     await page.getByLabel("驗證碼", { exact: true }).fill("123456");
