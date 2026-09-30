@@ -12,7 +12,8 @@ export function proxy(request: NextRequest) {
   if (now - windowStart >= 60_000) { failures = 0; windowStart = now; }
   if (failures >= 120 && !hasCloudDemoAuthorization(request)) return new NextResponse("Please retry later", { status: 429, headers: { "retry-after": "60", "cache-control": "no-store" } });
   try { assertCloudDemoRequest(request); }
-  catch {
+  catch (error) {
+    console.warn("Preview request denied:", error instanceof Error ? error.message : "Invalid request");
     failures += 1;
     return new NextResponse("Private test site", { status: 401, headers: {
       "www-authenticate": 'Basic realm="Chen Tea private preview", charset="UTF-8"',
