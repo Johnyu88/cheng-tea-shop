@@ -32,7 +32,7 @@ async function value(response) {
 try {
   let ready = false;
   for (let i = 0; i < 60; i += 1) {
-    try { if ((await fetch(base + "/api/health")).ok) { ready = true; break; } } catch {}
+    try { if ((await fetch(base + "/api/health")).ok) { ready = true; break; } } catch { /* Wait for the child server. */ }
     await sleep(500);
   }
   assert.equal(ready, true, "Standalone cloud build must start");
