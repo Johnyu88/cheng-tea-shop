@@ -45,7 +45,7 @@ jobs:
         env:
           NEXT_PUBLIC_DEMO_COMMERCE: enabled
       - name: Private cloud production order loop
-        run: node scripts/cloud-demo-smoke.mjs
+        run: node cloud-demo-smoke.mjs
       - name: Dependency audit
         run: pnpm audit --audit-level=high
       - name: Production dependency audit
