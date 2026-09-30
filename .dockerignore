@@ -10,3 +10,4 @@ work
 .superpowers
 .env*
 !.env.example
+.demo-data
