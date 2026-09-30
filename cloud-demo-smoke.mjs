@@ -75,6 +75,43 @@ try {
   const lookup = await value(await json("/api/demo/orders/lookup", { orderId: order.orderId, accessSecret: order.accessSecret, phone: draft.phone,
     phoneLastThree: "001", customerName: draft.name, challengeId: lookupOtp.challengeId, code: lookupOtp.demoCode }));
   assert.equal(lookup.order.status, "delivered");
+  // Emulate Render TLS headers over the local CI socket; guards above test hostile headers.
+  const { chromium, expect } = await import("@playwright/test");
+  const browser = await chromium.launch();
+  try {
+    const context = await browser.newContext({ baseURL: base, viewport: { width: 412, height: 915 },
+      httpCredentials: { username: "preview", password: token },
+      extraHTTPHeaders: { host: "tea-ci.onrender.com", "x-forwarded-proto": "https" } });
+    await context.route("**/*", async route => {
+      const current = route.request().headers();
+      if (current.origin === base) current.origin = origin;
+      await route.continue({ headers: current });
+    });
+    const page = await context.newPage();
+    await page.goto("/tea/taiwan-mi-xiang-wild-mountain-tea");
+    await page.getByRole("button", { name: "加入購物車" }).click();
+    await expect(page).toHaveURL(/\/cart$/);
+    await page.getByRole("link", { name: "前往結帳" }).click();
+    await page.getByLabel("姓名", { exact: true }).fill("合成顧客");
+    await page.getByLabel("合成手機").fill("0912000001");
+    await page.getByRole("button", { name: "取得合成驗證碼" }).click();
+    await page.getByLabel("驗證碼", { exact: true }).fill("123456");
+    await page.getByRole("button", { name: "下一步", exact: true }).click();
+    await page.getByRole("radio", { name: "銀行轉帳", exact: true }).check();
+    await page.getByRole("button", { name: "下一步", exact: true }).click();
+    await expect(page.getByText("付款狀態：待人工確認（不會扣款）", { exact: true })).toBeVisible();
+    await page.getByRole("button", { name: "建立示範訂單" }).click();
+    await expect(page.getByRole("heading", { name: "感謝您的購買" })).toBeVisible();
+    await page.goto("/admin/orders");
+    await page.getByLabel("商家 Demo 憑證").fill(merchant);
+    await page.getByRole("button", { name: "登入商家 Demo" }).click();
+    await expect(page.locator(".demo-order-card").first()).toBeVisible();
+    await page.goto("/admin/products");
+    await expect(page.getByRole("heading", { name: "商品管理", exact: true })).toBeVisible();
+    await expect(page.getByText("商品資料無法取得", { exact: true })).toHaveCount(0);
+    await context.close();
+  } finally { await browser.close(); }
+  console.log("Cloud browser smoke passed: phone checkout, Basic forwarding, Secure merchant cookie, catalog management.");
   console.log("Cloud smoke passed: private routes, CSRF, merchant cookie, bank-transfer order, packing, delivery, lookup.");
 } finally {
   child.kill("SIGTERM");
