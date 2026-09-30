@@ -17,6 +17,7 @@ export function AdminOrdersPage() {
   const [confirmedOrderId, setConfirmedOrderId] = useState<string>();
   const [rotation, setRotation] = useState<{ orderId: string; accessSecret: string }>();
   const [copyMessage, setCopyMessage] = useState("");
+  const [pendingPhoto, setPendingPhoto] = useState<{ orderId: string; file: File; previewUrl: string }>();
   const normalizedCredential = credential.trim();
   const credentialValid = /^[0-9a-fA-F]{64}$/.test(normalizedCredential);
   const invalidCharacters = [...normalizedCredential].filter(char => !/[0-9a-fA-F]/.test(char)).length;
@@ -25,6 +26,12 @@ export function AdminOrdersPage() {
     setRotation(undefined);
     setConfirmedOrderId(undefined);
     setCopyMessage("");
+  };
+  const clearPendingPhoto = () => {
+    setPendingPhoto(current => {
+      if (current) URL.revokeObjectURL(current.previewUrl);
+      return undefined;
+    });
   };
   const refresh = async () => {
     clearRotation();
@@ -53,16 +60,25 @@ export function AdminOrdersPage() {
       setError(e instanceof Error ? e.message : "操作失敗");
     } finally { setBusy(false); }
   };
-  const photo = async (orderId: string, file?: File) => {
+  const selectPhoto = (orderId: string, file?: File) => {
     if (!file) return;
+    setError("");
+    setPendingPhoto(current => {
+      if (current) URL.revokeObjectURL(current.previewUrl);
+      return { orderId, file, previewUrl: URL.createObjectURL(file) };
+    });
+  };
+  const confirmPhoto = async () => {
+    if (!pendingPhoto) return;
     try {
       setBusy(true);
       clearRotation();
-      await demoApi.packingPhoto(orderId, file);
+      await demoApi.packingPhoto(pendingPhoto.orderId, pendingPhoto.file);
+      clearPendingPhoto();
       await refresh();
       setError("");
     } catch (e) {
-      setError(e instanceof Error ? e.message : "照片處理失敗");
+      setError(e instanceof Error ? e.message : "照片上傳失敗，請重試。");
     } finally { setBusy(false); }
   };
   const rotate = async (orderId: string) => {
@@ -111,9 +127,27 @@ export function AdminOrdersPage() {
             <DemoOrderProgress order={order} />
             <p>付款：{order.paymentStatus === "manual-confirmed" ? "已人工確認" : "待人工確認"}</p>
             {order.paymentStatus === "pending-manual-verification" && <button className="filter-button" disabled={busy} onClick={() => void act(order.orderId, "confirm-payment")}>人工確認付款</button>}
-            {order.status === "confirmed" && <label className="form-field mt-4">打包照片
-              <input className="form-input" type="file" accept="image/jpeg,image/png,image/webp" capture="environment" onChange={e => void photo(order.orderId, e.target.files?.[0])} />
-            </label>}
+            {order.status === "confirmed" && <section className="mt-4" aria-labelledby={`packing-photo-${order.orderId}`}>
+              <h3 id={`packing-photo-${order.orderId}`}>包裝照片</h3>
+              <p className="muted">請先選擇拍照或相簿照片，檢查預覽後再按「確認包裝」。</p>
+              <div className="form-actions mt-3">
+                <label className="filter-button" htmlFor={`packing-camera-${order.orderId}`}>開啟相機
+                  <input id={`packing-camera-${order.orderId}`} className="sr-only" type="file" accept="image/jpeg,image/png,image/webp" capture="environment" onClick={e => { e.currentTarget.value = ""; }} onChange={e => selectPhoto(order.orderId, e.target.files?.[0])} />
+                </label>
+                <label className="filter-button" htmlFor={`packing-gallery-${order.orderId}`}>選擇相簿
+                  <input id={`packing-gallery-${order.orderId}`} className="sr-only" type="file" accept="image/jpeg,image/png,image/webp" onClick={e => { e.currentTarget.value = ""; }} onChange={e => selectPhoto(order.orderId, e.target.files?.[0])} />
+                </label>
+              </div>
+              {pendingPhoto?.orderId === order.orderId && <div className="mt-4" role="group" aria-label="包裝照片預覽">
+                <img className="product-draft-photo-preview" src={pendingPhoto.previewUrl} alt="包裝照片預覽" />
+                <p className="muted mt-2">{pendingPhoto.file.name}</p>
+                <div className="form-actions mt-3">
+                  <button className="primary-action" type="button" disabled={busy} onClick={() => void confirmPhoto()}>確認包裝</button>
+                  <button className="filter-button" type="button" disabled={busy} onClick={clearPendingPhoto}>取消</button>
+                  <label className="text-button" htmlFor={`packing-gallery-${order.orderId}`}>重選照片</label>
+                </div>
+              </div>}
+            </section>}
             {order.status === "packed" && <button className="primary-action mt-4" disabled={busy || order.paymentStatus !== "manual-confirmed"} onClick={() => void act(order.orderId, "ship")}>人工確認出貨</button>}
             {order.status === "shipped" && <button className="primary-action mt-4" disabled={busy} onClick={() => void act(order.orderId, "deliver")}>模擬送達</button>}
             <section className="mt-6" aria-labelledby={`recovery-${order.orderId}`}>

@@ -678,3 +678,11 @@ The storefront payment boundary is explicitly traditional and manual: bank trans
 The mobile demo path is product → cart → three-step checkout → thank-you page → secure order lookup. The selected traditional payment method is persisted in the local synthetic order record and shown on lookup. File-backed image replacement remains the single catalog boundary and is covered by persistence tests. Navigation links used as primary mobile exits use dark, high-contrast controls.
 
 This remains a local synthetic Demo. No AI image composition, image-recognition provider, ERP expansion, external payment service, real notification service, or production deployment was added. TypeScript, focused lint, and diff checks passed for this change; Vitest/build environment failures are documented in `HANDOFF.md` and are not represented as product passes.
+
+## 61. 2026-09-30 手機 Demo 包裝照片確認收斂
+
+手機店家訂單流程現在把包裝照片分成「開啟相機／選擇相簿 → 預覽 → 確認包裝」三個可見步驟；選取或拍照只建立暫存預覽，不會直接上傳、完成包裝或允許出貨。預覽可取消、重選，確認成功後才由既有 Mock API 記錄照片並進入已打包狀態；出貨與已送達仍是後續獨立狀態。
+
+本輪同步保留並回歸檢查銀行轉帳、現金、電話確認、LINE 語音確認四種傳統人工結帳、訂單查詢、返回首頁與已送達顯示。新匯款流程尚未經游老師人工驗收，不標示為驗收通過；自動化瀏覽器證據也不取代真人手機驗收。
+
+本輪沒有加入信用卡、LINE Pay、ERP、正式通知、正式物流或生產部署。Vitest 受目前 Windows worktree 的 Vite `spawn EPERM`／runner CommonJS 啟動限制，未將失敗環境誤記為測試通過；TypeScript、focused ESLint 與 diff check 的實際結果記錄於 `HANDOFF.md`。
