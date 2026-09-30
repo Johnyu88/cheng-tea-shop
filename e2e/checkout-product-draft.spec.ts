@@ -110,7 +110,7 @@ test("operator can edit supplied facts and explicitly confirm publication on des
   await publish.click();
   await expect(page.getByRole("heading", { name: "商品已上架" })).toBeVisible();
   await expect(page.getByText("已上架商品：春茶", { exact: true })).toBeVisible();
-  await expect(page.getByText("規格：150g／NT1250", { exact: true })).toBeVisible();
+  await expect(page.getByText("規格：150g／NT$1250", { exact: true })).toBeVisible();
 });
 
 test("operator can save an unpublished product on desktop", async ({ page }) => {
