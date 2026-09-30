@@ -686,3 +686,10 @@ This remains a local synthetic Demo. No AI image composition, image-recognition 
 - 生產依賴稽核無已知漏洞；整體稽核仍有2項開發依賴中度問題，未宣稱全部依賴無漏洞。
 - Render插件已連線並確認工作區，但建立免費測試站時回報私人GitHub倉庫無法讀取，目前無服務、無可交付測試網址。需先完成Render的GitHub部署授權並允許cheng-tea-shop，再重試部署及檢查實際HTTPS。
 - 雲端預覽資料會隨重啟或部署消失，只供合成測試；沒有真實付款、物流或通知。未合併main、未正式上線。**新匯款流程仍未經游老師親自測試，人工驗收待完成。**
+
+### 第61節更新：免費私人雲端預覽已上線
+
+- 使用者確認GitHub部署憑證及Render app授權後，建立免費新加坡測試站 https://cheng-tea-private-preview.onrender.com 。部署dep-dau9s7hsrm7s73bd3jp0已LIVE，版本efd047f（程式與通過CI的55c5c34相同，其後只有文件更新），自動部署關閉。
+- 實際HTTPS驗證通過：健康檢查、私人頁面/API/圖片保護、登入後首頁、安全來源限制、店家Secure cookie、合成匯款訂單→人工付款確認→包裝照片→出貨→送達→OTP與密語安全查單。這解除前述倉庫存取阻塞。
+- 測試站獨立於兩台個人電腦；登入憑證不存Git、不放URL。資料仍為可隨重啟消失的合成測試資料，沒有真實金流或通知。
+- **游老師的新匯款流程真人手機驗收仍未完成。** 未合併main、未正式上線。
