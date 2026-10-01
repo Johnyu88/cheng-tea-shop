@@ -19,4 +19,3 @@ await p.route('**/api/demo/orders/lookup',r=>r.fulfill({status:403,json:{ok:fals
 for(const state of ['failure','network','rate']){mode=state;await identity();await issue();await p.getByRole('alert').waitFor();const text=await p.getByRole('alert').textContent();assert.match(text,state==='rate'?/冷卻.*87|87 秒/:state==='network'?/暫時無法連線/:/取得驗證碼失敗/);await inViewport(p.getByRole('alert'));if(state==='rate'){assert.equal(await p.getByRole('button',{name:/冷卻中，請等待/}).isDisabled(),true);await p.waitForTimeout(1100);assert.match(await p.getByRole('alert').textContent(),/剩餘 8[56] 秒/);}console.log('PASS '+state+' explicit visible feedback');}
 await c.close();console.log('Mobile WebKit two-stage UI regression PASS (mocked failure responses; actual deployed frontend).');
 }finally{await b.close()}})().catch(e=>{console.error(e.stack);process.exitCode=1});
-

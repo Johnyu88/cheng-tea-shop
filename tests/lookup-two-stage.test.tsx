@@ -61,4 +61,3 @@ it("shows consumed and expired challenge state with a cooldown", async () => {
   expect(screen.getByRole("button", { name: "查詢訂單" })).toBeDisabled();
   expect(screen.getByRole("button", { name: /重新取得驗證碼（冷卻/ })).toBeDisabled();
 });
-
