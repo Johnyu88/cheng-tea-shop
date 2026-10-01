@@ -24,3 +24,19 @@ User-authorized scope: order number + customer name + phone last three digits; m
 - A consumed challenge is returned during its remaining 60-second cooldown; wait before requesting a fresh one.
 - Passkey remains separate sandbox and not integrated with tea merchant authorization.
 - Demo delivery is simulated; Render data directory remains ephemeral.
+
+## Deployed cloud acceptance
+- Existing service srv-daukf2ojo6nc73dhmrfg deployed source e05fa2c33a8d7cf0bf06cdb70283588e93318f38, deploy dep-davakg2d0e5s73f85vj0 LIVE at 2026-10-01T18:46:52Z.
+- Mobile Chromium HTTPS order loop 12/12 PASS, exit 0, 68.27s. Retained delivered order 261002-003, name CrossDeviceAcceptance, suffix 001.
+- Final lookup uses a separate browser context at 390px with empty session storage and manually entered three identity fields; captured requests contain neither accessSecret nor phone.
+- Initial cloud attempts stopped at an unrelated clipboard spy assertion before lookup; the focused new lookup runner excludes clipboard coverage. Existing original acceptance runner and local public-number clipboard test remain intact.
+- No service/architecture/payment-provider replacement or main merge. Existing generated next-env.d.ts modification preserved.
+
+## Mobile WebKit HTTPS result
+- Linux Playwright WebKit 26.5 / build 2336 with iPhone 13 device emulation PASS, exit 0. Test-only browser libraries loaded from extracted temporary packages after Windows WebKit page creation failed; no application service or dependency changed.
+- Test fixture created by API, manually confirmed payment, uploaded packing photo, shipped and simulated delivered; separate WebKit browser context has zero session storage.
+- Customer UI receives manually entered order number/name/suffix, issues OTP, and displays delivered. Captured customer requests contain neither accessSecret nor full phone. No horizontal overflow.
+- Retained phone fixture: order 261002-006; name 手機查單; synthetic phone 0912000000; suffix 000. Use page-provided simulated OTP.
+- WebKit automated evidence is not physical iPhone Safari acceptance. Short remaining phone check: Safari private/new browser session -> /orders -> three fixture fields -> obtain OTP -> query -> confirm delivered with no credential step.
+- Runners: scripts/cross-device-live-acceptance.mjs and scripts/cross-device-webkit.mjs; credentials via private environment only. Retained logs include Chromium live and Linux WebKit live result.
+- Formal real SMS, actual delivery and Passkey tea authorization remain outside this private demo completion.

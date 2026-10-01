@@ -21,4 +21,3 @@ C:\Users\edea7\.codex\worktrees\issue-24\cheng-tea-shop\features\publishing\comp
   41:2951  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
 
 ??9 problems (0 errors, 9 warnings)
-

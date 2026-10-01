@@ -1,4 +1,4 @@
-node : The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the 
+node : The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the
 resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your V
 ite config instead.
 位於 線路:1 字元:150
@@ -6,7 +6,7 @@ ite config instead.
 +                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     + CategoryInfo          : NotSpecified: (The plugin...g instead.:String) [], RemoteException
     + FullyQualifiedErrorId : NativeCommandError
- 
+
 
  RUN  v5.0.0 C:/Users/edea7/.codex/worktrees/issue-24/cheng-tea-shop
 
@@ -57,7 +57,7 @@ This ensures that you're testing the behavior the user would see in the browser.
 rap-tests-with-act
 
  ??[39m tests/order-lookup-page.test.tsx (6 tests) 478ms
-stderr | tests/home-page.test.tsx > provides a named storefront shell for keyboard and assistive 
+stderr | tests/home-page.test.tsx > provides a named storefront shell for keyboard and assistive
 technology users
 An update to CatalogPreview inside a test was not wrapped in act(...).
 
@@ -71,7 +71,7 @@ act(() => {
 This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/w
 rap-tests-with-act
 
-stderr | tests/home-page.test.tsx > provides a named storefront shell for keyboard and assistive 
+stderr | tests/home-page.test.tsx > provides a named storefront shell for keyboard and assistive
 technology users
 An update to CatalogBrowser inside a test was not wrapped in act(...).
 
@@ -118,7 +118,7 @@ act(() => {
 This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/w
 rap-tests-with-act
 
-stderr | tests/home-page.test.tsx > uses approved desktop/mobile composite candidates instead of 
+stderr | tests/home-page.test.tsx > uses approved desktop/mobile composite candidates instead of
 a video
 An update to CatalogPreview inside a test was not wrapped in act(...).
 
@@ -132,7 +132,7 @@ act(() => {
 This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/w
 rap-tests-with-act
 
-stderr | tests/home-page.test.tsx > uses approved desktop/mobile composite candidates instead of 
+stderr | tests/home-page.test.tsx > uses approved desktop/mobile composite candidates instead of
 a video
 An update to CatalogBrowser inside a test was not wrapped in act(...).
 
@@ -278,4 +278,3 @@ stdout | tests/merchant-phone-auth.test.ts > phone challenge establishes signed 
 Environment  jsdom was created 54 times 繚 74.51s total, 61% of tracked time
              create it once per worker with pool: 'vmThreads' (keeps per-file isolation) or isolate: false (shares it across files)
              learn more: https://vitest.dev/guide/improving-performance#test-environments
-

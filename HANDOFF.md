@@ -713,3 +713,8 @@ Source/verification work continues on the same feature/issue-24-mobile-login bra
 - Security reviewer approved only private synthetic demo scope. OTP remains simulated; physical iPhone Safari not yet verified.
 - Current report: docs/testing/cross-device-lookup-2026-10-02.md; retained evidence logs include Windows WebKit failure.
 - Existing next-env.d.ts unrelated change preserved. Passkey merchant integration remains separate unfinished task.
+
+- Cloud lookup release e05fa2c LIVE deploy dep-davakg2d0e5s73f85vj0; new mobile Chromium HTTPS full loop 12/12 PASS.
+- Linux mobile WebKit HTTPS fresh-context cross-device lookup PASS, no secret/full-phone transmitted, delivered shown.
+- Current phone fixture 261002-006 / 手機查單 / suffix000. No long-secret handoff needed. Private runner configuration removed.
+- Remaining: actual iPhone Safari final confirmation; OTP/delivery still simulated and Passkey merchant bridge separate.

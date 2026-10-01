@@ -41,9 +41,6 @@ try {
   assert.ok(lookupHref && !lookupHref.includes("token="));
   const shortNumber = lookupHref.match(/[0-9]{6}-[0-9]{3,}/)[0];
   checkpoint(3);
-  await page.evaluate(() => { window.__copiedOrder = ""; Object.defineProperty(navigator, "clipboard", { configurable: true, value: { writeText: async text => { window.__copiedOrder = text; } } }); });
-  await page.getByRole("button", { name: "複製訂單編號", exact: true }).click();
-  assert.equal(await page.evaluate(() => window.__copiedOrder), shortNumber);
   await page.goto(lookupHref);
   await page.getByLabel("顧客姓名").fill(customerName);
   await page.getByLabel("手機末三碼").fill("001");

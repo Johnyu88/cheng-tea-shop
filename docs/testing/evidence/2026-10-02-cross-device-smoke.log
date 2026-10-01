@@ -5,7 +5,7 @@ e-24/cheng-tea-shop/lib/server/demo-cloud.ts is not specified and it doesn't par
 +                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     + CategoryInfo          : NotSpecified: ((node:20392) [M...se as CommonJS.:String) [], RemoteException
     + FullyQualifiedErrorId : NativeCommandError
- 
+
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
 To eliminate this warning, add "type": "module" to \\?\C:\Users\edea7\.codex\worktrees\issue-24\cheng-tea-shop\package.
 json.
