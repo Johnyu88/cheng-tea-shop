@@ -34,4 +34,8 @@ Cloud WebKit viewport/focus and full lookup results appended after deployment. P
 - Branchfeature/issue-24-mobile-login; draftPR25. Source app commitb56baeb8977ebeaf0a8abe36edb6e767753adeca; deployed formatting/source snapshot22111edb15169f6adcfab8d162dd612dc1882c9b.
 - Remaining: physical iPhone Safari OS keyboard interaction, real SMS delivery, and tea-order Passkey authorization are not established by these tests. Separate Passkey sandbox user registration/relogin evidence remains valid.
 ## Short final phone check
-Safari fresh/private tab -> /orders ->261002-001 / 手機查單 /000 ->取得查單驗證碼 -> second stage shows123456+expiry+query -> enter123456 ->查詢訂單 ->已送達.
+Safari fresh/private tab -> /orders ->261002-002 / 手機查單 /001 ->取得查單驗證碼 -> second stage shows123456+expiry+query -> enter123456 ->查詢訂單 ->已送達.
+
+## Unused handset fixture
+- Phone handoff now261002-002 / 手機查單 /001, syntheticphone0912000001, delivered. Created and paid/packed/shipped/delivered via verified HTTPS API; customer OTP has never been issued for this order. Evidence: phone-fixture.log.
+- Order001 remains automated evidence; it spent issuance/lookup quota. No quota reset or bypass performed. Use002 for immediate human acceptance.

@@ -5,7 +5,7 @@
 - Password demo /orders now uses two visible stages; OTP123456, expiry, cooldown and actionable errors. See docs/testing/otp-two-stage-2026-10-02.md.
 - Deployed app snapshot22111ed; existing service/deploydep-davbahbbc2fs73c7bpa0 LIVE. Auto-deploy off.
 - Full292 tests/type/lint/build PASS; local order/photo-preview loop PASS; deployed WebKit390x664 viewport/error tests and actual fresh-context delivered lookup PASS.
-- Current synthetic phone fixture261002-001 / 手機查單 /000; delivered. Ignore the older006 fixture in historical notes.
+- Current synthetic phone fixture261002-002 / 手機查單 /001; delivered. Ignore the older006 fixture in historical notes.
 - Physical Safari keyboard check remains; separate Passkey sandbox is not tea-order authentication. Existing next-env.d.ts user modification preserved.
 
 
