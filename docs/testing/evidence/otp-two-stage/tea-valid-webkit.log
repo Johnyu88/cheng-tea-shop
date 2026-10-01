@@ -1,0 +1,15 @@
+Skipping host requirements validation logic because `PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS` env variable is set.
+WebKit launched
+Setup context created
+Catalog read
+API /api/demo/otp
+API /api/demo/orders
+API /api/demo/admin/session
+API /api/demo/admin/orders/DEMO-a8d57a10-07a9-410f-b555-040f4621418b
+API /api/demo/admin/orders/DEMO-a8d57a10-07a9-410f-b555-040f4621418b
+API /api/demo/admin/orders/DEMO-a8d57a10-07a9-410f-b555-040f4621418b
+Fixture ready: 261002-001
+Fresh WebKit lookup page loaded
+Stage two viewport/focus PASS: {"otp":{"x":37,"y":345.375,"width":316,"height":50},"query":{"x":37,"y":419.375,"width":87.1875,"height":55.1875},"height":664}
+HTTPS mobile WebKit cross-device PASS: fresh context, no storage, three identity fields + OTP, delivered, no secret/full phone, no horizontal overflow.
+Retained order: 261002-001; name: 手機查單; suffix: 000
