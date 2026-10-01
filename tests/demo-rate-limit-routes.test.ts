@@ -65,3 +65,12 @@ it("cross-device order quota survives changing the name and suffix", async () =>
   const blocked = await lookup(req("/api/demo/orders/lookup", { orderId: "261002-001", customerName: "Other", phoneLastThree: "999" }));
   expect(blocked.status).toBe(429);
 });
+
+it("lookup errors give actionable generic no-match or expired-code text", async () => {
+  setup();
+  const response = await lookup(req("/api/demo/orders/lookup", {
+    orderId: "261002-001", customerName: "Test", phoneLastThree: "000", challengeId: "opaque", code: "000000"
+  }));
+  expect(response.status).toBe(403);
+  expect(await response.json()).toEqual({ ok: false, error: "查無符合資料的訂單，或驗證碼無效／過期，請確認訂單編號、姓名及手機末三碼後再試" });
+});

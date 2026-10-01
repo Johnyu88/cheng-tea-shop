@@ -21,7 +21,7 @@ test("cross-device lookup needs only number/name/suffix and a single-use bound O
   const f = fixture(); try {
     const order = f.create("Cross Device"); const input = { orderId: order.orderNumber, customerName: "Cross Device", phoneLastThree: "000" };
     const challenge = f.runtime.issueLookupOtp(input);
-    expect(Object.keys(challenge).sort()).toEqual(["challengeId", "delivery", "expiresAt"]);
+    expect(Object.keys(challenge).sort()).toEqual(["challengeId", "delivery", "expiresAt", "resendAvailableAt", "usable"]);
     const verified = { ...input, challengeId: challenge.challengeId, code: "123456" };
     expect(f.runtime.lookupOrder(verified)).toMatchObject({ orderId: order.orderId });
     expect(() => f.runtime.lookupOrder(verified)).toThrow("Unable to verify demo order");
@@ -33,7 +33,7 @@ test("invalid identities get indistinguishable decoys that never authorize", () 
     for (const change of [{ customerName: "Wrong" }, { phoneLastThree: "999" }, { orderId: "999999-999" }]) {
       const input = { orderId: order.orderNumber, customerName: "Cross Device", phoneLastThree: "000", ...change };
       const challenge = f.runtime.issueLookupOtp(input);
-      expect(Object.keys(challenge).sort()).toEqual(["challengeId", "delivery", "expiresAt"]);
+      expect(Object.keys(challenge).sort()).toEqual(["challengeId", "delivery", "expiresAt", "resendAvailableAt", "usable"]);
       expect(() => f.runtime.lookupOrder({ ...input, challengeId: challenge.challengeId, code: "123456" })).toThrow("Unable to verify demo order");
     }
   } finally { f.runtime.close(); }
@@ -92,7 +92,7 @@ test("lookup send quota and exhausted attempts remain enforced after restart", (
   f.runtime.close(); const reopened = createLocalDemoRuntime({ directory: f.directory }); try {
     for (let n = 0; n < 5; n++) expect(() => reopened.lookupOrder({ ...input, challengeId: challenge.challengeId, code: "000000" })).toThrow();
     vi.setSystemTime(Date.now() + 61_000);
-    expect(() => reopened.issueLookupOtp(input)).toThrow("Unable to issue demo verification");
+    expect(() => reopened.issueLookupOtp(input)).toThrow("嘗試次數過多");
     expect(() => reopened.lookupOrder({ ...input, challengeId: challenge.challengeId, code: "123456" })).toThrow();
   } finally { reopened.close(); }
 });

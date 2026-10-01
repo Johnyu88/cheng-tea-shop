@@ -1,3 +1,4 @@
+import { DemoRateLimitError } from "./demo-rate-limit";
 import { createHash, randomBytes, randomUUID, timingSafeEqual } from "node:crypto";
 import type { DatabaseSync } from "node:sqlite";
 export type LookupIdentity = { orderId: string; customerName: string; phoneLastThree: string };
@@ -9,25 +10,28 @@ const binding = (input: LookupIdentity) => hash(JSON.stringify([input.orderId.tr
 export function createDemoLookupChallenge(db: DatabaseSync, code: string) {
   db.exec("CREATE TABLE IF NOT EXISTS demo_lookup_challenge (id TEXT PRIMARY KEY, binding TEXT NOT NULL, order_id TEXT, salt TEXT NOT NULL, code_digest TEXT NOT NULL, issued_at INTEGER NOT NULL, expires_at INTEGER NOT NULL, attempts INTEGER NOT NULL DEFAULT 0, consumed INTEGER NOT NULL DEFAULT 0)");
   db.exec("CREATE INDEX IF NOT EXISTS idx_demo_lookup_binding ON demo_lookup_challenge(binding, issued_at)");
-  const receipt = (row: Pick<ChallengeRow, "id" | "expires_at">) => ({ challengeId: row.id, expiresAt: row.expires_at, delivery: "simulated" as const });
+  const receipt = (row: Pick<ChallengeRow, "id" | "expires_at" | "issued_at" | "consumed" | "attempts">) => ({
+    challengeId: row.id, expiresAt: row.expires_at, resendAvailableAt: row.issued_at + 60_000,
+    usable: !row.consumed && row.attempts < 5 && Date.now() < row.expires_at, delivery: "simulated" as const,
+  });
   return {
     issue(input: LookupIdentity, orderId: string | null) {
       const key = binding(input); const now = Date.now();
       db.exec("BEGIN IMMEDIATE");
       try {
-        db.prepare("DELETE FROM demo_lookup_challenge WHERE issued_at < ?").run(now - 3_600_000);
+        db.prepare("DELETE FROM demo_lookup_challenge WHERE issued_at <= ?").run(now - 3_600_000);
         const rows = db.prepare("SELECT * FROM demo_lookup_challenge WHERE binding = ? ORDER BY issued_at DESC").all(key) as ChallengeRow[];
         const latest = rows[0];
         if (latest && now - latest.issued_at < 60_000) {
-          // Always return the same public receipt during cooldown, even after consumption.
+          // Public state describes usability only, never whether an order identity matched.
           db.exec("COMMIT"); return receipt(latest);
         }
-        if (rows.length >= 3) throw new Error("Unable to issue demo verification");
+        if (rows.length >= 3) throw new DemoRateLimitError(Math.max(1, Math.ceil((rows[rows.length - 1]!.issued_at + 3_600_000 - now) / 1000)));
         db.prepare("UPDATE demo_lookup_challenge SET consumed = 1 WHERE binding = ?").run(key);
         const id = randomUUID(), salt = randomBytes(32).toString("hex"), expiresAt = now + 300_000;
         db.prepare("INSERT INTO demo_lookup_challenge (id,binding,order_id,salt,code_digest,issued_at,expires_at) VALUES (?,?,?,?,?,?,?)")
           .run(id, key, orderId, salt, hash(salt + code), now, expiresAt);
-        db.exec("COMMIT"); return receipt({ id, expires_at: expiresAt });
+        db.exec("COMMIT"); return receipt({ id, expires_at: expiresAt, issued_at: now, consumed: 0, attempts: 0 });
       } catch (error) { if (db.isTransaction) db.exec("ROLLBACK"); throw error; }
     },
     verify(input: LookupIdentity, challengeId: string, code: string): string | null {

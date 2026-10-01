@@ -26,7 +26,7 @@ it("shows a delivered order after verified lookup without passing a credential",
     notifications: [], mobilePushPreview: { title: "", body: "", state: "preview-only" },
   } as unknown as DemoLookup);
   render(<OrderLookupPage />);
-  await waitFor(() => expect(screen.getByRole("button", { name: "取得查單驗證碼" })).toBeEnabled());
+  await waitFor(() => expect(screen.getByLabelText("顧客姓名")).toHaveValue(receipt.customerName));
   fireEvent.click(screen.getByRole("button", { name: "取得查單驗證碼" }));
   await screen.findByLabelText("驗證碼");
   fireEvent.change(screen.getByLabelText("驗證碼"), { target: { value: "123456" } });
@@ -37,7 +37,8 @@ it("shows a delivered order after verified lookup without passing a credential",
 it("blocks incomplete identity before requesting OTP", () => {
   const issue = vi.spyOn(demoApi, "issueLookupOtp");
   render(<OrderLookupPage />);
-  expect(screen.getByRole("button", { name: "取得查單驗證碼" })).toBeDisabled();
+  fireEvent.click(screen.getByRole("button", { name: "取得查單驗證碼" }));
+  expect(screen.getByRole("alert")).toHaveTextContent("請完整填入");
   expect(issue).not.toHaveBeenCalled();
   expect(screen.queryByLabelText("驗證碼")).not.toBeInTheDocument();
 });

@@ -17,7 +17,7 @@ test("restores private UUID receipt from short number URL and verifies before lo
   expect(screen.getByLabelText("訂單編號")).toHaveValue("260930-001");
   expect(lookup).not.toHaveBeenCalled();
   fireEvent.click(screen.getByRole("button",{name:"取得查單驗證碼"}));
-  await screen.findByText("本機驗證碼：",{exact:false});
+  await screen.findByText(/本機驗證碼/,{exact:false});
   fireEvent.change(screen.getByLabelText("驗證碼"),{target:{value:"123456"}});
   fireEvent.click(screen.getByRole("button",{name:"查詢訂單"}));
   await waitFor(()=>expect(lookup).toHaveBeenCalledWith(expect.objectContaining({orderId:"260930-001",customerName:"Yu",phoneLastThree:"000"})));

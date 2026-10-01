@@ -18,6 +18,7 @@ it("queries from an empty browser using three fields and OTP without any receipt
   await waitFor(() => expect(fetcher).toHaveBeenCalledTimes(1));
   expect(fetcher).toHaveBeenCalledWith("/api/demo/otp", expect.objectContaining({ body: JSON.stringify({ purpose: "lookup", orderId: "261002-002", customerName: "手機驗收", phoneLastThree: "000" }) }));
   await screen.findByLabelText("驗證碼");
+  fireEvent.click(screen.getByRole("button", { name: "修改查單資料" }));
   fireEvent.change(screen.getByLabelText("顧客姓名"), { target: { value: "另一位" } });
   expect(screen.queryByLabelText("驗證碼")).not.toBeInTheDocument();
 });

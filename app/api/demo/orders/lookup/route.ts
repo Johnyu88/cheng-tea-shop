@@ -20,6 +20,6 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     if (error instanceof DemoRateLimitError) return Response.json({ ok: false, error: error.message }, { status: 429, headers: { "Retry-After": String(error.retryAfterSeconds) } });
-    return demoFailure(new Error("無法驗證示範訂單，請確認訂單資料與驗證碼。"), 403);
+    return demoFailure(new Error("查無符合資料的訂單，或驗證碼無效／過期，請確認訂單編號、姓名及手機末三碼後再試"), 403);
   }
 }
