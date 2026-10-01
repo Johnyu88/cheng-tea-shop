@@ -696,3 +696,12 @@ Source/verification work continues on the same feature/issue-24-mobile-login bra
 - BLOCKED_EXTERNAL: current cloud access/merchant/bootstrap secrets are unavailable; prior private test configs were intentionally removed. Render live deployment references were read, but no authenticated live revalidation or retained test order was created this round.
 - Do not redeploy/restart existing ephemeral services without verified full backup/restore. No application changes, product-management rework, payment-provider change or main merge.
 - Next: obtain current valid private test credentials; run authenticated live loop and preserve a fresh test receipt; phone Passkey acceptance precedes existing AuthProvider integration. Cross-device name/suffix-only lookup remains unimplemented.
+
+## 2026-10-02 live acceptance recovery
+- User authorized replacement of ephemeral password-demo orders for gate recovery.
+- Rotated only DEMO_PREVIEW_TOKEN_SHA256; existing service deployed source 0fe4a50.
+- Cloud browser acceptance: exit 0, 12/12 passed; retained delivered order 261002-001.
+- Pending phone order 261002-002 created and queried; synthetic phone 0912000000.
+- User screenshots show phone Passkey registration/logout/re-login success in independent sandbox.
+- Current evidence/limits: docs/testing/live-acceptance-2026-10-02.md. No secrets committed.
+- Still pending: actual handset camera preview, Passkey tea authorization integration, new-device lookup simplification.
