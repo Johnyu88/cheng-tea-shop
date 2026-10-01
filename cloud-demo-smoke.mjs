@@ -124,7 +124,7 @@ try {
       outgoing.writeHead(response.statusCode, response.headers);
       response.pipe(outgoing);
     });
-    upstream.on("error", () => { outgoing.writeHead(502); outgoing.end(); });
+    upstream.on("error", () => { if (!outgoing.headersSent) { outgoing.writeHead(502); outgoing.end(); } else outgoing.destroy(); });
     incoming.pipe(upstream);
   });
   await new Promise((resolve, reject) => { edge.once("error", reject); edge.listen(3139, "127.0.0.1", resolve); });
@@ -220,6 +220,32 @@ try {
     await expect(page.getByRole("heading", { name: "商品管理", exact: true })).toBeVisible();
     await expect(page.getByText("商品資料無法取得", { exact: true })).toHaveCount(0);
     await context.close();
+    const { webkit } = await import("@playwright/test");
+    const engine = process.env.DEMO_SMOKE_BROWSER === "webkit" ? webkit : chromium;
+    const safari = await engine.launch();
+    try {
+      const fresh = await safari.newContext({ baseURL: browserBase, viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, httpCredentials: { username: "preview", password: token } });
+      const other = await fresh.newPage();
+      await other.goto("/orders");
+      assert.equal(await other.evaluate(() => sessionStorage.length), 0, "New device has no receipt");
+      await expect(other.getByLabel("查單憑證")).toHaveCount(0);
+      await expect(other.getByLabel("驗證用手機")).toHaveCount(0);
+      const requests = [];
+      other.on("request", r => { if (r.method() === "POST" && /\/api\/demo\/(otp|orders\/lookup)$/.test(r.url())) requests.push(r.postDataJSON()); });
+      await other.getByLabel("訂單編號").fill(order.orderNumber);
+      await other.getByLabel("顧客姓名").fill(draft.name);
+      await other.getByLabel("手機末三碼").fill("001");
+      await other.getByRole("button", { name: "取得查單驗證碼" }).click();
+      await other.getByLabel("驗證碼", { exact: true }).fill("123456");
+      await other.getByRole("button", { name: "查詢訂單", exact: true }).click();
+      await expect(other.getByRole("heading", { name: "已送達", exact: true })).toBeVisible();
+      assert.equal(requests.length, 2);
+      assert.ok(requests.every(r => !("accessSecret" in r) && !("phone" in r)));
+      await expect.poll(() => other.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+      await fresh.close();
+      console.log("Mobile "+engine.name()+" cross-device PASS: empty storage, three fields+OTP, delivered, no secret/full phone, 390px no overflow.");
+    } finally { await safari.close(); }
+
   } finally { await browser.close(); await new Promise(resolve => edge.close(resolve)); }
   console.log("Cloud browser smoke passed: phone checkout, Basic forwarding, Secure merchant cookie, catalog management.");
   console.log("Cloud smoke passed: private routes, CSRF, merchant cookie, bank-transfer order, packing, delivery, lookup.");

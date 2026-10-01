@@ -51,10 +51,10 @@ export function DemoCheckoutSuccessPage(props: SuccessData): JSX.Element {
     <button className="filter-button mt-4" type="button" onClick={() => void copyNumber()}>複製訂單編號</button>
     {copyMessage && <p role="status">{copyMessage}</p>}
     <p>訂單狀態：{statusLabels[data.status]}</p>
-    {!data.accessSecret && <p role="status" className="prototype-notice">此分頁沒有完整查單憑證，查詢頁不會自動登入。請輸入訂單編號、查詢密語、訂購人姓名與手機末三碼，再完成一次性驗證；密語遺失時請直接聯絡店家協助。密語不會放在網址或公開畫面中。</p>}
+    <p role="status" className="prototype-notice">在其他裝置查單，只需訂單編號、顧客姓名與手機末三碼，再完成驗證碼驗證。</p>
     <div className="form-actions mt-6">
       <Link className="filter-button" href="/">回到首頁</Link>
-      <Link className="primary-action" href={lookupHref}>{data.accessSecret ? "主動查看訂單" : "前往安全的訂單查詢"}</Link>
+      <Link className="primary-action" href={lookupHref}>主動查看訂單</Link>
     </div>
   </section></main>;
 }

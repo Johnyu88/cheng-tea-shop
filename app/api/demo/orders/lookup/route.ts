@@ -8,10 +8,10 @@ export async function POST(request: Request) {
   try {
     assertLocalDemoHttpRequest(request, "POST", "json");
     const runtime = getLocalDemoRuntime();
-    const body = await request.json() as { orderId?: unknown; phone?: unknown };
+    const body = await request.json() as { orderId?: unknown; phone?: unknown; phoneLastThree?: unknown };
     enforceDemoRateLimit("lookup", "lan-global", 40, 15 * 60_000);
-    enforceDemoRateLimit("lookup", "order:" + String(body.orderId), 5, 15 * 60_000);
-    enforceDemoRateLimit("lookup", "phone:" + String(body.phone), 5, 15 * 60_000);
+    enforceDemoRateLimit("lookup", "order:" + String(body.orderId).trim(), 5, 15 * 60_000);
+    enforceDemoRateLimit("lookup", body.phone === undefined ? "suffix:" + String(body.phoneLastThree) : "phone:" + String(body.phone), 5, 15 * 60_000);
     const order = runtime.lookupOrder(body as Parameters<typeof runtime.lookupOrder>[0]);
     return demoSuccess({
       order,

@@ -705,3 +705,11 @@ Source/verification work continues on the same feature/issue-24-mobile-login bra
 - User screenshots show phone Passkey registration/logout/re-login success in independent sandbox.
 - Current evidence/limits: docs/testing/live-acceptance-2026-10-02.md. No secrets committed.
 - Still pending: actual handset camera preview, Passkey tea authorization integration, new-device lookup simplification.
+
+## 2026-10-02 cross-device lookup redesign
+- Explicit user instruction replaced customer long-secret steps with order number/name/phone suffix + mandatory OTP.
+- Frontend and backend implemented on existing feature branch; no service/architecture replacement.
+- Full tests 54/277 PASS, typecheck/lint/build PASS, local full order loop plus empty-storage mobile Chromium cross-device delivered lookup PASS.
+- Security reviewer approved only private synthetic demo scope. OTP remains simulated; physical iPhone Safari not yet verified.
+- Current report: docs/testing/cross-device-lookup-2026-10-02.md; retained evidence logs include Windows WebKit failure.
+- Existing next-env.d.ts unrelated change preserved. Passkey merchant integration remains separate unfinished task.

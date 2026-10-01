@@ -22,6 +22,6 @@ test("copies only the public short number with one tap", async () => {
   render(<DemoCheckoutSuccessPage orderId="DEMO-private" orderNumber="260930-002" accessSecret="private-secret" status="confirmed" />);
   fireEvent.click(screen.getByRole("button", { name: "複製訂單編號" }));
   await waitFor(() => expect(writeText).toHaveBeenCalledWith("260930-002"));
-  expect(screen.getByRole("status")).toHaveTextContent("已複製");
+  expect(screen.getByText("已複製訂單編號")).toBeInTheDocument();
   expect(writeText).not.toHaveBeenCalledWith("DEMO-private");
 });

@@ -1,0 +1,47 @@
+node : (node:20392) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/edea7/.codex/worktrees/issu
+e-24/cheng-tea-shop/lib/server/demo-cloud.ts is not specified and it doesn't parse as CommonJS.
+位於 線路:1 字元:248
++ ... ptance.mjs; node cloud-demo-smoke.mjs *> docs/testing/evidence/2026-1 ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:20392) [M...se as CommonJS.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to \\?\C:\Users\edea7\.codex\worktrees\issue-24\cheng-tea-shop\package.
+json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+??Next.js 16.3.6
+- Local:         http://localhost:3138
+- Network:       http://0.0.0.0:3138
+??Ready in 0ms
+??Running next.config took 4ms
+Preview request denied: Preview access denied
+Preview request denied: Preview access denied
+Preview request denied: Preview access denied
+Preview request denied: Preview access denied
+Preview request denied: Preview access denied
+Preview request denied: Preview access denied
+Preview request denied: Preview access denied
+Preview request denied: Preview access denied
+Preview request denied: Preview access denied
+Preview request denied: Preview origin rejected
+Preview request denied: Preview origin rejected
+Preview request denied: Preview origin rejected
+Preview request denied: Preview origin rejected
+{"scope":"merchant-auth","provider":"password","event":"verify-denied","at":1790880165663}
+{"scope":"merchant-auth","provider":"password","event":"verify-success","at":1790880166807}
+Preview request denied: Preview access denied
+Preview request denied: Preview access denied
+Preview request denied: Preview access denied
+Preview request denied: Preview access denied
+Preview request denied: Preview access denied
+Preview request denied: Preview access denied
+Preview request denied: Preview access denied
+Preview request denied: Preview access denied
+Preview request denied: Preview access denied
+Preview request denied: Preview access denied
+{"scope":"merchant-auth","provider":"password","event":"verify-success","at":1790880170252}
+Preview request denied: Preview access denied
+Mobile chromium cross-device PASS: empty storage, three fields+OTP, delivered, no secret/full phone, 390px no overflow.
+Cloud browser smoke passed: phone checkout, Basic forwarding, Secure merchant cookie, catalog management.
+Cloud smoke passed: private routes, CSRF, merchant cookie, bank-transfer order, packing, delivery, lookup.
