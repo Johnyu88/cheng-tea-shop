@@ -1,0 +1,31 @@
+Starting isolated virtual-authenticator fixture: merchantAllowed=true
+PASS: private sandbox Basic gate
+PASS: anonymous merchant bridge denied
+PASS: vendor bootstrap account login with merchant permission true
+PASS: merchant bridge cannot mutate tea business data
+PASS: wrong Origin rejected
+PASS: public signup disabled
+PASS: vendor Passkey registration using virtual CTAP2 authenticator
+PASS: modified session cookie cannot grant merchant access
+PASS: vendor logout clears session
+PASS: Passkey login round 1
+PASS: Passkey login round 2
+PASS: invalid authenticator signature rejected
+PASS: missing authenticator credential rejected
+Sandbox virtual WebAuthn smoke passed. This verifies CDP virtual CTAP2, not physical Face ID or fingerprint hardware.
+Starting isolated virtual-authenticator fixture: merchantAllowed=false
+PASS: private sandbox Basic gate
+PASS: anonymous merchant bridge denied
+PASS: vendor bootstrap account login with merchant permission false
+PASS: merchant bridge cannot mutate tea business data
+PASS: wrong Origin rejected
+PASS: public signup disabled
+PASS: vendor Passkey registration using virtual CTAP2 authenticator
+PASS: modified session cookie cannot grant merchant access
+PASS: vendor logout clears session
+PASS: Passkey login round 1
+PASS: Passkey login round 2
+PASS: invalid authenticator signature rejected
+PASS: missing authenticator credential rejected
+Sandbox virtual WebAuthn smoke passed. This verifies CDP virtual CTAP2, not physical Face ID or fingerprint hardware.
+Both isolated virtual-authenticator fixtures passed; no tea order database was used.

@@ -688,3 +688,11 @@ Source/verification work continues on the same feature/issue-24-mobile-login bra
 
 - Deployed password backup version 12a60bd105b84fe1840be7420c90235a60da05de to srv-daukf2ojo6nc73dhmrfg, https://cheng-tea-password-demo.onrender.com ; Render live deploy dep-daukf38jo6nc73dhmuag commit matches. Production HTTPS mobile-sized acceptance 12/12 passed, test order retained in new service (short 261001-001). Identical short numbers across independent stations do not indicate migration; this is a newly created synthetic order.
 - Release validation: 52 test files / 266 tests; TypeScript/lint/build passed (lint 0 errors / 9 warnings). Existing 261001-001/002 on srv-daujlk093c1s73egl1r0 were not modified or migrated. Private test configuration removed after live run; no credentials in source/output.
+
+## 2026-10-02 Final order-loop checkpoint
+- Fresh local verification on a91e0e3: 266/266 tests, TypeScript, lint (9 existing warnings), production build, full local API + mobile-browser order loop and two independent virtual Passkey fixtures PASS, all commands exit 0.
+- Details and retained logs: docs/testing/final-acceptance-2026-10-02.md and docs/testing/evidence/2026-10-02-final-*.log.
+- Independent QA source review: phone-ready final delivery cannot be claimed. Customer lookup requires original-tab receipt or saved order number/secret/full phone plus OTP. Passkey remains a separate sandbox with no merchant business authorization bridge.
+- BLOCKED_EXTERNAL: current cloud access/merchant/bootstrap secrets are unavailable; prior private test configs were intentionally removed. Render live deployment references were read, but no authenticated live revalidation or retained test order was created this round.
+- Do not redeploy/restart existing ephemeral services without verified full backup/restore. No application changes, product-management rework, payment-provider change or main merge.
+- Next: obtain current valid private test credentials; run authenticated live loop and preserve a fresh test receipt; phone Passkey acceptance precedes existing AuthProvider integration. Cross-device name/suffix-only lookup remains unimplemented.

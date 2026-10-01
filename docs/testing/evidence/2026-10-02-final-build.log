@@ -1,0 +1,45 @@
+??Next.js 16.3.6 (webpack)
+??Running next.config.ts took 36ms
+
+  Creating an optimized production build ...
+??Compiled successfully in 1593ms
+  Running TypeScript ...
+  Finished TypeScript in 1379ms ...
+  Collecting page data using 24 workers ...
+  Generating static pages using 24 workers (0/19) ...
+  Generating static pages using 24 workers (4/19)
+  Generating static pages using 24 workers (9/19)
+  Generating static pages using 24 workers (14/19)
+??Generating static pages using 24 workers (19/19) in 540ms
+  Finalizing page optimization ...
+  Collecting build traces ...
+
+Route (app)
+????/
+????/_not-found
+????/admin/orders
+????/admin/products
+????/admin/products/new
+??? /api/demo/admin/orders
+??? /api/demo/admin/orders/[orderId]
+??? /api/demo/admin/orders/[orderId]/packing-photo
+??? /api/demo/admin/otp
+??? /api/demo/admin/otp/operator
+??? /api/demo/admin/session
+??? /api/demo/catalog
+??? /api/demo/catalog/media/[fileName]
+??? /api/demo/orders
+??? /api/demo/orders/lookup
+??? /api/demo/otp
+??? /api/health
+????/cart
+????/checkout
+??? /checkout/success
+????/orders
+??? /tea/[slug]
+
+
+? Proxy (Middleware)
+
+?? (Static)   prerendered as static content
+?  (Dynamic)  server-rendered on demand
