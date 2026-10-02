@@ -1,3 +1,4 @@
+import { merchantRequestCookie } from "@/lib/server/merchant-request-access";
 import { assertLocalDemoHttpRequest } from "@/lib/server/demo-http-guard";
 import { getLocalDemoRuntime } from "@/lib/server/demo-runtime-singleton";
 import { demoFailure, demoSuccess } from "@/lib/server/demo-route-response";
@@ -10,7 +11,7 @@ export async function POST(request: Request, { params }: Context) {
     const { orderId } = await params;
     const body = await request.json() as { action?: unknown; notificationId?: unknown; outcome?: unknown; confirmed?: unknown };
     const runtime = getLocalDemoRuntime();
-    const cookie = request.headers.get("cookie");
+    const cookie = await merchantRequestCookie(request);
     runtime.merchant.listOrders(cookie);
     if (body.action === "rotate-lookup-secret") {
       return demoSuccess(runtime.merchant.rotateLookupSecret(cookie, orderId, body.confirmed === true), { headers: { "Cache-Control": "no-store" } });

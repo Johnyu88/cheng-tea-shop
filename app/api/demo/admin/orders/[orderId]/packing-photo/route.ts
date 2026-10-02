@@ -1,3 +1,4 @@
+import { merchantRequestCookie } from "@/lib/server/merchant-request-access";
 import { assertLocalDemoHttpRequest } from "@/lib/server/demo-http-guard";
 import { getLocalDemoRuntime } from "@/lib/server/demo-runtime-singleton";
 import { demoFailure, demoSuccess } from "@/lib/server/demo-route-response";
@@ -13,7 +14,7 @@ export async function POST(request: Request, { params }: Context) {
     if (!(photo instanceof File)) throw new Error("請選擇包裝照片");
     const bytes = Buffer.from(await photo.arrayBuffer());
     return demoSuccess(await getLocalDemoRuntime().merchant.uploadPackingPhoto(
-      request.headers.get("cookie"), orderId, photo.type, bytes,
+      await merchantRequestCookie(request), orderId, photo.type, bytes,
     ));
   } catch (error) { return demoFailure(error, 400); }
 }

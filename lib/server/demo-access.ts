@@ -85,3 +85,6 @@ export function verifyDemoMerchantCookie(cookieHeader: string | null, now = Date
   const expected = Buffer.from(mac(key, match[1] + "." + match[2]), "hex");
   return timingSafeEqual(expected, Buffer.from(match[3]!, "hex"));
 }
+
+/** Server-only transient adapter, used only after live vendor authorization. Never return it to a client. */
+export function issueVerifiedMerchantBridgeCookie(): string { return signCookie(Date.now()); }
