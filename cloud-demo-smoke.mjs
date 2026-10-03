@@ -169,9 +169,9 @@ try {
     await expect(page.getByRole("heading", { name: "訂單成立", exact: true })).toBeVisible();
     await page.goto("/admin/orders");
     if (authProvider === "password") {
-      await expect(page.getByRole("heading", { name: "Demo 密碼登入" })).toBeVisible();
-      await page.getByLabel("Demo 密碼", { exact: true }).fill(password);
-      await page.getByRole("button", { name: "登入", exact: true }).click();
+      await page.getByRole("button", { name: "緊急密碼登入", exact: true }).click();
+      await page.getByLabel("緊急登入密碼", { exact: true }).fill(password);
+      await page.getByRole("button", { name: "使用密碼登入", exact: true }).click();
     }
     const orderCard = page.locator(".demo-order-card").filter({ hasText: shortNumber }).first();
     await expect(orderCard).toBeVisible();
