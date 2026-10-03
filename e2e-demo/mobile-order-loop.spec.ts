@@ -82,7 +82,7 @@ test("mobile synthetic order closes customer and merchant status loop", async ({
   await page.getByLabel("顧客姓名").fill("合成顧客");
   await page.getByLabel("手機末三碼").fill("001");
   await page.getByRole("button", { name: "取得查單驗證碼" }).click();
-  await expect(page.getByText("本機驗證碼：", { exact: false })).toContainText("123456");
+  await expect(page.getByText("沙盒測試 OTP（本機驗證碼）：", { exact: false })).toContainText("123456");
   await page.getByLabel("驗證碼").fill("123456");
   await page.getByRole("button", { name: "查詢訂單" }).click();
   await expect(page.getByRole("heading", { name: "已送達" })).toBeVisible();
