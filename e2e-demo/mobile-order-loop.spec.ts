@@ -79,6 +79,7 @@ test("mobile synthetic order closes customer and merchant status loop", async ({
   await page.getByRole("button", { name: "模擬成功" }).first().click();
 
   await page.goto(lookupHref!);
+  await expect(page.getByText("已帶入這個分頁剛才的訂單資料，請取得驗證碼。", { exact: true })).toBeVisible();
   await page.getByLabel("顧客姓名").fill("合成顧客");
   await page.getByLabel("手機末三碼").fill("001");
   await page.getByRole("button", { name: "取得查單驗證碼" }).click();
