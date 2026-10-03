@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "instanceId": "general-secretary-01",
+  "workOrders": [
+    {
+      "id": "GS-TEST-20261003-001",
+      "originalText": "請確認總管秘書能保留這一整句原文：只登記、原文傳遞、查核證據，不能替任何人做決策。",
+      "status": "待接單",
+      "finished": false
+    }
+  ]
+}

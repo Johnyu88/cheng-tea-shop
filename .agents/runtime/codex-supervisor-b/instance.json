@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "instanceId": "4090-supervisor-01",
+  "displayName": "4090監工",
+  "roleFile": ".github/agents/codex-supervisor-b.agent.md",
+  "model": "gpt-5.6-luna",
+  "lifecycle": "running",
+  "hostId": "local",
+  "currentThreadId": "01a10263-de81-78c0-b1f5-297fb629979c",
+  "previousThreadIds": [],
+  "stateFile": ".agents/runtime/codex-supervisor-b/work-orders.json",
+  "eventLog": ".agents/runtime/codex-supervisor-b/events.ndjson"
+}

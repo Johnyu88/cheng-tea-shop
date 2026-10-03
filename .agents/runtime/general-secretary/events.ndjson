@@ -1,0 +1,5 @@
+{"event":"instance_created","instanceId":"general-secretary-01","model":"gpt-5.6-luna","roleFile":".github/agents/general-secretary.agent.md","at":"2026-10-03T00:00:00+08:00"}
+{"event":"thread_started","instanceId":"general-secretary-01","threadId":"01a1025f-d23c-7732-8730-d7c867456db8","hostId":"local","model":"gpt-5.6-luna","at":"2026-10-03T23:26:37+08:00"}
+{"event":"thread_stopped","instanceId":"general-secretary-01","threadId":"01a1025f-d23c-7732-8730-d7c867456db8","hostId":"local","method":"archive_thread","at":"2026-10-03T23:31:00+08:00"}
+{"event":"thread_restarted","instanceId":"general-secretary-01","previousThreadId":"01a1025f-d23c-7732-8730-d7c867456db8","threadId":"01a10261-9c42-7b33-b30a-ffe24df9a180","hostId":"local","model":"gpt-5.6-luna","at":"2026-10-03T23:35:00+08:00"}
+{"event":"work_order_registered","workOrderId":"GS-TEST-20261003-001","originalText":"請確認總管秘書能保留這一整句原文：只登記、原文傳遞、查核證據，不能替任何人做決策。","status":"待接單","finished":false,"at":"2026-10-03T23:30:00+08:00"}

@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "instanceId": "general-secretary-01",
+  "displayName": "總管秘書",
+  "roleFile": ".github/agents/general-secretary.agent.md",
+  "model": "gpt-5.6-luna",
+  "lifecycle": "running",
+  "hostId": "local",
+  "currentThreadId": "01a10261-9c42-7b33-b30a-ffe24df9a180",
+  "previousThreadIds": ["01a1025f-d23c-7732-8730-d7c867456db8"],
+  "stateFile": ".agents/runtime/general-secretary/work-orders.json",
+  "eventLog": ".agents/runtime/general-secretary/events.ndjson",
+  "startup": "Create an explicit Codex model thread with the role file and durable state paths.",
+  "stop": "Archive/stop the current Codex thread and record the lifecycle event before restart.",
+  "restart": "Create a fresh Codex thread with the same instanceId, role file, model, and durable state paths; preserve unfinished work orders.",
+  "lastUpdated": "2026-10-03T23:35:00+08:00"
+}

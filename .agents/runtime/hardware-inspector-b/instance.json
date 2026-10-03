@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "instanceId": "4090-inspector-01",
+  "displayName": "4090掃地",
+  "roleFile": ".github/agents/hardware-inspector-b.agent.md",
+  "model": "gpt-5.6-luna",
+  "lifecycle": "running",
+  "hostId": "local",
+  "currentThreadId": "01a10264-274f-7701-9134-eb606e66a184",
+  "previousThreadIds": [],
+  "stateFile": ".agents/runtime/hardware-inspector-b/work-orders.json",
+  "eventLog": ".agents/runtime/hardware-inspector-b/events.ndjson"
+}

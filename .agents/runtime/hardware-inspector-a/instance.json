@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "instanceId": "acer-inspector-01",
+  "displayName": "Acer掃地",
+  "roleFile": ".github/agents/hardware-inspector-a.agent.md",
+  "model": "gpt-5.6-luna",
+  "lifecycle": "running",
+  "hostId": "local",
+  "currentThreadId": "01a10265-d69a-7f43-92cc-0d5cdd431749",
+  "previousThreadIds": [],
+  "stateFile": ".agents/runtime/hardware-inspector-a/work-orders.json",
+  "eventLog": ".agents/runtime/hardware-inspector-a/events.ndjson"
+}
