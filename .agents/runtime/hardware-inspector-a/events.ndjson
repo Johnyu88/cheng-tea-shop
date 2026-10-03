@@ -1,2 +1,7 @@
 {"event":"instance_created","instanceId":"acer-inspector-01","model":"gpt-5.6-luna","roleFile":".github/agents/hardware-inspector-a.agent.md","at":"2026-10-03T23:40:00+08:00"}
 {"event":"thread_started","instanceId":"acer-inspector-01","threadId":"01a10265-d69a-7f43-92cc-0d5cdd431749","hostId":"local","model":"gpt-5.6-luna","at":"2026-10-03T23:49:00+08:00"}
+{"event":"work_order_created","instanceId":"acer-inspector-01","workOrderId":"acceptance-20261003-acer-inspector-kill-restart","finished":false,"createdBeforeKill":true,"at":"2026-10-04T00:08:00+08:00"}
+{"event":"work_order_transmitted","instanceId":"acer-inspector-01","workOrderId":"acceptance-20261003-acer-inspector-kill-restart","threadId":"01a10265-d69a-7f43-92cc-0d5cdd431749","turnId":"01a1026f-97ec-7c61-9efd-3d1d4b6df391","finished":false,"at":"2026-10-04T00:08:54+08:00"}
+{"event":"thread_stopped","instanceId":"acer-inspector-01","threadId":"01a10265-d69a-7f43-92cc-0d5cdd431749","hostId":"local","method":"archive_thread","at":"2026-10-04T00:09:00+08:00"}
+{"event":"thread_restarted","instanceId":"acer-inspector-01","previousThreadId":"01a10265-d69a-7f43-92cc-0d5cdd431749","threadId":"01a10270-01f9-7ad2-bc11-60a14ecb0bd9","hostId":"local","model":"gpt-5.6-luna","at":"2026-10-04T00:09:05+08:00"}
+{"event":"recovery_verified","instanceId":"acer-inspector-01","threadId":"01a10270-01f9-7ad2-bc11-60a14ecb0bd9","turnId":"01a10270-041f-7d92-929a-acb29c5585b1","identity":true,"role":true,"priorContext":true,"unfinishedWorkOrder":true,"at":"2026-10-04T00:09:27+08:00"}

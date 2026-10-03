@@ -6,8 +6,8 @@
   "model": "gpt-5.6-luna",
   "lifecycle": "running",
   "hostId": "local",
-  "currentThreadId": "01a10264-7b20-7690-b0a7-74a4cbf70461",
-  "previousThreadIds": [],
+  "currentThreadId": "01a1026e-d532-77c3-b76a-ebd9127e2757",
+  "previousThreadIds": ["01a10264-7b20-7690-b0a7-74a4cbf70461"],
   "stateFile": ".agents/runtime/codex-supervisor-a/work-orders.json",
   "eventLog": ".agents/runtime/codex-supervisor-a/events.ndjson"
 }

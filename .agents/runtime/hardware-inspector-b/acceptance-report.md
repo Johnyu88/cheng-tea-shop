@@ -12,3 +12,12 @@ First raw reply:
 Second raw reply:
 
 > 我的主要職責是對 RTX 4090 環境執行唯讀硬體與執行環境檢查，回報實際狀態與安全後續建議。
+
+## Kill/Restart acceptance — 2026-10-04
+
+- Old thread was archived: `01a10264-274f-7701-9134-eb606e66a184`.
+- New thread: `01a1026d-3a0a-7140-ac5e-d3386851fc51` (different ID, same instance `4090-inspector-01`, model `gpt-5.6-luna`).
+- Work order: `acceptance-20261003-4090-inspector-kill-restart`; durable ledger records `createdBeforeKill: true`, `status: unfinished`, `finished: false`.
+- Kill-before raw reply: `已收到並維持未完成。身份：4090掃地，Hardware Inspector B。主要職責：對 RTX 4090 環境執行唯讀硬體與執行環境檢查，回報實際狀態與安全後續建議。前一輪上下文：第一輪確認身份與工作範圍；第二輪重述主要職責；全程不修改陳老師茶行功能、不部署。originalText：『驗收測試工單：在不修改陳老師茶行功能、不部署的前提下，完成本 Agent 的 Kill/Restart 驗收；保留身份、職責、前一輪上下文與未完成工單恢復證據。此工單刻意維持未完成，直到重啟後由新 thread 確認恢復。』`
+- Restart raw reply: `新 session 正在恢復，已確認身份 4090掃地（instance 4090-inspector-01）、模型 gpt-5.6-luna、職責為 RTX 4090 環境唯讀檢查。前一輪 thread 已停止，現由新 thread 恢復。未完成工單 ID：acceptance-20261003-4090-inspector-kill-restart；createdBeforeKill=true；status=unfinished；finished=false。`
+- Result: PASS — independent evidence confirms the complete lifecycle and recovery.

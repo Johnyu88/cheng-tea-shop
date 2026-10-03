@@ -1,5 +1,14 @@
 {
   "schemaVersion": 1,
   "instanceId": "4090-inspector-01",
-  "workOrders": []
+  "workOrders": [
+    {
+      "id": "acceptance-20261003-4090-inspector-kill-restart",
+      "originalText": "驗收測試工單：在不修改陳老師茶行功能、不部署的前提下，完成本 Agent 的 Kill/Restart 驗收；保留身份、職責、前一輪上下文與未完成工單恢復證據。此工單刻意維持未完成，直到重啟後由新 thread 確認恢復。",
+      "status": "unfinished",
+      "finished": false,
+      "createdBeforeKill": true,
+      "createdAt": "2026-10-04T00:02:00+08:00"
+    }
+  ]
 }

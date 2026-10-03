@@ -424,3 +424,10 @@ GitHub 是正式文件與程式來源。聊天中的新指令若尚未寫入 Git
 - `IMG_9606`／`IMG_9607`、`IMG_9608`／`IMG_9609` 的同品／不同等級關係、正式名稱、產地、包裝重量、價格與庫存單位仍屬待店家確認；清單列出的金萱黃茶、黑茶、特殊茶、老茶也尚未形成可發布商品資料。
 - 本階段只處理資料整理，不改變 UI、購物流程、service boundary、付款、ERP 或持久化行為。真實商品素材只有在店家確認後，才可另行建立正式 product mapping 與網站適用版本。
 - 驗證結果：JSON 欄位與照片存在性檢查通過；Vitest 17 files／101 tests、TypeScript、production build 通過；ESLint 0 errors，既有一項 `<img>` warning 未因本階段擴大處理。既存 `next-env.d.ts` 變更維持未提交。
+
+## 62. 五-Agent 獨立 runtime Kill/Restart 驗收 — 2026-10-04
+
+- 依 `docs/superpowers/specs/2026-10-03-independent-agent-runtime-design.md`，依序完成 4090監工、4090掃地、Acer監工、Acer掃地的 Kill/Restart 驗收；每隻 Agent 在 Kill 前各自建立一筆 `finished:false` 的未完成測試工單，再封存舊 thread，並以固定 `gpt-5.6-luna` 建立不同的新 thread。
+- 四隻新 thread 均直接恢復身份、職責、前一輪上下文與完整未完成工單；每隻結果均有獨立 raw model output、`instance.json`、`work-orders.json` 與 `events.ndjson` 證據，不以其他 Agent 結果類推。
+- 五-Agent baseline（含先前已驗收的總管秘書）標記為 `PASS`。完整對照表與 gate evidence 見 `docs/checkpoints/2026-10-04-five-agent-kill-restart.md`，Registry 見 `docs/agents/agent-registry.md`。
+- 本 checkpoint 只更新 Agent runtime / audit 文件；沒有修改茶行功能、沒有部署，也沒有執行 payment、credential 或 production 設定變更。

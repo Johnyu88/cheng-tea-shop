@@ -6,8 +6,8 @@
   "model": "gpt-5.6-luna",
   "lifecycle": "running",
   "hostId": "local",
-  "currentThreadId": "01a10265-d69a-7f43-92cc-0d5cdd431749",
-  "previousThreadIds": [],
+  "currentThreadId": "01a10270-01f9-7ad2-bc11-60a14ecb0bd9",
+  "previousThreadIds": ["01a10265-d69a-7f43-92cc-0d5cdd431749"],
   "stateFile": ".agents/runtime/hardware-inspector-a/work-orders.json",
   "eventLog": ".agents/runtime/hardware-inspector-a/events.ndjson"
 }

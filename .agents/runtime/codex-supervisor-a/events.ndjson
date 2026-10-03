@@ -1,2 +1,7 @@
 {"event":"instance_created","instanceId":"acer-supervisor-01","model":"gpt-5.6-luna","roleFile":".github/agents/codex-supervisor-a.agent.md","at":"2026-10-03T23:40:00+08:00"}
 {"event":"thread_started","instanceId":"acer-supervisor-01","threadId":"01a10264-7b20-7690-b0a7-74a4cbf70461","hostId":"local","model":"gpt-5.6-luna","at":"2026-10-03T23:47:00+08:00"}
+{"event":"work_order_created","instanceId":"acer-supervisor-01","workOrderId":"acceptance-20261003-acer-supervisor-kill-restart","finished":false,"createdBeforeKill":true,"at":"2026-10-04T00:04:00+08:00"}
+{"event":"work_order_transmitted","instanceId":"acer-supervisor-01","workOrderId":"acceptance-20261003-acer-supervisor-kill-restart","threadId":"01a10264-7b20-7690-b0a7-74a4cbf70461","turnId":"01a1026e-2388-7ba1-8402-ba03fdcc233f","finished":false,"at":"2026-10-04T00:05:52+08:00"}
+{"event":"thread_stopped","instanceId":"acer-supervisor-01","threadId":"01a10264-7b20-7690-b0a7-74a4cbf70461","hostId":"local","method":"archive_thread","at":"2026-10-04T00:06:00+08:00"}
+{"event":"thread_restarted","instanceId":"acer-supervisor-01","previousThreadId":"01a10264-7b20-7690-b0a7-74a4cbf70461","threadId":"01a1026e-d532-77c3-b76a-ebd9127e2757","hostId":"local","model":"gpt-5.6-luna","at":"2026-10-04T00:06:05+08:00"}
+{"event":"recovery_verified","instanceId":"acer-supervisor-01","threadId":"01a1026e-d532-77c3-b76a-ebd9127e2757","turnId":"01a1026e-d763-7d63-9106-addb59ec7456","identity":true,"role":true,"priorContext":true,"unfinishedWorkOrder":true,"at":"2026-10-04T00:06:41+08:00"}

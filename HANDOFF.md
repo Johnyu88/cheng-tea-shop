@@ -314,3 +314,11 @@ Follow `RESUME_PROMPT.md`, `AGENTS.md`, and `WORKFLOW.md`. If newer explicit use
 ### Next action
 
 等待店家確認正式名稱、價格／重量／庫存單位與兩組疑似重複樣本。確認前不可把候選資料升級為正式商品、覆蓋既有資料或接入商品頁。
+
+## 64. 五-Agent Kill/Restart 驗收 — 2026-10-04
+
+- 依序完成 4090監工、4090掃地、Acer監工、Acer掃地的 Kill/Restart 驗收；四隻固定使用 `gpt-5.6-luna`。
+- 每隻在 Kill 前各自建立 `finished:false` 未完成測試工單；舊 thread 已 archive，Restart 各取得不同的新 thread ID，並由新 Agent 直接恢復身份、職責、前一輪上下文與完整工單。
+- 四隻結果均為 PASS；先前總管秘書的獨立驗收也為 PASS，因此五-Agent baseline 標記 `PASS`。
+- 原始模型輸出、instance state、work-order ledger、事件 LOG 與 acceptance report 均保留在 `.agents/runtime/`；彙總 checkpoint 為 `docs/checkpoints/2026-10-04-five-agent-kill-restart.md`，Registry 為 `docs/agents/agent-registry.md`。
+- 本次只改 runtime/audit/documentation；沒有修改茶行功能、沒有部署。Watchdog 狀態顯示 disabled，無法 arm；這不影響 Codex thread 的完成證據，且未被當作 Agent PASS 證據。

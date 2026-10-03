@@ -1,2 +1,7 @@
 {"event":"instance_created","instanceId":"4090-inspector-01","model":"gpt-5.6-luna","roleFile":".github/agents/hardware-inspector-b.agent.md","at":"2026-10-03T23:40:00+08:00"}
 {"event":"thread_started","instanceId":"4090-inspector-01","threadId":"01a10264-274f-7701-9134-eb606e66a184","hostId":"local","model":"gpt-5.6-luna","at":"2026-10-03T23:45:00+08:00"}
+{"event":"work_order_created","instanceId":"4090-inspector-01","workOrderId":"acceptance-20261003-4090-inspector-kill-restart","finished":false,"createdBeforeKill":true,"at":"2026-10-04T00:02:00+08:00"}
+{"event":"work_order_transmitted","instanceId":"4090-inspector-01","workOrderId":"acceptance-20261003-4090-inspector-kill-restart","threadId":"01a10264-274f-7701-9134-eb606e66a184","turnId":"01a1026c-ccd9-7462-9e51-a0c223071a04","finished":false,"at":"2026-10-04T00:00:50+08:00"}
+{"event":"thread_stopped","instanceId":"4090-inspector-01","threadId":"01a10264-274f-7701-9134-eb606e66a184","hostId":"local","method":"archive_thread","at":"2026-10-04T00:01:00+08:00"}
+{"event":"thread_restarted","instanceId":"4090-inspector-01","previousThreadId":"01a10264-274f-7701-9134-eb606e66a184","threadId":"01a1026d-3a0a-7140-ac5e-d3386851fc51","hostId":"local","model":"gpt-5.6-luna","at":"2026-10-04T00:01:05+08:00"}
+{"event":"recovery_verified","instanceId":"4090-inspector-01","threadId":"01a1026d-3a0a-7140-ac5e-d3386851fc51","turnId":"01a1026d-3cce-7a52-aa95-84d18c403280","identity":true,"role":true,"priorContext":true,"unfinishedWorkOrder":true,"at":"2026-10-04T00:01:23+08:00"}
