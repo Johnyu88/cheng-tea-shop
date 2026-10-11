@@ -1,6 +1,7 @@
 import { createHash, timingSafeEqual } from "node:crypto";
 
 export const cloudDemoRequested = () => process.env.DEMO_COMMERCE_CLOUD === "enabled";
+export const acerDemoRequested = () => process.env.DEMO_COMMERCE_ACER === "enabled";
 
 export function cloudDemoOrigin(): URL {
   const raw = process.env.DEMO_CLOUD_ORIGIN || process.env.RENDER_EXTERNAL_URL;
@@ -14,15 +15,39 @@ export function cloudDemoOrigin(): URL {
   return url;
 }
 
+/** Acer staging uses one operator-configured private DNS name, never an Origin wildcard. */
+export function acerDemoOrigin(): URL {
+  const raw = process.env.DEMO_ACER_ORIGIN;
+  if (!raw) throw new Error("Acer demo origin is not configured");
+  const url = new URL(raw);
+  if (url.origin !== raw || url.protocol !== "https:" || url.username || url.password || url.port
+    || url.pathname !== "/" || url.search || url.hash
+    || !(/^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.home\.arpa$/.test(url.hostname)
+      || /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.){2}ts\.net$/.test(url.hostname))) {
+    throw new Error("Acer demo origin is invalid");
+  }
+  return url;
+}
+
 export function assertDemoEnabled(): void {
   if (process.release?.name !== "node") throw new Error("Demo requires Node");
   if (cloudDemoRequested()) {
     cloudDemoOrigin();
-    if (process.env.DEMO_COMMERCE_LOCAL === "enabled" || process.env.DEMO_COMMERCE_LAN === "enabled"
+    if (acerDemoRequested() || process.env.DEMO_COMMERCE_LOCAL === "enabled" || process.env.DEMO_COMMERCE_LAN === "enabled"
       || !/^[a-f0-9]{64}$/.test(process.env.DEMO_PREVIEW_TOKEN_SHA256 ?? "")
       || !/^[a-fA-F0-9]{64}$/.test(process.env.DEMO_MERCHANT_SECRET ?? "")
       || process.env.DEMO_MERCHANT_SECRET === "11".repeat(32)) {
       throw new Error("Cloud demo configuration is incomplete");
+    }
+    return;
+  }
+  if (acerDemoRequested()) {
+    acerDemoOrigin();
+    if (process.env.DEMO_COMMERCE_LOCAL === "enabled" || process.env.DEMO_COMMERCE_LAN === "enabled"
+      || !/^[a-f0-9]{64}$/.test(process.env.DEMO_PREVIEW_TOKEN_SHA256 ?? "")
+      || !/^[a-fA-F0-9]{64}$/.test(process.env.DEMO_MERCHANT_SECRET ?? "")
+      || process.env.DEMO_MERCHANT_SECRET === "11".repeat(32)) {
+      throw new Error("Acer demo configuration is incomplete");
     }
     return;
   }
@@ -64,5 +89,29 @@ export function assertCloudDemoRequest(request: Request): void {
   if (!["GET", "HEAD"].includes(request.method)
     && (request.headers.get("origin") !== origin.origin || (site && site !== "same-origin"))) {
     throw new Error("Preview origin rejected");
+  }
+}
+
+export function assertAcerDemoRequest(request: Request): void {
+  assertDemoEnabled();
+  if (!acerDemoRequested() || !hasCloudDemoAuthorization(request)) throw new Error("Acer demo access denied");
+  const origin = acerDemoOrigin();
+  const url = new URL(request.url);
+  const proto = request.headers.get("x-forwarded-proto");
+  if (request.headers.get("host") !== origin.host || url.username || url.password
+    || !["http:", "https:"].includes(url.protocol)
+    || (proto ? proto !== "https" : url.protocol !== "https:")
+    || request.headers.has("forwarded")
+    || (request.headers.has("x-forwarded-host") && request.headers.get("x-forwarded-host") !== origin.host)) {
+    throw new Error("Acer demo origin rejected");
+  }
+  const site = request.headers.get("sec-fetch-site");
+  const navigation = ["GET", "HEAD"].includes(request.method)
+    && request.headers.get("sec-fetch-mode") === "navigate"
+    && request.headers.get("sec-fetch-dest") === "document";
+  if (site && !["same-origin", "none"].includes(site) && !navigation) throw new Error("Cross-site Acer request rejected");
+  if (!["GET", "HEAD"].includes(request.method)
+    && (request.headers.get("origin") !== origin.origin || (site && site !== "same-origin"))) {
+    throw new Error("Acer demo origin rejected");
   }
 }

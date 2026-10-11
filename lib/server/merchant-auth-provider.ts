@@ -1,5 +1,5 @@
 import { createHmac, scryptSync, timingSafeEqual } from "node:crypto";
-import { assertDemoEnabled, cloudDemoOrigin, cloudDemoRequested } from "./demo-cloud";
+import { acerDemoOrigin, acerDemoRequested, assertDemoEnabled, cloudDemoOrigin, cloudDemoRequested } from "./demo-cloud";
 import { merchantPhoneAuth, merchantPhoneStatus } from "./merchant-phone-auth";
 
 export type MerchantAuthInput = { password?: unknown; phone?: unknown; challengeId?: unknown; code?: unknown };
@@ -22,8 +22,12 @@ function passwordConfiguration(): typeof cachedPassword {
   try {
     assertDemoEnabled();
     const value = process.env.DEMO_AUTH_PASSWORD ?? "";
-    if (!cloudDemoRequested() || process.env.DEMO_AUTH_ENV !== "isolated-demo"
-      || cloudDemoOrigin().origin !== passwordOrigin || value.length < 3 || Buffer.byteLength(value) > 128
+    const cloud = cloudDemoRequested();
+    const acer = acerDemoRequested();
+    const expectedOrigin = cloud ? passwordOrigin : acer ? acerDemoOrigin().origin : "";
+    const expectedEnvironment = cloud ? "isolated-demo" : acer ? "acer-demo" : "";
+    if ((!cloud && !acer) || process.env.DEMO_AUTH_ENV !== expectedEnvironment
+      || (cloud && cloudDemoOrigin().origin !== expectedOrigin) || value.length < (acer ? 12 : 3) || Buffer.byteLength(value) > 128
       || value === process.env.DEMO_MERCHANT_SECRET) return undefined;
     const fingerprint = keyedDigest("password-config:" + value).toString("hex");
     if (cachedPassword?.fingerprint !== fingerprint) {
@@ -55,8 +59,8 @@ export function createPasswordAuthProvider(options: { now?: () => number } = {})
     },
     sessionContext() {
       const configuration = passwordConfiguration();
-      return configuration ? ["merchant-password-session-v1", configuration.fingerprint,
-        process.env.DEMO_AUTH_ENV, cloudDemoOrigin().origin].join("|") : "password-disabled";
+      return configuration ? ["merchant-password-session-v1", configuration.fingerprint, process.env.DEMO_AUTH_ENV,
+        cloudDemoRequested() ? cloudDemoOrigin().origin : acerDemoRequested() ? acerDemoOrigin().origin : ""].join("|") : "password-disabled";
     },
   };
 }
@@ -86,7 +90,7 @@ export function getMerchantAuthProvider(): MerchantAuthProvider {
 }
 export const merchantAuthStatus = (): MerchantAuthStatus => getMerchantAuthProvider().status();
 export const merchantAuthSessionContext = (): string => getMerchantAuthProvider().sessionContext();
-export const providerSessionRequired = () => cloudDemoRequested() || !!process.env.DEMO_AUTH_PROVIDER
+export const providerSessionRequired = () => cloudDemoRequested() || acerDemoRequested() || !!process.env.DEMO_AUTH_PROVIDER
   || process.env.DEMO_MERCHANT_PHONE_CONFIRMED === "yes";
 
 

@@ -1,4 +1,4 @@
-import { assertDemoEnabled, cloudDemoRequested } from "./demo-cloud";
+import { acerDemoRequested, assertDemoEnabled, cloudDemoRequested } from "./demo-cloud";
 import { getMerchantAuthProvider, merchantAuthSessionContext, merchantAuthStatus, providerSessionRequired, type MerchantAuthInput } from "./merchant-auth-provider";
 import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 
@@ -8,7 +8,7 @@ const durationMs = 30 * 60 * 1000;
 const context = "local-demo-merchant-v1";
 const loopback = new Set(["localhost", "127.0.0.1", "[::1]"]);
 function cookieName(): string {
-  return !cloudDemoRequested() && process.env.DEMO_COMMERCE_LAN === "enabled" ? lanCookieName : loopbackCookieName;
+  return !cloudDemoRequested() && !acerDemoRequested() && process.env.DEMO_COMMERCE_LAN === "enabled" ? lanCookieName : loopbackCookieName;
 }
 function assertEnabled(): void {
   assertDemoEnabled();
@@ -28,7 +28,7 @@ const mac = (key: Buffer, payload: string) =>
 /** Caller must pass the real socket peer; headers alone do not prove locality. */
 export function assertLocalDemoPost(request: Request, peerAddress: string): void {
   assertEnabled();
-  if (cloudDemoRequested()) throw new Error("Local bootstrap unavailable in cloud");
+  if (cloudDemoRequested() || acerDemoRequested()) throw new Error("Local bootstrap unavailable in hosted demo");
   const url = new URL(request.url);
   if (!loopback.has(peerAddress) || !loopback.has(url.hostname)
     || url.protocol !== "http:" || url.username || url.password
@@ -63,7 +63,7 @@ function signCookie(now: number): string {
   const key = secret();
   const payload = now + "." + randomBytes(16).toString("hex");
   const signature = mac(key, payload);
-  const secure = !cloudDemoRequested() && process.env.DEMO_COMMERCE_LAN === "enabled" ? "" : " Secure;";
+  const secure = !cloudDemoRequested() && !acerDemoRequested() && process.env.DEMO_COMMERCE_LAN === "enabled" ? "" : " Secure;";
   return cookieName() + "=" + payload + "." + signature
     + "; HttpOnly;" + secure + " SameSite=Strict; Path=/; Max-Age=1800";
 }

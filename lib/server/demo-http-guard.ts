@@ -1,4 +1,4 @@
-import { assertCloudDemoRequest, cloudDemoRequested } from "./demo-cloud";
+import { assertAcerDemoRequest, acerDemoRequested, assertCloudDemoRequest, cloudDemoRequested } from "./demo-cloud";
 
 const LOOPBACK_HOSTS = new Set(["localhost", "127.0.0.1", "[::1]"]);
 
@@ -22,6 +22,16 @@ export function assertLocalDemoHttpRequest(
   expectedMethod: string,
   bodyKind?: BodyKind,
 ) {
+  if (acerDemoRequested()) {
+    assertAcerDemoRequest(request);
+    if (request.method !== expectedMethod) throw new Error("Invalid demo method");
+    if (bodyKind) {
+      const type = request.headers.get("content-type") ?? "";
+      const expected = bodyKind === "json" ? /^application\/json(?:\s*;|$)/i : /^multipart\/form-data(?:\s*;|$)/i;
+      if (!expected.test(type)) throw new Error("Invalid demo request content type");
+    }
+    return;
+  }
   if (cloudDemoRequested()) {
     assertCloudDemoRequest(request);
     if (request.method !== expectedMethod) throw new Error("Invalid demo method");

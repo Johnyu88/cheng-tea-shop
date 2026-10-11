@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, expect, test } from "vitest";
 import { assertLocalDemoHttpRequest } from "@/lib/server/demo-http-guard";
+import { createHash } from "node:crypto";
 
 beforeEach(() => { process.env.DEMO_COMMERCE_LOCAL = "enabled"; });
 afterEach(() => { delete process.env.DEMO_COMMERCE_LOCAL; });
@@ -73,4 +74,25 @@ test("rejects disabled, cross-origin, forwarded, non-loopback and wrong content 
   expect(() => assertLocalDemoHttpRequest(make("http://127.0.0.1:3013/api/demo/otp", { "content-type": "text/plain" }), "POST", "json")).toThrow();
   delete process.env.DEMO_COMMERCE_LOCAL;
   expect(() => assertLocalDemoHttpRequest(make("http://127.0.0.1:3013/api/demo/otp"), "POST", "json")).toThrow();
+});
+
+
+test("Acer HTTPS demo permits only its authenticated configured origin", () => {
+  Reflect.set(process.env, "NODE_ENV", "production");
+  process.env.DEMO_COMMERCE_ACER = "enabled";
+  process.env.DEMO_COMMERCE_CLOUD = "";
+  process.env.DEMO_COMMERCE_LOCAL = "";
+  process.env.DEMO_COMMERCE_LAN = "";
+  process.env.DEMO_ACER_ORIGIN = "https://tea-staging.home.arpa";
+  const token = "a".repeat(32);
+  process.env.DEMO_PREVIEW_TOKEN_SHA256 = createHash("sha256").update(token).digest("hex");
+  process.env.DEMO_MERCHANT_SECRET = "b".repeat(64);
+  const headers = { host: "tea-staging.home.arpa", origin: "https://tea-staging.home.arpa",
+    authorization: "Basic " + Buffer.from("preview:" + token).toString("base64"),
+    "x-forwarded-proto": "https", "content-type": "application/json", "sec-fetch-site": "same-origin" };
+  expect(() => assertLocalDemoHttpRequest(new Request("http://tea-staging.home.arpa/api/demo/otp", { method: "POST", headers }), "POST", "json")).not.toThrow();
+  expect(() => assertLocalDemoHttpRequest(new Request("http://tea-staging.home.arpa/api/demo/otp", { method: "POST", headers: { ...headers, origin: "https://attacker.example" } }), "POST", "json")).toThrow();
+  delete process.env.DEMO_COMMERCE_ACER; delete process.env.DEMO_ACER_ORIGIN;
+  delete process.env.DEMO_PREVIEW_TOKEN_SHA256; delete process.env.DEMO_MERCHANT_SECRET;
+  Reflect.set(process.env, "NODE_ENV", "test");
 });
