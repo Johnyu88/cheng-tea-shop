@@ -20,10 +20,12 @@ export function acerDemoOrigin(): URL {
   const raw = process.env.DEMO_ACER_ORIGIN;
   if (!raw) throw new Error("Acer demo origin is not configured");
   const url = new URL(raw);
-  if (url.origin !== raw || url.protocol !== "https:" || url.username || url.password || (url.port && url.port !== "8443")
+  const tailnetHost = /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.){2}ts\\.net$/.test(url.hostname);
+  const homeArpaHost = /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.home\\.arpa$/.test(url.hostname);
+  if (url.origin !== raw || url.protocol !== "https:" || url.username || url.password
+    || (url.port && (url.port !== "8443" || !tailnetHost))
     || url.pathname !== "/" || url.search || url.hash
-    || !(/^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.home\.arpa$/.test(url.hostname)
-      || /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.){2}ts\.net$/.test(url.hostname))) {
+    || !(homeArpaHost || tailnetHost)) {
     throw new Error("Acer demo origin is invalid");
   }
   return url;
