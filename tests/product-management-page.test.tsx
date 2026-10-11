@@ -1,5 +1,6 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { afterEach, expect, test, vi } from "vitest";
+import { afterEach, beforeEach, expect, test, vi } from "vitest";
+import { demoApi } from "@/features/demo/demo-api";
 import type { Product } from "@/lib/domain";
 import { ProductManagementPage } from "@/features/publishing/components/product-management-page";
 
@@ -18,7 +19,8 @@ const product: Product = {
   publication: "published",
 };
 
-afterEach(() => vi.unstubAllGlobals());
+beforeEach(() => vi.spyOn(demoApi, "merchantStatus").mockResolvedValue({ provider: "password", state: "ready", simulated: false, authenticated: true, passkey: { enabled: false, registered: false } }));
+afterEach(() => { vi.unstubAllGlobals(); vi.restoreAllMocks(); });
 
 test("loads existing catalog data and saves edits through the shared catalog API", async () => {
   const confirm = vi.spyOn(window, "confirm").mockReturnValue(true);
@@ -43,7 +45,7 @@ test("shows newly saved draft first with a clear unpublished count", async () =>
   const draft: Product = { ...product, id: "draft-002", slug: "draft-002", name: "測試紅茶A", publication: "draft" };
   vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ ok: true, value: { items: [product, draft] } }), { status: 200 })));
   render(<ProductManagementPage />);
-  expect(screen.getByRole("link", { name: "前往購物前台" })).toHaveAttribute("href", "/");
+  expect(await screen.findByRole("link", { name: "前往購物前台" })).toHaveAttribute("href", "/");
   await waitFor(() => expect(screen.getByText("測試紅茶A")).toBeInTheDocument());
   expect(screen.getByRole("status")).toHaveTextContent("共 2 筆商品，其中 1 筆未上架");
   const names = Array.from(document.querySelectorAll(".product-admin-item h2")).map((node) => node.textContent);

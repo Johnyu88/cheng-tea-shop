@@ -60,9 +60,24 @@ export function createDemoMerchantWorkflow({ orders, outbox, privatePhotoDirecto
       if (confirmed !== true) throw new Error("Merchant identity confirmation required");
       return orders.rotateLookupSecret(orderId);
     },
-    confirmManualPayment(cookieHeader: string | null, orderId: string): DemoOrderSnapshot {
+    confirmManualPayment(cookieHeader: string | null, orderId: string, reason = "Manual payment confirmed"): DemoOrderSnapshot {
       find(cookieHeader, orderId);
-      orders.confirmManualPayment(orderId);
+      orders.confirmManualPayment(orderId, { actor: "authenticated-merchant", reason });
+      return find(cookieHeader, orderId);
+    },
+    revokeManualPayment(cookieHeader: string | null, orderId: string, reason: string): DemoOrderSnapshot {
+      find(cookieHeader, orderId);
+      orders.revokeManualPayment(orderId, { actor: "authenticated-merchant", reason });
+      return find(cookieHeader, orderId);
+    },
+    reopenPacking(cookieHeader: string | null, orderId: string, reason: string): DemoOrderSnapshot {
+      find(cookieHeader, orderId);
+      orders.reopenPacking(orderId, { actor: "authenticated-merchant", reason });
+      return find(cookieHeader, orderId);
+    },
+    recordShippingIssue(cookieHeader: string | null, orderId: string, action: "shipping-exception" | "intercept-requested" | "shipping-correction", reason: string): DemoOrderSnapshot {
+      find(cookieHeader, orderId);
+      orders.recordShippingIssue(orderId, action, { actor: "authenticated-merchant", reason });
       return find(cookieHeader, orderId);
     },
     async uploadPackingPhoto(cookieHeader: string | null, orderId: string,

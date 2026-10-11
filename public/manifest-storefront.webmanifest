@@ -1,0 +1,29 @@
+{
+  "id": "/tea-pwa/storefront",
+  "name": "陳老師茶行",
+  "short_name": "陳老師茶行",
+  "description": "陳老師茶行商品瀏覽與購物",
+  "start_url": "/?pwa=storefront",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
+  "background_color": "#fff7e7",
+  "theme_color": "#164a3b",
+  "icons": [
+    {
+      "src": "/icons/tea-store-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/tea-store-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

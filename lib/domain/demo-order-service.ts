@@ -4,6 +4,7 @@ import type { Cart } from "./types";
 /** Demo-only state machine. Default store is process-local; optional SQLite persists across restarts. */
 export type DemoOrderStatus = "confirmed" | "packed" | "shipped" | "delivered";
 export type DemoOrderLine = Pick<Cart["lines"][number], "productId" | "variantId" | "productName" | "specification" | "unitPrice" | "quantity">;
+export type DemoOrderEvent = { status: DemoOrderStatus; at: string; action?: "payment-confirmed" | "payment-revoked" | "packing-reopened" | "packed" | "shipping-exception" | "intercept-requested" | "shipping-correction"; actor?: string; reason?: string; photoId?: string };
 export type DemoOrderSnapshot = {
   orderId: string;
   orderNumber?: string;
@@ -13,8 +14,10 @@ export type DemoOrderSnapshot = {
   lines: DemoOrderLine[];
   total: { currency: "TWD"; amount: number };
   packingPhotoId: string | null;
-  events: { status: DemoOrderStatus; at: string }[];
+  events: DemoOrderEvent[];
+  shippingAttention?: { action: "shipping-exception" | "intercept-requested" | "shipping-correction"; reason: string; actor: string; at: string } | null;
 };
+export type DemoOrderAudit = { reason: string; actor: string };
 export type DemoNotification = {
   id: string;
   orderId: string;
@@ -45,7 +48,10 @@ export interface DemoOrderService {
   /** Internal merchant view; callers must enforce merchant authentication before invoking. */
   listInternalForMerchant(): DemoOrderSnapshot[];
   /** Synthetic only: no payment gateway, charge, or financial confirmation. */
-  confirmManualPayment(orderId: string): void;
+  confirmManualPayment(orderId: string, audit?: DemoOrderAudit): void;
+  revokeManualPayment(orderId: string, audit: DemoOrderAudit): void;
+  reopenPacking(orderId: string, audit: DemoOrderAudit): void;
+  recordShippingIssue(orderId: string, action: "shipping-exception" | "intercept-requested" | "shipping-correction", audit: DemoOrderAudit): void;
   recordPackingPhoto(orderId: string, photoId: string): void;
   markShipped(orderId: string): void;
   markDelivered(orderId: string): void;
@@ -57,16 +63,22 @@ const clone = (snapshot: DemoOrderSnapshot): DemoOrderSnapshot => ({
   ...snapshot, total: { ...snapshot.total },
   lines: snapshot.lines.map(line => ({ ...line, unitPrice: { ...line.unitPrice } })),
   events: snapshot.events.map(event => ({ ...event })),
+  shippingAttention: snapshot.shippingAttention ? { ...snapshot.shippingAttention } : null,
 });
 const checked = (orders: Map<string, StoredOrder>, id: string): StoredOrder => {
   const order = orders.get(id);
   if (!order) throw new Error("Unknown demo order");
   return order;
 };
-const transition = (order: StoredOrder, from: DemoOrderStatus, to: DemoOrderStatus): void => {
+const transition = (order: StoredOrder, from: DemoOrderStatus, to: DemoOrderStatus, event: Partial<DemoOrderEvent> = {}): void => {
   if (order.snapshot.status !== from) throw new Error("Invalid demo order transition");
   order.snapshot.status = to;
-  order.snapshot.events.push({ status: to, at: new Date().toISOString() });
+  order.snapshot.events.push({ status: to, at: new Date().toISOString(), ...event });
+};
+const checkedAudit = (audit: DemoOrderAudit): DemoOrderAudit => {
+  const reason = audit?.reason?.trim(); const actor = audit?.actor?.trim();
+  if (!reason || reason.length > 500 || !actor || actor.length > 128) throw new Error("A reason and authenticated operator are required");
+  return { reason, actor };
 };
 
 export const taiwanOrderDate = (date: Date): string => new Date(date.getTime() + 8 * 60 * 60_000).toISOString().slice(2, 10).replaceAll("-", "");
@@ -160,12 +172,40 @@ export const createDemoOrderService = (persistence?: DemoOrderPersistence): Demo
       return [...orders.values()].map(order => clone(order.snapshot)).sort((a, b) =>
         b.events[0]!.at.localeCompare(a.events[0]!.at));
     },
-    confirmManualPayment(orderId) {
+    confirmManualPayment(orderId, audit = { actor: "merchant-session", reason: "Manual payment confirmed" }) {
       const order = checked(orders, orderId);
       if (order.snapshot.paymentStatus !== "pending-manual-verification" || order.snapshot.status === "shipped" || order.snapshot.status === "delivered") {
         throw new Error("Invalid manual payment transition");
       }
-      mutate(order, () => { order.snapshot.paymentStatus = "manual-confirmed"; });
+      const entry = checkedAudit(audit);
+      mutate(order, () => {
+        order.snapshot.paymentStatus = "manual-confirmed";
+        order.snapshot.events.push({ status: order.snapshot.status, at: new Date().toISOString(), action: "payment-confirmed", ...entry });
+      });
+    },
+    revokeManualPayment(orderId, audit) {
+      const order = checked(orders, orderId); const entry = checkedAudit(audit);
+      if (order.snapshot.paymentStatus !== "manual-confirmed" || order.snapshot.status === "shipped" || order.snapshot.status === "delivered") throw new Error("Invalid manual payment revocation");
+      mutate(order, () => {
+        order.snapshot.paymentStatus = "pending-manual-verification";
+        order.snapshot.events.push({ status: order.snapshot.status, at: new Date().toISOString(), action: "payment-revoked", ...entry });
+      });
+    },
+    reopenPacking(orderId, audit) {
+      const order = checked(orders, orderId); const entry = checkedAudit(audit);
+      if (order.snapshot.status !== "packed") throw new Error("Only packed orders may be reopened");
+      mutate(order, () => {
+        transition(order, "packed", "confirmed", { action: "packing-reopened", ...entry });
+      });
+    },
+    recordShippingIssue(orderId, action, audit) {
+      const order = checked(orders, orderId); const entry = checkedAudit(audit);
+      if (order.snapshot.status !== "shipped" && order.snapshot.status !== "delivered") throw new Error("Shipping issue requires a shipped order");
+      mutate(order, () => {
+        const at = new Date().toISOString();
+        order.snapshot.shippingAttention = { action, ...entry, at };
+        order.snapshot.events.push({ status: order.snapshot.status, action, ...entry, at });
+      });
     },
     recordPackingPhoto(orderId, photoId) {
       // Only an opaque metadata reference; this fake accepts no image bytes or remote URLs.
@@ -173,7 +213,7 @@ export const createDemoOrderService = (persistence?: DemoOrderPersistence): Demo
       const order = checked(orders, orderId);
       if (order.snapshot.status !== "confirmed") throw new Error("Invalid demo order transition");
       mutate(order, () => {
-        transition(order, "confirmed", "packed");
+        transition(order, "confirmed", "packed", { action: "packed", photoId });
         order.snapshot.packingPhotoId = photoId;
       });
     },
