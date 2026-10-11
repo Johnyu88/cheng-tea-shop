@@ -15,6 +15,9 @@ RUN pnpm install --frozen-lockfile
 
 FROM base AS builder
 
+ARG NEXT_PUBLIC_DEMO_COMMERCE=disabled
+ENV NEXT_PUBLIC_DEMO_COMMERCE=$NEXT_PUBLIC_DEMO_COMMERCE
+
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN pnpm build
