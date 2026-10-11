@@ -177,9 +177,9 @@ export function AdminOrdersPage() {
       {pendingAudit && <section className="demo-panel mt-4" role="dialog" aria-modal="true" aria-labelledby="audit-reason-title">
         <h2 id="audit-reason-title">{pendingAudit.label}</h2>
         <label className="form-field mt-3">更正原因
-          <textarea className="form-input" rows={3} maxLength={500} value={auditReason} onChange={event => setAuditReason(event.target.value)} />
+          <textarea className="form-input" rows={3} maxLength={500} required aria-describedby="audit-reason-help" value={auditReason} onChange={event => setAuditReason(event.target.value)} />
         </label>
-        <p className="muted mt-2">原因、商家 Session 操作者與時間會保留在訂單紀錄。</p>
+        <p id="audit-reason-help" className="muted mt-2">必填，最多 500 字。請簡述更正原因；原因、商家 Session 操作者與操作時間會保留在訂單紀錄。</p>
         <div className="form-actions mt-3">
           <button className="filter-button" type="button" disabled={busy} onClick={() => { setPendingAudit(undefined); setAuditReason(""); }}>取消更正</button>
           <button className="primary-action" type="button" disabled={busy || !auditReason.trim()} onClick={() => void submitAuditAction()}>確認更正</button>

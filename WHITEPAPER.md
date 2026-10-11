@@ -715,3 +715,14 @@ This remains a local synthetic Demo. No AI image composition, image-recognition 
 
 最新策略停止擴寫自行開發認證，採維護中的 Better Auth 與官方 @better-auth/passkey 1.7.6。先在 sandboxes/passkey-lock 獨立 Next.js 應用、套件安裝與資料庫測試，驗證成功後才透過既有 AuthProvider 對接，不修改訂單／付款／照片／出貨 API。獨立 Demo 密碼 Provider 保留作備援，實際密碼只由私密環境注入。
 供應商 native handler/client 負責 WebAuthn 驗證及 Session；受驗證 Session 與店家權限分開，沙盒帳號不自動取得茶行店家權限。虛擬驗證器測試不等於手機 Face ID／指紋通過，實機驗收需另列結果。
+
+## 2026-10-12 PR #29 integration closeout (supersedes older runtime notes)
+
+PR #29 remains draft/unmerged. User-reported iPhone Safari acceptance on 2026-10-11: Passkey logout/re-login, synthetic order completion, product publish/unpublish/edit, ORDER-01 reversal, and ORDER-02 package reopening passed. ORDER-03 shipment correction and Samsung's three Android Chrome entries remain pending.
+
+The correction dialog now says the reason is required and limited to 500 characters. This changes operation guidance only; the Acer candidate remains on the pre-copy 3bc3283 image and was not rebuilt.
+
+Quality run #133 is red: lint, typecheck, unit/component, build, browser/accessibility, default E2E 32/32 and container smoke passed; Demo mobile E2E 3 pass / 1 fail / 1 skipped. Unchanged catalog persistence heading failure also reproduces on ancestor dce323c. Both dependency audits were skipped; security audit remains outstanding. See `docs/testing/pr29-integration-closeout-2026-10-12.md` for the evidence-based matrix, Acer routes, asset source gaps, monitoring checkpoints and cloud release gates.
+
+Acer's 8443 listener is tailnet-only on isolated localhost 8092; 443 → 8090, old PR #29, AUTH-02, Caddy, data and monitoring remain intact. Five-day monitoring is in progress. No merge or cloud production deployment occurred.
+

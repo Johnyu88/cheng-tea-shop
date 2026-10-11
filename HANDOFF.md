@@ -748,3 +748,15 @@ Source/verification work continues on the same feature/issue-24-mobile-login bra
 - Candidate `tea-nextjs-regression` serves through private Tailnet/Caddy; original `tea-nextjs-staging` remains running for rollback. Candidate data restored from synthetic snapshot after E2E. Caddy is bound to localhost port 8090; public exposure is off.
 - Five-day soak began `2026-10-11T10:13:06Z`, due `2026-10-16T10:13:06Z`; log at `C:\\data\\tea-staging\\soak\\soak-20261011-demo-mode-fix.jsonl`. In progress only.
 - Teacher bank/contact data in PR #26 remains unverified; no import. PR #28 is draft/unmerged; main was not changed.
+
+## 2026-10-12 PR #29 integration closeout
+
+- PR #29 remains open/draft on `feat/mobile-three-pwa-entries`; source head before closeout edits `3bc328337c23a7fac95e26bcfe5b036c7d64fd2f`; no main merge.
+- User-reported iPhone Safari acceptance 2026-10-11: Passkey logout/re-login, synthetic order loop, product publish/unpublish/edit, ORDER-01 payment reversal, ORDER-02 reopen packing accepted. ORDER-03 remains **not fully physically verified**.
+- Correction dialog is clarified as required, max 500 chars, with native required metadata; order behavior unchanged. Acer keeps its existing pre-copy 3bc build; this closeout does not rebuild it.
+- Quality run #133: lint/typecheck, 65 files/334 tests, build, browser/accessibility, default Playwright 32/32, and container smoke pass. Demo mobile E2E 3 pass / 1 fail / 1 skip; unchanged catalog persistence assertion fails at heading 商品已上架 and also failed on ancestor dce323c. Dependency audits skipped; security is not clean.
+- Acer :8443: isolated `tea-nextjs-pr29-8443-accept`, image `tea-nextjs-staging:pr29-8443-3bc3283`, ID `sha256:e6d7cfe92a7ef59b01547e2522c1a0747a42b941cad356ecd58bced0fffb8c33`, localhost 8092, independent path `C:\\data\\tea-staging\\pr29-8443-accept-v2-data`; exact Origin `https://acer-v5.tail4d8b5a.ts.net:8443`. Security checks passed. 443 → 8090 unchanged; both Serve ports tailnet-only; Funnel off.
+- Latest soak UTC 2026-10-11T23:49:56Z: local/Tailnet API 200, app/Caddy running, 0 errors. AUTH-02 UTC 2026-10-11T23:45:30Z: HTTPS 200, running, 0 errors. Five-day monitor is still **IN PROGRESS**, due 2026-10-16; original JSONL retained.
+- Full matrix, asset source gaps, Samsung instructions, deployment rollback and cloud gate: `docs/testing/pr29-integration-closeout-2026-10-12.md`.
+- Listener-only rollback: `tailscale serve --https=8443 off`; verify 443 still points to 8090. Do not remove containers or data.
+

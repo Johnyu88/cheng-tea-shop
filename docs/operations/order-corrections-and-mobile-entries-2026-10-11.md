@@ -76,3 +76,17 @@ The branch now accepts an explicitly configured HTTPS `:8443` origin only for a 
 - [ ] If app installation is not distinct, add fixed shortcuts from each route and repeat launch checks.
 
 Do not mark Android installation complete until this checklist has been run on a Samsung device or Android Chrome emulator and evidence is attached.
+
+## Superseding live checkpoint — 2026-10-12 Taipei
+
+This checkpoint supersedes older statements above that :8443 was not configured and that the PR #29 candidate had not been deployed; prior entries remain historical.
+
+- PR #29 app build source `3bc328337c23a7fac95e26bcfe5b036c7d64fd2f`; image `tea-nextjs-staging:pr29-8443-3bc3283`, ID `sha256:e6d7cfe92a7ef59b01547e2522c1a0747a42b941cad356ecd58bced0fffb8c33`; build label `NEXT_PUBLIC_DEMO_COMMERCE=enabled`.
+- New isolated container `tea-nextjs-pr29-8443-accept` uses `127.0.0.1:8092` and independent writable data `C:\\data\\tea-staging\\pr29-8443-accept-v2-data`; explicit Origin `https://acer-v5.tail4d8b5a.ts.net:8443`.
+- Tailscale Serve: 443 → `127.0.0.1:8090` unchanged; 8443 → `127.0.0.1:8092`. Both tailnet-only; Funnel off. Old f95ba80 candidate, AUTH-02 and Caddy still running.
+- HTTPS health/login/session, secure cookie, Passkey RP ID and negative Host/Origin/CSRF/missing-auth/wrong-port checks passed. Summary without secrets: `docs/testing/pr29-integration-closeout-2026-10-12.md`.
+- Latest soak UTC 2026-10-11T23:49:56Z: local/Tailnet API 200, app/Caddy running, 0 errors. AUTH-02 UTC 2026-10-11T23:45:30Z: HTTPS 200, running, 0 errors. Five-day monitor still **IN PROGRESS**, planned end 2026-10-16; logs retained.
+- Listener-only rollback: `tailscale serve --https=8443 off`; confirm 443 → 8090 remains. Do not stop/remove the candidate or data.
+- User-reported iPhone Safari 2026-10-11 checks passed for Passkey logout/re-login, synthetic order loop, product publication/edit, ORDER-01 and ORDER-02. ORDER-03 and Samsung phone checks remain pending.
+- Quality #133 still fails the catalog persistence heading assertion, also seen on dce323c. Container smoke passes; both dependency audit steps skipped. Full CI/source caveats are in the closeout package.
+
