@@ -42,7 +42,27 @@ Keep routine product/order work on the existing live session. Before enabling hi
 - The PWA routing test passed for all three paths and their distinct manifest IDs, start URLs, scopes, icons, and reload destinations using 390 × 844 touch emulation.
 - The optional `node cloud-demo-smoke.mjs` entry point could not start in this checkout: Node 24 failed to resolve the extensionless TypeScript import `lib/server/demo-cloud`, and no local `tsx` loader is installed. This was not counted as a pass; the route-level browser loop and Vitest suite above passed.
 
-No deployment was performed. The Acer candidate/original containers, data, and five-day monitor were not touched by these tests.
+## Acer PR #29 candidate and HTTPS :8443 follow-up — 2026-10-11
+
+The PR #29 candidate is deployed separately on Acer; this corrects the earlier statement that no Acer deployment occurred.
+
+- Candidate: `tea-nextjs-pr29-candidate`, image `tea-nextjs-staging:pr29-f95ba80`, image digest `sha256:96e23825f599080647035e45b6be0fdfad7c76eb68daba429700b115e4354923`, local listener `127.0.0.1:8091`, `/api/health` HTTP 200.
+- Candidate data is bind-mounted from `C:\\data\\tea-staging\\pr29-candidate\\data` to `/app/data`. The existing container and data remain intact.
+- AUTH-02 remains `tea-nextjs-auth02` using `tea-nextjs-staging:auth02-e50dfff`; its health check is HTTP 200.
+- Caddy remains running. Tailscale Serve is tailnet-only and currently maps HTTPS 443 to `http://127.0.0.1:8090`; no `:8443` listener is configured.
+- The five-day monitor remains active. Latest retrieved samples: demo-mode soak `2026-10-11T14:55:14Z` (candidate and rollback running, API checks 200, zero matched errors, candidate data 167261 bytes); AUTH-02 `2026-10-11T14:52:35Z` (health 200, zero matched errors, data 3398368 bytes).
+
+### Origin port hardening
+
+The branch now accepts an explicitly configured HTTPS `:8443` origin only for a private `.ts.net` host. Default HTTPS origins remain valid; `.home.arpa:8443`, other ports, mismatched Host/Origin, non-HTTPS forwarded protocol, and cross-site requests are rejected. Host and Origin must match the configured origin exactly. Passkey RP ID remains the hostname, without a port.
+
+- Source branch head: `dce323cfd9a20fe9d7240c8f025f85500e4dc8c5`.
+- Targeted verification: lint, typecheck, 65 unit-test files / 334 tests, production build, container build, browser/accessibility tests all passed. The new positive and negative Acer-origin tests pass.
+- Full Quality workflow still fails at an existing synthetic mobile catalog E2E assertion, expecting the heading “商品已上架”; the same assertion failed on the pre-fix `f95ba808` baseline. Later workflow steps were skipped.
+- The Acer candidate image is still `pr29-f95ba80` and does not include this source fix. No new image/container or runtime origin change has been deployed. The existing candidate image and its data bind remain the current rollback anchor.
+- Do not add the Tailscale `:8443` Serve entry until the updated candidate image and exact `DEMO_ACER_ORIGIN=https://<tailnet-host>:8443` have been deployed and positively/negatively verified. Keep AUTH-02 on its existing 443 route and continue the five-day monitor.
+
+
 
 ## Mobile acceptance checklist
 
