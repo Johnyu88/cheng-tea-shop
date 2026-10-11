@@ -738,3 +738,13 @@ Source/verification work continues on the same feature/issue-24-mobile-login bra
 - Five-day soak monitor started 2026-10-11T08:53:12Z (2026-10-11 16:53:12 Taiwan); planned end 2026-10-16T08:53:12Z. Process PID 23292 was alive at startup verification. JSONL log: `C:\\data\\tea-staging\\soak\\soak-20261011.jsonl`; initial sample had both APIs 200, both containers running, error count 0. Monitor process persistence across Windows reboot is not configured; a reboot may interrupt the soak.
 - Staging credentials are stored only in the restricted local file `C:\\data\\tea-staging\\staging-access.txt`; never copy secrets into Git or chat. User should open that file locally on Acer to access Basic Preview and Demo login, then complete phone Passkey enrollment while iPhone is on the Tailnet.
 - Open: one high and two moderate audit findings remain visible to npm audit; physical iPhone Safari/Passkey acceptance pending; five-day soak is in progress and has not completed. Work/Codex quota was unavailable to query; last known Remote Desktop Commander remaining-call estimate was 27%.
+
+
+## Acer regression recovery — 2026-10-11
+
+- Regression matrix and evidence: `docs/testing/acer-feature-regression-2026-10-11.md`.
+- Root cause was missing build-time `NEXT_PUBLIC_DEMO_COMMERCE=enabled` in Acer image. Repair commit `6a2b2e9014c53a657c4808729e0aeb5016924f40`; full touch-emulated mobile flow passed against isolated candidate after rebuilding. No app functionality was recreated.
+- Last documented live mobile-browser acceptance source is `0fe4a50ebb65ad9f66814e41915ebfe36987c368` (412×915 emulation); no Tea full-flow physical iPhone evidence is documented. Physical Safari/Face ID/photo picker remains a human gate.
+- Candidate `tea-nextjs-regression` serves through private Tailnet/Caddy; original `tea-nextjs-staging` remains running for rollback. Candidate data restored from synthetic snapshot after E2E. Caddy is bound to localhost port 8090; public exposure is off.
+- Five-day soak began `2026-10-11T10:13:06Z`, due `2026-10-16T10:13:06Z`; log at `C:\\data\\tea-staging\\soak\\soak-20261011-demo-mode-fix.jsonl`. In progress only.
+- Teacher bank/contact data in PR #26 remains unverified; no import. PR #28 is draft/unmerged; main was not changed.
