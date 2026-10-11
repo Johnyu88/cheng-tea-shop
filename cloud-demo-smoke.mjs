@@ -14,7 +14,7 @@ assert.ok(["password", "sms"].includes(authProvider));
 const password = process.env.DEMO_SMOKE_PASSWORD ?? randomBytes(24).toString("hex");
 const origin = "https://cheng-tea-password-demo.onrender.com";
 const base = "http://127.0.0.1:3138";
-const child = spawn(process.execPath, ["start-cloud-demo.mjs"], {
+const child = spawn(process.execPath, ["scripts/start-playwright-standalone.mjs"], {
   stdio: ["ignore", "inherit", "inherit"],
   env: { ...process.env, PORT: "3138", HOSTNAME: "127.0.0.1", NODE_ENV: "production",
     NEXT_PUBLIC_DEMO_COMMERCE: "enabled", DEMO_COMMERCE_CLOUD: "enabled",
@@ -192,8 +192,10 @@ try {
     }
     const orderCard = page.locator(".demo-order-card").filter({ hasText: shortNumber }).first();
     await expect(orderCard).toBeVisible();
-    page.once("dialog", dialog => dialog.accept("合成收款紀錄已核對"));
     await orderCard.getByRole("button", { name: "人工確認付款" }).click();
+    const auditDialog = page.getByRole("dialog", { name: "人工確認付款" });
+    await auditDialog.getByLabel("更正原因").fill("合成收款紀錄已核對");
+    await auditDialog.getByRole("button", { name: "確認更正" }).click();
     await expect(orderCard).toContainText("已人工確認");
     let photoWrites = 0;
     page.on("request", request => { if (request.method() === "POST" && request.url().endsWith("/packing-photo")) photoWrites += 1; });

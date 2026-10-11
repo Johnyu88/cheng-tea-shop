@@ -9,6 +9,10 @@ test("mobile synthetic order closes customer and merchant status loop", async ({
   await page.getByRole("button", { name: "加入購物車" }).click();
   await expect(page).toHaveURL(/\/cart$/);
   await expect(page.getByRole("button", { name: "返回上一頁" })).toBeVisible();
+  await page.getByRole("button", { name: "返回上一頁" }).click();
+  await expect(page).toHaveURL(/\/tea\/taiwan-mi-xiang-wild-mountain-tea$/);
+  await page.goForward();
+  await expect(page).toHaveURL(/\/cart$/);
   await expect(page.getByRole("link", { name: "繼續購買" })).toHaveAttribute("href", "/#catalog");
   await page.getByRole("link", { name: "前往結帳" }).click();
   await expect(page.getByRole("link", { name: "返回購物車" })).toHaveAttribute("href", "/cart");
@@ -121,5 +125,12 @@ test("mobile synthetic order closes customer and merchant status loop", async ({
   await expect(page.getByText("包裝照片：已由店家上傳")).toBeVisible();
   await expect(page.getByRole("alert").filter({ hasText: "提出攔件" })).toBeVisible();
   await expect(page.getByRole("alert").filter({ hasText: "顧客提出攔件申請" })).toBeVisible();
+  await page.goto("/admin/products?pwa=products");
+  await expect(page.getByRole("heading", { name: "商品管理", exact: true })).toBeVisible();
+  await expect(page.getByLabel("已綁定手機")).toHaveCount(0);
+  await page.goto("/admin/orders?pwa=orders");
+  await expect(page.locator(".demo-order-card").filter({ hasText: lookupHref!.match(/\\d{6}-\\d{3,}/)?.[0] ?? "" }).first()).toBeVisible();
+  await page.goBack();
+  await expect(page).toHaveURL(/pwa=products$/);
   await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(412);
 });

@@ -57,4 +57,26 @@ describe("order correction audit events", () => {
     expect(customer.events.at(-1)).toMatchObject({ status: "shipped", action: "intercept-requested" });
     expect(() => service.markShipped(orderId)).toThrow();
   });
+
+  test("invalid reversals fail without changing shipment or payment history", () => {
+    const service = createDemoOrderService();
+    const { orderId, accessSecret } = service.create(cart);
+    expect(() => service.revokeManualPayment(orderId, audit("not paid"))).toThrow();
+    expect(() => service.reopenPacking(orderId, audit("not packed"))).toThrow();
+
+    service.confirmManualPayment(orderId, audit("checked"));
+    service.recordPackingPhoto(orderId, "photo-packed");
+    service.markShipped(orderId);
+    const before = service.lookup(orderId, accessSecret)!;
+    expect(() => service.revokeManualPayment(orderId, audit("after shipment"))).toThrow();
+    expect(() => service.reopenPacking(orderId, audit("after shipment"))).toThrow();
+    expect(() => service.markShipped(orderId)).toThrow();
+    expect(service.lookup(orderId, accessSecret)).toEqual(before);
+
+    service.markDelivered(orderId);
+    const delivered = service.lookup(orderId, accessSecret)!;
+    expect(() => service.markShipped(orderId)).toThrow();
+    expect(() => service.reopenPacking(orderId, audit("after delivery"))).toThrow();
+    expect(service.lookup(orderId, accessSecret)).toEqual(delivered);
+  });
 });
