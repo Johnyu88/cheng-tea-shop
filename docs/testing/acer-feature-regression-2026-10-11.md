@@ -4,7 +4,7 @@
 
 This report records regression recovery for the Acer candidate built from PR #27. It does not certify a physical iPhone test.
 
-- Last documented live mobile-browser acceptance source: `0fe4a50ebb65ad9f66814e41915ebfe36987c368`, Render deploy `dep-dav9s7h7lnhs73bimvbg`, documented in `docs/testing/live-acceptance-2026-10-02.md`. The recorded 12/12 cases used a 412×915 browser viewport. This is browser emulation, not physical iPhone acceptance.
+- Last documented live mobile-browser acceptance source: `0fe4a50ebb65ad9f66814e41915ebfe36987c368`, Render deploy `dep-dav9s7h7lnhs73bimvbg`, documented in `docs/testing/live-acceptance-2026-10-02.md`. The recorded 12/12 cases used a 412x915 browser viewport. This is browser emulation, not physical iPhone acceptance.
 - The 2026-10-02 iPhone screenshots documented Passkey sandbox login/register/logout/relogin only; they are not Tea shop flow evidence. No full-flow physical iPhone acceptance commit is documented.
 - PR #25 source `d19ed4b8588c14c35c74c510f9c509bc3a0bf1ab`; PR #27 app commit `db392973e1809547a24f7334f18b79a323b2ba19` (with a later handoff-only commit). PR #27 contains security/dependency/Acer-origin changes; the relevant storefront/admin functions remained in source.
 - PR #15 is docs-only; PR #26 is docs-only and its teacher bank/contact data remains pending verification. Neither is merged or the cause of the regression.
@@ -33,7 +33,7 @@ The fix adds a Docker build argument with a safe default of `disabled`; Acer bui
 ## Verification record
 
 - Candidate image: `tea-nextjs-staging:regression-flag`, image `sha256:e9d25f4352e3791ec646e1fd0163927457477d554c669d97652a8c9c6c4f3286`; built from PR27 source plus repair commit. Next.js build exited 0. Five existing dynamic filesystem tracing warnings were nonfatal.
-- Full mobile browser E2E at 390×844 with touch emulation passed: storefront image/layout (12 loaded, 0 broken), product-to-cart, checkout OTP/order creation, admin return and password fallback, edit/photo preview/cancel/replace/save/reload, payment/packing-photo cancel-reselect-confirm, shipping/delivery, and new-context OTP lookup.
+- Full mobile browser E2E at 390x844 with touch emulation passed: storefront image/layout (12 loaded, 0 broken), product-to-cart, checkout OTP/order creation, admin return and password fallback, edit/photo preview/cancel/replace/save/reload, payment/packing-photo cancel-reselect-confirm, shipping/delivery, and new-context OTP lookup.
 - One initial E2E attempt stopped due to the temporary test script toggling the editor closed; the script was corrected and the complete run passed. No app source change was made for that test-script issue.
 - After E2E, candidate data was restored from the five-file synthetic baseline backup. The candidate was restarted and health returned 200. No E2E order/photo mutation remains in candidate data.
 - Existing original `tea-nextjs-staging` / `tea-nextjs-staging:pr25` container remains running for rollback. Candidate runs separately as `tea-nextjs-regression` with isolated `regression-data`. Caddy routes to candidate; Caddy binds only `127.0.0.1:8090`. Tailnet URL is private: `https://acer-v5.tail4d8b5a.ts.net/`; Funnel/public exposure is off.

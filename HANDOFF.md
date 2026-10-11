@@ -740,11 +740,11 @@ Source/verification work continues on the same feature/issue-24-mobile-login bra
 - Open: one high and two moderate audit findings remain visible to npm audit; physical iPhone Safari/Passkey acceptance pending; five-day soak is in progress and has not completed. Work/Codex quota was unavailable to query; last known Remote Desktop Commander remaining-call estimate was 27%.
 
 
-## Acer regression recovery — 2026-10-11
+## Acer regression recovery 2026-10-11
 
 - Regression matrix and evidence: `docs/testing/acer-feature-regression-2026-10-11.md`.
 - Root cause was missing build-time `NEXT_PUBLIC_DEMO_COMMERCE=enabled` in Acer image. Repair commit `6a2b2e9014c53a657c4808729e0aeb5016924f40`; full touch-emulated mobile flow passed against isolated candidate after rebuilding. No app functionality was recreated.
-- Last documented live mobile-browser acceptance source is `0fe4a50ebb65ad9f66814e41915ebfe36987c368` (412×915 emulation); no Tea full-flow physical iPhone evidence is documented. Physical Safari/Face ID/photo picker remains a human gate.
+- Last documented live mobile-browser acceptance source is `0fe4a50ebb65ad9f66814e41915ebfe36987c368` (412x915 emulation); no Tea full-flow physical iPhone evidence is documented. Physical Safari/Face ID/photo picker remains a human gate.
 - Candidate `tea-nextjs-regression` serves through private Tailnet/Caddy; original `tea-nextjs-staging` remains running for rollback. Candidate data restored from synthetic snapshot after E2E. Caddy is bound to localhost port 8090; public exposure is off.
 - Five-day soak began `2026-10-11T10:13:06Z`, due `2026-10-16T10:13:06Z`; log at `C:\\data\\tea-staging\\soak\\soak-20261011-demo-mode-fix.jsonl`. In progress only.
 - Teacher bank/contact data in PR #26 remains unverified; no import. PR #28 is draft/unmerged; main was not changed.
