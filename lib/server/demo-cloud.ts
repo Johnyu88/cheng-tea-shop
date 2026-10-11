@@ -15,12 +15,12 @@ export function cloudDemoOrigin(): URL {
   return url;
 }
 
-/** Acer staging uses one operator-configured private DNS name, never an Origin wildcard. */
+/** Acer staging requires one operator-configured private origin; only HTTPS :8443 may be non-default. */
 export function acerDemoOrigin(): URL {
   const raw = process.env.DEMO_ACER_ORIGIN;
   if (!raw) throw new Error("Acer demo origin is not configured");
   const url = new URL(raw);
-  if (url.origin !== raw || url.protocol !== "https:" || url.username || url.password || url.port
+  if (url.origin !== raw || url.protocol !== "https:" || url.username || url.password || (url.port && url.port !== "8443")
     || url.pathname !== "/" || url.search || url.hash
     || !(/^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.home\.arpa$/.test(url.hostname)
       || /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.){2}ts\.net$/.test(url.hostname))) {
