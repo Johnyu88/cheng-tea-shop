@@ -1,9 +1,8 @@
 import Link from "next/link";
-import { confirmedTeaFixture } from "@/lib/domain/mock/confirmed-tea-fixture";
+import type { Product } from "@/lib/domain/types";
 
 const line = "https://line.me/ti/p/TT6TRQyMF6";
-export function PublicTeaStorefront() {
-  const teas = confirmedTeaFixture.filter(p => p.publication === "published");
+export function PublicTeaStorefront({ teas }: { teas: Product[] }) {
   return <div className="site-shell">
     <header className="site-header">
       <Link className="brand-mark" href="/">陳老師茶行</Link>
@@ -42,7 +41,7 @@ export function PublicTeaStorefront() {
         </div>
       </section>
       <section id="tea-list" className="catalog-browser" aria-labelledby="teas-heading">
-        <div className="catalog-heading-row"><div><p className="eyebrow">精選茶品</p><h2 id="teas-heading">八款茶品</h2></div><span className="catalog-count">共 {teas.length} 款</span></div>
+        <div className="catalog-heading-row"><div><p className="eyebrow">精選茶品</p><h2 id="teas-heading">精選茶品</h2></div><span className="catalog-count">共 {teas.length} 款</span></div>
         <p className="muted">茶名、規格與參考價格依既有茶樣資料整理；實際價格與供貨以陳老師確認為準。</p>
         <div className="product-grid">
           {teas.map(tea => <article className="product-card" key={tea.id}>
