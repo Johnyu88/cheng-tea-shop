@@ -110,6 +110,17 @@ export const createMockCartService = (options: MockCartOptions = {}): CartServic
     },
     async getCart(): Promise<ServiceResult<Cart>> {
       await restore();
+      if (storageKey && cart.lines.length) {
+        const active = await catalog.listProducts({ limit: 50 });
+        if (!active.ok) return active;
+        const allowed = new Set(active.value.items.filter(product => product.publication === "published").map(product => product.id));
+        const previousLength = cart.lines.length;
+        cart.lines = cart.lines.filter(line => allowed.has(line.productId));
+        if (cart.lines.length !== previousLength) {
+          recalculate(cart);
+          persist();
+        }
+      }
       return { ok: true, value: cloneCart(cart) };
     },
 
