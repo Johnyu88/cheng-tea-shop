@@ -4,6 +4,30 @@ import { issueDemoMerchantCookie, issueDemoMerchantAuthCookie } from "@/lib/serv
 import { merchantAuthStatus, providerSessionRequired } from "@/lib/server/merchant-auth-provider";
 import { assertLocalDemoHttpRequest } from "@/lib/server/demo-http-guard";
 import { demoFailure, demoSuccess } from "@/lib/server/demo-route-response";
+function safeSessionFailureDiagnostic(request: Request, stage: string) {
+  let configured: URL | null = null;
+  try {
+    const raw = process.env.DEMO_ACER_ORIGIN;
+    if (raw) configured = new URL(raw);
+  } catch { /* Do not include malformed configuration values in diagnostics. */ }
+  const fetchSite = request.headers.get("sec-fetch-site");
+  return {
+    scope: "merchant-session",
+    event: "login-rejected",
+    status: 403,
+    stage,
+    method: request.method,
+    hostMatchesConfiguredOrigin: configured ? request.headers.get("host") === configured.host : null,
+    originMatchesConfiguredOrigin: configured ? request.headers.get("origin") === configured.origin : null,
+    forwardedProtoIsHttps: request.headers.get("x-forwarded-proto") === "https",
+    hasForwardedHeader: request.headers.has("forwarded"),
+    hasForwardedHostHeader: request.headers.has("x-forwarded-host"),
+    hasBasicAuthorizationHeader: (request.headers.get("authorization") ?? "").startsWith("Basic "),
+    fetchSiteMissingOrSameOrigin: !fetchSite || fetchSite === "same-origin",
+    contentTypeIsJson: /^application\\/json(?:\\s*;|$)/i.test(request.headers.get("content-type") ?? ""),
+  };
+}
+
 export async function GET(request: Request) {
   try {
     assertLocalDemoHttpRequest(request, "GET");
@@ -13,18 +37,28 @@ export async function GET(request: Request) {
   } catch { return demoFailure(new Error("商家登入尚未開放"), 403); }
 }
 export async function POST(request: Request) {
+  let stage = "request-guard";
   try {
     assertLocalDemoHttpRequest(request, "POST", "json");
+    stage = "body-read";
     const text = await request.text();
     if (text.length > 1024) throw new Error("Invalid request");
+    stage = "body-parse";
     const body = JSON.parse(text) as Record<string, unknown>;
+    stage = "auth-provider-or-session-signing";
     let cookie = issueDemoMerchantAuthCookie(body);
     if (!cookie && !providerSessionRequired() && typeof body.credential === "string") {
       cookie = issueDemoMerchantCookie(body.credential);
     }
-    if (!cookie) throw new Error("Invalid login");
+    if (!cookie) {
+      stage = "auth-provider-rejected";
+      throw new Error("Invalid login");
+    }
     return demoSuccess({ authenticated: true }, { headers: { "set-cookie": cookie, "cache-control": "no-store" } });
-  } catch { return demoFailure(new Error("登入失敗，請確認資料或稍後重試。"), 403); }
+  } catch {
+    console.warn(JSON.stringify(safeSessionFailureDiagnostic(request, stage)));
+    return demoFailure(new Error("登入失敗，請確認資料或稍後重試。"), 403);
+  }
 }
 
 export async function DELETE(request: Request) {
