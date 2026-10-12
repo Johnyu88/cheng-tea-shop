@@ -19,6 +19,27 @@ export function PublicTeaStorefront() {
         <p className="hero-copy">台灣特色茶品，歡迎透過電話或 LINE 聯絡陳老師選茶。</p>
         <a className="primary-action" href="#tea-list">瀏覽茶品</a>
       </section>
+      <section className="teacher-story" aria-labelledby="teacher-story-heading">
+        <div className="teacher-story-copy">
+          <p className="eyebrow">坐下來，聽陳老師說茶</p>
+          <h2 id="teacher-story-heading">先認識泡茶的人，再慢慢找到喜歡的茶。</h2>
+          <p>在茶席的氛圍中，慢慢認識茶的香氣與滋味。</p>
+        </div>
+        <div className="teacher-story-media">
+          <picture>
+            <source media="(max-width: 40rem)" srcSet="/media/teacher-hero-mobile-candidate.png" />
+            <img src="/media/teacher-hero-desktop-candidate.png" alt="陳老師茶行的茶席形象合成照" />
+          </picture>
+          <div className="teacher-story-audio">
+            <p>鳥鳴 2／茶園自然聲景</p>
+            <audio aria-label="茶園鳥鳴 2 音效" controls preload="none">
+              <source src="/media/tea-stream-birds.wav" type="audio/wav" />
+              您的瀏覽器不支援音訊播放。
+            </audio>
+            <small>請點擊播放；不會自動出聲。</small>
+          </div>
+        </div>
+      </section>
       <section id="tea-list" className="catalog-browser" aria-labelledby="teas-heading">
         <div className="catalog-heading-row"><div><p className="eyebrow">精選茶品</p><h2 id="teas-heading">八款茶品</h2></div><span className="catalog-count">共 {teas.length} 款</span></div>
         <p className="muted">茶名、規格與參考價格依既有茶樣資料整理；實際價格與供貨以陳老師確認為準。</p>
