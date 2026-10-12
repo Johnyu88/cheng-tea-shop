@@ -110,3 +110,32 @@ PR：[29](https://github.com/Johnyu88/cheng-tea-shop/pull/29)，分支 `feat/mob
 - Dependency audit and production dependency audit skipped again. Latest security status remains unverified; do not state audit clean.
 - This follow-up only records CI evidence in docs; it changes no application code, runtime, container, data, or monitoring. PR remains Quality-red until the baseline test is resolved or explicitly accepted.
 
+
+
+## 10/12 deployment acceptance update and 10/15 field run
+
+PR #29 is still draft/unmerged. Quality run #143 (workflow run 38193685121, source/workflow commit 5b996e8; later branch commits are documentation only) passed lint, typecheck, unit/component, production build, browser/accessibility, both isolated mobile E2E runs, cloud-demo build/smoke, and container health. Overall Quality remains failed because the full dependency audit reports one high and two moderate findings in development dependencies; production audit passed. These findings are existing lockfile/toolchain issues, not newly introduced by PR #29. Do not describe CI as all green or security as clean.
+
+A fresh isolated candidate from PR head 9a53b34 is built as image `tea-nextjs-staging:pr29-8443-9a53b34`, digest `sha256:772bd29ad25e6e22c1cf160364c4f0dabfd5c436425a99273316c56d1619a82d`, build flag `NEXT_PUBLIC_DEMO_COMMERCE=enabled`. Container `tea-nextjs-pr29-8443-1014` listens only on localhost 8093 and uses the new independent path `C:\\data\\tea-staging\\pr29-1014-accept-data`. Its health endpoint returns 200. Preview credentials matched the new candidate configuration without printing secret values; Basic Auth denied an unauthenticated request (401) and accepted the matched credentials (200). A request with Origin port 8444 was rejected (401). Candidate auth status reports password provider ready and Passkey enabled, not yet registered in its fresh data. A valid merchant-password login POST returned 403, so session/cookie, full CSRF/Host negative matrix, and app-level Passkey registration are not verified. Do not expose this candidate on :8443 until login and the remaining gates pass.
+
+The current phone URL `https://acer-v5.tail4d8b5a.ts.net:8443` still reaches the old `pr29-8443-3bc3283` image at localhost 8092. Tailscale Serve remains tailnet-only 443→8090 and 8443→8092; Funnel is off. Existing PR #29 f95ba80 candidate, AUTH-02, Caddy and original data remain running. Local health returned 200 for ports 8090–8093. Five-day monitoring is **IN PROGRESS** through 2026-10-16; known monitor processes were alive, and original JSONL files were retained.
+
+### 10/15 field showcase run sheet
+
+1. Confirm the iPhone and/or Samsung is connected to Tailscale. Open the current 8443 URL and check the HANDOFF's candidate mapping first. Until the new candidate clears login, report the current build as old 3bc3283; do not represent it as the 9a53b34 image.
+2. Use only an explicitly disposable synthetic order in the demo environment. Do not edit real or previously accepted orders. Keep customer identifiers and credentials out of screenshots and notes.
+3. For ORDER-03, record the shipment as shipped, submit each action separately with a non-empty reason (shipping exception, intercept request, correction), and verify the shipped status remains unchanged, an audit event records the reason/actor, customer lookup shows the warning, and a further ship action is blocked. Capture the device/browser and result for each step.
+4. If any action fails or a suitable disposable order is unavailable, stop that physical flow and record it as pending; CI's unit/E2E coverage is synthetic and cannot replace the phone result.
+5. Samsung Android Chrome: connect Tailscale; open `/install`; sign in; install or add all three entries (`/?pwa=storefront`, `/admin/products?pwa=products`, `/admin/orders?pwa=orders)); register a Passkey on the device; sign out and sign in with it; force-close and reopen each icon, confirming the correct start route and protected admin access. Record Samsung model, Android/Chrome versions and each outcome. iPhone acceptance does not count for Samsung.
+6. Recheck 443→8090 and 8443's intended target, health checks, and monitor log growth after the demonstration. Do not stop monitoring or alter old containers/data. If the new candidate has not cleared all gates, keep 8443 on 8092 and postpone the switch.
+
+### Safe :8443 route switch proposal
+
+After valid merchant login/session/cookie checks and the complete negative matrix pass on 8093, first verify 8092 and 8093 health, current Serve mapping, and monitor status. Change only the 8443 target with `tailscale serve --https=8443 http://127.0.0.1:8093`, then verify the private URL and 443→8090. Roll back only 8443 with `tailscale serve --https=8443 http://127.0.0.1:8092`. Preserve both containers/data; never use Funnel. **No switch has been executed.**
+
+### Next blocking items
+
+- Diagnose why the new candidate returns 403 on a valid merchant-password login even though the secret-free configuration comparisons match; then verify session cookie properties, authenticated session, Passkey RP ID and full Host/Origin/CSRF/port denials.
+- Resolve the high/moderate dev dependency audit findings or document an accepted, time-bounded exception before cloud release.
+- Complete ORDER-03 iPhone and Samsung three-entry/Passkey real-device acceptance.
+- Complete five-day monitoring on 2026-10-16 and retain the original logs.
