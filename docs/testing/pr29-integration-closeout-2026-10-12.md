@@ -159,3 +159,21 @@ After valid merchant login/session/cookie checks and the complete negative matri
     tailscale serve --https=8443 http://127.0.0.1:8092
 
 確認 Serve 狀態仍為 443→8090、8443→8092。保留 8095、8092 容器及資料，不動 AUTH-02、Caddy、監測與原始日誌；Funnel 不得啟用。本次沒有切換或執行回退。
+
+## 2026-10-12 切換前驗收矩陣與 10/14 閘門
+
+| 項目 | 目前證據 | 狀態／處置 |
+|---|---|---|
+| PR / Quality #154 | PR head 1d9f309，draft/open；#154 run 38223091018 完成。所有測試/建置/container smoke 與 production audit 通過；完整 audit 唯一失敗為 braces High。 | 僅在使用者核准範圍內接受該 Acer 私網展示殘餘風險；不得稱 audit 全綠。10/14 再確認無新增失敗。 |
+| 8095 Basic Auth / 商家登入 / Session | 無 Basic 的管理 Session 401，有 Basic 200；商家登入 200，受保護 API 200；Cookie Secure/HttpOnly/SameSite=Strict/Path=/、__Host 且無 Domain。 | 切換前 PASS；不輸出憑證或 Cookie。 |
+| HTTPS Host / Origin / Passkey | 正確 :8443 Origin 設定；錯 Host、錯 Origin 埠、跨站 POST 拒絕 401；Passkey enabled，RP ID 為 hostname。 | 設定 PASS；registered=false，未從舊版移轉。若要 Passkey 展示，須新站註冊並真機驗證。 |
+| 候選展示資料 | 8095 有 8 個 catalog 品項、orders.sqlite 訂單數 0；資料目錄與 8092、AUTH-02 隔離。 | 新站登入/商品資料可用；切換後另建合成訂單，不假設舊訂單遷移。 |
+| SQLite 撤銷查詢讀取失敗 | 隔離容器注入缺少 signature_hash 的資料表 schema；有效 Cookie 對受保護 API 回 403；測試資源已清除。 | PASS。 |
+| Serve / 監測 | 443→8090、8443→8092，tailnet-only、Funnel off；舊版與新版容器 running；三監測程序 alive，原始 JSONL 近期增長。 | 保持原設定至 10/14；五日監測仍 IN PROGRESS 至 10/16。 |
+| 新版外部展示切換 | 尚未執行。 | 只在 10/14 部署驗收且全部閘門通過才切 8443→8095；不合格即維持/回退 8092。 |
+
+### 回退操作（尚未執行）
+
+    tailscale serve --https=8443 http://127.0.0.1:8092
+
+回退後驗證 tailnet 443→8090、8443→8092；保留 8095/8092 容器及資料，不停監測、不啟用 Funnel。

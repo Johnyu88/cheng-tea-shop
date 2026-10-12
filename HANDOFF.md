@@ -895,3 +895,25 @@ PR #29 仍為 open/draft/unmerged；本次驗收前 branch head 為 5fe904d12e28
 - 建議暫不將 8095 切換到 :8443。阻塞是完整 dependency audit 的 braces High 尚未由上游修正版解除或取得明確風險接受；目前候選可留作隔離驗收候選，不能宣稱完整安全稽核通過。
 - 即時只讀狀態：Serve 仍為 tailnet-only 443→8090、8443→8092；8092 舊展示容器、8091 舊候選、AUTH-02、Caddy 均未動。五日監測程序 PID 20756、12000、1932 仍存活；三份原始 JSONL 仍存在，最近檔案長度分別 89,449、96,049、43,902 bytes（2026-10-12 約 08:18 UTC 記錄）。監測至 2026-10-16，仍為 IN PROGRESS。
 - 本次沒有切換，所以無需回退。未來只有在取得明確切換確認後才可改 :8443；若新入口健康、登入或驗收失敗，只回復 tailscale serve --https=8443 http://127.0.0.1:8092，確認 443→8090，保留兩候選容器與資料；不得停監測、移除資料或啟用 Funnel。
+
+## 2026-10-12 10/14 切換前檢查與授權風險界線
+
+游老師已核准：只有 2026-10-14 部署驗收階段、且當日所有前置檢查通過，才可將 tailnet-only :8443 從 8092 改指 8095。接受 braces 開發依賴 High 的殘餘風險僅限 Acer 私有展示，不代表完整 audit 通過；不得公開 Funnel、合併 main 或影響 443、AUTH-02、Caddy、舊候選/資料與監測。
+
+### 已完成的切換前檢查（2026-10-12）
+
+- PR #29 branch head 1d9f30960d176df0b37452ea5eaf95dffbd06498，PR open/draft/unmerged。Quality #154（run 38223091018）已完成：lint、typecheck、unit/component、production build、browser/accessibility、synthetic mobile E2E、private demo/order smoke 均通過；container build/health 通過；production audit 通過。唯一失敗為完整 dependency audit 的 braces High，屬已由使用者限縮接受的 Acer 私有展示風險；此結果不等於 audit clean。
+- 8095 候選 tea-nextjs-pr29-session-rev 運行 tea-nextjs-staging:pr29-session-rev-f3fefc1，image ID sha256:d92078d35e9a2a9373ce4e30c99b2b836657ce913489b5da5fae0217be0626da。Health 200；Basic Auth 無憑證時管理 Session 路徑回 401、正確 Basic Auth 回 200；商家正確密碼登入 200；Cookie 的 __Host、Secure、HttpOnly、SameSite=Strict、Path=/、無 Domain 均通過；登入後受保護 API 200。
+- 對 POST /api/demo/admin/session 的錯誤 Host、錯誤 Origin 埠 8444、跨站 Origin 測試均拒絕（HTTP 401）。預期 HTTPS origin 為 https://acer-v5.tail4d8b5a.ts.net:8443。Passkey enabled=true，RP ID hostname 與 acer-v5.tail4d8b5a.ts.net 相符；新候選 registered=false，舊版 Passkey/Session 不會自動移入。若展示要用 Passkey，須在新候選另行註冊並實機驗證；目前已備妥的登入方式是既有安全憑證來源的商家密碼。
+- 8095 使用獨立可寫資料目錄，與 8092、AUTH-02 路徑不同。只讀盤點：catalog API 有 8 個展示品項，orders.sqlite 的 demo_orders 為 0；不假設舊版訂單會移轉。切換後須建立新的、明確標記的合成測試訂單。
+- PR #29 Session 撤銷讀取故障已於隔離空白資料目錄驗證：SQLite 缺少 signature_hash 欄位造成 SELECT 失敗，受保護 API 回 403；臨時故障注入容器及資料夾已清除。8095 未重建、未改寫既有資料。
+- 2026-10-12 只讀 Serve baseline：tailnet-only 443 → 127.0.0.1:8090；8443 → 127.0.0.1:8092；Funnel off。8092 舊展示容器與 8095 候選均 running。
+- 五日監測仍 IN PROGRESS 至 2026-10-16。監督程序 PID 20756、12000、1932 存活；原始 JSONL 仍增長：soak-20261011.jsonl 90,087 bytes（2026-10-12T08:28:42Z），soak-20261011-demo-mode-fix.jsonl 96,777 bytes（08:28:35Z），auth02-20261011.jsonl 44,252 bytes（08:28:18Z）。來源檔案未改動。
+
+### 10/14 切換閘門與回退
+
+切換前須再確認 PR head/source revision、Quality #154 與其唯一已接受 audit 例外、8095 health/登入/資料目錄、8092 health、Serve baseline 及監測日誌仍符合上列條件。若 Quality 出現任何非 braces High 的新增失敗、登入/Host/Origin/Cookie 驗證失敗、Passkey RP ID 不符、資料目錄共享、舊入口或監測異常，停止，不切換並保留 8443→8092。
+
+條件全部滿足才於 10/14 只改 :8443：tailscale serve --https=8443 http://127.0.0.1:8095。接著從 tailnet HTTPS 網址驗證首頁、/install、三個入口、Basic Auth、管理員密碼登入、商品管理、建立並完成一筆合成訂單、登出；任何關鍵項目失敗，立即只回退 :8443：tailscale serve --https=8443 http://127.0.0.1:8092，並確認 443→8090 與舊版首頁/管理路徑恢復。切換與回退均保留容器和資料、不觸及 AUTH-02/Caddy/監測、不使用 Funnel。
+
+本節為 10/12 切換前證據，不代表 :8443 已切換。實際切換時間、外部驗收結果、Passkey 是否於新候選註冊、備援狀態須於 10/14 取得實際證據後追加。
