@@ -6,4 +6,5 @@ export interface CartService {
   addItem(productId: ProductId, variantId: VariantId, quantity: number): Promise<ServiceResult<Cart>>;
   updateQuantity(productId: ProductId, variantId: VariantId, quantity: number): Promise<ServiceResult<Cart>>;
   removeItem(productId: ProductId, variantId: VariantId): Promise<ServiceResult<Cart>>;
+  clearCart?(): Promise<ServiceResult<Cart>>;
 }
