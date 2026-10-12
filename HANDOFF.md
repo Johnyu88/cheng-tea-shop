@@ -810,3 +810,12 @@ A new isolated Acer candidate was built from clean PR head `9a53b34a35b497ff6d95
 Five-day monitoring remains **IN PROGRESS**, due 2026-10-16. At the 2026-10-12 Acer checkpoint, all three known monitor supervisor PIDs (20756, 12000, 1932) were alive, original JSONL files remained present, and local endpoints 8090–8093 returned 200. Existing 443 and 8443 Serve mappings were unchanged. The monitor has not completed; preserve the source logs.
 
 ORDER-03 unit coverage for exception, intercept, and correction actions passed in Quality #143; real iPhone end-to-end verification remains pending. For the 10/15 field showcase, use the manual checklist in `docs/testing/pr29-integration-closeout-2026-10-12.md`; do not mark ORDER-03 or Samsung installation/Passkey acceptance passed without real-device evidence. Current user-facing 8443 URL remains `https://acer-v5.tail4d8b5a.ts.net:8443` on the old 3bc3283 image until the new candidate clears the failed login gate.
+
+
+## 2026-10-12 field runbook and current PR head
+
+The 10/15 field showcase steps and safe 8443 switch/rollback proposal were appended to `docs/testing/pr29-integration-closeout-2026-10-12.md` in documentation commit `d19f1f52d3b0e5f971b4a4b8282c7449b9348042`. This is documentation only. Quality run #146 (38195069583) for that head was queued at checkpoint; the application/test/workflow source result remains #143 as documented above. PR #29 remains draft and unmerged.
+
+Current deployment gate is **blocked** by the new candidate's merchant login returning HTTP 403; do not change the :8443 Serve mapping. Existing 8443 continues to point to 8092 / image `pr29-8443-3bc3283`; 443 still points to 8090. The new `pr29-8443-9a53b34` candidate remains at localhost 8093 with independent test data. Health and preview Basic Auth checks passed; app-level session/cookie and full origin/CSRF/Passkey acceptance did not. Preserve the old route and investigate the login denial before any switch.
+
+Quality #143 passed all code and E2E checks but overall failed because of the one high/two moderate development dependency findings. Production audit passed. ORDER-03 CI action tests pass, but physical iPhone verification and Samsung install/Passkey remain pending. Five-day monitoring remains in progress through 2026-10-16; the original JSONL logs and monitor processes are preserved.
