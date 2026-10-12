@@ -93,7 +93,7 @@ export function CatalogBrowser({ catalogService }: CatalogBrowserProps): JSX.Ele
           <p className="eyebrow">慢慢找，找到喜歡的味道</p>
           <h2 id="complete-catalog-heading">全部茶品</h2>
         </div>
-        {state.status === "ready" && <span className="catalog-count">共 {state.total} 款合成示範茶</span>}
+        {state.status === "ready" && <span className="catalog-count">共 {state.total} 款茶品</span>}
       </div>
 
       <div className="catalog-filters" role="group" aria-label="依口感篩選">
