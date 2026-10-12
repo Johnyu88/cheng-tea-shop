@@ -1,4 +1,5 @@
 import { merchantRequestCookie } from "@/lib/server/merchant-request-access";
+import { writePublicTeaPublication } from "@/lib/server/public-tea-publication";
 
 import { assertLocalDemoHttpRequest } from "@/lib/server/demo-http-guard";
 import { getDemoCatalogStore, type ProductUpdate } from "@/lib/server/demo-catalog-store";
@@ -36,6 +37,7 @@ export async function PATCH(request: Request) {
     if (body.publication === "draft" || body.publication === "published") {
       const product = await getDemoCatalogStore().setPublication(body.id, body.publication);
       if (!product) throw new Error("找不到商品");
+      await writePublicTeaPublication(await getDemoCatalogStore().list());
       return demoSuccess(product);
     }
     const changes: ProductUpdate = {};
