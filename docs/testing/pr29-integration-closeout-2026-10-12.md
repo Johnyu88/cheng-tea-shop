@@ -177,3 +177,7 @@ After valid merchant login/session/cookie checks and the complete negative matri
     tailscale serve --https=8443 http://127.0.0.1:8092
 
 回退後驗證 tailnet 443→8090、8443→8092；保留 8095/8092 容器及資料，不停監測、不啟用 Funnel。
+
+## 2026-10-12 10/15 現場交付包索引
+
+截至 2026-10-12，最新現場操作包與 10/14 切換檢查表以 `docs/testing/pr29-field-showcase-pack-2026-10-15.md` 為準。內容包含切換/回退檢查標準、10/15 前台到顧客查單流程、Samsung 三入口與捷徑備案、十種茶品及商家正式資料現場確認欄、ORDER-03/Passkey/audit/監測未完成項。此索引新增不代表已切換；8443 仍指向 8092，五日監測仍進行中。正式資料候選值不等於店家核准，銀行帳號、電話與 LINE QR 機密內容不放入 Git。

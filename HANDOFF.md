@@ -952,3 +952,19 @@ Confirm 443 still points to 8090 and the prior 3bc3283 route works. Keep both co
 6. Keep the 8092/3bc3283 rollback available; verify monitor remains active and leave 443/AUTH-02 unchanged.
 
 This checkpoint records preparation only; the 10/14 switch has **not** been performed. On 10/14 append actual switch time, external acceptance evidence, Passkey enrollment outcome, and rollback/backup status.
+
+## 2026-10-12 10/15 現場交付包交接
+
+本次只整理交付文件，沒有修改核心程式、重建容器、寫入/覆蓋部署資料、改 Serve、合併 main 或正式上雲。詳細切換表、每步通過/停止標準、回退指令、10/15 現場演示順序、Samsung 安裝/主畫面捷徑備案及正式資料確認欄，統一從 `docs/testing/pr29-field-showcase-pack-2026-10-15.md` 開始；歷史驗收證據仍見 `docs/testing/pr29-integration-closeout-2026-10-12.md`。
+
+### 最新狀態（2026-10-12 17:29 Taipei）
+
+- PR #29 以 `364d47c77d2e5f2bea8b19cf516b63fa6d81796b` 為本次文件基準，仍 open/draft/unmerged；候選程式為 `f3fefc1`。
+- Quality #156 / run `38229526027` completed failure：lint/typecheck/unit-component/build/browser-accessibility/synthetic mobile E2E/private demo/order smoke/container build+health 均通過，production audit pass；完整 dependency audit 仍只有已核准限縮範圍的 development-path `braces@3.0.3` High。不可稱 Quality 或完整 audit 全綠。10/14 必須再核最新 run；新增任何 finding/失敗即停止切換。
+- Acer：8095 `tea-nextjs-pr29-session-rev` / `pr29-session-rev-f3fefc1` running；8092 `tea-nextjs-pr29-8443-accept` / `pr29-8443-3bc3283` running；既有 f95ba80 候選、AUTH-02、Caddy (`tea-caddy-staging`) 也 running。
+- Serve 保持 tailnet-only 443→8090、8443→8092，Funnel off；本日未切換。8095/8092 健康、Basic Auth/商家登入/Session/Origin-CSRF/撤銷等已驗收證據沿用，不重跑。
+- 監測程序 20756/12000/1932 存活；三份原始 JSONL 於 2026-10-12 約 17:29 Taipei 仍增加；五日監測完成日 2026-10-16，仍 IN PROGRESS。
+- 新版 Passkey enabled/RP ID 正確但尚未註冊；需新站註冊後才可宣稱新版 Passkey 真機驗收。ORDER-03 實機驗收尚未完成。
+- 現場茶品檔僅有八筆樣品候選，另有黑茶/特殊茶名稱未提供，黃茶與老茶分類可能與樣品重疊；照片映射也有候選衝突。檔內價格/庫存不是已核定正式資料。正式匯款、電話、LINE QR、運費/免運條件待陳老師確認，機密值不得寫入 Git。
+- 10/14 才依現場包逐項執行切換前閘門；只有全數條件通過才改 :8443→8095。任一關鍵失敗，只回退 :8443→8092，保持 443→8090，保留容器/資料/監測。若不通過，維持舊版展示備援。
+- 10/15 現場順序：前台商品→購物車→下單→商家登入→訂單確認付款→包裝拍照→出貨→顧客查單。付款/訂單皆標示合成演示；ORDER-03 仍待實機驗收，不可標通過。Samsung 若無法安裝三個獨立 PWA，改建三個 Chrome 主畫面捷徑並記錄。
