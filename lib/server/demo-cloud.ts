@@ -96,7 +96,7 @@ export function assertCloudDemoRequest(request: Request): void {
 
 export function assertAcerDemoRequest(request: Request): void {
   assertDemoEnabled();
-  if (!acerDemoRequested() || !hasCloudDemoAuthorization(request)) throw new Error("Acer demo access denied");
+  if (!acerDemoRequested() || (process.env.DEMO_ACER_MERCHANT_LOGIN_DIRECT !== "enabled" && !hasCloudDemoAuthorization(request))) throw new Error("Acer demo access denied");
   const origin = acerDemoOrigin();
   const url = new URL(request.url);
   const proto = request.headers.get("x-forwarded-proto");
