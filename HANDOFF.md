@@ -917,3 +917,38 @@ PR #29 仍為 open/draft/unmerged；本次驗收前 branch head 為 5fe904d12e28
 條件全部滿足才於 10/14 只改 :8443：tailscale serve --https=8443 http://127.0.0.1:8095。接著從 tailnet HTTPS 網址驗證首頁、/install、三個入口、Basic Auth、管理員密碼登入、商品管理、建立並完成一筆合成訂單、登出；任何關鍵項目失敗，立即只回退 :8443：tailscale serve --https=8443 http://127.0.0.1:8092，並確認 443→8090 與舊版首頁/管理路徑恢復。切換與回退均保留容器和資料、不觸及 AUTH-02/Caddy/監測、不使用 Funnel。
 
 本節為 10/12 切換前證據，不代表 :8443 已切換。實際切換時間、外部驗收結果、Passkey 是否於新候選註冊、備援狀態須於 10/14 取得實際證據後追加。
+
+## 2026-10-12 PR #29 10/14 switch preparation recheck
+
+PR #29 remains open, draft, and unmerged. Current PR branch HEAD is `0cab394e9e1b1ece6fb12e46aeacab6e0cbf5d03`; the feature/runtime code in the 8095 candidate remains from `f3fefc1`. This is a read-only preparation checkpoint; no switch, container rebuild, data write, or mapping change was made.
+
+Quality #155 (run `38224247500`) completed against PR merge ref `842e4487e8ad932294b66dcde5ac6c4d2f51cf7f` / head `0cab394e9e1b1ece6fb12e46aeacab6e0cbf5d03`. Container build and smoke passed. Lint, typecheck, unit/component tests, production build, browser/accessibility, synthetic catalog/order E2E, private demo build, and order-loop smoke passed. Production audit passed with no known production vulnerabilities. Overall Quality remains **failure** because full dependency audit found exactly one High: `braces <=3.0.3`, via `eslint-config-next > @next/eslint-plugin-next > fast-glob > micromatch > braces`, advisory GHSA-vfj7-8cjw-p6xm; patched version is `>=3.0.4`. This remains the user-accepted, limited Acer tailnet showcase risk. Do not describe the full audit or Quality as green; stop on any new failure beyond this known exception.
+
+Acer read-only status at 2026-10-12 09:19 UTC:
+- Candidate container `tea-nextjs-pr29-session-rev`, image `tea-nextjs-staging:pr29-session-rev-f3fefc1`, is running on 127.0.0.1:8095; health is HTTP 200.
+- Rollback container `tea-nextjs-pr29-8443-accept`, image `tea-nextjs-staging:pr29-8443-3bc3283`, is running on 127.0.0.1:8092; health is HTTP 200.
+- Existing f95ba80 candidate, AUTH-02, and Caddy are running. Tailscale Serve is tailnet-only 443→8090 and 8443→8092; Funnel is off. No mappings changed.
+- Monitor supervisor PIDs 20756, 12000, and 1932 are alive. Original logs are still growing: `auth02-20261011.jsonl` 46,002 bytes at 09:18:33Z; `soak-20261011-demo-mode-fix.jsonl` 100,416 bytes at 09:18:59Z; `soak-20261011.jsonl` 93,274 bytes at 09:19:05Z. Five-day monitoring remains **IN PROGRESS** until 2026-10-16. Preserve these originals.
+
+8095 readiness evidence remains the previously recorded acceptance; it was not repeated in this recheck. Preview Basic Auth, merchant password login/session, protected API, secure Cookie flags, Origin/Host/CSRF rejection matrix, and SQLite session revocation failure-mode checks passed. The candidate has its own writable data directory, separate from 8092 and AUTH-02. Passkey is enabled and RP ID matches `acer-v5.tail4d8b5a.ts.net`, but the fresh candidate has no registered Passkey. Do not assume the old version's Passkey migrates. If Passkey is part of the live demonstration, register it on the new site after the 8443 switch using iPhone Safari/Face ID and verify logout/re-login; treat failure as a rollback trigger. Keep password login as the prepared fallback.
+
+### 10/14 switch gate and rollback
+
+Before changing Serve, recheck the current PR head and latest Quality result, 8095 and 8092 health, preview Basic Auth and merchant login readiness, candidate data isolation, Passkey enabled/RP ID, 443→8090 / 8443→8092 baseline, Funnel off, and monitor processes/log growth. Do not switch if any critical check is red, if the full audit gains findings beyond the accepted braces High, or if the monitor/original services are unhealthy.
+
+Only after the 10/14 gate passes, change only the private 8443 listener to 8095:
+`tailscale serve --https=8443 http://127.0.0.1:8095`.
+Verify from an authorized tailnet client: HTTPS homepage, /install and all three entry points, preview Basic Auth, merchant login, catalog management, one uniquely marked synthetic order through its loop, and logout/revoked-cookie rejection. Enroll and verify a new Passkey if needed for the planned demonstration. If any critical external check fails, immediately restore only 8443:
+`tailscale serve --https=8443 http://127.0.0.1:8092`.
+Confirm 443 still points to 8090 and the prior 3bc3283 route works. Keep both containers and data; do not alter AUTH-02, Caddy, logs, or monitors; never enable Funnel.
+
+### 10/15 Chen teacher field demonstration checklist
+
+1. Confirm tailnet connection and open `https://acer-v5.tail4d8b5a.ts.net:8443`; verify preview Basic Auth and merchant login.
+2. Show the storefront, product management, and order management entry points. Confirm the new candidate's catalog; do not expect old orders or Passkeys to be present.
+3. Register/use the new site's Passkey with iPhone Safari Face ID if enrollment was completed; demonstrate logout and re-login. If unavailable, use prepared merchant-password fallback and record Passkey as pending.
+4. Create one clearly synthetic order and demonstrate the accepted workflow without changing real customer or formal merchant data.
+5. ORDER-01 payment reversal and ORDER-02 reopen packing are previously accepted; do not repeat as new acceptance. ORDER-03 physical shipment exception/intercept/correction remains pending real-device verification; demonstrate only when explicitly labeled as pending/synthetic.
+6. Keep the 8092/3bc3283 rollback available; verify monitor remains active and leave 443/AUTH-02 unchanged.
+
+This checkpoint records preparation only; the 10/14 switch has **not** been performed. On 10/14 append actual switch time, external acceptance evidence, Passkey enrollment outcome, and rollback/backup status.
