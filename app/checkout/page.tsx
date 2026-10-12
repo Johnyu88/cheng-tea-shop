@@ -4,6 +4,6 @@ import { CheckoutExitNav } from "@/features/checkout/components/checkout-exit-na
 import { MerchantManualCheckoutPage } from "@/features/checkout/components/merchant-manual-checkout-page";
 
 export default function Page() {
-  if (process.env.NEXT_PUBLIC_MERCHANT_MANUAL_ORDER === "enabled") return <MerchantManualCheckoutPage />;
+  if (process.env.PUBLIC_STOREFRONT_SERVER === "enabled" || process.env.NEXT_PUBLIC_MERCHANT_MANUAL_ORDER === "enabled") return <MerchantManualCheckoutPage />;
   return process.env.NEXT_PUBLIC_DEMO_COMMERCE === "enabled" ? <DemoCheckoutPage /> : <><CheckoutExitNav /><CheckoutPage /> </>;
 }
