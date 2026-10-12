@@ -765,3 +765,14 @@ Source/verification work continues on the same feature/issue-24-mobile-login bra
 
 Run #134 tested closeout commit `a521b3732edf8c5db8f20248c993564f9f9c934a` and completed with Quality = failure; container job passed. Lint, typecheck, 65 files / 334 tests, production build, browser/accessibility all passed. Demo mobile E2E: 3 passed, 1 failed, 1 skipped. The failure is still the unchanged `e2e-demo/catalog-persistence.spec.ts:23` assertion for the 商品已上架 heading, matching the same failure on ancestor dce323c. Dependency audit and production dependency audit were skipped, so security remains unverified. No code behavior changed after run #134; subsequent handoff-only commit updates these findings.
 
+
+
+## 2026-10-12 deployment-preparation evidence (PR #29)
+
+PR #29 is still draft and unmerged. Current branch head: `ce888befb5f87614190e9171d44b3f2759cc8d36`; base `fix/acer-demo-build-flag-regression` remains at `dce7db10524dee93d35b04571c93e411b13d1ca9`. No merge or cloud deployment occurred.
+
+Quality #135's dependency and production audits were skipped by the workflow's implicit success condition after the catalog E2E step failed. The workflow now explicitly runs both audits after earlier failures (`always() && !cancelled()`). New run #138 is pending at handoff update time.
+
+Catalog E2E root-cause evidence: demo Playwright config selects simulated SMS auth; the catalog persistence spec previously opened `/admin/products/new` and submitted without creating a merchant Session. The product management page gates its form on authenticated Session and otherwise shows its login state. The original success heading assertion remains intact. Commit `c41d978f16d09442fea2a3db4d1c0c7aa8a3541a` adds the missing OTP/operator login setup; follow-up `b9d5f9bbaf6e58984e76583be6cc56f0fb4af2f7` preserves the original cart URL assertion syntax. Run #138 will verify the corrected flow; until then, root cause is evidence-based but remediation is not yet confirmed.
+
+Acer read-only checkpoint: existing 8443 candidate remains image `tea-nextjs-staging:pr29-8443-3bc3283`, localhost 8092; old PR #29 f95ba80 remains 8091; AUTH-02 and Caddy remain running. Tailscale Serve is still tailnet-only 443→8090 and 8443→8092. Health returned 200 for 8090, 8091, 8092 and both HTTPS URLs. Monitoring supervisors 20756, 12000 and 1932 were alive; original JSONL files were retained and still receiving updates. Five-day monitoring remains in progress. No candidate build, data write, Serve change or service replacement has occurred in this preparation phase.
