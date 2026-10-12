@@ -39,7 +39,9 @@ jobs:
       - name: Browser and accessibility tests
         run: pnpm test:e2e
       - name: Synthetic mobile order and catalog tests
-        run: pnpm exec playwright test --config=playwright.demo.config.ts
+        run: |
+          pnpm exec playwright test --config=playwright.demo.catalog.config.ts
+          pnpm exec playwright test --config=playwright.demo.config.ts
       - name: Build private cloud demo
         run: pnpm build
         env:
