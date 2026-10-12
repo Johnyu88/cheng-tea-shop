@@ -14,6 +14,26 @@ export function MerchantManualCheckoutPage() {
   const [cart, setCart] = useState<Cart>();
   const [error, setError] = useState("");
   const [feedback, setFeedback] = useState("");
+  const [clearing, setClearing] = useState(false);
+
+  async function clearAfterSending() {
+    if (!cart?.lines.length || clearing) return;
+    if (!window.confirm("請確認你已將訂購內容傳送給陳老師。清空後購物車無法還原，確定清空？")) return;
+    setClearing(true);
+    try {
+      const result = cartService.clearCart ? await cartService.clearCart() : await (async () => {
+        for (const item of cart.lines) {
+          const removed = await cartService.removeItem(item.productId, item.variantId);
+          if (!removed.ok) return removed;
+        }
+        return cartService.getCart();
+      })();
+      if (!result.ok) { setFeedback("無法清空購物車，請稍後再試。"); return; }
+      setCart(result.value);
+      setFeedback("購物車已清空。請保留 LINE 訊息以便與店家確認；這不代表網站已自動成立訂單。");
+    } catch { setFeedback("清空失敗，請稍後再試。"); }
+    finally { setClearing(false); }
+  }
   useEffect(() => {
     let active = true;
     void cartService.getCart().then(result => {
@@ -62,6 +82,12 @@ export function MerchantManualCheckoutPage() {
         </label>
         <button className="filter-button mt-3" type="button" onClick={() => void copyText(summary, "已複製訂購內容，請貼到 LINE 傳送給陳老師。")}>複製訂購清單</button>
       </section> : <p className="mt-5">尚未選擇茶品，也可以先聯絡陳老師詢問。</p>}
+      {Boolean(cart?.lines.length) && <section className="mt-6" aria-label="傳送後清空購物車">
+        <p>已將訂購清單貼到 LINE 並傳送給陳老師？確認傳送後可清空購物車，方便下次選茶。</p>
+        <button className="filter-button mt-3" type="button" disabled={clearing} onClick={() => void clearAfterSending()}>
+          {clearing ? "正在清空…" : "已傳送訂購清單，清空購物車"}
+        </button>
+      </section>}
       <div className="form-actions mt-6">
         <a className="primary-action" href={`tel:${merchantPhone}`}>電話訂購：0919-086-099</a>
         <a className="filter-button" href={merchantLine} target="_blank" rel="noopener noreferrer">透過 LINE 聯絡訂購</a>
