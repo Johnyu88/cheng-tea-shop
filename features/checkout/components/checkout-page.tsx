@@ -13,7 +13,7 @@ type CartState = { status: "loading" } | { status: "ready"; cart: Cart } | { sta
 
 const initialDraft: CheckoutDraft = { name: "", phone: "", deliveryMethod: "home-delivery", address: "", paymentMethod: "bank-transfer" };
 const formatMoney = (amount: number) => `NT$${amount.toLocaleString("zh-TW")}`;
-const SHOP_LINE_CONTACT_URL = "https://line.me/R/ti/p/@longying-tea-shop";
+const SHOP_LINE_CONTACT_URL = "https://line.me/ti/p/TT6TRQyMF6";
 
 export function CheckoutPage(): JSX.Element {
   const { cartService, checkoutService } = useCommerce();
