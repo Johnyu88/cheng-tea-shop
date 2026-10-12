@@ -101,6 +101,13 @@ export const createMockCartService = (options: MockCartOptions = {}): CartServic
   };
 
   return {
+    async clearCart(): Promise<ServiceResult<Cart>> {
+      await restore();
+      cart.lines = [];
+      recalculate(cart);
+      persist();
+      return { ok: true, value: cloneCart(cart) };
+    },
     async getCart(): Promise<ServiceResult<Cart>> {
       await restore();
       return { ok: true, value: cloneCart(cart) };
