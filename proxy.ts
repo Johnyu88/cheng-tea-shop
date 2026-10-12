@@ -5,6 +5,17 @@ import { assertAcerDemoRequest, acerDemoRequested, assertCloudDemoRequest, cloud
 let failures = 0;
 let windowStart = 0;
 export function proxy(request: NextRequest) {
+  if (process.env.PUBLIC_STOREFRONT_SERVER === "enabled") {
+    const path = request.nextUrl.pathname;
+    const denied = path === "/admin" || path.startsWith("/admin/") || path === "/api" || path.startsWith("/api/") || path === "/orders" || path.startsWith("/orders/") || path === "/install" || path.startsWith("/install/") || path.startsWith("/checkout/success") || path.startsWith("/manifest-orders") || path.startsWith("/manifest-products");
+    if (denied) return new NextResponse("Not found", { status: 404, headers: { "cache-control": "no-store", "x-robots-tag": "noindex" } });
+    if (request.method !== "GET" && request.method !== "HEAD") return new NextResponse("Method not allowed", { status: 405 });
+    const response = NextResponse.next();
+    response.headers.set("x-content-type-options", "nosniff");
+    response.headers.set("referrer-policy", "strict-origin-when-cross-origin");
+    response.headers.set("x-frame-options", "DENY");
+    return response;
+  }
   const cloud = cloudDemoRequested();
   const acer = acerDemoRequested();
   if (!cloud && !acer) return NextResponse.next();
