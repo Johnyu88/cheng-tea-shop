@@ -1,6 +1,6 @@
 import { getMerchantPasskeyStore } from "@/lib/server/merchant-passkey";
 import { merchantRequestCookie } from "@/lib/server/merchant-request-access";
-import { issueDemoMerchantCookie, issueDemoMerchantAuthCookie } from "@/lib/server/demo-access";
+import { issueDemoMerchantCookie, issueDemoMerchantAuthCookie, revokeDemoMerchantCookie } from "@/lib/server/demo-access";
 import { merchantAuthStatus, providerSessionRequired } from "@/lib/server/merchant-auth-provider";
 import { assertLocalDemoHttpRequest } from "@/lib/server/demo-http-guard";
 import { demoFailure, demoSuccess } from "@/lib/server/demo-route-response";
@@ -64,6 +64,7 @@ export async function POST(request: Request) {
 export async function DELETE(request: Request) {
   try {
     assertLocalDemoHttpRequest(request, "DELETE");
+    revokeDemoMerchantCookie(request.headers.get("cookie"));
     const store = getMerchantPasskeyStore();
     const vendor = store ? await store.auth.api.signOut({ headers: request.headers, asResponse: true }) : null;
     const response = demoSuccess({ authenticated: false }, { headers: { "Cache-Control": "no-store" } });
