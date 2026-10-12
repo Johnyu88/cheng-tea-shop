@@ -10,6 +10,7 @@ export function PublicTeaStorefront() {
       <nav aria-label="主要導覽">
         <a href="#tea-list">精選茶品</a>
         <a href="#contact">聯絡訂購</a>
+        <Link href="/cart">購物車</Link>
       </nav>
     </header>
     <main>
@@ -53,7 +54,7 @@ export function PublicTeaStorefront() {
               <h3>{tea.name}</h3>
               <p className="product-summary">{tea.summary}</p>
               <p className="product-meta">{tea.variants[0]?.specification}／參考價 NT${tea.variants[0]?.price.amount.toLocaleString("zh-TW")}</p>
-              <a className="product-link" href={line} target="_blank" rel="noopener noreferrer">向陳老師詢問</a>
+              <Link className="product-link" href={`/tea/${tea.slug}`}>查看茶品／加入購物車</Link>
             </div>
           </article>)}
         </div>
