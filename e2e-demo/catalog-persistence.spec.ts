@@ -52,7 +52,7 @@ test("homepage assets load and a ninth demo product survives a reload", async ({
   await productCard.getByRole("link", { name: "查看茶品" }).click();
   await expect(page.getByRole("heading", { name })).toBeVisible();
   await page.getByRole("button", { name: "加入購物車" }).click();
-  await expect(page).toHaveURL(/\\/cart$/);
+  await expect(page).toHaveURL(/\/cart$/);
   await expect(page.getByText(name)).toBeVisible();
 
   await page.goto("/admin/products");
