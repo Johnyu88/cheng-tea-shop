@@ -24,7 +24,7 @@ function safeSessionFailureDiagnostic(request: Request, stage: string) {
     hasForwardedHostHeader: request.headers.has("x-forwarded-host"),
     hasBasicAuthorizationHeader: (request.headers.get("authorization") ?? "").startsWith("Basic "),
     fetchSiteMissingOrSameOrigin: !fetchSite || fetchSite === "same-origin",
-    contentTypeIsJson: /^application\\/json(?:\\s*;|$)/i.test(request.headers.get("content-type") ?? ""),
+    contentTypeIsJson: /^application\/json(?:\s*;|$)/i.test(request.headers.get("content-type") ?? ""),
   };
 }
 
