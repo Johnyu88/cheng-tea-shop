@@ -186,7 +186,7 @@ export function AdminOrdersPage() {
         </div>
       </section>}
       {!authenticated ? <>
-        {loginStatus?.passkey?.enabled ? <AdminPasskeyLogin registered={loginStatus.passkey.registered} onAuthenticated={resumePasskey} /> : loginStatus?.provider === "password" ? <>
+        {loginStatus?.passkey?.enabled && loginStatus.passkey.registered ? <AdminPasskeyLogin registered={loginStatus.passkey.registered} onAuthenticated={resumePasskey} /> : loginStatus?.provider === "password" ? <>
           <h2 className="mt-6">Demo 密碼登入</h2>
           <p className="muted mt-3">請輸入授權驗收人員取得的 Demo 密碼。</p>
           {loginStatus.state !== "ready" && <p role="status">Demo 密碼登入尚未設定，請聯絡管理員。</p>}
