@@ -11,6 +11,7 @@ export type MockCartScenario = "happy" | "sold-out" | "purchase-limit";
 type MockCartOptions = {
   scenario?: MockCartScenario;
   catalog?: CatalogService;
+  storageKey?: string;
 };
 
 const emptyCart = (): Cart => ({
@@ -42,6 +43,8 @@ export const createMockCartService = (options: MockCartOptions = {}): CartServic
   const scenario = options.scenario ?? "happy";
   const catalog = options.catalog ?? createMockCatalogService();
   const cart = emptyCart();
+  const storageKey = options.storageKey;
+  let restored = false;
 
   const resolveLine = async (productId: string, variantId: string): Promise<ServiceResult<{ product: Product; variant: ProductVariant }>> => {
     const pageResult = await catalog.listProducts({ limit: 50 });
@@ -70,12 +73,41 @@ export const createMockCartService = (options: MockCartOptions = {}): CartServic
     maxQuantity: effectiveLimit(variant),
   });
 
+  const restore = async (): Promise<void> => {
+    if (restored) return;
+    restored = true;
+    if (!storageKey || typeof window === "undefined") return;
+    try {
+      const raw: unknown = JSON.parse(window.localStorage.getItem(storageKey) ?? "[]");
+      if (!Array.isArray(raw)) return;
+      for (const item of raw.slice(0, 30)) {
+        if (!item || typeof item.productId !== "string" || typeof item.variantId !== "string" || !Number.isInteger(item.quantity)) continue;
+        if (item.quantity < 1 || item.quantity > 30) continue;
+        const result = await resolveLine(item.productId, item.variantId);
+        if (!result.ok || result.value.variant.inventoryStatus === "sold-out") continue;
+        const line = makeLine(result.value.product, result.value.variant, Math.min(item.quantity, result.value.variant.maxQuantity));
+        if (!cart.lines.some(existing => existing.productId === line.productId && existing.variantId === line.variantId)) cart.lines.push(line);
+      }
+      recalculate(cart);
+    } catch { /* corrupted local selections should not break shopping */ }
+  };
+  const persist = (): void => {
+    if (!storageKey || typeof window === "undefined") return;
+    try {
+      window.localStorage.setItem(storageKey, JSON.stringify(cart.lines.map(line => ({
+        productId: line.productId, variantId: line.variantId, quantity: line.quantity,
+      }))));
+    } catch { /* shopping remains usable for this tab if storage is unavailable */ }
+  };
+
   return {
     async getCart(): Promise<ServiceResult<Cart>> {
+      await restore();
       return { ok: true, value: cloneCart(cart) };
     },
 
     async addItem(productId, variantId, quantity): Promise<ServiceResult<Cart>> {
+      await restore();
       if (!isValidQuantity(quantity)) return errorResult("invalid-draft", "數量必須是正整數。 ");
       const resolved = await resolveLine(productId, variantId);
       if (!resolved.ok) return resolved;
@@ -90,24 +122,29 @@ export const createMockCartService = (options: MockCartOptions = {}): CartServic
       if (existing) existing.quantity = nextQuantity;
       else cart.lines.push(makeLine(product, variant, quantity));
       recalculate(cart);
+      persist();
       return { ok: true, value: cloneCart(cart) };
     },
 
     async updateQuantity(productId, variantId, quantity): Promise<ServiceResult<Cart>> {
+      await restore();
       if (!isValidQuantity(quantity)) return errorResult("invalid-draft", "數量必須是正整數。 ");
       const existing = cart.lines.find((line) => line.productId === productId && line.variantId === variantId);
       if (!existing) return errorResult("cart-empty", "購物車中找不到這項茶品。 ");
       if (quantity > existing.maxQuantity) return errorResult("purchase-limit-exceeded", "已超過這項茶品的購買數量上限。 ");
       existing.quantity = quantity;
       recalculate(cart);
+      persist();
       return { ok: true, value: cloneCart(cart) };
     },
 
     async removeItem(productId, variantId): Promise<ServiceResult<Cart>> {
+      await restore();
       const nextLines = cart.lines.filter((line) => !(line.productId === productId && line.variantId === variantId));
       if (nextLines.length === cart.lines.length) return errorResult("cart-empty", "購物車中找不到這項茶品。 ");
       cart.lines = nextLines;
       recalculate(cart);
+      persist();
       return { ok: true, value: cloneCart(cart) };
     },
   };
