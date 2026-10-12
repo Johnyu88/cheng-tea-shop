@@ -127,6 +127,17 @@ export function HomePage({ catalogService = defaultCatalogService }: HomePagePro
 
         <CatalogPreview catalogService={catalogService} />
         <CatalogBrowser catalogService={catalogService} />
+        <section className="demo-panel mt-8" aria-labelledby="merchant-contact-title">
+          <h2 id="merchant-contact-title">聯絡陳老師</h2>
+          <p>選茶、匯款確認或訂購諮詢，歡迎直接聯絡。</p>
+          <div className="form-actions mt-4">
+            <a className="primary-action" href="tel:0919086099">電話 0919-086-099</a>
+            <a className="filter-button" href="https://line.me/ti/p/TT6TRQyMF6" target="_blank" rel="noopener noreferrer">LINE 聯絡陳老師</a>
+          </div>
+          <a href="https://line.me/ti/p/TT6TRQyMF6" target="_blank" rel="noopener noreferrer" aria-label="掃描 LINE QR Code 聯絡陳老師">
+            <img src="/media/chen-teacher-line-qr.svg" width={160} height={160} alt="陳老師 LINE QR Code" />
+          </a>
+        </section>
       </main>
     </div>
   );
