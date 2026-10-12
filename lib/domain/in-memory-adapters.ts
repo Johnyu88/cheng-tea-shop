@@ -22,6 +22,22 @@ import { createMockCatalogService } from "./mock/mock-catalog-service";
 import { createMockCheckoutService } from "./mock/mock-checkout-service";
 import { createMockPublishingService } from "./mock/mock-publishing-service";
 import { createDemoCatalogService, createDemoPublishingService } from "./demo-catalog-service";
+import { confirmedTeaFixture } from "./mock/confirmed-tea-fixture";
+import type { CatalogQuery, Product } from "./types";
+
+const publicCatalog: CatalogService = {
+  async listProducts(query: CatalogQuery = {}) {
+    const list = confirmedTeaFixture.filter((p: Product) => p.publication === "published" && (!query.taste || p.tasteTags.includes(query.taste)) && (!query.category || p.category === query.category));
+    const start = query.cursor && /^\\d+$/.test(query.cursor) ? Number(query.cursor) : 0;
+    const size = Math.max(1, Math.min(50, query.limit ?? 12));
+    return { ok: true as const, value: { items: list.slice(start, start + size), total: list.length, nextCursor: start + size < list.length ? String(start + size) : null } };
+  },
+  async getProductBySlug(slug) {
+    const product = confirmedTeaFixture.find(p => p.publication === "published" && p.slug === slug);
+    return product ? { ok: true as const, value: product } : { ok: false as const, error: { code: "product-not-found" as const, message: "找不到這項茶品。", retryable: false } };
+  },
+};
+
 
 export type InMemoryCommerceServices = {
   catalogService: CatalogService;
@@ -102,3 +118,5 @@ export const createInMemoryIntegrationAdapters = (
   logisticsService: overrides.logisticsService ?? createInMemoryLogisticsService(),
   erpService: overrides.erpService ?? createInMemoryErpService(),
 });
+
+export const publicTeaCatalogService: CatalogService = publicCatalog;
