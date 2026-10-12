@@ -870,3 +870,28 @@ The login POST to `/api/demo/admin/session` returned HTTP 401 in this probe. The
 Latest workflow run #152 (`38208120086`) completed: lint, typecheck, unit/component, production build, browser/accessibility, synthetic mobile/order/catalog tests, private demo build, private production order loop, and container build/health smoke all passed. Dependency audit failed; production dependency audit passed. This leaves the same unresolved High `braces <=3.0.3` finding in the development toolchain; the full dependency audit is not clean. No source code changed during this live probe.
 
 The candidate remains local-only. No `8092`, `443`, `8443`, AUTH-02, Caddy, data, or monitoring changes were made. Existing `8443→8092` remains the fallback; five-day monitoring remains **IN PROGRESS**. Do not propose or execute the Serve switch until live Session acceptance is complete and the remaining High audit finding has an explicit safe disposition.
+
+## 2026-10-12 SQLite 撤銷讀取故障與安全收斂（最新狀態）
+
+PR #29 仍為 open/draft/unmerged；本次驗收前 branch head 為 5fe904d12e28700f63da1f60a95a60737809b81f。本次僅作文件收斂，未改應用程式碼、未切換 Tailscale Serve、未合併 main。
+
+### SQLite fail-closed 實際 HTTP 驗收
+
+- 以目前候選映像 tea-nextjs-staging:pr29-session-rev-f3fefc1（image ID sha256:d92078d35e9a2a9373ce4e30c99b2b836657ce913489b5da5fae0217be0626da）另起短生命週期隔離容器，使用全新空資料目錄與臨時 localhost 8096；未掛載 8095、8092 或 AUTH-02 的可寫資料。
+- 隔離容器 health 200、Session GET preflight 200、既有憑證來源的正確登入 200、有效 Cookie 讀受保護 orders API 200。
+- 只在臨時 SQLite 中將 demo_session_revocations 改成缺少 signature_hash 欄位的錯誤 schema，並保留 expires_at 索引；直接 SELECT 預期欄位確實失敗。使用同一有效 Cookie 重讀受保護 API 得 HTTP 403，沒有授權放行。結論：SQLite 撤銷查詢讀取錯誤 fail-closed PASS。
+- 故障注入容器與其唯一臨時資料目錄均已刪除。綜合腳本第一次的收尾 health probe 誤仍連到已刪除的 8096，故曾回報該 probe unavailable；已用正確 8095 埠另行只讀確認：候選容器仍 running，image tag 如上，/api/health HTTP 200。這是驗收腳本收尾埠號錯誤，非候選失敗；8095 未被重啟或修改。
+
+### braces High 風險處置（仍未解除）
+
+- 最新已執行 Quality #152（run ID 38208120086）：lint/typecheck/unit/build/E2E/private demo/container smoke 通過；完整 dependency audit 因單一 High 失敗；production dependency audit PASS。此文件更新不宣稱重新執行 CI 或 audit。
+- 受影響鏈：eslint-config-next > @next/eslint-plugin-next > fast-glob > micromatch > braces@3.0.3；完整 audit 仍命中 GHSA-vfj7-8cjw-p6xm，因上游/registry 尚無可用 3.0.4 修正版，不能標示修復或 clean。
+- 已套用同主版本防禦性 patch：pnpm-workspace.yaml 將 braces@3.0.3 指向 patches/braces@3.0.3.patch；lockfile patch hash 為 ed8c4935ee64d2f1c75d8986b3f8263c739b486c35b28ad669529a286c0edf24。patch 在解析 nested braces/parentheses 時設 MAX_DEPTH = 100 並拒絕超深輸入；安裝目錄 hash 與 lockfile 對應，實際 lib/parse.js 可見該 guard。這是風險緩解，不是 audit 修復。
+- 實際執行範圍為開發／CI 工具依賴（lint、build/test 工具鏈）；對 8095 production-pruned 容器執行 require.resolve('braces') 得 not_resolvable，production audit 也 PASS。這降低執行期暴露，但無法消除開發工具處理惡意巢狀輸入的剩餘風險；完整 audit/Quality 保持 red，雲端正式發布阻塞仍在。
+
+### 候選與入口決策
+
+- 目前新版候選：tea-nextjs-pr29-session-rev，tea-nextjs-staging:pr29-session-rev-f3fefc1，image ID 如上，localhost 127.0.0.1:8095，health 200。使用者先前確認的登入、cookie 安全屬性、logout replay、重啟 replay、跨連線與寫入故障證據維持有效；本次補齊 SQLite SELECT 故障拒絕證據。
+- 建議暫不將 8095 切換到 :8443。阻塞是完整 dependency audit 的 braces High 尚未由上游修正版解除或取得明確風險接受；目前候選可留作隔離驗收候選，不能宣稱完整安全稽核通過。
+- 即時只讀狀態：Serve 仍為 tailnet-only 443→8090、8443→8092；8092 舊展示容器、8091 舊候選、AUTH-02、Caddy 均未動。五日監測程序 PID 20756、12000、1932 仍存活；三份原始 JSONL 仍存在，最近檔案長度分別 89,449、96,049、43,902 bytes（2026-10-12 約 08:18 UTC 記錄）。監測至 2026-10-16，仍為 IN PROGRESS。
+- 本次沒有切換，所以無需回退。未來只有在取得明確切換確認後才可改 :8443；若新入口健康、登入或驗收失敗，只回復 tailscale serve --https=8443 http://127.0.0.1:8092，確認 443→8090，保留兩候選容器與資料；不得停監測、移除資料或啟用 Funnel。

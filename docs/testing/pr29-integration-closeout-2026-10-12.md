@@ -139,3 +139,23 @@ After valid merchant login/session/cookie checks and the complete negative matri
 - Resolve the high/moderate dev dependency audit findings or document an accepted, time-bounded exception before cloud release.
 - Complete ORDER-03 iPhone and Samsung three-entry/Passkey real-device acceptance.
 - Complete five-day monitoring on 2026-10-16 and retain the original logs.
+
+## 2026-10-12 最新展示版驗收矩陣補遺
+
+本節更新並優先於前文舊的 8095 live Session 尚未驗證描述；只記錄新增證據，不重跑已通過的流程。
+
+| 驗收項目 | 最新結果 | 證據／展示處置 |
+|---|---|---|
+| SQLite 撤銷讀取錯誤 fail-closed | PASS | 新隔離容器、新空白 SQLite；直接 SELECT 缺少的 signature_hash 欄位失敗；先前有效 Cookie 對受保護 orders API 回 HTTP 403。測後容器及唯一測試資料目錄已刪除。 |
+| 8095 候選健康 | PASS | tea-nextjs-pr29-session-rev / pr29-session-rev-f3fefc1，image ID sha256:d92078d35e9a2a9373ce4e30c99b2b836657ce913489b5da5fae0217be0626da；8095 health HTTP 200。第一次綜合測試收尾探測誤打到已刪除的 8096，另以正確 8095 埠完成確認。 |
+| braces High / 完整 dependency audit | 未解除／Quality red | eslint-config-next > @next/eslint-plugin-next > fast-glob > micromatch > braces@3.0.3。patch 與 lockfile hash 一致、MAX_DEPTH=100 深度防護已套用；生產候選無法 resolve braces，production audit PASS。pnpm audit 仍報 GHSA-vfj7-8cjw-p6xm；不得標示安全稽核 clean。 |
+| 8095 切至 :8443 | 未執行；暫不建議 | 等 braces High 有上游修正版或明確風險接受後，再另行提出切換。現行 :8443 保持舊版 8092 作展示備援。 |
+| 原入口與五日監測 | 保留／進行中 | Serve 443→8090、8443→8092；8092、8091、AUTH-02、Caddy 未動。監測 PID 20756/12000/1932 存活，原始三份 JSONL 存在且近期有寫入；監測仍至 2026-10-16，未標完成。 |
+
+### :8443 回退條件（僅供未來經確認後切換）
+
+若獲確認後切換至 8095，切換後任何 health 非 200、正確登入／受保護 API 失敗、負向拒絕測試放行，或 443→8090 改變，立即只回退 :8443：
+
+    tailscale serve --https=8443 http://127.0.0.1:8092
+
+確認 Serve 狀態仍為 443→8090、8443→8092。保留 8095、8092 容器及資料，不動 AUTH-02、Caddy、監測與原始日誌；Funnel 不得啟用。本次沒有切換或執行回退。
