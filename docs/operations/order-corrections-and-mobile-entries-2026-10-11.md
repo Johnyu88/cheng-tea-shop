@@ -90,3 +90,8 @@ This checkpoint supersedes older statements above that :8443 was not configured 
 - User-reported iPhone Safari 2026-10-11 checks passed for Passkey logout/re-login, synthetic order loop, product publication/edit, ORDER-01 and ORDER-02. ORDER-03 and Samsung phone checks remain pending.
 - Quality #133 still fails the catalog persistence heading assertion, also seen on dce323c. Container smoke passes; both dependency audit steps skipped. Full CI/source caveats are in the closeout package.
 
+
+## 2026-10-12 Quality run #134 final result
+
+Run #134 tested closeout commit `a521b3732edf8c5db8f20248c993564f9f9c934a` and completed with Quality = failure; container job passed. Lint, typecheck, 65 files / 334 tests, production build, browser/accessibility all passed. Demo mobile E2E: 3 passed, 1 failed, 1 skipped. The failure is still the unchanged `e2e-demo/catalog-persistence.spec.ts:23` assertion for the 商品已上架 heading, matching the same failure on ancestor dce323c. Dependency audit and production dependency audit were skipped, so security remains unverified. No code behavior changed after run #134; subsequent handoff-only commit updates these findings.
+

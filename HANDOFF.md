@@ -760,3 +760,8 @@ Source/verification work continues on the same feature/issue-24-mobile-login bra
 - Full matrix, asset source gaps, Samsung instructions, deployment rollback and cloud gate: `docs/testing/pr29-integration-closeout-2026-10-12.md`.
 - Listener-only rollback: `tailscale serve --https=8443 off`; verify 443 still points to 8090. Do not remove containers or data.
 
+
+## 2026-10-12 Quality run #134 final result
+
+Run #134 tested closeout commit `a521b3732edf8c5db8f20248c993564f9f9c934a` and completed with Quality = failure; container job passed. Lint, typecheck, 65 files / 334 tests, production build, browser/accessibility all passed. Demo mobile E2E: 3 passed, 1 failed, 1 skipped. The failure is still the unchanged `e2e-demo/catalog-persistence.spec.ts:23` assertion for the 商品已上架 heading, matching the same failure on ancestor dce323c. Dependency audit and production dependency audit were skipped, so security remains unverified. No code behavior changed after run #134; subsequent handoff-only commit updates these findings.
+

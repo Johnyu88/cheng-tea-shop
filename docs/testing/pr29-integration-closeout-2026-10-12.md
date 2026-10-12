@@ -102,3 +102,11 @@ PR：[29](https://github.com/Johnyu88/cheng-tea-shop/pull/29)，分支 `feat/mob
 ## 9. 工作界線
 
 未重做 ORDER-01～03；不重建既有 Acer 容器、不覆寫資料／備份／日誌、不合併 main、不正式上雲、不部署 Agent 宿舍成員。
+## 10. Latest CI after operation-copy clarification
+
+- Quality run #134 for source/UI commit `a521b3732edf8c5db8f20248c993564f9f9c934a` completed: Quality failure; container job PASS.
+- Lint, typecheck, 65 test files / 334 unit-component tests, production build, browser/accessibility all passed.
+- Demo mobile E2E: 3 passed / 1 failed / 1 skipped. Failure remains `e2e-demo/catalog-persistence.spec.ts:23`, missing 商品已上架 heading. Exact same assertion failed on ancestor dce323c, so no new application failure identified in the copy change.
+- Dependency audit and production dependency audit skipped again. Latest security status remains unverified; do not state audit clean.
+- This follow-up only records CI evidence in docs; it changes no application code, runtime, container, data, or monitoring. PR remains Quality-red until the baseline test is resolved or explicitly accepted.
+
