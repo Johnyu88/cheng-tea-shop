@@ -37,3 +37,16 @@
 ## 部署規則
 
 先測候選版本；保留正式容器、資料與快照備份。正式切換與回退必須有具體紀錄，禁止模糊的「已完成」。不要增建 ERP、客戶查單或與這次需求無關的功能。
+
+
+## 2026-10-13 凌晨正式切換驗證（已完成部分）
+
+- 正式 `:10000` Funnel 現指向 `127.0.0.1:8129`，容器 `tea-public-v4-ready`，映像 `tea-nextjs:catalog-04dde29`。
+- 正式 `:8443` Tailnet Serve 現指向 `127.0.0.1:8128`，容器 `tea-private-v4-ready`，映像 `tea-nextjs:catalog-04dde29`。
+- 原本公開容器 `tea-public-visibility-synced`（8119）及私人容器 `tea-private-publication-connected`（8122）保留供回退。
+- 已備份舊公開快照 `public-visibility-live/publication.before-v4.json`，重建的發布快照只包含上架商品，單獨複製新增商品的照片。
+- 直接使用正式私有商品資料的複本建立發布快照，驗證 6 筆上架商品、含新增商品 `a` 及其 1,072,272 位元組的圖片。
+- **正式外部網域**驗證：公開商品 API 共 6 筆，`a` 存在、公開照片 HTTP 200（1,072,272 bytes）、首頁包含 `a` 的商品連結、商品詳情 HTTP 200；私人 API 在公開網域回應 404；私人後台 Session 狀態 ready。
+- Playwright 390×844 手機尺寸檢查：6 個商品卡片、`a` 商品卡片存在、無整頁水平溢出。
+- 尚未完成：使用者 iPhone 真機換照片兩次的正式版驗收；不能將這部分標為 PASS。商品編輯及新增的自動回歸測試仍須繼續強化。
+- 回退指向：公開 `tailscale funnel --https=10000 off` 後 `tailscale funnel --bg --https=10000 http://127.0.0.1:8119`；私人 `tailscale serve --https=8443 off` 後 `tailscale serve --bg --https=8443 http://127.0.0.1:8122`。回退時需要評估新舊公開快照格式的相容性，避免資料不一致。
