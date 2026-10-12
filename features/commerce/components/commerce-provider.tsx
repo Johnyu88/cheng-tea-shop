@@ -26,7 +26,7 @@ const createDefaultServices = (): CommerceContextValue => {
 };
 
 export function CommerceProvider({ children, services, publicStorefront = false }: CommerceProviderProps): ReactElement {
-  const [contextValue] = useState<CommerceContextValue>(() => ({ ...(publicStorefront ? createInMemoryCommerceServices({ catalogService: publicTeaCatalogService }) : createDefaultServices()), ...services }));
+  const [contextValue] = useState<CommerceContextValue>(() => ({ ...(publicStorefront ? createInMemoryCommerceServices({ catalogService: publicTeaCatalogService, cartService: createMockCartService({ catalog: publicTeaCatalogService, storageKey: "chen-tea-public-cart-v1" }) }) : createDefaultServices()), ...services }));
 
   return <CommerceContext.Provider value={contextValue}>{children}</CommerceContext.Provider>;
 }
