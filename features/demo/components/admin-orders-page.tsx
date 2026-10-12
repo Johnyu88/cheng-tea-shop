@@ -173,7 +173,6 @@ export function AdminOrdersPage() {
     <section className="demo-panel">
       <h1>商家訂單 Demo</h1>
       <Link className="filter-button mt-4 inline-flex" href="/">回到首頁</Link>
-      <a className="filter-button mt-4 inline-flex" href="/private-app/">開啟離線帳務 App</a>
       {error && <div role="alert" className="product-draft-alert">{error}</div>}
       {pendingAudit && <section className="demo-panel mt-4" role="dialog" aria-modal="true" aria-labelledby="audit-reason-title">
         <h2 id="audit-reason-title">{pendingAudit.label}</h2>
