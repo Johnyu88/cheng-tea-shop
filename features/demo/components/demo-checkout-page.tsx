@@ -78,9 +78,9 @@ export function DemoCheckoutPage() {
     {step === "identity" && <><p className="eyebrow">步驟 1／3</p><h1>身分確認</h1><label className="form-field mt-6">姓名<input className="form-input" value={draft.name} onChange={e => change("name", e.target.value)} /></label><label className="form-field mt-4">合成手機<input className="form-input" inputMode="tel" value={draft.phone} onChange={e => change("phone", e.target.value)} /></label><label className="form-field mt-4">Email（選填，僅模擬通知）<input className="form-input" value={draft.email ?? ""} onChange={e => change("email", e.target.value)} /></label><button className="filter-button mt-4" disabled={busy} onClick={() => void issue()}>取得合成驗證碼</button>{challenge && <p role="status" className="prototype-notice">本機驗證碼：<strong>{challenge.demoCode}</strong></p>}<label className="form-field mt-4">驗證碼<input className="form-input" inputMode="numeric" value={code} onChange={e => setCode(e.target.value)} /></label><button className="primary-action mt-6" onClick={identityNext}>下一步</button></>}
     {step === "delivery" && <><p className="eyebrow">步驟 2／3</p><h1>配送與付款</h1><fieldset className="form-fieldset mt-6"><legend>配送方式</legend><label className="form-option"><input type="radio" name="demo-delivery" checked={draft.deliveryMethod === "home-delivery"} onChange={() => change("deliveryMethod", "home-delivery")} />宅配</label><label className="form-option"><input type="radio" name="demo-delivery" checked={draft.deliveryMethod === "store-pickup"} onChange={() => change("deliveryMethod", "store-pickup")} />到店取貨</label></fieldset>{draft.deliveryMethod === "home-delivery" && <label className="form-field mt-4">宅配地址<textarea className="form-textarea" value={draft.address ?? ""} onChange={e => change("address", e.target.value)} /></label>}<p className="prototype-notice">無法自動驗證的地址不會硬判成功，必須人工介入。</p><section className="form-fieldset mt-6" aria-label="展示用付款與聯絡資訊">
   <h2 className="text-xl font-bold">付款與聯絡資訊（展示資料）</h2>
-  <p className="prototype-notice">以下匯款資料依陳老師 2026-10-08 手寫照片轉錄，尚未逐碼核對；展示期間請勿實際匯款。電話與 LINE 帳號歸屬亦待現場核對。</p>
-  <p className="mt-4">銀行：中國信託（待店家確認）</p>
-  <p>匯款帳號：026540263310（待逐碼核對，請勿匯款）</p>
+  <p className="prototype-notice">以下銀行、電話與 LINE 資料採用陳老師提供的聯絡資料；目前仍是私有展示站，請勿以測試訂單實際匯款。</p>
+  <p className="mt-4">銀行：中國信託</p>
+  <p>匯款帳號：026540263310</p>
   <p className="mt-4">店家電話：<a href="tel:0919086099">0919-086-099（點擊撥號）</a></p>
   <p className="mt-4">LINE：<a href="https://line.me/ti/p/TT6TRQyMF6" target="_blank" rel="noopener noreferrer">開啟陳老師提供的 LINE 邀請連結</a></p>
   <p className="muted">正式 LINE QR 原圖不直接使用含背景的照片；手機可先點擊連結測試。</p>
