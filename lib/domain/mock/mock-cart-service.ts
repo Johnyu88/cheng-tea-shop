@@ -84,11 +84,16 @@ export const createMockCartService = (options: MockCartOptions = {}): CartServic
         if (!item || typeof item.productId !== "string" || typeof item.variantId !== "string" || !Number.isInteger(item.quantity)) continue;
         if (item.quantity < 1 || item.quantity > 30) continue;
         const result = await resolveLine(item.productId, item.variantId);
-        if (!result.ok || result.value.variant.inventoryStatus === "sold-out") continue;
+        if (!result.ok) {
+          if (result.error.code === "catalog-unavailable") return;
+          continue;
+        }
+        if (result.value.variant.inventoryStatus === "sold-out") continue;
         const line = makeLine(result.value.product, result.value.variant, Math.min(item.quantity, result.value.variant.maxQuantity));
         if (!cart.lines.some(existing => existing.productId === line.productId && existing.variantId === line.variantId)) cart.lines.push(line);
       }
       recalculate(cart);
+      if (cart.lines.length !== raw.length) persist();
     } catch { /* corrupted local selections should not break shopping */ }
   };
   const persist = (): void => {
