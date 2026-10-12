@@ -65,6 +65,7 @@ export async function PATCH(request: Request) {
     if (Object.keys(changes).length === 0) throw new Error("商品編輯資料無效");
     const product = await getDemoCatalogStore().update(body.id, changes);
     if (!product) throw new Error("找不到商品");
+    await writePublicTeaPublication(await getDemoCatalogStore().list());
     return demoSuccess(product);
   } catch (error) { return demoFailure(error); }
 }
@@ -77,6 +78,7 @@ export async function POST(request: Request) {
     const validated = validateProductDraftDto(await request.json());
     if (!validated.ok) return demoFailure(new Error(validated.error.message));
     const product = await getDemoCatalogStore().publish(validated.value as ProductDraft, publication);
+    await writePublicTeaPublication(await getDemoCatalogStore().list());
     return demoSuccess(product, { status: 201 });
   } catch (error) { return demoFailure(error); }
 }
