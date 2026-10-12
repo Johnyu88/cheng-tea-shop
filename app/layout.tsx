@@ -16,7 +16,7 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
   return (
     <html lang="zh-Hant">
       <body>
-        <CommerceProvider>{children}</CommerceProvider>
+        <CommerceProvider publicStorefront={process.env.PUBLIC_STOREFRONT_SERVER === "enabled"}>{children}</CommerceProvider>
       </body>
     </html>
   );
