@@ -41,21 +41,29 @@ describe("order correction audit events", () => {
     ]);
   });
 
-  test("ORDER-03 records exception/intercept without pretending shipment was rolled back", () => {
-    const service = createDemoOrderService();
-    const { orderId, accessSecret } = service.create(cart);
-    service.confirmManualPayment(orderId);
-    service.recordPackingPhoto(orderId, "photo-packed");
-    service.markShipped(orderId);
-    service.recordShippingIssue(orderId, "intercept-requested", audit("customer requested cancellation"));
-    const customer = service.lookup(orderId, accessSecret)!;
-    expect(customer.status).toBe("shipped");
-    expect(customer.shippingAttention).toMatchObject({
-      action: "intercept-requested", reason: "customer requested cancellation",
-      actor: "authenticated-merchant",
-    });
-    expect(customer.events.at(-1)).toMatchObject({ status: "shipped", action: "intercept-requested" });
-    expect(() => service.markShipped(orderId)).toThrow();
+  test("ORDER-03 records each shipment issue action without rolling shipment back", () => {
+    const actions = ["shipping-exception", "intercept-requested", "shipping-correction"] as const;
+    for (const action of actions) {
+      const service = createDemoOrderService();
+      const { orderId, accessSecret } = service.create(cart);
+      service.confirmManualPayment(orderId);
+      service.recordPackingPhoto(orderId, "photo-packed");
+      service.markShipped(orderId);
+      const reason = `operator note for ${action}`;
+
+      service.recordShippingIssue(orderId, action, audit(reason));
+
+      const customer = service.lookup(orderId, accessSecret)!;
+      expect(customer.status).toBe("shipped");
+      expect(customer.shippingAttention).toMatchObject({
+        action, reason, actor: "authenticated-merchant",
+      });
+      expect(customer.events.at(-1)).toMatchObject({
+        status: "shipped", action, reason, actor: "authenticated-merchant",
+      });
+      expect(() => service.markShipped(orderId)).toThrow();
+      expect(service.lookup(orderId, accessSecret)).toEqual(customer);
+    }
   });
 
   test("invalid reversals fail without changing shipment or payment history", () => {
