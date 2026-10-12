@@ -1,5 +1,27 @@
 import { expect, test } from "@playwright/test";
 
+async function loginAsDemoMerchant(page: import("@playwright/test").Page) {
+  const origin = new URL(page.url()).origin;
+  const operatorSecret = "11".repeat(32);
+  const challengeResponse = await page.request.post("/api/demo/admin/otp", {
+    headers: { origin },
+    data: { phone: "0912000000" },
+  });
+  expect(challengeResponse.status()).toBe(200);
+  const challenge = (await challengeResponse.json()).value;
+  const operatorResponse = await page.request.post("/api/demo/admin/otp/operator", {
+    headers: { origin, "x-demo-merchant-operator": operatorSecret },
+    data: { challengeId: challenge.challengeId },
+  });
+  expect(operatorResponse.status()).toBe(200);
+  const code = (await operatorResponse.json()).value.code;
+  const loginResponse = await page.request.post("/api/demo/admin/session", {
+    headers: { origin },
+    data: { phone: "0912000000", challengeId: challenge.challengeId, code },
+  });
+  expect(loginResponse.status()).toBe(200);
+}
+
 test("homepage assets load and a ninth demo product survives a reload", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("img", { name: "陳老師茶行首頁合成照" })).toBeVisible();
@@ -9,6 +31,7 @@ test("homepage assets load and a ninth demo product survives a reload", async ({
   await expect(page.locator("audio source")).toHaveAttribute("src", "/media/tea-stream-birds.wav");
   await expect(page.getByText("台灣蜜香野生山茶").first()).toBeVisible();
 
+  await loginAsDemoMerchant(page);
   const name = `第九種 UI 測試茶 ${Date.now()}`;
   await page.goto("/admin/products/new");
   await expect(page.getByRole("heading", { name: "新增商品" })).toBeVisible();
@@ -29,7 +52,7 @@ test("homepage assets load and a ninth demo product survives a reload", async ({
   await productCard.getByRole("link", { name: "查看茶品" }).click();
   await expect(page.getByRole("heading", { name })).toBeVisible();
   await page.getByRole("button", { name: "加入購物車" }).click();
-  await expect(page).toHaveURL(/\/cart$/);
+  await expect(page).toHaveURL(/\\/cart$/);
   await expect(page.getByText(name)).toBeVisible();
 
   await page.goto("/admin/products");
