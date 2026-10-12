@@ -15,6 +15,7 @@ export type CommerceContextValue = {
 type CommerceProviderProps = {
   children: ReactNode;
   services?: Partial<CommerceContextValue>;
+  publicStorefront?: boolean;
 };
 
 const CommerceContext = createContext<CommerceContextValue | null>(null);
@@ -24,8 +25,8 @@ const createDefaultServices = (): CommerceContextValue => {
   return process.env.NEXT_PUBLIC_DEMO_COMMERCE === "enabled" ? createDemoCommerceServices() : createInMemoryCommerceServices();
 };
 
-export function CommerceProvider({ children, services }: CommerceProviderProps): ReactElement {
-  const [contextValue] = useState<CommerceContextValue>(() => ({ ...createDefaultServices(), ...services }));
+export function CommerceProvider({ children, services, publicStorefront = false }: CommerceProviderProps): ReactElement {
+  const [contextValue] = useState<CommerceContextValue>(() => ({ ...(publicStorefront ? createInMemoryCommerceServices({ catalogService: publicTeaCatalogService }) : createDefaultServices()), ...services }));
 
   return <CommerceContext.Provider value={contextValue}>{children}</CommerceContext.Provider>;
 }
