@@ -40,7 +40,26 @@ export async function writePublicTeaPublication(products: Product[]): Promise<vo
     publication[source.id] = source.publication === "published" ? "published" : "draft";
     // Never export unpublished product metadata.
     if (source.publication !== "published") continue;
-    const product: Product = JSON.parse(JSON.stringify(source)) as Product;
+    // Explicit public allowlist. Never export inventory counts, private metadata, or merchant-only extensions.
+    const product: Product = {
+      id: source.id,
+      slug: source.slug,
+      name: source.name,
+      category: source.category,
+      tasteTags: [...source.tasteTags],
+      summary: source.summary,
+      image: { ...source.image },
+      variants: source.variants.map(({ id, specification, price, inventoryStatus, maxQuantity }) => ({
+        id, specification, price: { ...price }, inventoryStatus, maxQuantity,
+      })),
+      publication: "published",
+      ...(source.teaRegion ? { teaRegion: source.teaRegion } : {}),
+      ...(source.aroma ? { aroma: source.aroma } : {}),
+      ...(source.taste ? { taste: source.taste } : {}),
+      ...(source.fermentation ? { fermentation: source.fermentation } : {}),
+      ...(source.roast ? { roast: source.roast } : {}),
+      ...(source.brewing ? { brewing: source.brewing } : {}),
+    };
     const imagePath = product.image.src;
     if (imagePath?.startsWith("/api/demo/catalog/media/")) {
       const filename = imagePath.slice("/api/demo/catalog/media/".length);
