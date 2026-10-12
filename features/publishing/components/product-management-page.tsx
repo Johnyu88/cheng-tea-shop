@@ -63,7 +63,7 @@ export function ProductManagementPage(): JSX.Element {
 
   if (!authReady) return <main className="product-draft-page py-8"><section className="product-draft-card"><p role="status">正在驗證商家 Session…</p></section></main>;
   if (!authenticated) return <main className="product-draft-page py-8"><section className="product-draft-card"><h1>商品管理登入</h1>{error && <p role="alert">{error}</p>}
-    {loginStatus?.passkey?.enabled
+    {loginStatus?.passkey?.enabled && loginStatus.passkey.registered
       ? <AdminPasskeyLogin registered={loginStatus.passkey.registered} onAuthenticated={resumePasskey} />
       : loginStatus?.provider === "password" && loginStatus.state === "ready"
         ? <form onSubmit={event => { event.preventDefault(); void passwordLogin(); }}><label className="form-field">Demo 密碼<input className="form-input" type="password" autoComplete="current-password" maxLength={128} value={password} onChange={event => setPassword(event.target.value)} /></label><button className="primary-action mt-4" disabled={!password}>登入</button></form>
