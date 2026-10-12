@@ -23,6 +23,7 @@ import { createMockCheckoutService } from "./mock/mock-checkout-service";
 import { createMockPublishingService } from "./mock/mock-publishing-service";
 import { createDemoCatalogService, createDemoPublishingService } from "./demo-catalog-service";
 import { confirmedTeaFixture } from "./mock/confirmed-tea-fixture";
+import { domainError } from "./errors";
 import type { CatalogQuery, Product } from "./types";
 
 const publicCatalog: CatalogService = {
@@ -34,7 +35,7 @@ const publicCatalog: CatalogService = {
   },
   async getProductBySlug(slug) {
     const product = confirmedTeaFixture.find(p => p.publication === "published" && p.slug === slug);
-    return product ? { ok: true as const, value: product } : { ok: false as const, error: { code: "product-not-found" as const, message: "找不到這項茶品。", retryable: false } };
+    return product ? { ok: true as const, value: product } : { ok: false as const, error: domainError("product-not-found", "找不到這項茶品。", false) };
   },
 };
 
