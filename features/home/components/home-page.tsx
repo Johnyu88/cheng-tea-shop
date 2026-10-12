@@ -4,6 +4,7 @@ import { useEffect, useState, type JSX } from "react";
 import Link from "next/link";
 import type { CatalogService, Product } from "@/lib/domain";
 import { createDemoCatalogService, createMockCatalogService } from "@/lib/domain";
+import { publicTeaCatalogService } from "@/lib/domain/in-memory-adapters";
 import { CatalogBrowser } from "@/features/catalog/components/catalog-browser";
 
 type HomePageProps = {
@@ -89,7 +90,7 @@ export function HomePage({ catalogService = defaultCatalogService }: HomePagePro
         </a>
         <nav aria-label="主要導覽">
           <a href="#baseline">茶品導覽</a>
-          <Link href="/orders">訂單查詢</Link>
+          {process.env.NEXT_PUBLIC_PUBLIC_STOREFRONT !== "enabled" && <Link href="/orders">訂單查詢</Link>}
         </nav>
       </header>
 
@@ -106,7 +107,7 @@ export function HomePage({ catalogService = defaultCatalogService }: HomePagePro
             <p className="eyebrow">坐下來，聽陳老師說茶</p>
             <h2 id="teacher-story-heading">先認識泡茶的人，再慢慢找到喜歡的茶。</h2>
             <p>
-              這裡用陳老師與茶席的合成照，讓第一次來的客人先感受到這間茶行的溫度。
+              認識陳老師茶行的茶席風景，歡迎透過電話或 LINE 詢問茶品。
             </p>
           </div>
           <div className="teacher-story-media">
