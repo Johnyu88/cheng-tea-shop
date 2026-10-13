@@ -61,6 +61,33 @@ export function CartPage(): JSX.Element {
     setMutationState({ status: "success", message: operation.kind === "remove" ? "已移除茶品" : "購物車數量已更新" });
   };
 
+  const abandonPurchase = async () => {
+    if (cartState.status !== "ready" || mutationState.status === "pending") return;
+    if (!window.confirm("確定放棄本次購買並清空購物車？此操作無法還原。")) return;
+    setPendingOperation(undefined);
+    setMutationState({ status: "pending" });
+    try {
+      const result = cartService.clearCart
+        ? await cartService.clearCart()
+        : await (async () => {
+            for (const line of cartState.cart.lines) {
+              const removed = await cartService.removeItem(line.productId, line.variantId);
+              if (!removed.ok) return removed;
+            }
+            return cartService.getCart();
+          })();
+      if (!result.ok) {
+        setMutationState({ status: "error", message: "未能清空購物車，請稍後重試。", retryable: false });
+        await loadCart();
+        return;
+      }
+      setCartState({ status: "ready", cart: result.value });
+      setMutationState({ status: "success", message: "已放棄本次購買，購物車已清空。未建立任何訂單。" });
+    } catch {
+      setMutationState({ status: "error", message: "操作失敗，請稍後重試。", retryable: false });
+    }
+  };
+
   const updateLine = (line: CartLine, quantity: number) => {
     if (!isValidQuantity(quantity, line.maxQuantity)) {
       setMutationState({ status: "error", message: `請輸入 1 到 ${line.maxQuantity} 件。`, retryable: false });
@@ -77,7 +104,7 @@ export function CartPage(): JSX.Element {
 
   const cart = cartState.cart;
   if (cart.lines.length === 0) {
-    return <main>{mutationState.status === "success" && <p role="status">{mutationState.message}</p>}<section aria-labelledby="empty-cart-heading"><h1 id="empty-cart-heading">購物車是空的</h1><p>先挑一款喜歡的茶，再回來這裡查看。</p><Link href="/#catalog">開始選茶</Link><Link href="/">回首頁</Link></section></main>;
+    return <main>{mutationState.status === "success" && <p role="status">{mutationState.message}</p>}<section aria-labelledby="empty-cart-heading"><h1 id="empty-cart-heading">購物車是空的</h1><p>先挑一款喜歡的茶，再回來這裡查看。</p><Link href="/#tea-list">開始選茶</Link><Link href="/">回首頁</Link></section></main>;
   }
 
   return (
@@ -108,9 +135,10 @@ export function CartPage(): JSX.Element {
         <div aria-label="購物車摘要" role="region">
           <p aria-label={`購物車總小計 ${formatMoney(cart.subtotal.amount)}`}>小計：{formatMoney(cart.subtotal.amount)}</p>
         </div>
-        <Link href="/#catalog">繼續購買</Link>
+        <Link href="/#tea-list">繼續購買</Link>
         <button type="button" onClick={() => window.history.back()}>返回上一頁</button>
         <Link href="/checkout">前往結帳</Link>
+        <button type="button" disabled={mutationState.status === "pending"} onClick={() => void abandonPurchase()}>放棄本次購買／清空購物車</button>
       </section>
     </main>
   );

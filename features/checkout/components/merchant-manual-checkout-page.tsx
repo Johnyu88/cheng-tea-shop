@@ -15,6 +15,7 @@ export function MerchantManualCheckoutPage() {
   const [error, setError] = useState("");
   const [feedback, setFeedback] = useState("");
   const [clearing, setClearing] = useState(false);
+  const [copiedOrder, setCopiedOrder] = useState(false);
 
   async function clearAfterSending() {
     if (!cart?.lines.length || clearing) return;
@@ -34,6 +35,26 @@ export function MerchantManualCheckoutPage() {
     } catch { setFeedback("清空失敗，請稍後再試。"); }
     finally { setClearing(false); }
   }
+  async function abandonPurchase() {
+    if (!cart?.lines.length || clearing) return;
+    if (!window.confirm("確定放棄本次購買並清空購物車？此操作無法還原。")) return;
+    setClearing(true);
+    try {
+      const result = cartService.clearCart ? await cartService.clearCart() : await (async () => {
+        for (const item of cart.lines) {
+          const removed = await cartService.removeItem(item.productId, item.variantId);
+          if (!removed.ok) return removed;
+        }
+        return cartService.getCart();
+      })();
+      if (!result.ok) { setFeedback("未能清空購物車，請稍後重試。"); return; }
+      setCart(result.value);
+      setCopiedOrder(false);
+      setFeedback("已放棄本次購買，購物車已清空。沒有向店家傳送任何訂單。");
+    } catch { setFeedback("操作失敗，請稍後重試。"); }
+    finally { setClearing(false); }
+  }
+
   useEffect(() => {
     let active = true;
     void cartService.getCart().then(result => {
@@ -58,6 +79,7 @@ export function MerchantManualCheckoutPage() {
     try {
       await navigator.clipboard.writeText(text);
       setFeedback(success);
+      if (text === summary && Boolean(summary)) setCopiedOrder(true);
     } catch {
       setFeedback("無法自動複製；請長按文字選取後複製。");
     }
@@ -80,13 +102,26 @@ export function MerchantManualCheckoutPage() {
         <label className="form-field mt-4">訂購內容（可複製後貼到 LINE）
           <textarea className="form-textarea" readOnly rows={7} value={summary} />
         </label>
-        <button className="filter-button mt-3" type="button" onClick={() => void copyText(summary, "已複製訂購內容，請貼到 LINE 傳送給陳老師。")}>複製訂購清單</button>
+        <div className="mt-5" aria-label="LINE 訂購三步驟">
+          <h3>用 LINE 傳送訂購清單</h3>
+          <p className="mt-2">步驟 1：複製以下清單。步驟 2：開啟 LINE 對話並貼上。步驟 3：按「傳送」給陳老師。</p>
+          <div className="form-actions mt-3">
+            <button className="primary-action" type="button" onClick={() => void copyText(summary, "已複製清單。請開啟 LINE，貼上內容並按傳送。")}>1. 複製訂購清單</button>
+            <a className="filter-button" href={merchantLine} target="_blank" rel="noopener noreferrer">2. 開啟陳老師 LINE</a>
+          </div>
+          <p className="mt-3" role="status">{copiedOrder ? "已複製清單，請到 LINE 貼上並按傳送。網站不會自動傳訊。" : "請先複製清單，再開啟 LINE 貼上並送出。"}</p>
+          <p className="muted mt-2">傳送紀錄以雙方實際 LINE 對話為準；請不要在老師確認前匯款。</p>
+        </div>
       </section> : <p className="mt-5">尚未選擇茶品，也可以先聯絡陳老師詢問。</p>}
       {Boolean(cart?.lines.length) && <section className="mt-6" aria-label="傳送後清空購物車">
         <p>已將訂購清單貼到 LINE 並傳送給陳老師？確認傳送後可清空購物車，方便下次選茶。</p>
         <button className="filter-button mt-3" type="button" disabled={clearing} onClick={() => void clearAfterSending()}>
           {clearing ? "正在清空…" : "已傳送訂購清單，清空購物車"}
         </button>
+      </section>}
+      {Boolean(cart?.lines.length) && <section className="mt-6" aria-label="放棄本次購買">
+        <p className="muted">暫時不想購買？可放棄本次選購，系統會先請你確認，不會自行送出訂單。</p>
+        <button type="button" className="text-button mt-3" disabled={clearing} onClick={() => void abandonPurchase()}>放棄本次購買／清空購物車</button>
       </section>}
       <div className="form-actions mt-6">
         <a className="primary-action" href={`tel:${merchantPhone}`}>電話訂購：0919-086-099</a>
