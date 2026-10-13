@@ -940,3 +940,45 @@ a:focus-visible {
   .tea-invitation { margin-top: 3rem; padding: 2rem 1.2rem; border-radius: 1.25rem; }
   .tea-invitation .form-actions { gap: .75rem; }
 }
+
+/* Paired purchasing choices: equal-sized decisions on cart and manual checkout. */
+.purchase-choice-actions {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: .75rem;
+  width: 100%;
+}
+.purchase-choice-actions > a,
+.purchase-choice-actions > button {
+  width: 100% !important;
+  min-width: 0;
+  min-height: 4rem;
+  padding: .8rem .55rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: .85rem;
+  text-align: center;
+  line-height: 1.4;
+  font: inherit;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.purchase-choice-actions .primary-action {
+  background: #20352e;
+  color: #fff;
+  border: 2px solid #20352e;
+}
+.purchase-choice-actions .purchase-abandon-action {
+  color: #465e50;
+  background: #f7f5ee;
+  border: 2px solid #8c9c90;
+  cursor: pointer;
+}
+.purchase-choice-actions .purchase-abandon-action:focus-visible {
+  outline: 3px solid var(--tea-brown);
+  outline-offset: 3px;
+}
+.purchase-choice-actions button:disabled { opacity: .6; cursor: wait; }

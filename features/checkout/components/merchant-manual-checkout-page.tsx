@@ -113,15 +113,17 @@ export function MerchantManualCheckoutPage() {
           <p className="muted mt-2">傳送紀錄以雙方實際 LINE 對話為準；請不要在老師確認前匯款。</p>
         </div>
       </section> : <p className="mt-5">尚未選擇茶品，也可以先聯絡陳老師詢問。</p>}
-      {Boolean(cart?.lines.length) && <section className="mt-6" aria-label="傳送後清空購物車">
-        <p>已將訂購清單貼到 LINE 並傳送給陳老師？確認傳送後可清空購物車，方便下次選茶。</p>
-        <button className="filter-button mt-3" type="button" disabled={clearing} onClick={() => void clearAfterSending()}>
-          {clearing ? "正在清空…" : "已傳送訂購清單，清空購物車"}
-        </button>
-      </section>}
-      {Boolean(cart?.lines.length) && <section className="mt-6" aria-label="放棄本次購買">
-        <p className="muted">暫時不想購買？可放棄本次選購，系統會先請你確認，不會自行送出訂單。</p>
-        <button type="button" className="text-button mt-3" disabled={clearing} onClick={() => void abandonPurchase()}>放棄本次購買／清空購物車</button>
+      {Boolean(cart?.lines.length) && <section className="mt-6" aria-label="本次購買操作">
+        <p>清單送到 LINE 後可清空購物車；若不購買，也可直接放棄。兩種操作都需要確認。</p>
+        <div className="purchase-choice-actions mt-3">
+          <button className="primary-action" type="button" disabled={clearing} onClick={() => void clearAfterSending()}>
+            {clearing ? "正在處理…" : "已傳送訂單／完成選購"}
+          </button>
+          <button className="purchase-abandon-action" type="button" disabled={clearing} onClick={() => void abandonPurchase()}>
+            放棄本次購買
+          </button>
+        </div>
+        <p className="muted mt-3">此網站無法驗證 LINE 訊息是否送達，請以雙方 LINE 對話紀錄為準。</p>
       </section>}
       <div className="form-actions mt-6">
         <a className="primary-action" href={`tel:${merchantPhone}`}>電話訂購：0919-086-099</a>

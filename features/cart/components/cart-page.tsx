@@ -137,8 +137,10 @@ export function CartPage(): JSX.Element {
         </div>
         <Link href="/#tea-list">繼續購買</Link>
         <button type="button" onClick={() => window.history.back()}>返回上一頁</button>
-        <Link href="/checkout">前往結帳</Link>
-        <button type="button" disabled={mutationState.status === "pending"} onClick={() => void abandonPurchase()}>放棄本次購買／清空購物車</button>
+        <div className="purchase-choice-actions" aria-label="購物車操作">
+          <Link className="primary-action" href="/checkout">前往結帳／傳送訂單</Link>
+          <button className="purchase-abandon-action" type="button" disabled={mutationState.status === "pending"} onClick={() => void abandonPurchase()}>放棄本次購買</button>
+        </div>
       </section>
     </main>
   );
