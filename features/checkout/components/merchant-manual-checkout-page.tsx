@@ -1,113 +1,72 @@
 "use client";
-
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import type { Cart } from "@/lib/domain";
 import { useCommerce } from "@/features/commerce/components/commerce-provider";
 
-const merchantPhone = "0919086099";
-const merchantLine = "https://line.me/ti/p/TT6TRQyMF6";
-const bankAccount = "026540263310";
-
-export function MerchantManualCheckoutPage() {
-  const { cartService } = useCommerce();
-  const [cart, setCart] = useState<Cart>();
-  const [error, setError] = useState("");
-  const [feedback, setFeedback] = useState("");
-  const [clearing, setClearing] = useState(false);
-
-  async function clearAfterSending() {
-    if (!cart?.lines.length || clearing) return;
-    if (!window.confirm("請確認你已將訂購內容傳送給陳老師。清空後購物車無法還原，確定清空？")) return;
-    setClearing(true);
-    try {
-      const result = cartService.clearCart ? await cartService.clearCart() : await (async () => {
-        for (const item of cart.lines) {
-          const removed = await cartService.removeItem(item.productId, item.variantId);
-          if (!removed.ok) return removed;
-        }
-        return cartService.getCart();
-      })();
-      if (!result.ok) { setFeedback("無法清空購物車，請稍後再試。"); return; }
-      setCart(result.value);
-      setFeedback("購物車已清空。請保留 LINE 訊息以便與店家確認；這不代表網站已自動成立訂單。");
-    } catch { setFeedback("清空失敗，請稍後再試。"); }
-    finally { setClearing(false); }
+const lineUrl="https://line.me/ti/p/TT6TRQyMF6";
+type Receipt={number:string;subtotal:number};
+export function MerchantManualCheckoutPage(){
+  const {cartService}=useCommerce();
+  const [cart,setCart]=useState<Cart>();
+  const [name,setName]=useState("");
+  const [phone,setPhone]=useState("");
+  const [delivery,setDelivery]=useState<"home-delivery"|"store-pickup">("home-delivery");
+  const [address,setAddress]=useState("");
+  const [note,setNote]=useState("");
+  const [pending,setPending]=useState(false);
+  const [receipt,setReceipt]=useState<Receipt>();
+  const [error,setError]=useState("");
+  const submissionId=useRef<string>();
+  useEffect(()=>{let active=true;void cartService.getCart().then(result=>{if(active){if(result.ok)setCart(result.value);else setError("無法取得購物車，請返回重新選購");}});return()=>{active=false;};},[cartService]);
+  async function submit(event:React.FormEvent){
+    event.preventDefault();
+    if(pending||receipt||!cart?.lines.length)return;
+    setPending(true);setError("");
+    try{
+      submissionId.current ||= crypto.randomUUID();
+      const res=await fetch("/api/public/orders",{method:"POST",headers:{"content-type":"application/json"},credentials:"same-origin",body:JSON.stringify({
+        requestId:submissionId.current,name,phone,delivery,address:delivery==="home-delivery"?address:"",note,
+        lines:cart.lines.map(l=>({productId:l.productId,variantId:l.variantId,quantity:l.quantity}))
+      })});
+      const result=await res.json() as {ok:boolean;value?:Receipt;error?:string};
+      if(!res.ok||!result.ok||!result.value)throw Error(result.error||"送出失敗，請稍後重試");
+      setReceipt(result.value);
+    }catch(e){setError(e instanceof Error?e.message:"送出失敗");}
+    finally{setPending(false);}
   }
-  useEffect(() => {
-    let active = true;
-    void cartService.getCart().then(result => {
-      if (!active) return;
-      if (result.ok) setCart(result.value);
-      else setError("目前無法取得購物車，請直接電話或 LINE 聯絡店家。");
-    }).catch(() => { if (active) setError("目前無法取得購物車，請直接聯絡店家。"); });
-    return () => { active = false; };
-  }, [cartService]);
-
-  const summary = useMemo(() => {
-    if (!cart?.lines.length) return "";
-    return [
-      "您好，我想向陳老師茶行確認以下茶品：",
-      ...cart.lines.map((line, index) => `${index + 1}. ${line.productName}／${line.specification} × ${line.quantity}`),
-      `網站參考小計：NT$${cart.subtotal.amount.toLocaleString("zh-TW")}`,
-      "請協助確認庫存、最後金額、運費及付款方式。謝謝。",
-    ].join("\n");
-  }, [cart]);
-
-  async function copyText(text: string, success: string) {
-    try {
-      await navigator.clipboard.writeText(text);
-      setFeedback(success);
-    } catch {
-      setFeedback("無法自動複製；請長按文字選取後複製。");
-    }
-  }
-
   return <main className="py-8 md:py-12">
-    <section className="demo-panel" aria-labelledby="manual-order-heading">
+    <section className="demo-panel" aria-label="送出茶品訂單">
       <p className="eyebrow">陳老師茶行</p>
-      <h1 id="manual-order-heading">電話或 LINE 訂購茶品</h1>
-      <p className="mt-3">目前提供人工接單服務。請先向陳老師確認商品、庫存、運費與訂單金額，再依店家確認的方式付款。</p>
-      {error && <p role="alert" className="mt-3">{error}</p>}
-      {cart?.lines.length ? <section className="mt-6" aria-label="本次選購茶品">
-        <h2>本次選購清單</h2>
-        <ul className="mt-3">
-          {cart.lines.map(line => <li key={line.variantId} className="mt-2">
-            {line.productName}／{line.specification} × {line.quantity}
-          </li>)}
-        </ul>
-        <p className="mt-3">參考小計：NT${cart.subtotal.amount.toLocaleString("zh-TW")}（實際金額以店家確認為準）</p>
-        <label className="form-field mt-4">訂購內容（可複製後貼到 LINE）
-          <textarea className="form-textarea" readOnly rows={7} value={summary} />
-        </label>
-        <button className="filter-button mt-3" type="button" onClick={() => void copyText(summary, "已複製訂購內容，請貼到 LINE 傳送給陳老師。")}>複製訂購清單</button>
-      </section> : <p className="mt-5">尚未選擇茶品，也可以先聯絡陳老師詢問。</p>}
-      {Boolean(cart?.lines.length) && <section className="mt-6" aria-label="傳送後清空購物車">
-        <p>已將訂購清單貼到 LINE 並傳送給陳老師？確認傳送後可清空購物車，方便下次選茶。</p>
-        <button className="filter-button mt-3" type="button" disabled={clearing} onClick={() => void clearAfterSending()}>
-          {clearing ? "正在清空…" : "已傳送訂購清單，清空購物車"}
-        </button>
-      </section>}
-      <div className="form-actions mt-6">
-        <a className="primary-action" href={`tel:${merchantPhone}`}>電話訂購：0919-086-099</a>
-        <a className="filter-button" href={merchantLine} target="_blank" rel="noopener noreferrer">透過 LINE 聯絡訂購</a>
-        <Link className="text-button" href="/">繼續選茶</Link>
-      </div>
-      {feedback && <p role="status" className="mt-3">{feedback}</p>}
-      <div className="mt-6">
-        <a href={merchantLine} target="_blank" rel="noopener noreferrer" aria-label="開啟陳老師 LINE 聯絡方式">
-          <img src="/media/chen-teacher-line-qr.svg" alt="陳老師 LINE QR Code" width={180} height={180} />
-        </a>
-        <p className="muted">可掃描 QR Code，或直接點擊上方 LINE 聯絡連結。</p>
-      </div>
-      <section className="mt-6" aria-label="匯款資訊">
-        <h2>匯款資訊</h2>
-        <p className="mt-3">銀行：中國信託</p>
-        <p>帳號：{bankAccount}</p>
-        <button className="filter-button mt-3" type="button" onClick={() => void copyText(bankAccount, "已複製匯款帳號。")}>複製匯款帳號</button>
-        <p className="mt-3">請在陳老師確認訂單與金額後再匯款。匯款後以電話或 LINE 告知轉帳帳號後五碼與金額，以利人工確認。</p>
-      </section>
-      <p className="mt-6">本頁不會自動送出訂單或扣款。向店家實際完成聯絡、由店家確認接單後，訂購才成立。</p>
+      {receipt?<section role="status">
+        <h1>訂單已送出</h1>
+        <p className="mt-4">訂單編號：<strong>{receipt.number}</strong></p>
+        <p className="mt-2">參考商品小計：NT${receipt.subtotal.toLocaleString("zh-TW")}</p>
+        <p className="mt-4">陳老師會電話與您確認茶品、庫存、運費及最終金額。<strong>請先不要匯款</strong>，待電話確認後再依約定方式付款。</p>
+        <p className="mt-3">請保留訂單編號，避免重複送單。</p>
+        <div className="form-actions mt-6"><a className="filter-button" href="tel:0919086099">電話聯繫陳老師</a><a className="filter-button" href={lineUrl}>LINE 聯絡</a><Link className="text-button" href="/">回首頁</Link></div>
+      </section>:<>
+        <h1>送出茶品訂單</h1>
+        <p className="mt-3">填寫聯絡資料後，訂購清單會直接進入陳老師的私人後台。陳老師會電話確認，確認前無需匯款。</p>
+        {error&&<p className="product-draft-alert mt-4" role="alert">{error}</p>}
+        {!cart?<p role="status">正在載入購物車…</p>:cart.lines.length===0?<><p className="mt-4">目前購物車是空的。</p><Link className="filter-button mt-4 inline-flex" href="/">繼續選茶</Link></>:<>
+          <h2 className="mt-6">您的茶品清單</h2>
+          <ul className="mt-3 grid gap-2">{cart.lines.map(l=><li key={l.productId+":"+l.variantId}><strong>{l.productName}</strong>／{l.specification} × {l.quantity} — NT${(l.unitPrice.amount*l.quantity).toLocaleString("zh-TW")}</li>)}</ul>
+          <p className="mt-4 font-bold">商品小計：NT${cart.subtotal.amount.toLocaleString("zh-TW")}（運費與金額由老師電話確認）</p>
+          <form onSubmit={e=>void submit(e)} className="mt-6 grid gap-4">
+            <label className="form-field">訂購人姓名<input className="form-input" autoComplete="name" required maxLength={80} value={name} onChange={e=>setName(e.target.value)}/></label>
+            <label className="form-field">聯絡手機<input className="form-input" autoComplete="tel" type="tel" inputMode="tel" pattern="09[0-9]{8}" required maxLength={10} value={phone} onChange={e=>setPhone(e.target.value.replace(/\D/g,"").slice(0,10))}/></label>
+            <fieldset className="form-fieldset"><legend>取貨方式</legend>
+              <label className="form-option"><input type="radio" checked={delivery==="home-delivery"} onChange={()=>setDelivery("home-delivery")}/>宅配</label>
+              <label className="form-option"><input type="radio" checked={delivery==="store-pickup"} onChange={()=>setDelivery("store-pickup")}/>到店取貨</label>
+            </fieldset>
+            {delivery==="home-delivery"&&<label className="form-field">配送地址<textarea className="form-textarea" autoComplete="street-address" required minLength={6} maxLength={180} value={address} onChange={e=>setAddress(e.target.value)}/></label>}
+            <label className="form-field">備註（選填）<textarea className="form-textarea" maxLength={300} rows={3} value={note} onChange={e=>setNote(e.target.value)}/></label>
+            <button className="primary-action" type="submit" disabled={pending}>{pending?"正在送出…":"送出訂單給陳老師"}</button>
+          </form>
+          <p className="muted mt-4">送單不會直接扣款，也不代表老師已接單。個人資料僅供這次訂購聯繫和配送使用。</p>
+        </>}
+      </>}
     </section>
   </main>;
 }
