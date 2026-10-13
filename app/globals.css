@@ -911,3 +911,32 @@ a:focus-visible {
   .product-admin-item > [role="img"] { width: min(100%, 220px); max-height: 240px; }
   .product-admin-item > [role="img"] img { max-height: 240px; }
 }
+
+
+/* Tea-house invitation: blend gently into the storefront instead of a dashboard box. */
+.tea-invitation {
+  max-width: 64rem;
+  margin: clamp(3rem, 8vw, 6rem) auto 3rem;
+  padding: clamp(2rem, 6vw, 4.5rem);
+  border: none;
+  border-top: 1px solid rgba(106, 124, 103, .23);
+  border-radius: 1.8rem;
+  background: linear-gradient(150deg, #f3f2e9 0%, #eef1e8 58%, #f6f3ea 100%);
+  box-shadow: none;
+  color: var(--ink);
+}
+.tea-invitation > h2 {
+  font-family: Georgia, "Noto Serif TC", serif;
+  font-weight: 600;
+  font-size: clamp(1.8rem, 4vw, 3rem);
+  line-height: 1.35;
+  margin: .5rem 0 1.25rem;
+}
+.tea-invitation > p { line-height: 1.95; max-width: 38rem; }
+.tea-invitation h3 { font-size: 1.1rem; font-weight: 600; margin-bottom: .5rem; }
+.tea-invitation .filter-button { border-color: rgba(74, 105, 76, .26); }
+.tea-invitation img { max-width: 100%; height: auto; }
+@media (max-width: 640px) {
+  .tea-invitation { margin-top: 3rem; padding: 2rem 1.2rem; border-radius: 1.25rem; }
+  .tea-invitation .form-actions { gap: .75rem; }
+}
