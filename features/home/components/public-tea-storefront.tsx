@@ -59,16 +59,23 @@ export function PublicTeaStorefront({ teas }: { teas: Product[] }) {
         </div>
       </section>
       <section id="contact" className="demo-panel mt-8" aria-labelledby="contact-heading">
-        <h2 id="contact-heading">電話與 LINE 訂購</h2>
-        <p>請先確認茶品、運費與實際金額，再依店家確認方式付款。</p>
+        <p className="eyebrow">茶香裡，慢慢聊</p>
+        <h2 id="contact-heading">有空，來找陳老師喝杯茶。</h2>
+        <p>不趕時間，坐下來聊聊天、聞聞茶香，慢慢找到自己喜歡的好茶。歡迎先來電或透過 LINE 聯絡，約個方便的時間來喝茶。</p>
         <div className="form-actions mt-4">
-          <a className="primary-action" href="tel:0919086099">電話 0919-086-099</a>
+          <a className="primary-action" href="tel:0919086099">電話約喝茶：0919-086-099</a>
           <a className="filter-button" href={line} target="_blank" rel="noopener noreferrer">LINE 聯絡陳老師</a>
         </div>
-        <a href={line} target="_blank" rel="noopener noreferrer" aria-label="LINE 聯絡 QR Code">
+        <div className="mt-6">
+          <h3>來喝茶的地方</h3>
+          <p>427 台中市潭子區潭秀里雅潭路一段38號巷2號</p>
+          <p className="muted">Google 地圖原始店家標示為「龍映茗茶有限公司」，請依下方原始定位導航，來訪前先電話聯絡。</p>
+          <a className="filter-button mt-3 inline-flex" href="https://maps.app.goo.gl/hu1s5npHJxb1Yghp8?g_st=ic" target="_blank" rel="noopener noreferrer">開啟 Google 地圖導航</a>
+        </div>
+        <a className="mt-5 inline-block" href={line} target="_blank" rel="noopener noreferrer" aria-label="LINE 聯絡 QR Code">
           <img src="/media/chen-teacher-line-qr.svg" width={160} height={160} alt="陳老師 LINE QR Code"/>
         </a>
-        <p>匯款銀行：中國信託；帳號：026540263310。請先由店家確認訂單金額後再匯款。</p>
+        <p className="mt-4">訂購茶品可先透過網站送單，再由陳老師電話確認品項、金額與付款方式。</p>
       </section>
     </main>
   </div>;
