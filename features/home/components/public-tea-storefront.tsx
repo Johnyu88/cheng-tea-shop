@@ -75,7 +75,7 @@ export function PublicTeaStorefront({ teas }: { teas: Product[] }) {
         <a className="mt-5 inline-block" href={line} target="_blank" rel="noopener noreferrer" aria-label="LINE 聯絡 QR Code">
           <img src="/media/chen-teacher-line-qr.svg" width={160} height={160} alt="陳老師 LINE QR Code"/>
         </a>
-        <p className="mt-4">訂購茶品可先透過網站送單，再由陳老師電話確認品項、金額與付款方式。</p>
+        <p className="mt-4">訂購茶品請將購物清單透過 LINE 傳給陳老師，並以電話確認品項、金額與付款方式。</p>
       </section>
     </main>
   </div>;
