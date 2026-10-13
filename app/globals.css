@@ -966,7 +966,7 @@ a:focus-visible {
   color: #365441;
 }
 .site-shell .catalog-browser { padding-bottom: clamp(2rem, 6vw, 4rem); }
-.site-shell .teacher-story-media img { object-position: center 38%; }
+.site-shell .teacher-story-media img { object-position: center; }
 @media (max-width: 40rem) {
   .site-shell .hero { padding-block: 2.25rem 2.75rem; }
   .site-shell .hero h1 { font-size: clamp(2.4rem, 10vw, 3.15rem); line-height: 1.2; }
@@ -979,11 +979,11 @@ a:focus-visible {
   .site-shell .teacher-story-copy > p:last-child { font-size: 1rem; }
   .site-shell .teacher-story-media { gap: .8rem; }
   .site-shell .teacher-story-media img {
-    height: clamp(260px, 88vw, 350px);
-    max-height: 350px;
+    height: auto;
+    max-height: none;
     min-height: 0;
-    object-fit: cover;
-    object-position: center 42%;
+    object-fit: contain;
+    object-position: center;
   }
   .site-shell .teacher-story-audio { padding: 1rem; }
   .site-shell .catalog-browser { padding-top: 1rem; }
