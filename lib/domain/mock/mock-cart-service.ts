@@ -45,6 +45,7 @@ export const createMockCartService = (options: MockCartOptions = {}): CartServic
   const cart = emptyCart();
   const storageKey = options.storageKey;
   let restored = false;
+  let restoring: Promise<void> | undefined;
 
   const resolveLine = async (productId: string, variantId: string): Promise<ServiceResult<{ product: Product; variant: ProductVariant }>> => {
     const pageResult = await catalog.listProducts({ limit: 50 });
@@ -75,9 +76,12 @@ export const createMockCartService = (options: MockCartOptions = {}): CartServic
 
   const restore = async (): Promise<void> => {
     if (restored) return;
-    restored = true;
-    if (!storageKey || typeof window === "undefined") return;
-    try {
+    if (restoring) return restoring;
+    // Concurrent React mounts must await the same storage reconstruction,
+    // rather than observing an empty cart while the first fetch is in flight.
+    restoring = (async () => {
+      if (!storageKey || typeof window === "undefined") return;
+      try {
       const raw: unknown = JSON.parse(window.localStorage.getItem(storageKey) ?? "[]");
       if (!Array.isArray(raw)) return;
       for (const item of raw.slice(0, 30)) {
@@ -94,7 +98,14 @@ export const createMockCartService = (options: MockCartOptions = {}): CartServic
       }
       recalculate(cart);
       if (cart.lines.length !== raw.length) persist();
-    } catch { /* corrupted local selections should not break shopping */ }
+      } catch { /* corrupted local selections should not break shopping */ }
+    })();
+    try {
+      await restoring;
+      restored = true;
+    } finally {
+      restoring = undefined;
+    }
   };
   const persist = (): void => {
     if (!storageKey || typeof window === "undefined") return;
