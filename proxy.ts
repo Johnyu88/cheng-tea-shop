@@ -7,9 +7,9 @@ let windowStart = 0;
 export function proxy(request: NextRequest) {
   if (process.env.PUBLIC_STOREFRONT_SERVER === "enabled") {
     const path = request.nextUrl.pathname;
-    const denied = path === "/admin" || path.startsWith("/admin/") || path === "/api" || (path.startsWith("/api/") && path !== "/api/public/catalog" && !path.startsWith("/api/public/media/")) || path === "/orders" || path.startsWith("/orders/") || path === "/install" || path.startsWith("/install/") || path.startsWith("/checkout/success") || path.startsWith("/manifest-orders") || path.startsWith("/manifest-products") || path === "/private-app" || path.startsWith("/private-app/");
+    const denied = path === "/admin" || path.startsWith("/admin/") || path === "/api" || (path.startsWith("/api/") && path !== "/api/public/catalog" && path !== "/api/public/orders" && !path.startsWith("/api/public/media/")) || path === "/orders" || path.startsWith("/orders/") || path === "/install" || path.startsWith("/install/") || path.startsWith("/checkout/success") || path.startsWith("/manifest-orders") || path.startsWith("/manifest-products") || path === "/private-app" || path.startsWith("/private-app/");
     if (denied) return new NextResponse("Not found", { status: 404, headers: { "cache-control": "no-store", "x-robots-tag": "noindex" } });
-    if (request.method !== "GET" && request.method !== "HEAD") return new NextResponse("Method not allowed", { status: 405 });
+    if (path === "/api/public/orders" ? request.method !== "POST" : request.method !== "GET" && request.method !== "HEAD") return new NextResponse("Method not allowed", { status: 405 });
     const response = NextResponse.next();
     response.headers.set("x-content-type-options", "nosniff");
     response.headers.set("referrer-policy", "strict-origin-when-cross-origin");
@@ -24,6 +24,7 @@ export function proxy(request: NextRequest) {
       || path.startsWith("/api/demo/admin/orders")
       || path === "/api/demo/admin/otp"
       || path === "/api/demo/admin/passkey/enroll"
+      || path === "/api/merchant/order-inbox"
       || path === "/api/demo/catalog"
       || path.startsWith("/api/demo/catalog/media/")
       || path.startsWith("/api/auth/")
