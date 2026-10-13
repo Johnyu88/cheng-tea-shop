@@ -940,3 +940,126 @@ a:focus-visible {
   .tea-invitation { margin-top: 3rem; padding: 2rem 1.2rem; border-radius: 1.25rem; }
   .tea-invitation .form-actions { gap: .75rem; }
 }
+
+
+/* Tea storefront editorial polish v2: type, palette, actions only. Image geometry unchanged. */
+.site-shell {
+  --ink: #243c32;
+  --muted-ink: #647169;
+  --tea-brown: #876848;
+  --mist: #e7ebe1;
+  --paper: #faf8f2;
+  color: var(--ink);
+  background: linear-gradient(180deg, #faf8f2 0%, #f7f5ee 66%, #faf8f2 100%);
+  font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+.site-shell h1,
+.site-shell h2,
+.site-shell h3,
+.site-shell .brand-mark {
+  font-family: "Noto Serif TC", "Songti TC", "PMingLiU", Georgia, serif;
+  letter-spacing: .035em;
+}
+.site-shell h1,
+.site-shell h2 { line-height: 1.38; }
+.site-shell .brand-mark {
+  font-weight: 650;
+  letter-spacing: .11em;
+  color: #2a4838;
+}
+.site-shell .site-header {
+  border-bottom-color: rgba(54, 79, 62, .15);
+}
+.site-shell .site-header nav a {
+  border: 1px solid rgba(57, 78, 62, .20);
+  background: rgba(238, 240, 231, .82);
+  color: #2d4939;
+  font-weight: 600;
+  box-shadow: none;
+  transition: background .18s ease, border-color .18s ease;
+}
+.site-shell .site-header nav a:hover,
+.site-shell .site-header nav a:focus-visible {
+  background: #e2e8dd;
+  border-color: #8ca38d;
+}
+.site-shell .primary-action {
+  border: 1px solid #304e3d;
+  border-radius: .85rem;
+  background: #304e3d;
+  color: #fffdf6;
+  font-weight: 650;
+  letter-spacing: .035em;
+  box-shadow: 0 5px 13px rgba(41, 64, 47, .11);
+  transition: background .18s ease, box-shadow .18s ease;
+}
+.site-shell .primary-action:hover {
+  background: #3e614b;
+  box-shadow: 0 7px 16px rgba(41, 64, 47, .16);
+}
+.site-shell .filter-button,
+.site-shell .load-more-button {
+  border: 1px solid rgba(58, 88, 66, .36);
+  border-radius: .85rem;
+  background: #f8f7f1;
+  color: #2d513c;
+  font-weight: 650;
+  box-shadow: none;
+  transition: background .18s ease;
+}
+.site-shell .filter-button:hover,
+.site-shell .load-more-button:hover { background: #e8ede3; }
+.site-shell .filter-button[aria-pressed="true"] {
+  color: #fffdf6;
+  border-color: #365542;
+  background: #365542;
+  box-shadow: none;
+}
+.site-shell .eyebrow {
+  color: #926f4e;
+  font-size: .84rem;
+  font-weight: 700;
+  letter-spacing: .16em;
+}
+.site-shell .hero-copy,
+.site-shell .teacher-story-copy > p:last-child {
+  color: #66756a;
+  line-height: 1.9;
+}
+.site-shell .product-card {
+  border-color: rgba(65, 83, 66, .13);
+  box-shadow: 0 3px 14px rgba(54, 62, 47, .035);
+}
+.site-shell .product-card-content h3 {
+  color: #2a4034;
+  letter-spacing: .045em;
+  line-height: 1.5;
+}
+.site-shell .product-summary { color: #657068; }
+.site-shell .product-meta { color: #334b3b; }
+.site-shell .product-link {
+  color: #335942;
+  font-weight: 700;
+  text-underline-offset: .24em;
+}
+.site-shell .tea-invitation {
+  border-color: rgba(75, 102, 74, .14);
+}
+.site-shell .tea-invitation > h2 { color: #304b38; }
+@media (max-width: 40rem) {
+  .site-shell .site-header nav { gap: .3rem; }
+  .site-shell .site-header nav a {
+    padding: .65rem .58rem;
+    font-size: .83rem;
+  }
+  .site-shell .brand-mark { font-size: 1.13rem; letter-spacing: .04em; }
+  .site-shell .hero h1 { letter-spacing: .025em; }
+  .site-shell .primary-action,
+  .site-shell .filter-button { min-height: 3rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .site-shell .primary-action,
+  .site-shell .filter-button,
+  .site-shell .site-header nav a { transition: none; }
+}
