@@ -15,6 +15,8 @@ Updated: 2026-10-15 (Asia/Taipei)
 - `tools/prod-admin-23/production-switch.mjs` adds an explicit `production-switch` gate with exact source/candidate image/container identity checks, backup manifest check, RW writer freeze, health verification, and automatic restoration of the original container on failure.
 - Formal mode requires `PROD-ADMIN-24-AUTHORIZED`; it was not invoked in this phase. No formal Secret was read and no formal service/data/route changed.
 - Focused tool tests: `10/10 PASS`; synthetic production-flow rehearsal PASS with temporary containers cleaned; full Vitest `72 files / 360 tests PASS`; TypeScript and ESLint PASS; production build PASS with six pre-existing tracing warnings. Read-only formal preflight PASS for the verified source/candidate IDs, backup marker, and four known RW writers; formal switch was not invoked.
+- First formal switch attempt was automatically rolled back on the immediate public health check; read-only verification confirmed the original container and all three other RW writers running, and 8130/10001/10000 all HTTP 200. No data or route change remained.
+- The CLI now uses a bounded 60-second retry window for transient Caddy/Funnel reconnection. Focused tool tests are `10/10 PASS`; retry fix pending commit/push before any second switch attempt.
 
 ## Current stop point
 

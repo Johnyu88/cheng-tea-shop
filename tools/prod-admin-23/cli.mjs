@@ -43,10 +43,22 @@ async function main() {
       backupExists: true,
       writerNames: writers,
       healthCheck: async () => {
-        for (const url of ["http://127.0.0.1:8130/api/health", "https://acer-v5.tail4d8b5a.ts.net:10001/api/health", "https://acer-v5.tail4d8b5a.ts.net:10000/"]) {
-          const response = await fetch(url, { signal: AbortSignal.timeout(15000) });
-          if (!response.ok) throw new Error(`Health check returned HTTP ${response.status}`);
+        const urls = ["http://127.0.0.1:8130/api/health", "https://acer-v5.tail4d8b5a.ts.net:10001/api/health", "https://acer-v5.tail4d8b5a.ts.net:10000/"];
+        const deadline = Date.now() + 60000;
+        let lastFailure = "health check did not complete";
+        while (Date.now() < deadline) {
+          try {
+            for (const url of urls) {
+              const response = await fetch(url, { signal: AbortSignal.timeout(15000) });
+              if (!response.ok) throw new Error(`Health check returned HTTP ${response.status}`);
+            }
+            return;
+          } catch (error) {
+            lastFailure = error instanceof Error ? error.message : "health check failed";
+            await new Promise((resolve) => setTimeout(resolve, 2000));
+          }
         }
+        throw new Error(lastFailure);
       },
     });
     process.stdout.write(`${JSON.stringify({ mode, candidateId: result.candidateId, sourceId: result.sourceId, restoredWriters: result.restoredWriters, candidate: createRedactedDiff(result.spec) }, null, 2)}\n`);
