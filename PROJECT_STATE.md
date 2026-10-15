@@ -2,6 +2,14 @@
 
 Updated: 2026-10-15 (Asia/Taipei)
 
+## 2026-10-15 PROD-ADMIN-23 safe deployment utility
+
+- Design: `docs/superpowers/specs/2026-10-15-prod-admin-23-safe-deploy-design.md`.
+- Tool: `tools/prod-admin-23/cli.mjs` (Acer absolute path: `C:\Users\alluser\Documents\Codex\2026-10-15\ui-rwd-01-johnyu88-cheng-tea\tools\prod-admin-23\cli.mjs`).
+- Default behavior is dry-run against the synthetic allowlist only. Isolation mode uses synthetic source, loopback test port, and non-formal mounts; formal data roots are rejected after Windows/Docker Desktop path normalization.
+- Tests: focused Vitest `6/6 PASS`; full Vitest `71 files / 356 tests PASS`; TypeScript and ESLint PASS; production build PASS with six pre-existing dynamic filesystem tracing warnings; synthetic Docker Engine API dry-run/start/health/failure-cleanup lifecycle PASS. No formal Secret was read and no formal container or route changed.
+- Stop point: commit and push after fresh lint/full relevant verification; do not proceed to PROD-ADMIN-22 deployment.
+
 ## Current stop point
 
 - Task: `PROD-ADMIN-03`

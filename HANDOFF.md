@@ -1055,3 +1055,12 @@ This checkpoint records preparation only; the 10/14 switch has **not** been perf
 - Full Playwright was `27/52 PASS` with `25` WebKit tests blocked because the local `webkit-2359` executable is absent; no browser download was performed. This is an environment limitation, not a WebKit PASS.
 - No formal 10001 deployment, container change, Caddy/Funnel change, SQLite/photo/order change, or frontend 10000 change was made. Candidate service used local port `3109` only.
 - Stop point: await ChatGPT review before any formal-site diagnostic deployment. Rollback is one commit revert; existing formal backend/container/image remain untouched.
+
+## 2026-10-15 PROD-ADMIN-23 reusable safe deployment tool
+
+- Added `tools/prod-admin-23/` with a Node named-pipe Docker Engine API client, isolation path checks, explicit synthetic source allowlist, redacted dry-run output, candidate health-check lifecycle, and failure cleanup.
+- Absolute Acer path: `C:\Users\alluser\Documents\Codex\2026-10-15\ui-rwd-01-johnyu88-cheng-tea\tools\prod-admin-23\cli.mjs`.
+- Isolation mode rejects normalized paths under `C:\data\tea-staging\private-accounting-v1-data` and `C:\data\tea-staging\public-visibility-live`; no formal source, Secret, SQLite, photo, Caddy, Funnel, or 8130 operation was used.
+- Verification: focused Vitest `6/6 PASS`; full Vitest `71 files / 356 tests PASS`; TypeScript and ESLint PASS; production build PASS with the existing six dynamic filesystem tracing warnings; synthetic Docker Engine API dry-run + candidate start/health/cleanup `PASS`; synthetic Secret did not appear in output.
+- The E2E source and candidate containers and isolation directories were removed after verification. Formal service remained running and unchanged.
+- Commit/push status: pending this checkpoint. Next action: inspect diff, run lint/full relevant verification, commit and push this branch. No formal deployment is authorized by this handoff.
