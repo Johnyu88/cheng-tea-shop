@@ -1002,3 +1002,11 @@ This checkpoint records preparation only; the 10/14 switch has **not** been perf
 - `tea-public-contact-4837371` remains the 10000 service (`127.0.0.1:8131`) and was not changed.
 - Mobile delivery remains **BLOCKED / NOT VERIFIED**: no physical phone without Tailscale was available, and the independent web probe could not resolve this Tailscale hostname. Do not claim Safari or LINE acceptance.
 - Recovery: `C:\data\tea-staging\recovery\prod-admin-04-before-funnel`, `C:\data\tea-staging\recovery\prod-admin-04-before-caddy-origin-fix`. Disable with `tailscale funnel --https=10001 off`; restore the saved Caddyfile only if needed.
+
+## 2026-10-15 PROD-ADMIN-05 public entry Not found fix — latest
+
+- Confirmed actual login path is `/admin/orders`; `/admin/login` does not exist. Before repair, `/`, `/admin/orders`, and `/admin/login` were measured independently at 8130, Caddy 8090, and Funnel 10001.
+- Fixed only the public 10001 root: `/` now redirects 302 to `/admin/orders`. The existing 443/8443/10000 routes remain unchanged.
+- Public DOM evidence now shows `茶行訂單管理` → `密碼登入` → `管理員密碼` field → `登入` button. Public unauthenticated admin API remains 403.
+- Caddy config remains `Caddyfile.prod-admin-04`; the public Host/Origin normalization is scoped to `Host *:10001`.
+- Recovery remains `C:\data\tea-staging\recovery\prod-admin-04-before-caddy-origin-fix\Caddyfile.before`; disable only the new ingress with `tailscale funnel --https=10001 off`.

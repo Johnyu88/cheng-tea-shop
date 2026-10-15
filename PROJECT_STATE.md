@@ -75,3 +75,13 @@ Implementation and documentation are committed at `47b6d26` and pushed to `origi
 ### Rollback
 
 Disable only the new ingress with `tailscale funnel --https=10001 off`, restore `C:\data\tea-staging\recovery\prod-admin-04-before-caddy-origin-fix\Caddyfile.before` if needed, and reload Caddy. Existing 10000, 443, 8443, 8130, SQLite, and photos remain independent.
+
+## 2026-10-15 PROD-ADMIN-05 public entry Not found fix
+
+- Root cause: `/admin/login` is not an application route. The actual password login UI is client-rendered at `/admin/orders`; the direct Acer proxy intentionally returned plain-text `Not found` for `/` because direct mode did not allow a storefront root.
+- Layered evidence before the fix: `8130 /` 404 plain text, `Caddy 8090 /` 404 plain text, and Funnel `10001 /` 404 plain text; all three `/admin/orders` endpoints returned 200; all three `/admin/login` endpoints returned 404.
+- Minimal fix: `Caddyfile.prod-admin-04` now redirects only the 10001 Funnel root (`Host *:10001`, `/`) to `/admin/orders`. Existing 443, 8443, and 10000 roots are not matched.
+- Caddy additionally normalizes the 10001 forwarded Host/Origin/X-Forwarded-Host to the configured Acer origin; this was required for public API requests and is limited to the 10001 matcher.
+- Fresh public checks: root 302 with `Location: /admin/orders`; public `/admin/orders` 200; public unauthenticated admin API 403. In-browser DOM evidence shows title `茶行訂單管理`, heading `密碼登入`, label `管理員密碼`, and disabled `登入` button before a password is entered.
+- No database, container, 10000 route, 443 route, 8443 route, formal frontend, or credentials were changed.
+- Recovery: `C:\data\tea-staging\recovery\prod-admin-04-before-caddy-origin-fix\Caddyfile.before`; disable the independent Funnel with `tailscale funnel --https=10001 off`.
