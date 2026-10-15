@@ -1220,3 +1220,12 @@ This checkpoint records preparation only; the 10/14 switch has **not** been perf
 - storefront proxy 依正式安全設計封鎖 `/api/health` 為 404；正式與新容器行為一致，健康證據採首頁／catalog／關鍵路由／容器狀態。
 - 回退：`docker stop tea-public-adbe430-live; docker start tea-public-contact-4837371`，10000 Funnel 不需修改。回退後應重新以 `curl -k https://acer-v5.tail4d8b5a.ts.net:10000/` 驗證 HTTP 200。
 - 正式前台已部署，等待使用者手機人工驗收；不進入下一階段，不修改 10001、正式資料、照片、音訊或機密設定。
+
+## 2026-10-16 PHASE3-PROD-FRONTEND-ACCEPT-02 正式部署驗收封存
+
+- 使用者已完成正式前台 `https://acer-v5.tail4d8b5a.ts.net:10000/` 手機人工驗收，3/3 PASS：首頁／十大茶類／商品照片；購物車／LINE／電話／匯款／放棄購買；來喝茶文字／地址／地圖連結。
+- 正式部署基準為程式 commit `adbe4309707c1919eb2fc1738d0d373add9f39f1`、容器 `tea-public-adbe430-live`、image digest `sha256:463107219334b60d6e9dd9555ceba9a6b81e0dc12c771f32dd9937b5e39cd148`；部署時間為 `2026-10-16T03:02:51+08:00`。部署文件基準 `01992cf39a4d5a4def88659a2704aa7f2c2f8852` 保留。
+- 唯讀封存核對：10000 HTTP 200、10001 HTTP 200；正式公開 catalog 仍為 7 件商品。10000 Funnel 維持 `https://acer-v5.tail4d8b5a.ts.net:10000/` → `127.0.0.1:8131`，10001 維持 → `127.0.0.1:8090`。
+- `/api/health` 回傳 404 是 storefront proxy 既有安全行為，不記錄為健康檢查 PASS；本次健康狀態以公開首頁／catalog／路由 HTTP 200 與容器運行狀態記錄。
+- 舊容器 `tea-public-contact-4837371` 與舊 image `tea-nextjs:ui-rwd-01-f2a2a78`／`sha256:a3ade5517c5b90a09b693ae69c023882d6b38b3e40d57ed8b1fed44bd9f3c8fa` 保留未刪除。回退指令：`docker stop tea-public-adbe430-live; docker start tea-public-contact-4837371`，Funnel 不需修改。
+- 建立恢復標記 `phase3-prod-frontend-accept-02-adbe430`，精確指向 `adbe4309707c1919eb2fc1738d0d373add9f39f1`；既有驗收標記全部保留。正式部署驗收封存完成，等待後續明確授權。

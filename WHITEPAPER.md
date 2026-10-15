@@ -845,3 +845,11 @@ TDD 新增測試施工前為 `4 failed / 0 passed`，施工後定向分類測試
 
 正式前台目前等待使用者手機驗收。若需回退，先執行 `docker stop tea-public-adbe430-live; docker start tea-public-contact-4837371`，再檢查 10000 HTTP 200；不需改動 Funnel。`/api/health` 由正式 storefront proxy 安全封鎖為 404，與切換前一致，不能作為此正式前台的健康判準。
 
+## 80. 2026-10-16 PHASE3-PROD-FRONTEND-ACCEPT-02 正式部署驗收封存
+
+使用者已完成正式前台 10000 手機人工驗收，三項均 PASS：首頁／十大茶類／商品照片；購物車／LINE／電話／匯款／放棄購買；來喝茶文字／地址／地圖連結。正式部署基準為 `adbe4309707c1919eb2fc1738d0d373add9f39f1`，容器 `tea-public-adbe430-live`，image digest `sha256:463107219334b60d6e9dd9555ceba9a6b81e0dc12c771f32dd9937b5e39cd148`，部署時間 `2026-10-16T03:02:51+08:00`。
+
+驗收封存前唯讀核對 10000／10001 均 HTTP 200，正式公開 catalog 仍為 7 件商品；10000 Funnel 維持 `127.0.0.1:8131`，10001 維持 `127.0.0.1:8090`。`/api/health` 的 404 是既有 storefront proxy 安全行為，不是健康檢查 PASS 或 FAIL 的替代宣稱。
+
+舊正式前台容器與 image 保留為回退備援：`tea-public-contact-4837371`／`sha256:a3ade5517c5b90a09b693ae69c023882d6b38b3e40d57ed8b1fed44bd9f3c8fa`。回退時執行 `docker stop tea-public-adbe430-live; docker start tea-public-contact-4837371`，不需修改 Funnel。建立恢復標記 `phase3-prod-frontend-accept-02-adbe430` 指向 `adbe430`，既有標記均保留。
+
