@@ -117,12 +117,12 @@ export function MerchantManualCheckoutPage() {
         </button>
       </section>}
       <div className="manual-order-primary-actions mt-6" aria-label="結帳操作">
-        <a className="primary-action" href={merchantLine} target="_blank" rel="noopener noreferrer">傳送訂單／確認下單（LINE）</a>
-        <button className="abandon-action" type="button" disabled={clearing} onClick={() => setAbandonDialogOpen(true)}>放棄本次購買</button>
+        <a className="primary-action button-primary" href={merchantLine} target="_blank" rel="noopener noreferrer">傳送訂單／確認下單（LINE）</a>
+        <button className="abandon-action button-danger" type="button" disabled={clearing} onClick={() => setAbandonDialogOpen(true)}>放棄本次購買</button>
       </div>
       <div className="form-actions mt-4">
-        <a className="primary-action" href={`tel:${merchantPhone}`}>電話訂購：0919-086-099</a>
-        <Link className="text-button" href="/">繼續選茶</Link>
+        <a className="primary-action button-secondary" href={`tel:${merchantPhone}`}>電話訂購：0919-086-099</a>
+        <Link className="text-button button-quiet" href="/">繼續選茶</Link>
       </div>
       {feedback && <p role="status" className="mt-3">{feedback}</p>}
       <div className="mt-6">

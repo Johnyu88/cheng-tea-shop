@@ -30,12 +30,12 @@ function ProductCard({ product }: { product: Product }): JSX.Element {
       </div>
       <div className="product-card-content">
         <p className="product-taste">{product.tasteTags.join("・")}</p>
-        <h3>{product.name}</h3>
-        <p className="product-summary">{product.summary}</p>
-        <p className="product-meta">
+        <h3 className="product-card-title">{product.name}</h3>
+        <p className="product-summary product-card-summary">{product.summary}</p>
+        <p className="product-meta product-card-price">
           {variant?.specification ?? "未設定"}／NT${variant?.price?.amount?.toLocaleString("zh-TW") ?? "—"}
         </p>
-        <Link className="product-link" href={`/tea/${product.slug}`}>
+        <Link className="product-link button-quiet" href={`/tea/${product.slug}`}>
           查看茶品
         </Link>
       </div>
@@ -137,7 +137,7 @@ export function CatalogBrowser({ catalogService }: CatalogBrowserProps): JSX.Ele
           {nextCursor !== null && (
             <button
               type="button"
-              className="load-more-button"
+              className="load-more-button button-secondary"
               aria-label="載入更多茶品"
               onClick={() => {
                 setState((current) => ({ status: "loading", products: current.products }));

@@ -779,3 +779,11 @@ PHASE1 恢復基準為候選分支 `codex/frontend-design-phase1-20261016`、com
 
 目前建議先核准 typography／spacing／semantic color 與 button/card hierarchy，再進行任何 CSS 或元件施工；人物、茶湯、商品照片與鳥鳴音訊維持原檔與原路徑，不在本次盤點中替換、裁切或生成。PHASE2 尚未開始施工，等待總管確認。
 
+## 72. 2026-10-16 PHASE1-RECORD-06／PHASE2-DESIGN-01
+
+PHASE1 狀態已拆分記錄：人工手機驗收為 **PASS**，使用者確認購物車／結帳按鈕並列、放棄購買取消保留資料、確認放棄清空購物車且手機無跑版；正式部署為 **NOT DEPLOYED**。候選人工驗收恢復基準保留為 `b104163`，正式前台 10000 與後台 10001 未改動，10002 未重新開啟。
+
+PHASE2-DESIGN-01 候選施工已完成但不進入下一小階段：建立 typography、weight、line-height、spacing、semantic color tokens，統一 primary／secondary／quiet／danger 按鈕層級，並改善商品卡標題／摘要／價格閱讀層級。原有 `#faf8f2`、`#20352e`、`#dbe6dc`、`#8b6446`、照片、音訊、首頁段落順序、商品／訂單資料與 PHASE1 行為均保留。
+
+修改前截圖為 `phase1-checkout-03-screenshots/`，修改後截圖為 `phase2-design-01-screenshots/`；五種寬度均無水平捲動，390px 與 412px 按鈕維持並列，768px 過渡仍保持雙欄。完整 Vitest 75 files／371 tests PASS，Exit 0；TypeScript PASS；修改檔案 ESLint 0 errors／6 warnings；production build PASS，20/20 static pages。等待人工確認，不進入 PHASE2 下一小階段。
+

@@ -1135,6 +1135,16 @@ This checkpoint records preparation only; the 10/14 switch has **not** been perf
 - 盤點結論：現有紙張米白／深茶綠／茶褐色基礎可保留；下一階段應先核准 typography、spacing、semantic color、button/card hierarchy，再評估首頁構圖與素材缺口。未修改任何程式、照片、音訊或正式環境。
 - PHASE2 目前只停在設計盤點，等待總管確認後才可施工；未進入品牌美術修改。
 
+## 2026-10-16 PHASE1-RECORD-06 狀態分離與 PHASE2-DESIGN-01 候選施工
+
+- 狀態修正：PHASE1 人工手機驗收為 **PASS**（使用者已確認三項通過）；PHASE1 正式部署為 **NOT DEPLOYED**。不再用單一 PENDING 混淆兩者。`b104163` 保留為人工驗收恢復基準；候選程式仍在 `codex/frontend-design-phase1-20261016`。
+- PHASE2-DESIGN-01 已依核准範圍完成候選施工：新增 typography／weight／line-height／spacing／semantic color tokens，統一四種按鈕層級，並改善商品卡標題／摘要／價格閱讀層級。
+- 保留品牌色 `#faf8f2`、`#20352e`、`#dbe6dc`、`#8b6446`；未修改照片、音訊、首頁段落順序、正式訂單、商品資料、PHASE1 購物車與放棄購買行為。
+- 修改前截圖沿用 `phase1-checkout-03-screenshots/`；修改後截圖保存於 `phase2-design-01-screenshots/`，五種寬度與 390px 對話框均已保存。
+- 完整 Vitest：75 files／371 tests PASS，Exit 0；TypeScript PASS；修改檔案 ESLint 0 errors／6 warnings；production build PASS，20/20 static pages，保留既有 6 個動態檔案追蹤 warnings。五寬度均無水平捲動，390px／412px／768px／1080px／1440px 的按鈕與文字換行證據見施工紀錄。
+- 正式前台 10000、正式後台 10001 未變動；10002 未重新開啟；未合併 main、未部署正式站。
+- PHASE2-DESIGN-01 完成後停止，等待人工確認；不得自行進入 PHASE2 下一小階段。
+
 ## 2026-10-16 PHASE1-HTTPS-04 專用手機驗收入口
 
 - 施工前唯讀盤點確認 `3111` 僅為候選本機服務；10000／10001 為正式 Funnel，8443／8444／8445 為既有 tailnet-only mapping。新增前確認 10002 未占用，Windows Firewall 三個 profile 均維持原狀，未開放 3111 對外。

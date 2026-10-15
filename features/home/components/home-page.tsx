@@ -64,12 +64,12 @@ function CatalogPreview({ catalogService }: { catalogService: CatalogService }):
                 </div>
                 <div className="product-card-content">
                   <p className="product-taste">{product.tasteTags.join("・")}</p>
-                  <h3>{product.name}</h3>
-                  <p className="product-summary">{product.summary}</p>
-                  <p className="product-meta">
+                  <h3 className="product-card-title">{product.name}</h3>
+                  <p className="product-summary product-card-summary">{product.summary}</p>
+                  <p className="product-meta product-card-price">
                     {variant?.specification ?? "未設定"}／NT${variant?.price?.amount?.toLocaleString("zh-TW") ?? "—"}
                   </p>
-                  <Link className="product-link" href={`/tea/${product.slug}`}>
+                  <Link className="product-link button-quiet" href={`/tea/${product.slug}`}>
                     查看茶品
                   </Link>
                 </div>
@@ -90,7 +90,7 @@ export function HomePage({ catalogService = defaultCatalogService }: HomePagePro
           <p className="eyebrow">陳老師茶行</p>
           <h1 id="storefront-heading">慢慢選一杯好茶</h1>
           <p className="hero-copy">從喜歡的香氣與口感開始，不必先懂茶，也能找到適合自己的茶。</p>
-          <a className="primary-action" href="#baseline">開始選茶</a>
+          <a className="primary-action button-primary" href="#baseline">開始選茶</a>
         </section>
 
         <section className="teacher-story" aria-labelledby="teacher-story-heading">

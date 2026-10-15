@@ -8,6 +8,22 @@
   --paper: #faf8f2;
   --tea-brown: #8b6446;
   --white: #ffffff;
+  --font-size-display: clamp(3rem, 9vw, 6.5rem);
+  --font-size-title: clamp(2rem, 5vw, 4rem);
+  --font-size-body: 1rem;
+  --font-size-caption: 0.875rem;
+  --font-weight-regular: 400;
+  --font-weight-semibold: 650;
+  --font-weight-bold: 750;
+  --line-height-body: 1.7;
+  --line-height-tight: 1.2;
+  --space-section: clamp(3rem, 8vw, 7rem);
+  --space-card: 1.25rem;
+  --space-control: 0.75rem;
+  --color-action-primary: #20352e;
+  --color-action-secondary: #dbe6dc;
+  --color-action-quiet: #faf8f2;
+  --color-action-danger: #8b6446;
 }
 
 * {
@@ -23,6 +39,8 @@ body {
   color: var(--ink);
   background: var(--paper);
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-body);
 }
 
 .site-shell {
@@ -280,12 +298,12 @@ h1,
 h2 {
   margin: 0;
   font-family: Georgia, "Noto Serif TC", serif;
-  line-height: 1.2;
+  line-height: var(--line-height-tight);
 }
 
 h1 {
   max-width: 12ch;
-  font-size: clamp(3rem, 9vw, 6.5rem);
+  font-size: var(--font-size-display);
   letter-spacing: -0.04em;
 }
 
@@ -299,6 +317,60 @@ h1 {
 
 .hero-copy {
   margin: 1.5rem 0 2rem;
+}
+
+.button-primary,
+.button-secondary,
+.button-quiet,
+.button-danger {
+  min-height: 3rem;
+  border-radius: 999px;
+  padding: var(--space-control) 1.4rem;
+  font: inherit;
+  font-weight: var(--font-weight-bold);
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.button-primary {
+  border: 2px solid var(--color-action-primary);
+  color: var(--white);
+  background: var(--color-action-primary);
+}
+
+.button-secondary {
+  border: 2px solid var(--color-action-primary);
+  color: var(--color-action-primary);
+  background: var(--color-action-secondary);
+}
+
+.button-quiet {
+  border: 2px solid color-mix(in srgb, var(--ink) 24%, transparent);
+  color: var(--color-action-primary);
+  background: var(--color-action-quiet);
+}
+
+.button-danger {
+  border: 2px solid var(--color-action-danger);
+  color: var(--color-action-danger);
+  background: var(--color-action-quiet);
+}
+
+.button-primary:focus-visible,
+.button-secondary:focus-visible,
+.button-quiet:focus-visible,
+.button-danger:focus-visible {
+  outline: 3px solid var(--color-action-danger);
+  outline-offset: 4px;
+}
+
+.button-primary:disabled,
+.button-secondary:disabled,
+.button-quiet:disabled,
+.button-danger:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
 }
 
 .primary-action {
@@ -388,7 +460,7 @@ h1 {
 }
 
 .product-card-content {
-  padding: 1.25rem;
+  padding: var(--space-card);
 }
 
 .product-card h3,
@@ -402,6 +474,11 @@ h1 {
   font-size: 1.35rem;
 }
 
+.product-card-title {
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
+}
+
 .product-taste {
   margin-bottom: 0.6rem;
 }
@@ -409,11 +486,22 @@ h1 {
 .product-summary {
   min-height: 3.5rem;
   color: var(--muted-ink);
-  line-height: 1.6;
+  font-size: var(--font-size-caption);
+  line-height: var(--line-height-body);
 }
 
 .product-meta {
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
+}
+
+.product-card-summary {
+  color: var(--muted-ink);
+}
+
+.product-card-price {
+  color: var(--ink);
+  font-size: 1.05rem;
+  letter-spacing: 0.02em;
 }
 
 .product-link {
