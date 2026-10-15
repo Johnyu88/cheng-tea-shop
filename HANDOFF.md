@@ -974,3 +974,10 @@ This checkpoint records preparation only; the 10/14 switch has **not** been perf
 - 修正：草稿測試配置公開目錄同步路徑；首頁主要導覽補回訂單查詢；結帳電話改為目前核定的 0800 聯絡號碼；後台改為既有管理員密碼登入介面，移除前台 Passkey/SMS 登入入口與 Demo 文案。
 - 回歸測試：`69` files、`343/343` tests PASS；`typecheck` PASS；`production build` PASS。Build 仍報告既有 Demo 檔案路徑的動態 filesystem tracing 警告。
 - 未完成：正式 PostgreSQL、物件儲存、資料遷移、Render 付費 Web Service、正式 HTTPS 與真實環境 E2E 尚未執行；不得以本階段測試結果宣稱正式部署完成。
+
+## 2026-10-15 PROD-ADMIN-03 Acer Caddy checkpoint
+
+- Caddy `tea-caddy-staging` was changed only after saving `C:\data\tea-staging\recovery\prod-admin-03-caddy-before`. The active route is `:80 -> host.docker.internal:8130`; `/healthz`, `/api/health`, `/admin/orders`, and `/admin/products` were verified through `https://acer-v5.tail4d8b5a.ts.net`.
+- The active backend is still the existing `tea-private-v5-reauth` image `tea-nextjs:reauth-05f058e`, mounted to `C:\data\tea-staging\private-accounting-v1-data`. Its live UI still shows phone login, so it is not the current worktree commit and cannot be called the completed password-login deployment.
+- No container was rebuilt, no existing SQLite/media data was deleted, and no other Caddy route was modified.
+- Stop point: deploy/activate the verified worktree revision under the user's container restriction, then obtain the original admin password through a secure channel for authenticated E2E. Do not claim completion before that evidence exists.
