@@ -17,6 +17,9 @@ Updated: 2026-10-15 (Asia/Taipei)
 - Focused tool tests: `10/10 PASS`; synthetic production-flow rehearsal PASS with temporary containers cleaned; full Vitest `72 files / 360 tests PASS`; TypeScript and ESLint PASS; production build PASS with six pre-existing tracing warnings. Read-only formal preflight PASS for the verified source/candidate IDs, backup marker, and four known RW writers; formal switch was not invoked.
 - First formal switch attempt was automatically rolled back on the immediate public health check; read-only verification confirmed the original container and all three other RW writers running, and 8130/10001/10000 all HTTP 200. No data or route change remained.
 - The CLI now uses a bounded 60-second retry window for transient Caddy/Funnel reconnection. Focused tool tests are `10/10 PASS`; retry fix pending commit/push before any second switch attempt.
+- Second formal switch succeeded after the retry fix: `tea-private-v5-prod-admin-24-live` ID `3caf092c025f7a0f50a2298af18a00a8a944463c9b2255b30f1ec53c1d36326e` is running on 8130 with the candidate image; the original container is preserved and stopped for rollback, and all three other RW writers are running.
+- Post-switch read-only checks: 8130/10001/10000 HTTP 200, public products/orders pages HTTP 200, catalog endpoint HTTP 200 with 7 items, unauthenticated admin-orders API HTTP 403; Tailscale routes unchanged. Real password login and ordinary-phone acceptance remain manual and are not claimed from these checks.
+- Deployment evidence commit/push: `fd4d7f5`.
 
 ## Current stop point
 
