@@ -1046,3 +1046,12 @@ This checkpoint records preparation only; the 10/14 switch has **not** been perf
 - Public DOM evidence now shows `茶行訂單管理` → `密碼登入` → `管理員密碼` field → `登入` button. Public unauthenticated admin API remains 403.
 - Caddy config remains `Caddyfile.prod-admin-04`; the public Host/Origin normalization is scoped to `Host *:10001`.
 - Recovery remains `C:\data\tea-staging\recovery\prod-admin-04-before-caddy-origin-fix\Caddyfile.before`; disable only the new ingress with `tailscale funnel --https=10001 off`.
+
+## 2026-10-15 PROD-ADMIN-09C diagnostic candidate
+
+- Added query-gated diagnostics only for `/admin/products?diagnostics=1`. The server HTML emits the panel before the product React tree; `/admin/products` without the query does not request the diagnostic script.
+- Added independent same-origin Vanilla JS error/resource listeners and a read-only bridge for React mount, Session API, and Catalog API status metadata. No request body, response body, cookie, token, password, product, or customer data is recorded.
+- Candidate verification: TypeScript PASS; production build PASS with the existing six dynamic filesystem tracing warnings; Vitest `70 files / 347 tests PASS`; Chromium Playwright `26/26 PASS`, including blocked Next chunks, Session 401, Catalog 503, and normal-mode no-diagnostic-request checks.
+- Full Playwright was `27/52 PASS` with `25` WebKit tests blocked because the local `webkit-2359` executable is absent; no browser download was performed. This is an environment limitation, not a WebKit PASS.
+- No formal 10001 deployment, container change, Caddy/Funnel change, SQLite/photo/order change, or frontend 10000 change was made. Candidate service used local port `3109` only.
+- Stop point: await ChatGPT review before any formal-site diagnostic deployment. Rollback is one commit revert; existing formal backend/container/image remain untouched.

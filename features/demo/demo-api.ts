@@ -2,16 +2,20 @@ import type { Cart, CheckoutDraft } from "@/lib/domain";
 import type { DemoOrderSnapshot } from "@/lib/domain/demo-order-service";
 import type { DemoOutboxEntry } from "@/lib/server/demo-notification-outbox";
 import type { DemoMobilePushPreview } from "@/lib/domain/demo-notification-preview";
+import { reportAdminProductsApi, reportAdminProductsApiError } from "@/features/publishing/diagnostics/admin-products-diagnostic";
 
 type Envelope<T> = { ok: true; value: T } | { ok: false; error: string };
 export class DemoApiError extends Error {
   constructor(message: string, readonly status = 0, readonly retryAfterSeconds = 0) { super(message); this.name = "DemoApiError"; }
 }
 async function request<T>(url: string, init: RequestInit, bounded = false): Promise<T> {
+  const diagnosticName = url === "/api/demo/admin/session" ? "session" : url.startsWith("/api/demo/catalog") ? "catalog" : undefined;
+  const diagnosticStarted = diagnosticName ? performance.now() : 0;
   const controller = new AbortController();
   const timer = bounded ? setTimeout(() => controller.abort(), 20000) : undefined;
   try {
     const response = await fetch(url, { credentials: "same-origin", ...init, signal: controller.signal });
+    if (diagnosticName) reportAdminProductsApi(diagnosticName, { status: response.status, contentType: response.headers.get("content-type") ?? "", durationMs: Math.round(performance.now() - diagnosticStarted) });
     const rawRetry = response.headers?.get("Retry-After") ?? "";
     const retry = Math.max(0, Math.ceil(Number(rawRetry) || (Date.parse(rawRetry) - Date.now()) / 1000 || 0));
     const payload = await response.json().catch(() => null) as Envelope<T> | null;
@@ -23,6 +27,7 @@ async function request<T>(url: string, init: RequestInit, bounded = false): Prom
     }
     return payload.value;
   } catch (error) {
+    if (diagnosticName) reportAdminProductsApiError(diagnosticName, { errorType: error instanceof Error ? error.name : "UnknownError", durationMs: Math.round(performance.now() - diagnosticStarted) });
     if (error instanceof DemoApiError) throw error;
     throw new DemoApiError(controller.signal.aborted ? "連線逾時，取得或查詢未完成，請稍後重試。" : "暫時無法連線，請確認網路後重試。");
   } finally { clearTimeout(timer); }

@@ -5,12 +5,13 @@ import { useEffect, useState, type JSX } from "react";
 import type { Product } from "@/lib/domain";
 import { demoApi, type DemoMerchantStatus } from "@/features/demo/demo-api";
 import { AdminPasskeyLogin } from "@/features/demo/components/admin-passkey-login";
+import { reportAdminProductsApi, reportAdminProductsApiError, reportAdminProductsReactMounted } from "../diagnostics/admin-products-diagnostic";
 import { initialDraft, minimumProblems, ProductFields, type FormDraft } from "./product-form";
 
 type Envelope<T> = { ok: true; value: T } | { ok: false; error: string };
 const categoryLabels: Record<Product["category"], string> = { "wild-mountain": "台灣野生山茶", white: "白茶", green: "綠茶", yellow: "黃茶", oolong: "青茶", black: "紅茶", flower: "花茶", dark: "黑茶", special: "特殊茶", aged: "老茶", other: "其他" };
 
-async function loadProducts(): Promise<Product[]> { const response = await fetch("/api/demo/catalog?limit=50&includeUnpublished=true", { credentials: "same-origin" }); const payload = await response.json() as Envelope<{ items: Product[] }>; if (!response.ok || !payload.ok) throw new Error(payload.ok ? "商品資料無法取得" : payload.error); return [...payload.value.items].reverse(); }
+async function loadProducts(): Promise<Product[]> { const started = performance.now(); try { const response = await fetch("/api/demo/catalog?limit=50&includeUnpublished=true", { credentials: "same-origin" }); reportAdminProductsApi("catalog", { status: response.status, contentType: response.headers.get("content-type") ?? "", durationMs: Math.round(performance.now() - started) }); const payload = await response.json() as Envelope<{ items: Product[] }>; if (!response.ok || !payload.ok) throw new Error(payload.ok ? "商品資料無法取得" : payload.error); return [...payload.value.items].reverse(); } catch (caught) { reportAdminProductsApiError("catalog", { errorType: caught instanceof Error ? caught.name : "UnknownError", durationMs: Math.round(performance.now() - started) }); throw caught; } }
 async function patchProduct(body: Record<string, unknown>): Promise<Product> { const response = await fetch("/api/demo/catalog", { method: "PATCH", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify(body) }); const payload = await response.json() as Envelope<Product>; if (!response.ok || !payload.ok) throw new Error(payload.ok ? "商品更新失敗" : payload.error); return payload.value; }
 
 function draftFromProduct(product: Product): FormDraft { const variant = product.variants[0]; return { ...initialDraft, name: product.name, specification: variant?.specification ?? "", price: String(variant?.price.amount ?? ""), category: product.category, inventoryStatus: variant?.inventoryStatus ?? "available", tasteTags: [...product.tasteTags], fermentation: product.fermentation ?? "", roast: product.roast ?? "", brewing: product.brewing ?? "", summary: product.summary, aroma: product.aroma ?? "", taste: product.taste ?? "", origin: product.teaRegion ?? "" }; }
@@ -33,6 +34,7 @@ export function ProductManagementPage(): JSX.Element {
   const [error, setError] = useState("");
   const refresh = () => { void loadProducts().then(setProducts).catch((caught) => setError(caught instanceof Error ? caught.message : "商品資料無法取得")); };
   useEffect(() => {
+    reportAdminProductsReactMounted();
     let alive = true;
     void demoApi.merchantStatus().then(status => {
       if (!alive) return;

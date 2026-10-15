@@ -122,3 +122,13 @@ Disable only the new ingress with `tailscale funnel --https=10001 off`, restore 
 - Fresh public checks: root 302 with `Location: /admin/orders`; public `/admin/orders` 200; public unauthenticated admin API 403. In-browser DOM evidence shows title `茶行訂單管理`, heading `密碼登入`, label `管理員密碼`, and disabled `登入` button before a password is entered.
 - No database, container, 10000 route, 443 route, 8443 route, formal frontend, or credentials were changed.
 - Recovery: `C:\data\tea-staging\recovery\prod-admin-04-before-caddy-origin-fix\Caddyfile.before`; disable the independent Funnel with `tailscale funnel --https=10001 off`.
+
+## 2026-10-15 PROD-ADMIN-09C diagnostic candidate
+
+Status: candidate verified in isolation; formal deployment is not authorized.
+
+- Scope: `/admin/products?diagnostics=1` only. Normal product mode and `/admin/orders` do not load the diagnostic script.
+- Evidence: static server HTML marker, independent Vanilla JS startup/error/resource capture, React mount marker, safe Session/Catalog status metadata, and DOM visibility checks. No secrets or application data are emitted.
+- Verification: TypeScript PASS; production build PASS with six pre-existing dynamic filesystem tracing warnings; Vitest `347/347 PASS`; Chromium Playwright `26/26 PASS`. WebKit remains unverified because the local Playwright WebKit binary is missing.
+- Isolation: local candidate server on port `3109`; formal `10001`, `10000`, Caddy, Funnel, Docker, SQLite, photos, orders, and existing rollback artifacts were not changed.
+- Stop point: ChatGPT review required before any formal diagnostic deployment. Revert the candidate commit to remove the tool.
