@@ -1,0 +1,19 @@
+:80 {
+  @caddyHealth path /healthz
+  respond @caddyHealth "ok" 200
+
+  @publicAdmin header Host *:10001
+  handle @publicAdmin {
+    reverse_proxy host.docker.internal:8130 {
+      header_up Host acer-v5.tail4d8b5a.ts.net
+      header_up Origin https://acer-v5.tail4d8b5a.ts.net
+      header_up X-Forwarded-Host acer-v5.tail4d8b5a.ts.net
+      header_up X-Forwarded-Proto https
+    }
+  }
+
+  reverse_proxy host.docker.internal:8130 {
+    header_up Host {host}
+    header_up X-Forwarded-Proto https
+  }
+}

@@ -993,3 +993,12 @@ This checkpoint records preparation only; the 10/14 switch has **not** been perf
 - External mobile result is **BLOCKED**: the Caddy 443/8443 URLs are Tailscale `tailnet only`. The existing `:10000` Funnel targets unrelated 8131 and was not changed or used.
 - Local Git commit `47b6d26` is pushed to `origin/codex/prod-restore-20261015` (`SYNCED`).
 - Rollback: stop the live replacement, start `tea-private-v5-reauth`, restore the saved Caddyfile, and verify `/api/health` before any further action.
+
+## 2026-10-15 PROD-ADMIN-04 mobile external ingress — latest
+
+- Added only `https://acer-v5.tail4d8b5a.ts.net:10001` Funnel to the existing Caddy/8130 path. Existing 10000→8131, 443→8090, and 8443→8130 were not overwritten.
+- Caddy now uses the tracked `Caddyfile.prod-admin-04`; the 10001-only matcher normalizes the public port's forwarded origin to the already configured Acer origin. Caddy validate/reload passed.
+- Public checks: health 200; unauthenticated admin API 403; existing password login 200; authenticated admin API 200. No secrets/cookies were logged.
+- `tea-public-contact-4837371` remains the 10000 service (`127.0.0.1:8131`) and was not changed.
+- Mobile delivery remains **BLOCKED / NOT VERIFIED**: no physical phone without Tailscale was available, and the independent web probe could not resolve this Tailscale hostname. Do not claim Safari or LINE acceptance.
+- Recovery: `C:\data\tea-staging\recovery\prod-admin-04-before-funnel`, `C:\data\tea-staging\recovery\prod-admin-04-before-caddy-origin-fix`. Disable with `tailscale funnel --https=10001 off`; restore the saved Caddyfile only if needed.

@@ -55,3 +55,23 @@ Keep old container and image. To roll back, stop `tea-private-v5-prod-admin-03-l
 ### Git state
 
 Implementation and documentation are committed at `47b6d26` and pushed to `origin/codex/prod-restore-20261015` (`SYNCED`).
+
+## 2026-10-15 PROD-ADMIN-04 mobile external ingress — latest
+
+- Existing routes were preserved: `10000 -> 127.0.0.1:8131` remains `tea-public-contact-4837371`; `443 -> 8090`; `8443 -> 8130`; `8444 -> 8134`; `8445 -> 8138`.
+- Added independent Tailscale Funnel: `https://acer-v5.tail4d8b5a.ts.net:10001/ -> 127.0.0.1:8090 -> Caddy -> host.docker.internal:8130`.
+- Caddy asset/config: `Caddyfile.prod-admin-04`; only `Host *:10001` normalizes Host, Origin, and X-Forwarded-Host to the existing configured Acer origin. Other routes keep the prior proxy behavior.
+- Recovery evidence: `C:\data\tea-staging\recovery\prod-admin-04-before-funnel` and `C:\data\tea-staging\recovery\prod-admin-04-before-caddy-origin-fix`.
+
+### Public ingress verification
+
+- Public 10001 health: PASS (HTTP 200).
+- Public unauthenticated admin API: PASS protected (HTTP 403).
+- Public password login: PASS (HTTP 200); authenticated admin API: PASS (HTTP 200). Password and cookies were not printed.
+- Existing 443 health/admin protection: PASS (200/403).
+- Existing 10000 was not overwritten; it remains the unrelated 8131 service and its backend health path returned 404, as expected for that service.
+- Safari/LINE on a real phone: **NOT VERIFIED / BLOCKED** in this environment. The independent external probe could not resolve the Tailscale hostname, and no physical non-Tailscale phone evidence is available. Do not mark mobile delivery PASS until Chen's phone completes Safari and LINE checks for login, lookup, payment confirmation, photo upload, and shipping.
+
+### Rollback
+
+Disable only the new ingress with `tailscale funnel --https=10001 off`, restore `C:\data\tea-staging\recovery\prod-admin-04-before-caddy-origin-fix\Caddyfile.before` if needed, and reload Caddy. Existing 10000, 443, 8443, 8130, SQLite, and photos remain independent.
