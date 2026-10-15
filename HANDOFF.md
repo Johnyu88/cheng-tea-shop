@@ -981,3 +981,15 @@ This checkpoint records preparation only; the 10/14 switch has **not** been perf
 - The active backend is still the existing `tea-private-v5-reauth` image `tea-nextjs:reauth-05f058e`, mounted to `C:\data\tea-staging\private-accounting-v1-data`. Its live UI still shows phone login, so it is not the current worktree commit and cannot be called the completed password-login deployment.
 - No container was rebuilt, no existing SQLite/media data was deleted, and no other Caddy route was modified.
 - Stop point: deploy/activate the verified worktree revision under the user's container restriction, then obtain the original admin password through a secure channel for authenticated E2E. Do not claim completion before that evidence exists.
+
+## 2026-10-15 PROD-ADMIN-03 minimal reversible update — latest
+
+- Fixed the verified Acer direct-mode 404 root cause with the smallest allowlist change in `proxy.ts`; regression test is in `tests/cloud-demo.test.ts`.
+- Built and activated `tea-nextjs:prod-admin-03-0b36c71-r1` (`sha256:e247f2eb70688627e7b75a7d23ca230f2d4dc59bef3fdf58a30b09deb6f402cc`). Live container is `tea-private-v5-prod-admin-03-live` (`9c17dd26d8d42e4c4168fa22893830cc7ba0e11a7ebde9278d772b9742f7ef62`) on 8130.
+- `tea-private-v5-reauth` remains preserved/exited as rollback with the old image. Existing SQLite, catalog, and media mounts are unchanged.
+- Caddy now proxies `host.docker.internal:8130`; validate/reload succeeded and HTTPS health/admin routes returned 200.
+- Fresh live acceptance passed: existing password login, catalog, marked order creation, admin query, payment confirmation, packing photo, ship, deliver, cross-device lookup, and restart persistence. No secret values were printed.
+- Recovery summaries are at `C:\data\tea-staging\recovery\prod-admin-03-8130-before` and `...\prod-admin-03-8130-after`; Caddy pre-change rollback is `...\prod-admin-03-caddy-before`.
+- External mobile result is **BLOCKED**: the Caddy 443/8443 URLs are Tailscale `tailnet only`. The existing `:10000` Funnel targets unrelated 8131 and was not changed or used.
+- Local Git state is ready for commit. Push remains `LOCAL_COMMITS_PENDING` because GitHub connection fails on port 443; exact error: `Failed to connect to github.com port 443: Bad access`.
+- Rollback: stop the live replacement, start `tea-private-v5-reauth`, restore the saved Caddyfile, and verify `/api/health` before any further action.

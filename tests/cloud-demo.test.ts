@@ -5,6 +5,8 @@ import { assertLocalDemoHttpRequest } from "@/lib/server/demo-http-guard";
 import { issueDemoMerchantCookie, issueDemoMerchantPhoneCookie, verifyDemoMerchantCookie } from "@/lib/server/demo-access";
 
 import { merchantPhoneAuth } from "@/lib/server/merchant-phone-auth";
+import { proxy } from "@/proxy";
+import { NextRequest } from "next/server";
 
 const token = "a".repeat(32);
 const basic = "Basic " + Buffer.from("preview:" + token).toString("base64");
@@ -134,5 +136,13 @@ describe("private Acer HTTPS demo", () => {
     expect(() => assertAcerDemoRequest(make({ origin: "https://acer-v5.tail4d8b5a.ts.net" }))).toThrow();
     expect(() => assertAcerDemoRequest(make({ origin: "https://attacker.example:8443" }))).toThrow();
     expect(() => assertAcerDemoRequest(make({ "sec-fetch-site": "cross-site" }))).toThrow();
+  });
+  it("allows the customer order API through direct Acer mode", () => {
+    vi.stubEnv("DEMO_COMMERCE_ACER", "enabled");
+    vi.stubEnv("DEMO_ACER_MERCHANT_LOGIN_DIRECT", "enabled");
+    const requestFor = (path: string) => new NextRequest(`https://acer-v5.tail4d8b5a.ts.net${path}`, { method: "POST" });
+    for (const path of ["/api/demo/otp", "/api/demo/orders", "/api/demo/orders/lookup"]) {
+      expect(proxy(requestFor(path)).status, path).not.toBe(404);
+    }
   });
 });
