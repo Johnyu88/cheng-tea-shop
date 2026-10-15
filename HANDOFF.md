@@ -1011,6 +1011,16 @@ This checkpoint records preparation only; the 10/14 switch has **not** been perf
 - Recovery backup: `C:\data\tea-staging\recovery\ui-rwd-01-before-10000`. Preserve the old container/image and the read-only catalog mount for immediate rollback.
 - Next action: commit/push, smoke-test the new image, then replace only 10000 and run HTTPS regression. Wait for the user's foldable-phone visual confirmation before calling the UI task fully accepted.
 
+## 2026-10-15 UI-RWD-01 10000 formal deployment
+
+- Commit pushed: `f2a2a78d0351f6f0f650a2e511ce79b83d954191` on `codex/prod-restore-20261015`.
+- 10000 now runs `tea-public-contact-4837371` from `tea-nextjs:ui-rwd-01-f2a2a78` (image `sha256:a3ade5517c5b...`); Funnel and proxy target remain `10000 -> 127.0.0.1:8131`.
+- Cutover was 10000-only. 10001 admin, Caddy 8090, backend 8130, 443, 8443, SQLite/files, and read-only catalog mount were not changed.
+- Official HTTPS route checks passed for home, catalog, cart, checkout, and tea detail. Playwright official viewport checks passed at 390/412/768/1080/1440px with no horizontal overflow, intact natural image ratios, `contain`, full-width audio, and single-column story/media at widths through 1080px.
+- Evidence files: `test-results/ui-rwd-01-official-phone-390.png`, `...fold-outer.png`, `...tablet-768.png`, `...fold-inner-1080.png`, `...desktop-1440.png`.
+- Rollback: stop/remove only the new `tea-public-contact-4837371`, rename `tea-public-contact-4837371-ui-rwd-01-rollback` back to `tea-public-contact-4837371`, start it; the old image and backup at `C:\data\tea-staging\recovery\ui-rwd-01-before-10000` remain intact. Do not delete either image/data mount.
+- Waiting for the user's real foldable-phone opened/closed visual confirmation; no physical-device PASS is claimed.
+
 ## 2026-10-15 PROD-ADMIN-05 public entry Not found fix — latest
 
 - Confirmed actual login path is `/admin/orders`; `/admin/login` does not exist. Before repair, `/`, `/admin/orders`, and `/admin/login` were measured independently at 8130, Caddy 8090, and Funnel 10001.

@@ -84,6 +84,17 @@ Disable only the new ingress with `tailscale funnel --https=10001 off`, restore 
 - Pre-deploy recovery is `C:\data\tea-staging\recovery\ui-rwd-01-before-10000`; the old image/container and read-only catalog data must remain recoverable.
 - Release gate: source is ready for a 10000-only replacement; physical foldable-device confirmation remains pending after deployment.
 
+## 2026-10-15 UI-RWD-01 10000 formal deployment
+
+- Source commit: `f2a2a78d0351f6f0f650a2e511ce79b83d954191`, pushed to `codex/prod-restore-20261015`.
+- Deployment time: `2026-10-15T18:58:23+08:00` evidence collection; replacement container created at `2026-10-15T10:56:35Z`.
+- New 10000 container: `tea-public-contact-4837371`; image `tea-nextjs:ui-rwd-01-f2a2a78`, image ID `sha256:a3ade5517c5b90a09b693ae69c023882d6b38b3e40d57ed8b1fed44bd9f3c8fa`; target remains `Tailscale Funnel 10000 -> 127.0.0.1:8131`.
+- Existing catalog publication mount remains read-only at `C:\data\tea-staging\public-visibility-live -> /app/catalog-sync`. No database, photo, order, admin, Caddy, 10001, 8130, 443, or 8443 changes.
+- Formal HTTPS checks: `/`, `/api/public/catalog`, `/cart`, `/checkout`, and a tea detail route all returned 200. Official Playwright metrics passed at 390, 412, 768, 1080, and 1440px: natural/rendered image ratios match, `object-fit=contain`, no horizontal overflow, metadata preload, and single-column story/media through 1080px.
+- Screenshots: `test-results/ui-rwd-01-official-phone-390.png`, `...fold-outer.png`, `...tablet-768.png`, `...fold-inner-1080.png`, `...desktop-1440.png`; pre-deploy browser evidence was captured from the old 10000 page before cutover.
+- Rollback preserved: stopped old container `tea-public-contact-4837371-ui-rwd-01-rollback`, old image `tea-nextjs:contact-4837371`, plus `C:\data\tea-staging\recovery\ui-rwd-01-before-10000`.
+- Physical foldable-phone visual acceptance is still pending; automated/browser checks must not be treated as real-device acceptance.
+
 ## 2026-10-15 PROD-ADMIN-05 public entry Not found fix
 
 - Root cause: `/admin/login` is not an application route. The actual password login UI is client-rendered at `/admin/orders`; the direct Acer proxy intentionally returned plain-text `Not found` for `/` because direct mode did not allow a storefront root.
