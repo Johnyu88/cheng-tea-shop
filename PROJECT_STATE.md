@@ -95,6 +95,15 @@ Disable only the new ingress with `tailscale funnel --https=10001 off`, restore 
 - Rollback preserved: stopped old container `tea-public-contact-4837371-ui-rwd-01-rollback`, old image `tea-nextjs:contact-4837371`, plus `C:\data\tea-staging\recovery\ui-rwd-01-before-10000`.
 - Physical foldable-phone visual acceptance is still pending; automated/browser checks must not be treated as real-device acceptance.
 
+## 2026-10-15 PROD-ADMIN-06B foldable product-management blank screen diagnosis
+
+- Production baseline unchanged: `tea-private-v5-prod-admin-03-live`, image `tea-nextjs:prod-admin-03-0b36c71-r1`; Caddy 10001 Funnel remains `10001 -> 8090 -> host.docker.internal:8130`.
+- User real-device result is FAIL on both the original browser and Chrome. This is separate from the current Chromium evidence and is not being marked PASS.
+- Public `10001/admin/products` and local `8130/admin/products` with the exact forwarded Host/Origin headers returned identical HTML byte count/hash. Every referenced Next static JS asset returned 200.
+- Authenticated Playwright diagnostics at 412px and 1080px: `main`, product card, and product list had visible/displayed geometry; session API and authenticated catalog API returned 200; console errors and page exceptions were 0. Cookie attributes were Secure, HttpOnly, SameSite=Strict, Path=/; no value recorded.
+- No source, container, Caddy, database, photo, order, or frontend change was made. No repair commit or deployment exists for PROD-ADMIN-06B.
+- Blocker: the real phone's failing request/console evidence is unavailable from this host. Minimal next diagnostic is a redacted Chrome DevTools remote capture of the failing page: URL/status, first console exception, failed `/_next/static/*` or `/api/*` request, viewport, and cookie names/attributes only; never share cookie values or password.
+
 ## 2026-10-15 PROD-ADMIN-05 public entry Not found fix
 
 - Root cause: `/admin/login` is not an application route. The actual password login UI is client-rendered at `/admin/orders`; the direct Acer proxy intentionally returned plain-text `Not found` for `/` because direct mode did not allow a storefront root.

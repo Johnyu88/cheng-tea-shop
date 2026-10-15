@@ -1021,6 +1021,15 @@ This checkpoint records preparation only; the 10/14 switch has **not** been perf
 - Rollback: stop/remove only the new `tea-public-contact-4837371`, rename `tea-public-contact-4837371-ui-rwd-01-rollback` back to `tea-public-contact-4837371`, start it; the old image and backup at `C:\data\tea-staging\recovery\ui-rwd-01-before-10000` remain intact. Do not delete either image/data mount.
 - Waiting for the user's real foldable-phone opened/closed visual confirmation; no physical-device PASS is claimed.
 
+## 2026-10-15 PROD-ADMIN-06B foldable product-management blank screen diagnosis
+
+- Real foldable-phone acceptance: FAIL reported on both the original browser and Chrome. No real-device PASS is claimed.
+- Live backend remains `tea-private-v5-prod-admin-03-live` / `tea-nextjs:prod-admin-03-0b36c71-r1`; no deployment or rollback state changed.
+- 10001 and forwarded-local 8130 product HTML matched by byte count/hash; public page JS assets all returned 200. Authenticated browser at 412px and 1080px rendered the product page and 10 products with visible geometry.
+- Authenticated cookie metadata: `__Host-demo_merchant`, Secure, HttpOnly, SameSite=Strict, Path=/; values were never printed. Session/catalog APIs returned 200. Console/pageerror count was zero. The only request failures were aborted Next RSC prefetches from normal link prefetch, not the page or API.
+- Current result is **BLOCKED / UNRESOLVED**, not repaired: the first real-device exception/request is still missing, so no code change is justified.
+- Required diagnostic handoff: from the failing phone, provide a redacted capture containing viewport/UA, first console exception, failed request URL path + status for `/_next/static/*` or `/api/*`, redirect chain, and cookie names/attributes only. Do not provide cookie values, passwords, or customer data.
+
 ## 2026-10-15 PROD-ADMIN-05 public entry Not found fix — latest
 
 - Confirmed actual login path is `/admin/orders`; `/admin/login` does not exist. Before repair, `/`, `/admin/orders`, and `/admin/login` were measured independently at 8130, Caddy 8090, and Funnel 10001.
