@@ -835,3 +835,13 @@ TDD 新增測試施工前為 `4 failed / 0 passed`，施工後定向分類測試
 
 建立恢復標記 `phase2-tea-invitation-08-adbe430` 指向 `adbe430`，並保留 `phase2-checkout-accept-05-aff7262`。候選 10002 已關閉；正式 10000／10001 未修改、未停止、未部署。
 
+## 79. 2026-10-16 PHASE3-PROD-FRONTEND-DEPLOY-01 正式前台部署
+
+本次依使用者明確授權，將已完成人工手機驗收的 `adbe4309707c1919eb2fc1738d0d373add9f39f1` 部署至正式前台 10000。來源驗收標記 `phase2-tea-invitation-08-adbe430` 與文件基準 `396d27066e19c626ff116594b4e774d2bd8a3c4f` 保留不變，沒有合併 `main`。
+
+正式 10000 的既有 Funnel 映射仍為 `127.0.0.1:8131`，只替換該 loopback port 背後的前台容器。新容器 `tea-public-adbe430-live` 使用 image `tea-nextjs:prod-frontend-adbe430`，digest `sha256:463107219334b60d6e9dd9555ceba9a6b81e0dc12c771f32dd9937b5e39cd148`；原 `tea-public-contact-4837371` 與 image `sha256:a3ade5517c5b90a09b693ae69c023882d6b38b3e40d57ed8b1fed44bd9f3c8fa` 保留為可立即回退備援。正式 10001／8090 與其 Funnel 未變。
+
+新容器只讀取公開 catalog 掛載，不掛載正式私有資料或可寫入資料庫；切換前後公開 catalog hash 未變，且本次驗證未送出寫入請求、未建立真實訂單。Docker build、TypeScript、5 檔／21 項關鍵回歸測試通過；正式 `/`、`/cart`、`/checkout`、公開 catalog 與 10001 `/` 均 HTTP 200；390px 首頁／購物車／結帳無水平溢出，放棄購買保留／清除流程通過。
+
+正式前台目前等待使用者手機驗收。若需回退，先執行 `docker stop tea-public-adbe430-live; docker start tea-public-contact-4837371`，再檢查 10000 HTTP 200；不需改動 Funnel。`/api/health` 由正式 storefront proxy 安全封鎖為 404，與切換前一致，不能作為此正式前台的健康判準。
+

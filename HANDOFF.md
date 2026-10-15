@@ -1208,3 +1208,15 @@ This checkpoint records preparation only; the 10/14 switch has **not** been perf
 - 十大茶類橫向分類與操作的既有人工驗收紀錄仍為 **PASS**；人工訂購流程的 LINE 三步驟、電話／匯款、放棄購買二次確認既有人工驗收紀錄仍為 **PASS**。
 - 建立新恢復標記 `phase2-tea-invitation-08-adbe430`，精確指向 `adbe4309707c1919eb2fc1738d0d373add9f39f1`；既有 `phase2-checkout-accept-05-aff7262` 保留且未覆蓋。
 - 本次只更新交接文件與 Git 標記，未修改網站功能、視覺、正式商品／訂單／資料庫或正式部署。候選 HTTPS 10002 已於封存後關閉；正式 10000／10001 維持運作。
+
+## 2026-10-16 PHASE3-PROD-FRONTEND-DEPLOY-01 正式前台部署
+
+- 使用者已明確授權正式部署；來源固定為 `adbe4309707c1919eb2fc1738d0d373add9f39f1`，驗收標記 `phase2-tea-invitation-08-adbe430`，文件基準 `396d27066e19c626ff116594b4e774d2bd8a3c4f`。未合併 `main`、未改寫驗收標記。
+- 部署時間：`2026-10-16T03:02:51+08:00`。新 image：`tea-nextjs:prod-frontend-adbe430`，digest `sha256:463107219334b60d6e9dd9555ceba9a6b81e0dc12c771f32dd9937b5e39cd148`；新正式前台容器：`tea-public-adbe430-live`／`3048d710450b69d5e13c6762f8584a2c5601e4a4553d6b5f56f27dce8ee3093f`。
+- 10000 Funnel 映射未改寫，仍為 `https://acer-v5.tail4d8b5a.ts.net:10000/` → `127.0.0.1:8131`。原正式容器 `tea-public-contact-4837371`／`f32aeef95b489a6f13a0261a6752610d7566d28041cf25cfe50337573a70d74d` 已停止但保留；原 image `tea-nextjs:ui-rwd-01-f2a2a78`／`sha256:a3ade5517c5b90a09b693ae69c023882d6b38b3e40d57ed8b1fed44bd9f3c8fa` 未刪除。
+- 新容器只掛載 `C:\data\tea-staging\public-visibility-live` → `/app/catalog-sync` 的唯讀掛載，沒有 `/app/data` 或正式可寫入資料掛載。公開 catalog SHA-256 為 `75CB73640D2065F19CD7ED65D666F102317B4B1A25F8EFB5103399335BCC0E43`，切換前後未變更。
+- 部署前：Docker production build、TypeScript、關鍵回歸 5 檔／21 測試 PASS；舊 image 在獨立 `8141` 回退複本實際啟動、首頁 HTTP 200、catalog 可讀後已清理。
+- 切換後：10000 `/`、`/cart`、`/checkout`、`/api/public/catalog` 均 HTTP 200；10001 `/` HTTP 200，Caddy container 與 Funnel `10001 → 8090` 未變。正式 catalog 7 件商品的 ID／分類／上架狀態與切換前一致。390px Playwright 驗證首頁／購物車／結帳無水平溢出；放棄購買對話框、取消保留 cart、確認後清除 cart 均 PASS。未送出 POST、未建立真實訂單。
+- storefront proxy 依正式安全設計封鎖 `/api/health` 為 404；正式與新容器行為一致，健康證據採首頁／catalog／關鍵路由／容器狀態。
+- 回退：`docker stop tea-public-adbe430-live; docker start tea-public-contact-4837371`，10000 Funnel 不需修改。回退後應重新以 `curl -k https://acer-v5.tail4d8b5a.ts.net:10000/` 驗證 HTTP 200。
+- 正式前台已部署，等待使用者手機人工驗收；不進入下一階段，不修改 10001、正式資料、照片、音訊或機密設定。
