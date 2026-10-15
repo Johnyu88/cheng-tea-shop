@@ -716,6 +716,14 @@ This remains a local synthetic Demo. No AI image composition, image-recognition 
 最新策略停止擴寫自行開發認證，採維護中的 Better Auth 與官方 @better-auth/passkey 1.7.6。先在 sandboxes/passkey-lock 獨立 Next.js 應用、套件安裝與資料庫測試，驗證成功後才透過既有 AuthProvider 對接，不修改訂單／付款／照片／出貨 API。獨立 Demo 密碼 Provider 保留作備援，實際密碼只由私密環境注入。
 供應商 native handler/client 負責 WebAuthn 驗證及 Session；受驗證 Session 與店家權限分開，沙盒帳號不自動取得茶行店家權限。虛擬驗證器測試不等於手機 Face ID／指紋通過，實機驗收需另列結果。
 
+## 66. 2026-10-16 正式部署完成，轉入前台設計主線
+
+- PROD-ADMIN-24 已完成正式後台切換；部署交接基準為 commit `541e245`，正式後台容器為 `tea-private-v5-prod-admin-24-live`。
+- 正式資料、照片、訂單、Caddy、Funnel 與前台 10000 的保護邊界維持不變；原正式容器保留作為回退基準。
+- 後台的一般手機密碼登入與實機操作仍列為人工驗收事項，不能以自動化 HTTP 或 Playwright 證據取代。
+- 產品主線正式回到前台視覺與使用體驗：保留已通過的商品照片、茶湯、人物與購物流程，先處理購物車並列按鈕、放棄購買與手機排版，再整理品牌視覺系統。
+- 在設計提案獲確認前，不修改前台程式、不覆蓋正式 10000、不裁切或替換人物、茶湯與商品原始素材；所有後續實作使用獨立分支與候選環境。
+
 ## 2026-10-12 PR #29 integration closeout (supersedes older runtime notes)
 
 PR #29 remains draft/unmerged. User-reported iPhone Safari acceptance on 2026-10-11: Passkey logout/re-login, synthetic order completion, product publish/unpublish/edit, ORDER-01 reversal, and ORDER-02 package reopening passed. ORDER-03 shipment correction and Samsung's three Android Chrome entries remain pending.

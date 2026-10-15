@@ -1075,3 +1075,12 @@ This checkpoint records preparation only; the 10/14 switch has **not** been perf
 - CLI health verification now has a bounded 60-second retry window for that transient proxy condition. The second formal switch succeeded: candidate `tea-private-v5-prod-admin-24-live` ID `3caf092c025f7a0f50a2298af18a00a8a944463c9b2255b30f1ec53c1d36326e` is running on 8130 with the candidate image; the original container remains preserved and stopped as rollback target. All three other RW writers were restored.
 - Post-switch read-only checks: local 8130 health 200, public 10001 health 200, public `/admin/products` 200, public `/admin/orders` 200, frontend 10000 200, catalog endpoint 200 with 7 items, unauthenticated admin-orders API 403. Tailscale Funnel remains 10000->8131 and 10001->8090. No Caddy/Funnel/data content change was made.
 - Focused tool tests after the retry fix are `10/10 PASS`; commit/push: `fd4d7f5`. Real password login and ordinary-phone product/order操作 remain manual acceptance items; no mock login was used.
+
+## 2026-10-16 前台設計主線恢復基準
+
+- PROD-ADMIN-24 已部署完成；最終交接 commit：`541e245`。
+- 正式後台目前為 `tea-private-v5-prod-admin-24-live`；原正式容器仍保留作為回退基準。
+- 明日待陳老師以一般手機實機驗收後台登入與操作；本階段不修改後台、訂單、資料庫或前台正式 10000。
+- 角色切換：Acer Codex 由部署工程師切換為前台網頁設計師。
+- 新主線：先讀取前台原始碼、設計文件、素材與既有驗收紀錄，盤點未完成 UX 問題；優先處理購物車按鈕並列、放棄購買與手機排版，再提出字體、色調、留白、按鈕、商品卡片與品牌質感提案。
+- 本階段只產出現況截圖、差異清單與設計提案；任何前台修改須在獨立分支／候選環境，經確認後才可開始，正式 10000 不得覆蓋。
