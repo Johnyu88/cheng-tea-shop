@@ -968,3 +968,9 @@ This checkpoint records preparation only; the 10/14 switch has **not** been perf
 - 現場茶品檔僅有八筆樣品候選，另有黑茶/特殊茶名稱未提供，黃茶與老茶分類可能與樣品重疊；照片映射也有候選衝突。檔內價格/庫存不是已核定正式資料。正式匯款、電話、LINE QR、運費/免運條件待陳老師確認，機密值不得寫入 Git。
 - 10/14 才依現場包逐項執行切換前閘門；只有全數條件通過才改 :8443→8095。任一關鍵失敗，只回退 :8443→8092，保持 443→8090，保留容器/資料/監測。若不通過，維持舊版展示備援。
 - 10/15 現場順序：前台商品→購物車→下單→商家登入→訂單確認付款→包裝拍照→出貨→顧客查單。付款/訂單皆標示合成演示；ORDER-03 仍待實機驗收，不可標通過。Samsung 若無法安裝三個獨立 PWA，改建三個 Chrome 主畫面捷徑並記錄。
+## 2026-10-15 PROD-ADMIN-02 階段 02：四項失敗修復
+
+- 工作樹：`codex/prod-restore-20261015`；保留恢復基準 `f9748e187fa1cd74860c5fda79045dced9124d0d` 與備份 `C:\data\tea-staging\recovery\prod-restore-20261015-pre-render`。
+- 修正：草稿測試配置公開目錄同步路徑；首頁主要導覽補回訂單查詢；結帳電話改為目前核定的 0800 聯絡號碼；後台改為既有管理員密碼登入介面，移除前台 Passkey/SMS 登入入口與 Demo 文案。
+- 回歸測試：`69` files、`343/343` tests PASS；`typecheck` PASS；`production build` PASS。Build 仍報告既有 Demo 檔案路徑的動態 filesystem tracing 警告。
+- 未完成：正式 PostgreSQL、物件儲存、資料遷移、Render 付費 Web Service、正式 HTTPS 與真實環境 E2E 尚未執行；不得以本階段測試結果宣稱正式部署完成。
