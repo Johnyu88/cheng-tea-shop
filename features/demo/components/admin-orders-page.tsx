@@ -3,8 +3,6 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { demoApi, type DemoAdminOrder, type DemoLookupSecretRotation, type DemoMerchantStatus, type DemoMerchantChallenge } from "../demo-api";
-import { AdminPasskeyLogin } from "./admin-passkey-login";
-import { merchantPasskeyClient } from "../merchant-passkey-client";
 import { DemoOrderProgress } from "./demo-order-progress";
 
 const statusLabel = { confirmed: "已確認", packed: "已打包", shipped: "已出貨", delivered: "已送達" } as const;
@@ -68,18 +66,9 @@ export function AdminOrdersPage() {
     } catch (e) { setError(e instanceof Error ? e.message : "驗證碼傳送失敗"); }
     finally { setBusy(false); }
   };
-  const resumePasskey = async () => {
-    const status = await demoApi.merchantStatus();
-    if (!status.authenticated) throw new Error("尚未取得商家權限，請重新登入。");
-    setLoginStatus(status); await refresh(); setAuthenticated(true); setError("");
-  };
   const logout = async () => {
     try { setBusy(true); await demoApi.merchantLogout(); clearPendingPhoto(); clearRotation(); setOrders([]); setAuthenticated(false); setLoginStatus(await demoApi.merchantStatus()); setError(""); }
     catch { setError("登出未完成，請重試。"); } finally { setBusy(false); }
-  };
-  const registerPasskey = async () => {
-    try { setBusy(true); const result = await merchantPasskeyClient.passkey.addPasskey({ name: "茶行後台手機", authenticatorAttachment: "platform" }); if(result.error) throw new Error(); setLoginStatus(await demoApi.merchantStatus()); setError(""); }
-    catch { setError("註冊未完成。若使用緊急密碼登入，請先登出並使用首次設定。"); } finally { setBusy(false); }
   };
   const passwordLogin = async () => {
     try {
@@ -169,9 +158,9 @@ export function AdminOrdersPage() {
   };
 
   return <main className="py-8">
-    <p className="prototype-notice">訂單 Demo：付款由人工確認。</p>
+      <p className="prototype-notice">訂單管理：付款由人工確認。</p>
     <section className="demo-panel">
-      <h1>商家訂單 Demo</h1>
+      <h1>商家訂單</h1>
       <Link className="filter-button mt-4 inline-flex" href="/">回到首頁</Link>
       {error && <div role="alert" className="product-draft-alert">{error}</div>}
       {pendingAudit && <section className="demo-panel mt-4" role="dialog" aria-modal="true" aria-labelledby="audit-reason-title">
@@ -186,12 +175,12 @@ export function AdminOrdersPage() {
         </div>
       </section>}
       {!authenticated ? <>
-        {loginStatus?.passkey?.enabled && loginStatus.passkey.registered ? <AdminPasskeyLogin registered={loginStatus.passkey.registered} onAuthenticated={resumePasskey} /> : loginStatus?.provider === "password" ? <>
-          <h2 className="mt-6">Demo 密碼登入</h2>
-          <p className="muted mt-3">請輸入授權驗收人員取得的 Demo 密碼。</p>
-          {loginStatus.state !== "ready" && <p role="status">Demo 密碼登入尚未設定，請聯絡管理員。</p>}
+        {loginStatus?.provider === "password" ? <>
+          <h2 className="mt-6">密碼登入</h2>
+          <p className="muted mt-3">請輸入管理員密碼。</p>
+          {loginStatus.state !== "ready" && <p role="status">管理員密碼登入尚未設定，請聯絡管理員。</p>}
           <form onSubmit={event => { event.preventDefault(); if (!busy && password && loginStatus.state === "ready") void passwordLogin(); }}>
-            <label className="form-field mt-4">Demo 密碼
+            <label className="form-field mt-4">管理員密碼
               <input className="form-input" type="password" autoComplete="current-password" maxLength={128} value={password} onChange={event => setPassword(event.target.value)} />
             </label>
             <button className="primary-action mt-4" type="submit" disabled={busy || !password || loginStatus.state !== "ready"}>{busy ? "登入中…" : "登入"}</button>
@@ -219,7 +208,7 @@ export function AdminOrdersPage() {
         </>}
         </>}
       </> : <>
-        <div className="form-actions mt-6"><button className="filter-button" onClick={() => void refresh()}>重新載入</button><button className="filter-button" disabled={busy} onClick={() => void logout()}>登出</button>{loginStatus?.passkey?.enabled && <button className="filter-button" disabled={busy} onClick={() => void registerPasskey()}>新增這支手機的 Passkey</button>}</div>
+        <div className="form-actions mt-6"><button className="filter-button" onClick={() => void refresh()}>重新載入</button><button className="filter-button" disabled={busy} onClick={() => void logout()}>登出</button></div>
         <div className="demo-order-list">
           {orders.length === 0 && <p>目前沒有示範訂單。</p>}
           {orders.map(({ order, notifications }) => <article className="demo-order-card" key={order.orderId}>
