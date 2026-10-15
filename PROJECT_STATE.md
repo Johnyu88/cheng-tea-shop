@@ -10,6 +10,12 @@ Updated: 2026-10-15 (Asia/Taipei)
 - Tests: focused Vitest `6/6 PASS`; full Vitest `71 files / 356 tests PASS`; TypeScript and ESLint PASS; production build PASS with six pre-existing dynamic filesystem tracing warnings; synthetic Docker Engine API dry-run/start/health/failure-cleanup lifecycle PASS. No formal Secret was read and no formal container or route changed.
 - Stop point: commit and push after fresh lint/full relevant verification; do not proceed to PROD-ADMIN-22 deployment.
 
+## 2026-10-15 PROD-ADMIN-24 formal switch capability
+
+- `tools/prod-admin-23/production-switch.mjs` adds an explicit `production-switch` gate with exact source/candidate image/container identity checks, backup manifest check, RW writer freeze, health verification, and automatic restoration of the original container on failure.
+- Formal mode requires `PROD-ADMIN-24-AUTHORIZED`; it was not invoked in this phase. No formal Secret was read and no formal service/data/route changed.
+- Focused tool tests: `10/10 PASS`; synthetic production-flow rehearsal PASS with temporary containers cleaned; full Vitest `72 files / 360 tests PASS`; TypeScript and ESLint PASS; production build PASS with six pre-existing tracing warnings. Read-only formal preflight PASS for the verified source/candidate IDs, backup marker, and four known RW writers; formal switch was not invoked.
+
 ## Current stop point
 
 - Task: `PROD-ADMIN-03`

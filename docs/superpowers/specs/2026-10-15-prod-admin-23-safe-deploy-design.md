@@ -25,3 +25,7 @@ Provide a reusable Acer-local Docker Engine API tool for creating and validating
 ## Verification
 
 Unit tests cover path normalization, formal mount rejection, allowlist enforcement, redacted output, and failure cleanup. The isolation E2E uses only a synthetic Secret and independent data/mounts; it must not use the formal container or formal data.
+
+## PROD-ADMIN-24 production gate
+
+The production switch is a separate, explicit mode. It requires the exact verified source container ID, source image ID/tag, candidate image ID/tag, backup manifest, and known RW writer freeze list. It reads the source environment only after those checks pass, creates the candidate through the Engine API, performs health checks, and restores the original source container plus frozen writers on failure. The old container is never deleted. No production switch is run by this implementation phase.

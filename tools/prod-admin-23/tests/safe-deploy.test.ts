@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildCandidateSpec,
   buildCandidateFromInspect,
+  cleanupCandidate,
   createAndHealthCheckCandidate,
   createRedactedDiff,
   normalizeWindowsPath,
@@ -106,5 +107,17 @@ describe("PROD-ADMIN-23 safe deployment tool", () => {
       healthCheck: async () => { throw new Error("synthetic health failure"); },
     })).rejects.toThrow("synthetic health failure");
     expect(calls).toEqual(["create", "start", "stop", "remove"]);
+  });
+
+  it("waits for a stopping container before removing it", async () => {
+    const states = ["stopping", "exited"];
+    const calls: string[] = [];
+    const engine = {
+      async stopContainer() { calls.push("stop"); },
+      async inspectContainer() { calls.push("inspect"); const status = states.shift(); if (!status) throw new Error("HTTP 404"); return { State: { Status: status } }; },
+      async removeContainer() { calls.push("remove"); },
+    };
+    await cleanupCandidate(engine, "synthetic-id");
+    expect(calls).toEqual(["stop", "inspect", "inspect", "remove", "inspect"]);
   });
 });

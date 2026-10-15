@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { DockerEngineClient, buildCandidateFromInspect, cleanupCandidate, createAndHealthCheckCandidate, createRedactedDiff } from "./safe-deploy.mjs";
+import { PROD_ADMIN_24_EXPECTATIONS, switchProduction } from "./production-switch.mjs";
 
 const args = new Map();
 for (let index = 2; index < process.argv.length; index += 1) {
@@ -12,7 +13,7 @@ for (let index = 2; index < process.argv.length; index += 1) {
   if (next && !next.startsWith("--")) index += 1;
 }
 
-const mode = args.get("mode") === "isolation" ? "isolation" : "dry-run";
+const mode = ["isolation", "production-switch"].includes(args.get("mode")) ? args.get("mode") : "dry-run";
 const sourceName = String(args.get("source") ?? "tea-prod-admin-23-test-source");
 const candidateName = String(args.get("candidate") ?? "tea-prod-admin-23-test-candidate");
 const image = String(args.get("image") ?? "tea-nextjs:prod-admin-23-test");
@@ -25,6 +26,32 @@ const isolationMounts = [
 ];
 
 async function main() {
+  if (mode === "production-switch") {
+    if (args.get("authorize-production") !== "PROD-ADMIN-24-AUTHORIZED") throw new Error("Production mode requires explicit authorization");
+    const backupRoot = String(args.get("backup-root") ?? "C:\\data\\tea-staging\\recovery\\pro15-a1524in-21-20261015-232445");
+    const writers = String(args.get("writers") ?? [
+      "tea-private-v5-prod-admin-03-live",
+      "tea-private-v5-prod-admin-03",
+      "tea-private-v4-ready",
+      "tea-private-publication-connected",
+    ].join(",")).split(",").filter(Boolean);
+    const engine = new DockerEngineClient();
+    const result = await switchProduction(engine, {
+      authorization: "PROD-ADMIN-24-AUTHORIZED",
+      expected: PROD_ADMIN_24_EXPECTATIONS,
+      backupRoot,
+      backupExists: true,
+      writerNames: writers,
+      healthCheck: async () => {
+        for (const url of ["http://127.0.0.1:8130/api/health", "https://acer-v5.tail4d8b5a.ts.net:10001/api/health", "https://acer-v5.tail4d8b5a.ts.net:10000/"]) {
+          const response = await fetch(url, { signal: AbortSignal.timeout(15000) });
+          if (!response.ok) throw new Error(`Health check returned HTTP ${response.status}`);
+        }
+      },
+    });
+    process.stdout.write(`${JSON.stringify({ mode, candidateId: result.candidateId, sourceId: result.sourceId, restoredWriters: result.restoredWriters, candidate: createRedactedDiff(result.spec) }, null, 2)}\n`);
+    return;
+  }
   if (mode === "dry-run" && args.get("start")) throw new Error("Dry-run refuses --start");
   const engine = new DockerEngineClient();
   const inspect = await engine.inspectContainer(sourceName);

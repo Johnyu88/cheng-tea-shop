@@ -6,6 +6,8 @@ Absolute tool path on Acer:
 
 The tool is intentionally candidate-only. It never stops, removes, or switches a formal container. Its default mode is `dry-run`, and its only allowlisted source is the synthetic `tea-prod-admin-23-test-source`.
 
+`production-switch` is the sole exception and is disabled unless the exact authorization string `PROD-ADMIN-24-AUTHORIZED` is supplied. It is hard-coded to the verified PROD-ADMIN-24 source/candidate IDs, container name, backup root, and writer freeze list. It must not be invoked from automation or copied into a general deployment script.
+
 ## Safety model
 
 - Docker Desktop Engine API is accessed through `\\.\pipe\docker_engine` by `DockerEngineClient`; Docker CLI `-e` is not used.
@@ -30,7 +32,17 @@ Create an isolated candidate on a loopback test port:
 node .\tools\prod-admin-23\cli.mjs --mode isolation --source tea-prod-admin-23-test-source --candidate tea-prod-admin-23-test-candidate --image tea-nextjs:prod-admin-23-test --host-port 33123 --cleanup
 ```
 
-The source must be explicitly allowlisted by the tool. Formal container names are rejected in dry-run/isolation mode. This phase does not provide a production-source flag by design; a future production deployment must add a separately reviewed allowlist and authorization gate.
+The source must be explicitly allowlisted by the tool. Formal container names are rejected in dry-run/isolation mode; formal access is available only through the separately gated `production-switch` mode below.
+
+## Formal switch (explicit authorization only)
+
+The following command is the only production entry point. It reads the verified source container environment through the named pipe in memory, freezes the known RW writers, creates the exact candidate on 8130, checks 8130/10001/10000, and restores the original container and writers if candidate health fails:
+
+```powershell
+node .\tools\prod-admin-23\cli.mjs --mode production-switch --authorize-production PROD-ADMIN-24-AUTHORIZED
+```
+
+The original container is preserved and remains the rollback target. The command prints only container IDs, image/config metadata, and environment variable names. It does not print environment values. A real password login and ordinary-phone acceptance remain manual checks.
 
 ## Rollback
 

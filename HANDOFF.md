@@ -1064,3 +1064,11 @@ This checkpoint records preparation only; the 10/14 switch has **not** been perf
 - Verification: focused Vitest `6/6 PASS`; full Vitest `71 files / 356 tests PASS`; TypeScript and ESLint PASS; production build PASS with the existing six dynamic filesystem tracing warnings; synthetic Docker Engine API dry-run + candidate start/health/cleanup `PASS`; synthetic Secret did not appear in output.
 - The E2E source and candidate containers and isolation directories were removed after verification. Formal service remained running and unchanged.
 - Commit/push status: pending this checkpoint. Next action: inspect diff, run lint/full relevant verification, commit and push this branch. No formal deployment is authorized by this handoff.
+
+## 2026-10-15 PROD-ADMIN-24 formal switch capability
+
+- Extended the same tool with explicitly gated `production-switch` mode. It requires the exact verified source container/image IDs, candidate image ID, PROD-ADMIN-21 backup manifest, and known RW writer freeze list before any stop.
+- Failure path stops/removes only the new candidate and restores the original `tea-private-v5-prod-admin-03-live` plus previously frozen writers. The original container is never deleted and `tea-private-v5-reauth` is not used.
+- Tests: production guard/failure rollback `10/10 PASS` across the two tool suites; synthetic production-flow rehearsal PASS with zero temporary containers left; full Vitest `72 files / 360 tests PASS`; TypeScript and ESLint PASS; production build PASS with the existing six tracing warnings.
+- Read-only formal preflight PASS: source/container image IDs, candidate image ID, PROD-ADMIN-21 backup marker, and all four known RW writers matched; no formal Secret was emitted.
+- Formal switch is still pending execution in the next gated step. Current formal service, 8130/10001/10000, Caddy/Funnel, SQLite, photos, and orders remain unchanged. The original formal container remains the rollback target.

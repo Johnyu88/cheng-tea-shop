@@ -58,8 +58,8 @@ function formatBind(mount) {
   return `${mount.Source}:${mount.Destination}:${mount.RW === false ? "ro" : "rw"}`;
 }
 
-export function buildCandidateSpec({ name, image, env, mounts, ports, networkMode = "bridge", restartPolicy = "no", command }) {
-  validateIsolationMounts(mounts);
+export function buildCandidateSpec({ name, image, env, mounts, ports, networkMode = "bridge", restartPolicy = "no", command, entrypoint, allowFormalDataMounts = false, user, workingDir }) {
+  if (!allowFormalDataMounts) validateIsolationMounts(mounts);
   const portBindings = {};
   const exposedPorts = {};
   for (const port of ports) {
@@ -80,6 +80,9 @@ export function buildCandidateSpec({ name, image, env, mounts, ports, networkMod
     },
   };
   if (command) spec.Cmd = command;
+  if (entrypoint) spec.Entrypoint = entrypoint;
+  if (user) spec.User = user;
+  if (workingDir) spec.WorkingDir = workingDir;
   return spec;
 }
 
@@ -179,10 +182,11 @@ export class DockerEngineClient {
   }
 
   inspectContainer(name) { return this.request("GET", `/containers/${encodeURIComponent(name)}/json`); }
+  inspectImage(name) { return this.request("GET", `/images/${encodeURIComponent(name)}/json`); }
   createContainer(name, spec) { return this.request("POST", `/containers/create?name=${encodeURIComponent(name)}`, spec); }
   startContainer(id) { return this.request("POST", `/containers/${encodeURIComponent(id)}/start`); }
-  stopContainer(id) { return this.request("POST", `/containers/${encodeURIComponent(id)}/stop?t=20`); }
-  removeContainer(id) { return this.request("DELETE", `/containers/${encodeURIComponent(id)}?v=false&force=false`); }
+  stopContainer(id, timeoutSeconds = 20) { return this.request("POST", `/containers/${encodeURIComponent(id)}/stop?t=${timeoutSeconds}`); }
+  removeContainer(id, { force = false } = {}) { return this.request("DELETE", `/containers/${encodeURIComponent(id)}?v=false&force=${force}`); }
 }
 
 export function runtimeEnvFromInspect(inspect) {
@@ -230,9 +234,24 @@ export function buildCandidateFromInspect({
   });
 }
 
-export async function cleanupCandidate(engine, containerId) {
-  try { await engine.stopContainer(containerId); } catch { /* already stopped */ }
-  try { await engine.removeContainer(containerId); } catch { /* preserve the original failure */ }
+export async function cleanupCandidate(engine, containerId, { stopTimeoutSeconds = 20, waitMs = 30000, forceAfterWait = false } = {}) {
+  try { await engine.stopContainer(containerId, stopTimeoutSeconds); } catch { /* already stopped */ }
+  if (engine.inspectContainer) {
+    for (let attempt = 0; attempt < Math.ceil(waitMs / 100); attempt += 1) {
+      try {
+        const state = await engine.inspectContainer(containerId);
+        if (!["running", "stopping", "removing"].includes(state?.State?.Status)) break;
+      } catch { return; }
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
+  }
+  try { await engine.removeContainer(containerId, { force: forceAfterWait }); } catch { /* preserve the original failure */ }
+  if (engine.inspectContainer) {
+    for (let attempt = 0; attempt < Math.ceil(waitMs / 100); attempt += 1) {
+      try { await engine.inspectContainer(containerId); } catch { return; }
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
+  }
 }
 
 export async function createAndHealthCheckCandidate({
