@@ -76,6 +76,14 @@ Implementation and documentation are committed at `47b6d26` and pushed to `origi
 
 Disable only the new ingress with `tailscale funnel --https=10001 off`, restore `C:\data\tea-staging\recovery\prod-admin-04-before-caddy-origin-fix\Caddyfile.before` if needed, and reload Caddy. Existing 10000, 443, 8443, 8130, SQLite, and photos remain independent.
 
+## 2026-10-15 UI-RWD-01 formal frontend release gate
+
+- Isolated worktree UI scope is limited to `app/globals.css`, the two public audio components, and `e2e/ui-rwd-01-photo-integrity.spec.ts`; no backend, Caddy, order, payment, product-data, or original-photo changes.
+- Verification: Vitest 344/344 PASS; typecheck PASS; production build PASS; Chromium RWD 5/5 PASS at 390, 412, 768, 1080, and 1440px. WebKit/Safari automation is unavailable in this environment and is not claimed.
+- 10000 baseline is Tailscale Funnel `10000 -> 127.0.0.1:8131`, container `tea-public-contact-4837371`, image `tea-nextjs:contact-4837371`, with the read-only catalog publication mount. 10001/backend/Caddy/8130/443/8443 remain out of scope.
+- Pre-deploy recovery is `C:\data\tea-staging\recovery\ui-rwd-01-before-10000`; the old image/container and read-only catalog data must remain recoverable.
+- Release gate: source is ready for a 10000-only replacement; physical foldable-device confirmation remains pending after deployment.
+
 ## 2026-10-15 PROD-ADMIN-05 public entry Not found fix
 
 - Root cause: `/admin/login` is not an application route. The actual password login UI is client-rendered at `/admin/orders`; the direct Acer proxy intentionally returned plain-text `Not found` for `/` because direct mode did not allow a storefront root.

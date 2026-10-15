@@ -1003,6 +1003,14 @@ This checkpoint records preparation only; the 10/14 switch has **not** been perf
 - Mobile delivery remains **BLOCKED / NOT VERIFIED**: no physical phone without Tailscale was available, and the independent web probe could not resolve this Tailscale hostname. Do not claim Safari or LINE acceptance.
 - Recovery: `C:\data\tea-staging\recovery\prod-admin-04-before-funnel`, `C:\data\tea-staging\recovery\prod-admin-04-before-caddy-origin-fix`. Disable with `tailscale funnel --https=10001 off`; restore the saved Caddyfile only if needed.
 
+## 2026-10-15 UI-RWD-01 formal frontend release gate
+
+- UI-RWD-01 changes are isolated to the public storefront CSS/components and the new RWD integrity test; no admin, Caddy, order, payment, product data, or original-photo changes.
+- Evidence before deployment: Vitest 344/344 PASS; typecheck PASS; production build PASS; Chromium RWD 5/5 PASS at 390, 412, 768, 1080, and 1440px. WebKit/Safari automation is unavailable and remains unclaimed.
+- Current production frontend is Funnel `10000 -> 127.0.0.1:8131`, container `tea-public-contact-4837371`, image `tea-nextjs:contact-4837371`; 10001 remains the independent admin path.
+- Recovery backup: `C:\data\tea-staging\recovery\ui-rwd-01-before-10000`. Preserve the old container/image and the read-only catalog mount for immediate rollback.
+- Next action: commit/push, smoke-test the new image, then replace only 10000 and run HTTPS regression. Wait for the user's foldable-phone visual confirmation before calling the UI task fully accepted.
+
 ## 2026-10-15 PROD-ADMIN-05 public entry Not found fix — latest
 
 - Confirmed actual login path is `/admin/orders`; `/admin/login` does not exist. Before repair, `/`, `/admin/orders`, and `/admin/login` were measured independently at 8130, Caddy 8090, and Funnel 10001.

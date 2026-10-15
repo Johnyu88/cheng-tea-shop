@@ -117,7 +117,7 @@ export function HomePage({ catalogService = defaultCatalogService }: HomePagePro
             </picture>
             <div className="teacher-story-audio">
               <p>鳥鳴 2／茶園自然聲景</p>
-              <audio aria-label="茶園鳥鳴 2 音效" controls preload="none">
+              <audio aria-label="茶園鳥鳴 2 音效" controls preload="metadata">
                 <source src="/media/tea-stream-birds.wav" type="audio/wav" />
                 您的瀏覽器不支援音訊播放。
               </audio>
