@@ -1098,3 +1098,13 @@ This checkpoint records preparation only; the 10/14 switch has **not** been perf
 - Production server 瀏覽器驗收：390、412、768、1080、1440px 首頁／空購物車／空結帳均 `scrollWidth <= viewport`；390px 有商品結帳流程確認視窗、取消保留 draft、確認清空購物車均通過。
 - 截圖：`C:\Users\alluser\Documents\Codex\2026-10-16\github-johnyu88-cheng-tea-shop-codex\phase1-screenshots`，含五種寬度首頁／購物車／結帳及 `checkout-abandon-dialog-390.png`。
 - 下一步：等待總管與使用者人工驗收；未經核准不得進入第二階段品牌美術、合併 main 或部署正式環境。
+
+## 2026-10-16 PHASE1-VERIFY-02 補充驗證
+
+- 候選基準重新核對：worktree `phase1-candidate` clean，分支 `codex/frontend-design-phase1-20261016`，HEAD `1421ed1`；恢復基準為 `8365372`。
+- 正式前台唯讀核對：`tea-public-contact-4837371`（image `tea-nextjs:ui-rwd-01-f2a2a78`）的非敏感環境開關為 `PUBLIC_STOREFRONT_SERVER=enabled`、`NEXT_PUBLIC_MERCHANT_MANUAL_ORDER=enabled`、`NEXT_PUBLIC_DEMO_COMMERCE=disabled`；依 `app/checkout/page.tsx` 路由優先序，實際元件是 `MerchantManualCheckoutPage`，不是本候選新增放棄流程的 `CheckoutPage`。正式容器直接入口 `127.0.0.1:8131` 的 `/`, `/cart`, `/checkout` 均回 200；`:10000` 本機轉送入口以目前 Host 條件回 400，未修改或重啟。
+- 正式前台頁面唯讀內容有「陳老師茶行」與既有導覽，但沒有候選 `StorefrontShell` 的 `storefront-shell`／「前台導覽」標記，也沒有「放棄本次購買」；因此共用 Header 與放棄流程在候選原型測試為 PASS，在正式顧客流程為 **FAIL / 未覆蓋**。正式環境未做修正或部署。
+- 正式流程最小修正範圍：需在獨立候選部署驗證 `StorefrontShell` 與相容的 checkout mode，再經人工核准切換正式前台；不得直接在 `:10000` 或現有正式容器熱修。此工單不執行該修正。
+- 完整 Vitest 以 `CI=true corepack pnpm exec vitest run --maxWorkers=1 --no-file-parallelism --reporter=verbose --testTimeout=10000 --hookTimeout=10000` 新鮮執行：73 files / 363 tests PASS，exit 0，Vitest duration 275.45s（外層 280.118s）。沒有卡死檔案或失敗程序；前次兩分鐘觀察窗不足以涵蓋本套件。輸出顯示 jsdom 建立 73 次共 152.66s，是主要既有基準耗時來源；SQLite experimental warnings、React act warnings 與一筆預期錯誤邊界 stderr 均未造成測試失敗。未修改測試設定、未刪除／跳過／弱化測試。
+- 完整 ESLint 基準 `8365372` 與候選 `1421ed1` 均為 exit 1、20 problems（3 errors / 17 warnings）。三個相同 error：`app/admin/products/page.tsx:21:7` `@next/next/no-sync-scripts`；`features/checkout/components/public-order-checkout.tsx:18:33` `react-hooks/set-state-in-effect`；`tests/admin-products-diagnostic.test.ts:35:74` `@typescript-eslint/no-unsafe-function-type`。三個檔案均不在 `8365372..1421ed1` 的修改清單，判定為既有基準問題，非本階段引入。
+- PHASE1 仍維持 **PENDING**，尚未具備正式顧客流程的人工手機驗收條件；候選版的自動化五寬度證據仍僅代表 prototype/candidate，不得代替正式前台驗收。未進入第二階段品牌美術。

@@ -749,3 +749,9 @@ Acer's 8443 listener is tailnet-only on isolated localhost 8092; 443 → 8090, o
 
 The closeout source/UI commit `a521b3732edf8c5db8f20248c993564f9f9c934a` completed Quality as failure: lint, typecheck, 65 files / 334 tests, build, browser/accessibility, and container smoke passed; synthetic mobile E2E was 3/1/1. The sole failure is the same unchanged catalog-persistence 商品已上架 heading assertion reproduced on dce323c. Both dependency audit steps were skipped; no fresh security clearance. Following changes are handoff-only.
 
+## 68. 2026-10-16 PHASE1-VERIFY-02 驗收補強
+
+本次僅做候選版與正式前台的唯讀驗證。正式公開容器的安全組態顯示 `/checkout` 優先選用 `MerchantManualCheckoutPage`，因此候選 `CheckoutPage` 的「放棄本次購買」沒有覆蓋正式顧客流程；正式站未修改、未部署。共用 `StorefrontShell` 的可重用程式仍只存在候選 HEAD `1421ed1`，正式 `:10000` 不得以本次候選自動化證據宣稱通過。
+
+完整 Vitest 以單 worker、無檔案並行方式完成 73 個檔案／363 個測試，exit 0，Vitest duration 275.45 秒；前次兩分鐘未完成是觀察窗不足，不是已證實的單檔無限等待。主要耗時為 jsdom 73 次建立共 152.66 秒。完整 ESLint 的 3 個 error 在 `8365372` 與 `1421ed1` 完全相同，且相關檔案未被候選修改；本階段不處理無關 lint 基準問題。PHASE1 維持 PENDING，等待正式前台路由修正核准及人工手機驗收。
+
