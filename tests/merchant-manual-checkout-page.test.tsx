@@ -57,6 +57,17 @@ it("uses the manual checkout page for the formal storefront flags", () => {
   }
 });
 
+it("keeps the confirmed manual ordering steps and contact channels visible", async () => {
+  renderManual();
+
+  await waitFor(() => expect(screen.getByLabelText("訂購內容（可複製後貼到 LINE）")).toBeInTheDocument());
+  expect(screen.getByLabelText("LINE 訂購三步驟")).toBeInTheDocument();
+  expect(screen.getByRole("link", { name: "2. 開啟陳老師 LINE" })).toHaveAttribute("href", "https://line.me/ti/p/TT6TRQyMF6");
+  expect(screen.getByRole("link", { name: "透過 LINE 聯絡訂購" })).toHaveAttribute("href", "https://line.me/ti/p/TT6TRQyMF6");
+  expect(screen.getByRole("link", { name: "電話訂購：0919-086-099" })).toHaveAttribute("href", "tel:0919086099");
+  expect(screen.getByRole("heading", { name: "匯款資訊" })).toBeInTheDocument();
+});
+
 it("shows a second confirmation and keeps the manual cart when abandonment is cancelled", async () => {
   const clearCart = vi.fn(async () => ({ ok: true as const, value: emptyCart }));
   renderManual(createCartService({ clearCart }));

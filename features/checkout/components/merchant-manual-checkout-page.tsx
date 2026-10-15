@@ -108,7 +108,16 @@ export function MerchantManualCheckoutPage() {
         <label className="form-field mt-4">訂購內容（可複製後貼到 LINE）
           <textarea className="form-textarea" readOnly rows={7} value={summary} />
         </label>
-        <button className="filter-button mt-3" type="button" onClick={() => void copyText(summary, "已複製訂購內容，請貼到 LINE 傳送給陳老師。")}>複製訂購清單</button>
+        <div className="mt-5" aria-label="LINE 訂購三步驟">
+          <h3>用 LINE 傳送訂購清單</h3>
+          <p className="mt-2">步驟 1：複製以下清單。步驟 2：開啟 LINE 對話並貼上。步驟 3：按「傳送」給陳老師。</p>
+          <div className="form-actions mt-3">
+            <button className="filter-button" type="button" onClick={() => void copyText(summary, "已複製清單。請開啟 LINE，貼上內容並按傳送。")}>1. 複製訂購清單</button>
+            <a className="button-quiet" href={merchantLine} target="_blank" rel="noopener noreferrer">2. 開啟陳老師 LINE</a>
+          </div>
+          <p className="mt-3" role="status">請先複製清單，再到 LINE 貼上並送出；網站不會自動傳訊。</p>
+          <p className="muted mt-2">傳送紀錄以雙方實際 LINE 對話為準；請不要在老師確認前匯款。</p>
+        </div>
       </section> : <p className="mt-5">尚未選擇茶品，也可以先聯絡陳老師詢問。</p>}
       {Boolean(cart?.lines.length) && <section className="mt-6" aria-label="傳送後清空購物車">
         <p>已將訂購清單貼到 LINE 並傳送給陳老師？確認傳送後可清空購物車，方便下次選茶。</p>
@@ -122,6 +131,7 @@ export function MerchantManualCheckoutPage() {
       </div>
       <div className="form-actions mt-4">
         <a className="primary-action button-secondary" href={`tel:${merchantPhone}`}>電話訂購：0919-086-099</a>
+        <a className="button-quiet" href={merchantLine} target="_blank" rel="noopener noreferrer">透過 LINE 聯絡訂購</a>
         <Link className="text-button button-quiet" href="/">繼續選茶</Link>
       </div>
       {feedback && <p role="status" className="mt-3">{feedback}</p>}

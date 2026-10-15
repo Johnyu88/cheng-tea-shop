@@ -1170,3 +1170,14 @@ This checkpoint records preparation only; the 10/14 switch has **not** been perf
 - 購物車來源比對：`features/cart/components/cart-page.tsx` 在 `f6c9da9` 與 `897e319` 完全相同；本輪沒有回退按鈕並列、數量、移除、金額或結帳路徑。PHASE1 放棄購買與資料保留仍由既有回歸測試覆蓋。
 - TDD：恢復測試施工前 `1 failed`，恢復後定向回歸／分類測試 `5/5 PASS`。完整 Vitest `77 files / 376 tests PASS`、exit 0、246.52 秒；TypeScript PASS；Production build PASS；完整 ESLint 仍 `3 errors / 17 warnings`，3 errors 為既有基準問題，未修改。
 - 候選瀏覽器驗證：首頁 390／412／768／1080／1440 截圖均保存；首頁文案、地址、地圖連結存在，390px `scrollWidth === viewportWidth`。購物車與結帳三區截圖保存於 `phase2-regression-03-screenshots/`，候選服務 `127.0.0.1:3111` 回應正常。等待使用者手機驗收，不進入下一階段。
+
+## 2026-10-16 PHASE2-CHECKOUT-RECOVERY-04 人工接單流程回歸修復
+
+- 唯讀正式基準：實際 HTTPS `https://acer-v5.tail4d8b5a.ts.net:10000/checkout` 回傳 `MerchantManualCheckoutPage`，電話、LINE、匯款可見，但正式頁沒有「放棄本次購買」；正式站未修改。
+- 候選差異定位：`f87e693` 相較已確認歷史 `f4bc5c0` 少了「複製清單／開啟陳老師 LINE／貼上傳送」三步驟與直接「透過 LINE 聯絡訂購」入口。本輪只恢復缺失 UI，不改 API、訂單或付款邏輯。
+- TDD 證據：施工前定向結果 `1 failed / 6 passed`；修復後定向人工接單／回歸測試 `8/8 PASS`。
+- 完整驗證：Vitest `77 files / 377 tests PASS`、exit 0、87.68s；TypeScript PASS；修改檔案 ESLint `0 errors / 1 existing no-img warning`；production build 以正式非敏感旗標 PASS。既有全域 ESLint 3 errors 未處理。
+- 候選入口：`https://acer-v5.tail4d8b5a.ts.net:10002/` → `127.0.0.1:3111`；10000／10001 與既有 8443–8445 映射未改寫。候選首頁、`/cart`、`/checkout` HTTPS 200。
+- 五寬度截圖保存於 `phase2-checkout-recovery-04-*.png`；390／412／768／1080／1440 均無頁面水平捲動。390px 互動已驗證：取消二次確認保留 cart／訂購清單，確認放棄後回到空購物狀態；對話框為 `phase2-checkout-recovery-04-abandon-dialog-390.png`。
+- 資料隔離：僅使用候選瀏覽器 localStorage 的 synthetic cart，未建立訂單、未送出聯絡資料、未呼叫正式可寫入資料；清除只走既有 `CartService.clearCart()`。入口驗收完成後可執行 `tailscale funnel --https=10002 off`。
+- 目前仍停在人工驗收閘門，不合併 main、不部署正式站、不進入下一階段。

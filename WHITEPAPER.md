@@ -801,3 +801,13 @@ TDD 新增測試施工前為 `4 failed / 0 passed`，施工後定向分類測試
 
 恢復後保留十大茶類、共用 Header、銀行資訊與購物車／結帳／放棄購買行為；未修改正式資料、商品、價格、訂單、照片或音訊。定向回歸／分類測試 `5/5 PASS`；完整 Vitest `77 files / 376 tests PASS`、exit 0、246.52 秒；TypeScript PASS；production build PASS；完整 ESLint 仍為既有 `3 errors / 17 warnings`。首頁五寬度、購物車與結帳截圖保存於 `phase2-regression-03-screenshots/`，等待人工手機驗收。
 
+## 75. 2026-10-16 PHASE2-CHECKOUT-RECOVERY-04 恢復人工接單流程
+
+正式前台唯讀實測 `10000/checkout` 確認目前旗標路由實際使用 `MerchantManualCheckoutPage`，電話、LINE、匯款均可見；正式頁仍沒有放棄購買，未對正式服務做任何修改。候選 `f87e693` 與歷史人工接單確認版本 `f4bc5c0` 的來源差異確認為：候選移除了 LINE 三步驟與直接 LINE 聯絡入口，不是商品或訂單資料差異。
+
+本輪以最小修改恢復：訂購清單複製、開啟陳老師 LINE、貼上傳送說明，以及「透過 LINE 聯絡訂購」。保留 PHASE1 的放棄二次確認、取消保留資料、確認只清除未送出 cart、清除失敗保留資料與已成立訂單不受影響；未新增信用卡／LINE Pay，未改電話、匯款、庫存、訂單成立或出貨 API。新增正式模式人工接單回歸測試；施工前 `1 failed / 6 passed`，施工後定向 `8/8 PASS`。
+
+驗證結果：完整 Vitest `77 files / 377 tests PASS`、exit 0；TypeScript PASS；修改檔案 ESLint 0 errors、1 個既有圖片 warning；production build 以人工接單非敏感旗標 PASS。候選 HTTPS `https://acer-v5.tail4d8b5a.ts.net:10002/` 僅轉送 `127.0.0.1:3111`，五寬度首頁／購物車／結帳截圖保存於 `phase2-checkout-recovery-04-*.png`。瀏覽器使用 synthetic localStorage cart，未建立真實訂單或改寫正式資料；正式 `10000`、`10001` 與既有 8443–8445 映射未改變。
+
+本輪完成後停止於人工手機驗收閘門；不合併 main、不部署正式站、不進入下一階段。驗收完成的入口關閉指令為 `tailscale funnel --https=10002 off`。
+
