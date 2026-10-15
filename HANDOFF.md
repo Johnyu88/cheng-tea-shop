@@ -1121,6 +1121,20 @@ This checkpoint records preparation only; the 10/14 switch has **not** been perf
 - 截圖位於 `phase1-checkout-03-screenshots`，含五寬度首頁／購物車／正式結帳與 `checkout-abandon-dialog-390.png`。首頁人物、茶湯、照片與音訊路徑未修改；候選瀏覽器檢查仍可見人物文字、音訊標記與 10 個圖片元素。
 - 本輪候選工程修正完成但 PHASE1 仍為 **PENDING**。候選人工手機驗收、正式前台切換與正式部署均未執行；不得以候選自動化證據宣稱正式站已驗收。候選 server 使用正常 `next start` 會提示 standalone 設定警告，未改動正式容器；此為候選驗證環境風險。
 
+## 2026-10-16 PHASE1-ACCEPT-05 第一階段驗收結案
+
+- 使用者已親自以一般手機完成候選驗收，三項均 PASS：購物車／結帳主要按鈕並列；放棄購買二次確認取消後保留資料；確認放棄後清空購物車且手機無跑版。
+- 人工驗收候選網址：`https://acer-v5.tail4d8b5a.ts.net:10002/`。驗收完成後已執行 `tailscale funnel --https=10002 off`，目前不再公開候選入口；候選程式與 `phase1-checkout-03-screenshots/` 均保留。
+- 正式前台 `10000` 與正式後台 `10001` 唯讀檢查仍回 200；未修改正式路由、正式容器、正式資料或素材。
+- PHASE1 驗收恢復基準：候選分支 `codex/frontend-design-phase1-20261016`，commit `b104163`；PHASE1 正式結案但狀態標記維持 **PENDING**，不得以此推導正式部署核准。
+
+## 2026-10-16 PHASE2 設計盤點（待核准，不施工）
+
+- 已提交 `docs/phase2-design-inventory-20261016.md`，內容涵蓋字體／文字層級、色彩語意、按鈕與商品卡、首頁構圖、人物／茶湯／茶葉素材完整呈現、RWD 與素材庫缺口。
+- 現況截圖沿用 `phase1-checkout-03-screenshots/` 的 390／412／768／1080／1440px 首頁、購物車、結帳與確認視窗證據。
+- 盤點結論：現有紙張米白／深茶綠／茶褐色基礎可保留；下一階段應先核准 typography、spacing、semantic color、button/card hierarchy，再評估首頁構圖與素材缺口。未修改任何程式、照片、音訊或正式環境。
+- PHASE2 目前只停在設計盤點，等待總管確認後才可施工；未進入品牌美術修改。
+
 ## 2026-10-16 PHASE1-HTTPS-04 專用手機驗收入口
 
 - 施工前唯讀盤點確認 `3111` 僅為候選本機服務；10000／10001 為正式 Funnel，8443／8444／8445 為既有 tailnet-only mapping。新增前確認 10002 未占用，Windows Firewall 三個 profile 均維持原狀，未開放 3111 對外。

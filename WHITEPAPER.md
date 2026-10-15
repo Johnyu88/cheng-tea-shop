@@ -767,3 +767,15 @@ The closeout source/UI commit `a521b3732edf8c5db8f20248c993564f9f9c934a` complet
 
 PHASE1 維持 **PENDING**，等待總管與使用者人工手機驗收；未合併 main、未切換正式站、未進入第二階段品牌美術。
 
+## 70. 2026-10-16 PHASE1-ACCEPT-05 第一階段驗收結案
+
+使用者已親自以一般手機驗收候選版，確認三項 PASS：購物車／結帳主要按鈕並列；放棄購買二次確認在取消後保留資料；確認放棄後清空購物車且手機版無跑版。人工驗收網址為 `https://acer-v5.tail4d8b5a.ts.net:10002/`；驗收完成後已關閉本輪新增的 10002 Funnel，既有正式 10000／10001 與 8443–8445 未修改。
+
+PHASE1 恢復基準為候選分支 `codex/frontend-design-phase1-20261016`、commit `b104163`。候選程式與 `phase1-checkout-03-screenshots/` 保留；正式站、正式資料與素材均未變動。PHASE1 工程與人工驗收結案，但狀態依交接要求仍標記 **PENDING**，不代表正式部署核准。
+
+## 71. 2026-10-16 PHASE2 設計盤點（待核准，不施工）
+
+已建立 `docs/phase2-design-inventory-20261016.md`，提交現況截圖索引、差異清單與設計建議。盤點範圍包含字體與文字層級、色彩與品牌一致性、按鈕／商品卡片、首頁視覺構圖、陳老師人物／茶湯／茶葉照片完整呈現、手機與桌面 RWD，以及現有素材庫缺口。
+
+目前建議先核准 typography／spacing／semantic color 與 button/card hierarchy，再進行任何 CSS 或元件施工；人物、茶湯、商品照片與鳥鳴音訊維持原檔與原路徑，不在本次盤點中替換、裁切或生成。PHASE2 尚未開始施工，等待總管確認。
+
