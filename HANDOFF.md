@@ -1120,3 +1120,11 @@ This checkpoint records preparation only; the 10/14 switch has **not** been perf
 - 候選環境為 `http://127.0.0.1:3111`，使用上述非敏感正式模式旗標；只使用隔離瀏覽器 localStorage 的 synthetic cart line，未連接正式可寫入資料來源，未產生真實訂單。Playwright 五寬度驗證 `390/412/768/1080/1440` 全部無水平捲動、正式模式可見放棄操作、取消保留、確認清除；390px 兩按鈕並列，各 `152x76px`，其餘寬度亦至少 52px 高。
 - 截圖位於 `phase1-checkout-03-screenshots`，含五寬度首頁／購物車／正式結帳與 `checkout-abandon-dialog-390.png`。首頁人物、茶湯、照片與音訊路徑未修改；候選瀏覽器檢查仍可見人物文字、音訊標記與 10 個圖片元素。
 - 本輪候選工程修正完成但 PHASE1 仍為 **PENDING**。候選人工手機驗收、正式前台切換與正式部署均未執行；不得以候選自動化證據宣稱正式站已驗收。候選 server 使用正常 `next start` 會提示 standalone 設定警告，未改動正式容器；此為候選驗證環境風險。
+
+## 2026-10-16 PHASE1-HTTPS-04 專用手機驗收入口
+
+- 施工前唯讀盤點確認 `3111` 僅為候選本機服務；10000／10001 為正式 Funnel，8443／8444／8445 為既有 tailnet-only mapping。新增前確認 10002 未占用，Windows Firewall 三個 profile 均維持原狀，未開放 3111 對外。
+- 新增唯一候選入口：`https://acer-v5.tail4d8b5a.ts.net:10002/` → `http://127.0.0.1:3111`。既有 10000／10001 與 8443–8445 mapping 未變更。停止指令：`tailscale funnel --https=10002 off`；停止後不影響正式入口。
+- 候選程序 command line 指向 `phase1-candidate` worktree，候選首頁／購物車／結帳 HTTPS 回 200；結帳頁包含「放棄本次購買」。正式 HTTPS 10000 與 10001 唯讀回應仍為 200。
+- 候選使用既有隔離 browser synthetic cart 與 manual checkout；本輪沒有送出訂單或呼叫正式資料 API。手機驗收只應使用 synthetic 資料，不輸入真實個資、不按任何可能送出正式訂單的操作。
+- 目前入口已啟用，等待人工 Android／iPhone 驗收；完成後執行上述停止指令，並以 `tailscale serve status` 確認 10002 消失。PHASE1 維持 **PENDING**，未合併 main、未部署正式環境、未進入 PHASE2。
