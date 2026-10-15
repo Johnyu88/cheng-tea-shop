@@ -21,7 +21,7 @@ const tasteOptions: Array<{ value: TasteTag | undefined; label: string }> = [
 ];
 
 function ProductCard({ product }: { product: Product }): JSX.Element {
-  const variant = product.variants[0];
+  const variant = Array.isArray(product.variants) ? product.variants[0] : undefined;
 
   return (
     <article className="product-card">
@@ -33,7 +33,7 @@ function ProductCard({ product }: { product: Product }): JSX.Element {
         <h3>{product.name}</h3>
         <p className="product-summary">{product.summary}</p>
         <p className="product-meta">
-          {variant?.specification}／NT${variant?.price.amount.toLocaleString("zh-TW")}
+          {variant?.specification ?? "未設定"}／NT${variant?.price?.amount?.toLocaleString("zh-TW") ?? "—"}
         </p>
         <Link className="product-link" href={`/tea/${product.slug}`}>
           查看茶品

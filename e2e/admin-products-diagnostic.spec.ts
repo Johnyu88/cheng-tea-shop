@@ -35,6 +35,20 @@ test.describe("admin products diagnostic mode", () => {
     await expect(page.locator("#tea-admin-diagnostics-events")).not.toContainText("secret-product");
   });
 
+  test("keeps a malformed product visible without hiding the full list", async ({ page }) => {
+    await page.route("**/api/demo/admin/session", async route => {
+      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, value: { provider: "password", state: "ready", simulated: false, authenticated: true, passkey: { enabled: false, registered: false } } }) });
+    });
+    await page.route("**/api/demo/catalog?limit=50&includeUnpublished=true", async route => {
+      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, value: { items: [{ ...{ id: "broken", name: "測試資料", category: "oolong", publication: "published", image: { src: null, alt: "測試", isPlaceholder: true }, tasteTags: [], summary: "" }, variants: undefined }] } }) });
+    });
+    await page.goto("/admin/products?diagnostics=1");
+    await expect(page.getByRole("heading", { name: "商品管理" })).toBeVisible();
+    await expect(page.getByText("測試資料")).toBeVisible();
+    await expect(page.getByText("規格：未設定／NT$—")).toBeVisible();
+    await expect(page.getByText("ADMIN_PRODUCTS_RENDER_ERROR")).toHaveCount(0);
+  });
+
   test("does not request the diagnostic script in normal mode", async ({ page }) => {
     const diagnosticRequests: string[] = [];
     page.on("request", request => { if (request.url().includes("/diagnostics/admin-products.js")) diagnosticRequests.push(request.url()); });

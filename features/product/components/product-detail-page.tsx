@@ -59,7 +59,7 @@ export function ProductDetailPage({ slug }: ProductDetailPageProps): JSX.Element
   }, [catalogService, slug, requestKey]);
 
   const product = catalogState.status === "ready" ? catalogState.product : undefined;
-  const variant = product?.variants[0];
+  const variant = product && Array.isArray(product.variants) ? product.variants[0] : undefined;
   const numericQuantity = Number(quantity);
   const quantityIsValid = Number.isInteger(numericQuantity) && numericQuantity >= 1 && variant !== undefined && numericQuantity <= variant.maxQuantity;
 

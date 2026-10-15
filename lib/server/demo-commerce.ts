@@ -58,7 +58,7 @@ function authoritativeCart(lines: unknown, products: Product[] = mockCatalogFixt
       throw new Error("Invalid line");
     }
     const product = products.find(p => p.id === item.productId && p.publication === "published");
-    const variant = product?.variants.find(v => v.id === item.variantId);
+    const variant = (product && Array.isArray(product.variants) ? product.variants : []).find(v => v.id === item.variantId);
     if (!product || !variant || variant.inventoryStatus !== "available"
       || (item.quantity as number) > variant.maxQuantity || seen.has(variant.id)) {
       throw new Error("Unavailable line");

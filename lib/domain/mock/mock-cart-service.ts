@@ -37,7 +37,7 @@ const recalculate = (cart: Cart): void => {
 };
 
 const findVariant = (product: Product, variantId: string): ProductVariant | undefined =>
-  product.variants.find((variant) => variant.id === variantId);
+  (Array.isArray(product.variants) ? product.variants : []).find((variant) => variant.id === variantId);
 
 export const createMockCartService = (options: MockCartOptions = {}): CartService => {
   const scenario = options.scenario ?? "happy";

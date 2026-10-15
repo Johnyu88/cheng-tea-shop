@@ -55,7 +55,7 @@ function CatalogPreview({ catalogService }: { catalogService: CatalogService }):
       {state.status === "ready" && (
         <div className="product-grid">
           {state.products.map((product) => {
-            const variant = product.variants[0];
+            const variant = Array.isArray(product.variants) ? product.variants[0] : undefined;
             return (
               <article className="product-card" key={product.id}>
               <div className="product-placeholder" role="img" aria-label={product.image.alt}>
@@ -66,7 +66,7 @@ function CatalogPreview({ catalogService }: { catalogService: CatalogService }):
                   <h3>{product.name}</h3>
                   <p className="product-summary">{product.summary}</p>
                   <p className="product-meta">
-                    {variant?.specification}／NT${variant?.price.amount.toLocaleString("zh-TW")}
+                    {variant?.specification ?? "未設定"}／NT${variant?.price?.amount?.toLocaleString("zh-TW") ?? "—"}
                   </p>
                   <Link className="product-link" href={`/tea/${product.slug}`}>
                     查看茶品
