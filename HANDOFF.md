@@ -991,5 +991,5 @@ This checkpoint records preparation only; the 10/14 switch has **not** been perf
 - Fresh live acceptance passed: existing password login, catalog, marked order creation, admin query, payment confirmation, packing photo, ship, deliver, cross-device lookup, and restart persistence. No secret values were printed.
 - Recovery summaries are at `C:\data\tea-staging\recovery\prod-admin-03-8130-before` and `...\prod-admin-03-8130-after`; Caddy pre-change rollback is `...\prod-admin-03-caddy-before`.
 - External mobile result is **BLOCKED**: the Caddy 443/8443 URLs are Tailscale `tailnet only`. The existing `:10000` Funnel targets unrelated 8131 and was not changed or used.
-- Local Git state is ready for commit. Push remains `LOCAL_COMMITS_PENDING` because GitHub connection fails on port 443; exact error: `Failed to connect to github.com port 443: Bad access`.
+- Local Git commit `47b6d26` is pushed to `origin/codex/prod-restore-20261015` (`SYNCED`).
 - Rollback: stop the live replacement, start `tea-private-v5-reauth`, restore the saved Caddyfile, and verify `/api/health` before any further action.

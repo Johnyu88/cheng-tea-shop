@@ -54,4 +54,4 @@ Keep old container and image. To roll back, stop `tea-private-v5-prod-admin-03-l
 
 ### Git state
 
-Implementation and documentation are local pending commit; GitHub push remains subject to the existing network failure (`Failed to connect to github.com port 443: Bad access`).
+Implementation and documentation are committed at `47b6d26` and pushed to `origin/codex/prod-restore-20261015` (`SYNCED`).
