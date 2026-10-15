@@ -795,3 +795,9 @@ PHASE2-DESIGN-01 候選施工已完成但不進入下一小階段：建立 typog
 
 TDD 新增測試施工前為 `4 failed / 0 passed`，施工後定向分類測試為 `7/7 PASS`。完整 Vitest 為 `76 files / 375 tests PASS`、exit 0、235.69 秒；TypeScript PASS；修改檔案 ESLint `0 errors / 3 existing no-img warnings`；production build PASS，20/20 static pages，保留既有 6 個 dynamic filesystem tracing warnings。完整 ESLint 仍為 `3 errors / 17 warnings`，三個 error 均為既有基準問題，本輪未修改。五寬度瀏覽器驗證為 PASS：390／412／768／1080／1440 均無水平頁面捲動，分類列為單排橫向滑動，`/cart`／`/checkout` HTTP 200；特殊茶空狀態與恢復全部商品均通過。截圖保存於 `phase2-category-02-screenshots/`。PHASE1 結帳／放棄購買程式未改動；正式 `10000`、後台 `10001`、10002 入口與正式資料未變動。停在人工視覺驗收閘門，不進入下一個 PHASE2 小階段。
 
+## 74. 2026-10-16 PHASE2-REGRESSION-03 前台非授權變更回歸
+
+比對 `b104163`、`f6c9da9` 與 `897e319` 後確認：分類 commit 沒有修改首頁邀請文案、地址或購物車元件；`b104163` 與 `f6c9da9` 本身已缺少「來喝茶」與地址，缺口可追溯至更早的 `1421ed1` 共用 Shell 抽取。歷史 commit `4837371` 保留最後可核對的原文案、地址與 Google 地圖連結，因此本輪採最小恢復，不自行編造內容。
+
+恢復後保留十大茶類、共用 Header、銀行資訊與購物車／結帳／放棄購買行為；未修改正式資料、商品、價格、訂單、照片或音訊。定向回歸／分類測試 `5/5 PASS`；完整 Vitest `77 files / 376 tests PASS`、exit 0、246.52 秒；TypeScript PASS；production build PASS；完整 ESLint 仍為既有 `3 errors / 17 warnings`。首頁五寬度、購物車與結帳截圖保存於 `phase2-regression-03-screenshots/`，等待人工手機驗收。
+

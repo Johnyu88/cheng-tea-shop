@@ -1162,3 +1162,11 @@ This checkpoint records preparation only; the 10/14 switch has **not** been perf
 - TDD 紅燈：新增分類測試施工前 `4 failed / 0 passed`。施工後定向分類／CatalogBrowser 測試 `7/7 PASS`；修改檔案 ESLint `0 errors / 3 existing no-img warnings`；TypeScript PASS。完整 Vitest `76 files / 375 tests PASS`、exit 0、235.69 秒；production build PASS（20/20 static pages，保留既有 6 個 dynamic filesystem tracing warnings）。完整 ESLint 仍為 `3 errors / 17 warnings`，三個 error 均為既有基準問題：`app/admin/products/page.tsx:21`、`features/checkout/components/public-order-checkout.tsx:18`、`tests/admin-products-diagnostic.test.ts:35`，本輪未修改。
 - 候選 `127.0.0.1:3111` 五寬度瀏覽器驗證 PASS：390／412／768／1080／1440 均 HTTP 200、11 個分類按鈕、`overflow-x:auto`、`flex-wrap:nowrap`、頁面 `scrollWidth === viewportWidth`；特殊茶無資料顯示空狀態，回到全部後 8 張已上架商品恢復；`/cart`／`/checkout` 均 HTTP 200。PHASE1 放棄購買與結帳回歸包含在完整 Vitest 中通過。
 - 截圖保存於 `phase2-category-02-screenshots/`：`home-390.png`、`home-412.png`、`home-768.png`、`home-1080.png`、`home-1440.png`。候選服務可供人工驗收，但本輪未重新開啟或修改 10002；等待人工確認，不進入下一個 PHASE2 小階段。
+
+## 2026-10-16 PHASE2-REGRESSION-03 前台非授權變更回歸
+
+- 差異定位：`897e319` 只修改分類元件、公開商品篩選、分類樣式、測試與文件；沒有修改「來喝茶」、地址或購物車檔案。`b104163`／`f6c9da9` 已缺少茶行邀請與地址；Git 歷史顯示缺口源自更早的 `1421ed1` Shell 抽取。`4837371` 是可核對的最後歷史內容來源。
+- 最小恢復：在保留共用 `StorefrontShell`、十大分類、銀行資訊與既有購物車行為的前提下，恢復歷史「有空，來找陳老師喝杯茶。」、電話約喝茶、地址 `427 台中市潭子區潭秀里雅潭路一段38巷2號` 與原 Google 地圖連結。未修改商品、價格、訂單、資料庫、照片或音訊。
+- 購物車來源比對：`features/cart/components/cart-page.tsx` 在 `f6c9da9` 與 `897e319` 完全相同；本輪沒有回退按鈕並列、數量、移除、金額或結帳路徑。PHASE1 放棄購買與資料保留仍由既有回歸測試覆蓋。
+- TDD：恢復測試施工前 `1 failed`，恢復後定向回歸／分類測試 `5/5 PASS`。完整 Vitest `77 files / 376 tests PASS`、exit 0、246.52 秒；TypeScript PASS；Production build PASS；完整 ESLint 仍 `3 errors / 17 warnings`，3 errors 為既有基準問題，未修改。
+- 候選瀏覽器驗證：首頁 390／412／768／1080／1440 截圖均保存；首頁文案、地址、地圖連結存在，390px `scrollWidth === viewportWidth`。購物車與結帳三區截圖保存於 `phase2-regression-03-screenshots/`，候選服務 `127.0.0.1:3111` 回應正常。等待使用者手機驗收，不進入下一階段。
