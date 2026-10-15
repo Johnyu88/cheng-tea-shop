@@ -1021,6 +1021,15 @@ This checkpoint records preparation only; the 10/14 switch has **not** been perf
 - Rollback: stop/remove only the new `tea-public-contact-4837371`, rename `tea-public-contact-4837371-ui-rwd-01-rollback` back to `tea-public-contact-4837371`, start it; the old image and backup at `C:\data\tea-staging\recovery\ui-rwd-01-before-10000` remain intact. Do not delete either image/data mount.
 - Waiting for the user's real foldable-phone opened/closed visual confirmation; no physical-device PASS is claimed.
 
+## 2026-10-15 PROD-ADMIN-07 formal admin deployment consistency audit
+
+- Live backend: `tea-private-v5-prod-admin-03-live`, image `tea-nextjs:prod-admin-03-0b36c71-r1`, digest `sha256:e247f2eb70688627e7b75a7d23ca230f2d4dc59bef3fdf58a30b09deb6f402cc`.
+- Current Git HEAD `2e1dbec`; relevant admin products/order/auth/catalog source has no drift after `0b36c71`. Live `.next` route manifest contains both admin pages.
+- Active Caddy file is mounted from `C:\data\tea-staging\Caddyfile`; Funnel and Caddy target remain `10001 -> 8090 -> host.docker.internal:8130`. Product and order HTML routes are 200 at both public and forwarded-local paths.
+- Product page's route-specific static JS/CSS assets all returned 200. The consistency audit found no evidence that 10001 serves a wrong commit, wrong image, or wrong Caddy target.
+- Acceptance remains **FAIL / UNRESOLVED** on the user's foldable phone. Playwright/browser evidence cannot substitute for it; the missing artifact is the first real-device Console exception or failed Network request.
+- No code, container, Caddy route, SQLite, photo, order, or frontend change was made. Next action requires a redacted real-device capture, not another browser retest.
+
 ## 2026-10-15 PROD-ADMIN-06B foldable product-management blank screen diagnosis
 
 - Real foldable-phone acceptance: FAIL reported on both the original browser and Chrome. No real-device PASS is claimed.

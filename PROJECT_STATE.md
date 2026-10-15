@@ -95,6 +95,15 @@ Disable only the new ingress with `tailscale funnel --https=10001 off`, restore 
 - Rollback preserved: stopped old container `tea-public-contact-4837371-ui-rwd-01-rollback`, old image `tea-nextjs:contact-4837371`, plus `C:\data\tea-staging\recovery\ui-rwd-01-before-10000`.
 - Physical foldable-phone visual acceptance is still pending; automated/browser checks must not be treated as real-device acceptance.
 
+## 2026-10-15 PROD-ADMIN-07 formal admin deployment consistency audit
+
+- Git HEAD is `2e1dbec`; the live backend remains image `tea-nextjs:prod-admin-03-0b36c71-r1`, container image digest `sha256:e247f2eb70688627e7b75a7d23ca230f2d4dc59bef3fdf58a30b09deb6f402cc`, created from the verified backend baseline.
+- `git diff 0b36c71..HEAD` is empty for admin products, publishing, auth, catalog API, and server files. The live `.next` manifest contains both `/admin/products/page` and `/admin/orders/page`.
+- Caddy's active mounted file is the expected configuration; Funnel `10001 -> 8090`, Caddy `host.docker.internal:8130`. 10001 and forwarded 8130 returned the expected product/order HTML routes.
+- Product and order pages have distinct route assets; every product-specific JS/CSS asset returned HTTP 200. No source/build/route mismatch was found.
+- User foldable-phone result remains FAIL for `/admin/products`; this is not replaced by automated evidence. Root cause remains unknown because real-device Console/Network data is unavailable.
+- No container, Caddy, SQLite, photo, order, or frontend change was made. No deployment update is authorized by evidence.
+
 ## 2026-10-15 PROD-ADMIN-06B foldable product-management blank screen diagnosis
 
 - Production baseline unchanged: `tea-private-v5-prod-admin-03-live`, image `tea-nextjs:prod-admin-03-0b36c71-r1`; Caddy 10001 Funnel remains `10001 -> 8090 -> host.docker.internal:8130`.
