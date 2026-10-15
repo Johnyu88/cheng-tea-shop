@@ -1182,6 +1182,16 @@ This checkpoint records preparation only; the 10/14 switch has **not** been perf
 - 資料隔離：僅使用候選瀏覽器 localStorage 的 synthetic cart，未建立訂單、未送出聯絡資料、未呼叫正式可寫入資料；清除只走既有 `CartService.clearCart()`。入口驗收完成後可執行 `tailscale funnel --https=10002 off`。
 - 目前仍停在人工驗收閘門，不合併 main、不部署正式站、不進入下一階段。
 
+## 2026-10-16 PHASE2-TEA-INVITATION-06 來喝茶區塊字體優化
+
+- 基準：恢復標記 `phase2-checkout-accept-05-aff7262` 指向 `aff7262`；本輪只修改候選首頁「來喝茶」區塊的排版 hooks 與 CSS，未覆蓋標記。
+- 原本文案、地址、電話、LINE、Google 地圖連結完全保留；十大茶類、購物車、LINE、匯款、放棄購買與結帳流程未修改。
+- TDD：新增排版回歸測試，修改前 `1 failed / 1 passed`；修改後定向測試 `2/2 PASS`。
+- 排版實測：390／412px 標題 `26px`、邀請文字 `18px`、地址 `16px`；768px 標題 `30.72px`；1080／1440px 標題 `36px`、邀請文字 `20px`、地址 `18px`。電話與 Google 地圖連結高度約 `54.4px`，可點擊且文字完整。
+- 五寬度瀏覽器驗證：390／412／768／1080／1440 均 `scrollWidth === innerWidth`，無水平溢出。修改前截圖沿用 `phase2-regression-03-screenshots/home-390.png`、`home-412.png`、`home-768.png`、`home-1080.png`、`home-1440.png`；修改後截圖保存於 `phase2-tea-invitation-06-after-390.png`、`after-412.png`、`after-768.png`、`after-1080.png`、`after-1440.png`。
+- 完整 Vitest：`77 files / 378 tests PASS`，exit 0；TypeScript PASS；修改檔案 ESLint `0 errors`（既有圖片與 CSS 設定 warnings）；production build PASS。未開啟 10002、未修改正式 10000／10001。
+- 本輪完成後停止，等待手機人工確認；未進入下一個 PHASE2 小階段。
+
 ## 2026-10-16 PHASE2-CHECKOUT-ACCEPT-05 人工驗收封存
 
 - 使用者已以手機驗收候選程式基準 `aff7262`，以下三項為 **PASS**：LINE 三步驟訂購；電話聯絡及匯款資訊；放棄購買二次確認。

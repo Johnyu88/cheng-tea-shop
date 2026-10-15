@@ -811,6 +811,14 @@ TDD 新增測試施工前為 `4 failed / 0 passed`，施工後定向分類測試
 
 本輪完成後停止於人工手機驗收閘門；不合併 main、不部署正式站、不進入下一階段。驗收完成的入口關閉指令為 `tailscale funnel --https=10002 off`。
 
+## 77. 2026-10-16 PHASE2-TEA-INVITATION-06 來喝茶區塊字體優化
+
+本輪以 `phase2-checkout-accept-05-aff7262`／`aff7262` 為基準，只為首頁「來喝茶」區塊加入專用排版 hooks 與響應式 CSS。標題、邀請文字、地址的文案與原始內容未改；電話、LINE、Google 地圖、匯款與其他購物流程未改。
+
+排版設定為手機標題約 26px、邀請文字約 18px、地址至少 16px，桌面隨寬度放大至標題 36px、邀請文字 20px、地址 18px；連結保留至少 48px 觸控高度。390／412／768／1080／1440px 實測均無水平溢出。
+
+測試先行紅燈為 `1 failed / 1 passed`，修復後定向 `2/2 PASS`；完整 Vitest `77 files / 378 tests PASS`，TypeScript PASS，修改檔案 ESLint 無 errors，production build PASS。修改前截圖使用 `phase2-regression-03-screenshots/home-*.png`，修改後截圖使用 `phase2-tea-invitation-06-after-*.png`。候選 10002 未重新開啟，正式服務未修改，等待人工手機驗收。
+
 ## 76. 2026-10-16 PHASE2-CHECKOUT-ACCEPT-05 人工驗收封存
 
 使用者以手機驗收候選 `aff7262`，確認三項人工接單流程 **PASS**：LINE 三步驟訂購、電話聯絡及匯款資訊、放棄購買二次確認。十大茶類橫向分類與操作沿用先前使用者人工驗收 **PASS**。

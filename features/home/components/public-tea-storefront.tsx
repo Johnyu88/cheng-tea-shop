@@ -65,15 +65,15 @@ export function PublicTeaStorefront({ teas }: { teas: Product[] }) {
       </section>
       <section id="contact" className="demo-panel mt-8" aria-labelledby="contact-heading">
         <p className="eyebrow">茶香裡，慢慢聊</p>
-        <h2 id="contact-heading">有空，來找陳老師喝杯茶。</h2>
-        <p>不趕時間，坐下來聊聊天、聞聞茶香，慢慢找到自己喜歡的好茶。歡迎先來電或透過 LINE 聯絡，約個方便的時間來喝茶。</p>
-        <div className="form-actions mt-4">
+        <h2 id="contact-heading" className="tea-invitation-heading">有空，來找陳老師喝杯茶。</h2>
+        <p className="tea-invitation-copy">不趕時間，坐下來聊聊天、聞聞茶香，慢慢找到自己喜歡的好茶。歡迎先來電或透過 LINE 聯絡，約個方便的時間來喝茶。</p>
+        <div className="form-actions tea-invitation-actions mt-4">
           <a className="primary-action" href="tel:0919086099">電話約喝茶：0919-086-099</a>
           <a className="filter-button" href={line} target="_blank" rel="noopener noreferrer">LINE 聯絡陳老師</a>
         </div>
-        <div className="mt-6">
+        <div className="tea-invitation-location mt-6">
           <h3>來喝茶的地方</h3>
-          <p>427 台中市潭子區潭秀里雅潭路一段38巷2號</p>
+          <p className="tea-invitation-address">427 台中市潭子區潭秀里雅潭路一段38巷2號</p>
           <p className="muted">來訪前歡迎先電話或 LINE 約時間。</p>
           <a className="filter-button mt-3 inline-flex" href="https://maps.app.goo.gl/hu1s5npHJxb1Yghp8?g_st=ic" target="_blank" rel="noopener noreferrer">開啟 Google 地圖導航</a>
         </div>
