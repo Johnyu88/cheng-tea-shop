@@ -755,3 +755,15 @@ The closeout source/UI commit `a521b3732edf8c5db8f20248c993564f9f9c934a` complet
 
 完整 Vitest 以單 worker、無檔案並行方式完成 73 個檔案／363 個測試，exit 0，Vitest duration 275.45 秒；前次兩分鐘未完成是觀察窗不足，不是已證實的單檔無限等待。主要耗時為 jsdom 73 次建立共 152.66 秒。完整 ESLint 的 3 個 error 在 `8365372` 與 `1421ed1` 完全相同，且相關檔案未被候選修改；本階段不處理無關 lint 基準問題。PHASE1 維持 PENDING，等待正式前台路由修正核准及人工手機驗收。
 
+## 69. 2026-10-16 PHASE1-CHECKOUT-03 正式結帳模式補修
+
+本輪沿用候選分支 `codex/frontend-design-phase1-20261016` 與 worktree `phase1-candidate`，施工前恢復點為 `6caaded`。正式組態仍是 `PUBLIC_STOREFRONT_SERVER=enabled`、`NEXT_PUBLIC_MERCHANT_MANUAL_ORDER=enabled`、`NEXT_PUBLIC_DEMO_COMMERCE=disabled`；因此補修目標是 `MerchantManualCheckoutPage`，不碰正式 `:10000`。
+
+正式 manual checkout 的未送出資料只有頁面內 draft 與既有 public cart。cart 的瀏覽器持久化 key 是 `chen-tea-public-cart-v1`；本輪確認放棄只透過既有 CartService 清除該次 cart，清除失敗回報錯誤並保留資料，不觸及已成立訂單、商品、庫存或其他使用者資料。
+
+測試先行證據為實作前定向測試 4 failed／2 passed；最終正式模式測試 6／6 PASS。完整 Vitest 74 files／369 tests PASS，exit 0，283.71 秒；TypeScript PASS；修改檔案 ESLint 0 errors／1 existing image warning；以非敏感正式旗標建置的 production build PASS，20/20 static pages，保留既有六個 dynamic filesystem tracing warnings。
+
+候選服務 `http://127.0.0.1:3111` 使用隔離 synthetic browser cart，不連接正式可寫入資料源。Chromium 驗證 390、412、768、1080、1440px 全數無水平捲動；正式模式顯示放棄購買，取消二次確認保留 textarea/cart，確認後回到空購物車；390px 放棄與確認下單操作並列且各 76px 高。截圖保存於 `phase1-checkout-03-screenshots`。這些是候選證據，不是正式站人工驗收。
+
+PHASE1 維持 **PENDING**，等待總管與使用者人工手機驗收；未合併 main、未切換正式站、未進入第二階段品牌美術。
+

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type JSX } from "react";
 import Link from "next/link";
 import type { Cart } from "@/lib/domain";
 import { useCommerce } from "@/features/commerce/components/commerce-provider";
@@ -15,6 +15,7 @@ export function MerchantManualCheckoutPage() {
   const [error, setError] = useState("");
   const [feedback, setFeedback] = useState("");
   const [clearing, setClearing] = useState(false);
+  const [abandonDialogOpen, setAbandonDialogOpen] = useState(false);
 
   async function clearAfterSending() {
     if (!cart?.lines.length || clearing) return;
@@ -33,6 +34,33 @@ export function MerchantManualCheckoutPage() {
       setFeedback("購物車已清空。請保留 LINE 訊息以便與店家確認；這不代表網站已自動成立訂單。");
     } catch { setFeedback("清空失敗，請稍後再試。"); }
     finally { setClearing(false); }
+  }
+
+  async function abandonPurchase() {
+    if (!cart?.lines.length || clearing) return;
+    setClearing(true);
+    setError("");
+    setFeedback("");
+    try {
+      const result = cartService.clearCart ? await cartService.clearCart() : await (async () => {
+        for (const item of cart.lines) {
+          const removed = await cartService.removeItem(item.productId, item.variantId);
+          if (!removed.ok) return removed;
+        }
+        return cartService.getCart();
+      })();
+      if (!result.ok) {
+        setError("無法清除購物車，尚未送出的資料仍保留，請稍後再試。");
+        return;
+      }
+      setCart(result.value);
+      setFeedback("已放棄本次購買；尚未送出的購物車資料已清除，未成立任何訂單。");
+      setAbandonDialogOpen(false);
+    } catch {
+      setError("清除失敗，尚未送出的資料仍保留，請稍後再試。");
+    } finally {
+      setClearing(false);
+    }
   }
   useEffect(() => {
     let active = true;
@@ -88,9 +116,12 @@ export function MerchantManualCheckoutPage() {
           {clearing ? "正在清空…" : "已傳送訂購清單，清空購物車"}
         </button>
       </section>}
-      <div className="form-actions mt-6">
+      <div className="manual-order-primary-actions mt-6" aria-label="結帳操作">
+        <a className="primary-action" href={merchantLine} target="_blank" rel="noopener noreferrer">傳送訂單／確認下單（LINE）</a>
+        <button className="abandon-action" type="button" disabled={clearing} onClick={() => setAbandonDialogOpen(true)}>放棄本次購買</button>
+      </div>
+      <div className="form-actions mt-4">
         <a className="primary-action" href={`tel:${merchantPhone}`}>電話訂購：0919-086-099</a>
-        <a className="filter-button" href={merchantLine} target="_blank" rel="noopener noreferrer">透過 LINE 聯絡訂購</a>
         <Link className="text-button" href="/">繼續選茶</Link>
       </div>
       {feedback && <p role="status" className="mt-3">{feedback}</p>}
@@ -108,6 +139,11 @@ export function MerchantManualCheckoutPage() {
         <p className="mt-3">請在陳老師確認訂單與金額後再匯款。匯款後以電話或 LINE 告知轉帳帳號後五碼與金額，以利人工確認。</p>
       </section>
       <p className="mt-6">本頁不會自動送出訂單或扣款。向店家實際完成聯絡、由店家確認接單後，訂購才成立。</p>
+      {abandonDialogOpen && <AbandonDialog cancel={() => setAbandonDialogOpen(false)} confirm={() => void abandonPurchase()} />}
     </section>
   </main>;
+}
+
+function AbandonDialog({ cancel, confirm }: { cancel: () => void; confirm: () => void }): JSX.Element {
+  return <div className="abandon-dialog-backdrop"><div className="abandon-dialog" role="dialog" aria-modal="true" aria-labelledby="manual-abandon-dialog-heading"><h2 id="manual-abandon-dialog-heading">要放棄本次購買嗎？</h2><p>確認後將清除尚未送出的購物車與結帳草稿；已成立的訂單不會受到影響。</p><div className="form-actions"><button className="filter-button" type="button" onClick={cancel}>繼續購買／返回填寫</button><button className="abandon-action" type="button" onClick={confirm}>確認放棄</button></div></div></div>;
 }

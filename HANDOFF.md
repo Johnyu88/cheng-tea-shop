@@ -1108,3 +1108,15 @@ This checkpoint records preparation only; the 10/14 switch has **not** been perf
 - 完整 Vitest 以 `CI=true corepack pnpm exec vitest run --maxWorkers=1 --no-file-parallelism --reporter=verbose --testTimeout=10000 --hookTimeout=10000` 新鮮執行：73 files / 363 tests PASS，exit 0，Vitest duration 275.45s（外層 280.118s）。沒有卡死檔案或失敗程序；前次兩分鐘觀察窗不足以涵蓋本套件。輸出顯示 jsdom 建立 73 次共 152.66s，是主要既有基準耗時來源；SQLite experimental warnings、React act warnings 與一筆預期錯誤邊界 stderr 均未造成測試失敗。未修改測試設定、未刪除／跳過／弱化測試。
 - 完整 ESLint 基準 `8365372` 與候選 `1421ed1` 均為 exit 1、20 problems（3 errors / 17 warnings）。三個相同 error：`app/admin/products/page.tsx:21:7` `@next/next/no-sync-scripts`；`features/checkout/components/public-order-checkout.tsx:18:33` `react-hooks/set-state-in-effect`；`tests/admin-products-diagnostic.test.ts:35:74` `@typescript-eslint/no-unsafe-function-type`。三個檔案均不在 `8365372..1421ed1` 的修改清單，判定為既有基準問題，非本階段引入。
 - PHASE1 仍維持 **PENDING**，尚未具備正式顧客流程的人工手機驗收條件；候選版的自動化五寬度證據仍僅代表 prototype/candidate，不得代替正式前台驗收。未進入第二階段品牌美術。
+
+## 2026-10-16 PHASE1-CHECKOUT-03 正式結帳模式補修
+
+- 恢復核對：候選 worktree `C:\Users\alluser\Documents\Codex\2026-10-16\github-johnyu88-cheng-tea-shop-codex\phase1-candidate`，分支 `codex/frontend-design-phase1-20261016`，施工前 HEAD `6caaded`；未修改正式 `:10000`、正式後台、正式訂單／商品／庫存或素材。
+- 正式旗標組合下，`app/checkout/page.tsx` 實際選用 `MerchantManualCheckoutPage`。本輪只在候選正式模式補上放棄購買，沒有改寫電話、LINE、匯款、庫存、訂單成立或出貨邏輯。
+- 正式模式資料生命週期確認：目前 checkout draft 是頁面內 React 狀態，購物車由既有 `CartService` 持久化至瀏覽器 key `chen-tea-public-cart-v1`；沒有另行寫入正式訂單或全站草稿資料庫。取消確認不呼叫清除；確認放棄只清除目前 CartService 的未送出購物車與 React draft。清除失敗顯示錯誤並保留資料；已成立訂單不在此流程內。
+- 新增 `tests/merchant-manual-checkout-page.test.tsx` 6 tests。TDD 紅燈證據：實作前 4 failed / 2 passed，失敗均因正式模式尚無放棄按鈕；實作後定向測試 6/6 PASS，涵蓋旗標分流、二次確認、取消保留、確認清除、清除失敗、重複點擊與單一 Header。
+- 完整 Vitest：`74 files / 369 tests PASS`，exit 0；Vitest duration `283.71s`，外層 `289.001s`。未修改全域測試設定，未刪除／跳過／弱化測試。輸出中的既有 SQLite、React act、錯誤邊界與資料檔 warning 未造成失敗。
+- TypeScript `tsc --noEmit` PASS。修改檔案 ESLint exit 0、0 errors、1 個既有 `@next/next/no-img-element` warning；全域 ESLint 的 3 個基準 errors 仍不處理。Production build 以正式非敏感旗標 PASS，20/20 static pages，保留既有 6 個 dynamic filesystem tracing warnings。
+- 候選環境為 `http://127.0.0.1:3111`，使用上述非敏感正式模式旗標；只使用隔離瀏覽器 localStorage 的 synthetic cart line，未連接正式可寫入資料來源，未產生真實訂單。Playwright 五寬度驗證 `390/412/768/1080/1440` 全部無水平捲動、正式模式可見放棄操作、取消保留、確認清除；390px 兩按鈕並列，各 `152x76px`，其餘寬度亦至少 52px 高。
+- 截圖位於 `phase1-checkout-03-screenshots`，含五寬度首頁／購物車／正式結帳與 `checkout-abandon-dialog-390.png`。首頁人物、茶湯、照片與音訊路徑未修改；候選瀏覽器檢查仍可見人物文字、音訊標記與 10 個圖片元素。
+- 本輪候選工程修正完成但 PHASE1 仍為 **PENDING**。候選人工手機驗收、正式前台切換與正式部署均未執行；不得以候選自動化證據宣稱正式站已驗收。候選 server 使用正常 `next start` 會提示 standalone 設定警告，未改動正式容器；此為候選驗證環境風險。
