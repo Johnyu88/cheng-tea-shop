@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useState, type JSX } from "react";
 import Link from "next/link";
 import type { CatalogService, Product, TasteTag } from "@/lib/domain";
+import type { TeaCategory } from "@/lib/domain";
+import { CategoryFilter } from "./category-filter";
 
 type CatalogBrowserProps = { catalogService: CatalogService };
 
@@ -45,12 +47,14 @@ function ProductCard({ product }: { product: Product }): JSX.Element {
 
 export function CatalogBrowser({ catalogService }: CatalogBrowserProps): JSX.Element {
   const [taste, setTaste] = useState<TasteTag | undefined>();
+  const [category, setCategory] = useState<TeaCategory | undefined>();
   const [state, setState] = useState<CatalogState>({ status: "loading", products: [] });
   const [requestKey, setRequestKey] = useState(0);
 
   const loadPage = useCallback(
     async (cursor?: string, append = false) => {
       const query = {
+        ...(category === undefined ? {} : { category }),
         ...(taste === undefined ? {} : { taste }),
         ...(cursor === undefined ? {} : { cursor }),
       };
@@ -67,7 +71,7 @@ export function CatalogBrowser({ catalogService }: CatalogBrowserProps): JSX.Ele
           : { status: "ready", products, nextCursor: result.value.nextCursor, total: result.value.total };
       });
     },
-    [catalogService, taste],
+    [catalogService, category, taste],
   );
 
   useEffect(() => {
@@ -77,6 +81,11 @@ export function CatalogBrowser({ catalogService }: CatalogBrowserProps): JSX.Ele
   const chooseTaste = (nextTaste: TasteTag | undefined) => {
     setState({ status: "loading", products: [] });
     setTaste(nextTaste);
+    setRequestKey((key) => key + 1);
+  };
+  const chooseCategory = (nextCategory: TeaCategory | undefined) => {
+    setState({ status: "loading", products: [] });
+    setCategory(nextCategory);
     setRequestKey((key) => key + 1);
   };
 
@@ -109,11 +118,12 @@ export function CatalogBrowser({ catalogService }: CatalogBrowserProps): JSX.Ele
           </button>
         ))}
       </div>
+      <CategoryFilter value={category} onChange={chooseCategory} />
 
       {state.status === "loading" && <p role="status">正在整理茶品目錄</p>}
       {state.status === "empty" && (
         <div className="catalog-message" role="status">
-          <p>目前找不到符合口感的茶品。</p>
+          <p>目前找不到符合{category === undefined ? "口感" : "茶類"}的茶品。</p>
           <button type="button" className="text-button" onClick={() => chooseTaste(undefined)}>
             查看全部茶品
           </button>

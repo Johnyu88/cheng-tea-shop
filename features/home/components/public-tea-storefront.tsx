@@ -1,9 +1,20 @@
+"use client";
+
+import { useMemo, useState } from "react";
 import Link from "next/link";
-import type { Product } from "@/lib/domain/types";
+import type { Product, TeaCategory } from "@/lib/domain/types";
+import { CategoryFilter } from "@/features/catalog/components/category-filter";
 import { StorefrontShell } from "@/features/storefront/components/storefront-shell";
 
 const line = "https://line.me/ti/p/TT6TRQyMF6";
 export function PublicTeaStorefront({ teas }: { teas: Product[] }) {
+  const [category, setCategory] = useState<TeaCategory | undefined>();
+  const publishedTeas = useMemo(() => teas.filter((tea) => tea.publication === "published"), [teas]);
+  const visibleTeas = useMemo(
+    () => publishedTeas.filter((tea) => category === undefined || tea.category === category),
+    [category, publishedTeas],
+  );
+
   return <StorefrontShell><main>
       <section className="hero">
         <p className="eyebrow">陳老師茶行</p>
@@ -33,10 +44,12 @@ export function PublicTeaStorefront({ teas }: { teas: Product[] }) {
         </div>
       </section>
       <section id="tea-list" className="catalog-browser" aria-labelledby="teas-heading">
-        <div className="catalog-heading-row"><div><p className="eyebrow">精選茶品</p><h2 id="teas-heading">精選茶品</h2></div><span className="catalog-count">共 {teas.length} 款</span></div>
+        <div className="catalog-heading-row"><div><p className="eyebrow">精選茶品</p><h2 id="teas-heading">精選茶品</h2></div><span className="catalog-count">共 {visibleTeas.length} 款</span></div>
         <p className="muted">茶名、規格與參考價格依既有茶樣資料整理；實際價格與供貨以陳老師確認為準。</p>
+        <CategoryFilter value={category} onChange={setCategory} />
+        {visibleTeas.length === 0 && <div className="catalog-message" role="status"><p>目前找不到符合茶類的茶品。</p><button type="button" className="text-button" onClick={() => setCategory(undefined)}>查看全部茶品</button></div>}
         <div className="product-grid">
-          {teas.map(tea => { const variant = Array.isArray(tea.variants) ? tea.variants[0] : undefined; return <article className="product-card" key={tea.id}>
+          {visibleTeas.map(tea => { const variant = Array.isArray(tea.variants) ? tea.variants[0] : undefined; return <article className="product-card" key={tea.id}>
             <div className="product-placeholder" role="img" aria-label={tea.image.alt}>
               {tea.image.src ? <img src={tea.image.src} alt={tea.image.alt} loading="lazy"/> : <p>請洽陳老師確認照片</p>}
             </div>

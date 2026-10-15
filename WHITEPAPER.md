@@ -787,3 +787,11 @@ PHASE2-DESIGN-01 候選施工已完成但不進入下一小階段：建立 typog
 
 修改前截圖為 `phase1-checkout-03-screenshots/`，修改後截圖為 `phase2-design-01-screenshots/`；五種寬度均無水平捲動，390px 與 412px 按鈕維持並列，768px 過渡仍保持雙欄。完整 Vitest 75 files／371 tests PASS，Exit 0；TypeScript PASS；修改檔案 ESLint 0 errors／6 warnings；production build PASS，20/20 static pages。等待人工確認，不進入 PHASE2 下一小階段。
 
+## 73. 2026-10-16 PHASE2-CATEGORY-02 十大茶類手機分類
+
+本輪只施工茶類分類，不改首頁段落、品牌素材、商品內容、價格、庫存、訂單或正式環境。候選前台加入「全部」及十類固定順序：台灣野生山茶、綠茶、白茶、黃茶、青茶、紅茶、黑茶、花茶、特殊茶、老茶。手機以單排橫向滑動列呈現，選取狀態使用 `aria-pressed`，下拉選單為預設收合的備用方案。
+
+分類只使用既有 category 值篩選，公開頁面只渲染已上架商品。確認公開 fixture 有 8 類已上架：台灣野生山茶、青茶、綠茶、花茶、黃茶、白茶、紅茶、老茶；黑茶與特殊茶目前無已上架資料，因此顯示空狀態。歷史／管理欄位另有「其他茶類」，本輪不猜測映射，也沒有寫回商品資料。
+
+TDD 新增測試施工前為 `4 failed / 0 passed`，施工後定向分類測試為 `7/7 PASS`。完整 Vitest 為 `76 files / 375 tests PASS`、exit 0、235.69 秒；TypeScript PASS；修改檔案 ESLint `0 errors / 3 existing no-img warnings`；production build PASS，20/20 static pages，保留既有 6 個 dynamic filesystem tracing warnings。完整 ESLint 仍為 `3 errors / 17 warnings`，三個 error 均為既有基準問題，本輪未修改。五寬度瀏覽器驗證為 PASS：390／412／768／1080／1440 均無水平頁面捲動，分類列為單排橫向滑動，`/cart`／`/checkout` HTTP 200；特殊茶空狀態與恢復全部商品均通過。截圖保存於 `phase2-category-02-screenshots/`。PHASE1 結帳／放棄購買程式未改動；正式 `10000`、後台 `10001`、10002 入口與正式資料未變動。停在人工視覺驗收閘門，不進入下一個 PHASE2 小階段。
+

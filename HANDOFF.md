@@ -1152,3 +1152,13 @@ This checkpoint records preparation only; the 10/14 switch has **not** been perf
 - 候選程序 command line 指向 `phase1-candidate` worktree，候選首頁／購物車／結帳 HTTPS 回 200；結帳頁包含「放棄本次購買」。正式 HTTPS 10000 與 10001 唯讀回應仍為 200。
 - 候選使用既有隔離 browser synthetic cart 與 manual checkout；本輪沒有送出訂單或呼叫正式資料 API。手機驗收只應使用 synthetic 資料，不輸入真實個資、不按任何可能送出正式訂單的操作。
 - 目前入口已啟用，等待人工 Android／iPhone 驗收；完成後執行上述停止指令，並以 `tailscale serve status` 確認 10002 消失。PHASE1 維持 **PENDING**，未合併 main、未部署正式環境、未進入 PHASE2。
+
+## 2026-10-16 PHASE2-CATEGORY-02 十大茶類手機分類
+
+- 候選施工基準為 `f6c9da9`，分支仍為 `codex/frontend-design-phase1-20261016`；本輪只修改候選前台分類元件、樣式、測試與交接文件，未修改正式 `10000`／`10001`、商品資料、照片、音訊、訂單或庫存。
+- 新增公開分類固定順序：全部、台灣野生山茶、綠茶、白茶、黃茶、青茶、紅茶、黑茶、花茶、特殊茶、老茶。手機分類列為單排 `overflow-x: auto` 橫向滑動，按鈕使用 `aria-pressed` 並保留鍵盤操作；下拉選單備用方案以未展開 `details` 提供。
+- 分類篩選只讀取既有 `Product.category`，公開前台再次限制 `publication === "published"`；沒有符合資料時顯示友善空狀態，不建立假商品。原型 `CatalogBrowser` 與正式旗標下的 `PublicTeaStorefront` 均覆蓋。
+- 映射差異：管理／歷史分類順序不同；`oolong` 顯示為「青茶」，`other` 不列入十大分類。確認公開 fixture 目前有台灣野生山茶、青茶、綠茶、花茶、黃茶、白茶、紅茶、老茶共 8 類，黑茶與特殊茶目前沒有已上架資料；未修改任何資料補類。
+- TDD 紅燈：新增分類測試施工前 `4 failed / 0 passed`。施工後定向分類／CatalogBrowser 測試 `7/7 PASS`；修改檔案 ESLint `0 errors / 3 existing no-img warnings`；TypeScript PASS。完整 Vitest `76 files / 375 tests PASS`、exit 0、235.69 秒；production build PASS（20/20 static pages，保留既有 6 個 dynamic filesystem tracing warnings）。完整 ESLint 仍為 `3 errors / 17 warnings`，三個 error 均為既有基準問題：`app/admin/products/page.tsx:21`、`features/checkout/components/public-order-checkout.tsx:18`、`tests/admin-products-diagnostic.test.ts:35`，本輪未修改。
+- 候選 `127.0.0.1:3111` 五寬度瀏覽器驗證 PASS：390／412／768／1080／1440 均 HTTP 200、11 個分類按鈕、`overflow-x:auto`、`flex-wrap:nowrap`、頁面 `scrollWidth === viewportWidth`；特殊茶無資料顯示空狀態，回到全部後 8 張已上架商品恢復；`/cart`／`/checkout` 均 HTTP 200。PHASE1 放棄購買與結帳回歸包含在完整 Vitest 中通過。
+- 截圖保存於 `phase2-category-02-screenshots/`：`home-390.png`、`home-412.png`、`home-768.png`、`home-1080.png`、`home-1440.png`。候選服務可供人工驗收，但本輪未重新開啟或修改 10002；等待人工確認，不進入下一個 PHASE2 小階段。

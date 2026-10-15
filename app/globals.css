@@ -147,6 +147,47 @@ main {
   margin: 2rem 0;
 }
 
+.category-filter {
+  margin: 1.25rem 0 2rem;
+}
+
+.category-filter-row {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.75rem;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  padding: 0.25rem 0.25rem 0.75rem;
+  scrollbar-width: thin;
+}
+
+.category-filter-row .filter-button {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.category-filter-fallback {
+  margin-top: 0.75rem;
+}
+
+.category-filter-fallback summary {
+  color: var(--tea-brown);
+  cursor: pointer;
+  font-weight: 750;
+}
+
+.category-filter-fallback select {
+  min-height: 3rem;
+  width: 100%;
+  margin-top: 0.5rem;
+  border: 2px solid var(--ink);
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  color: var(--ink);
+  background: var(--paper);
+  font: inherit;
+}
+
 .filter-button,
 .load-more-button,
 .text-button {
@@ -1037,6 +1078,10 @@ a:focus-visible {
 
   .filter-button {
     width: 100%;
+  }
+
+  .category-filter-row .filter-button {
+    width: auto;
   }
 
   .teacher-story,
