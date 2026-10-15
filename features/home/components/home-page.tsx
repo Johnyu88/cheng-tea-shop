@@ -6,6 +6,7 @@ import type { CatalogService, Product } from "@/lib/domain";
 import { createDemoCatalogService, createMockCatalogService } from "@/lib/domain";
 import { publicTeaCatalogService } from "@/lib/domain/in-memory-adapters";
 import { CatalogBrowser } from "@/features/catalog/components/catalog-browser";
+import { StorefrontShell } from "@/features/storefront/components/storefront-shell";
 
 type HomePageProps = {
   catalogService?: CatalogService;
@@ -83,17 +84,7 @@ function CatalogPreview({ catalogService }: { catalogService: CatalogService }):
 
 export function HomePage({ catalogService = defaultCatalogService }: HomePageProps): JSX.Element {
   return (
-    <div id="top" className="site-shell">
-      <header className="site-header" role="banner">
-        <a className="brand-mark" href="#top" aria-label="陳老師茶行">
-          陳老師茶行
-        </a>
-        <nav aria-label="主要導覽">
-          <a href="#baseline">茶品導覽</a>
-          <a href="/orders">訂單查詢</a>
-        </nav>
-      </header>
-
+    <StorefrontShell homePage>
       <main>
         <section className="hero" aria-labelledby="storefront-heading">
           <p className="eyebrow">陳老師茶行</p>
@@ -140,6 +131,6 @@ export function HomePage({ catalogService = defaultCatalogService }: HomePagePro
           </a>
         </section>
       </main>
-    </div>
+    </StorefrontShell>
   );
 }

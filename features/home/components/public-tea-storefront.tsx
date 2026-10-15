@@ -1,18 +1,10 @@
 import Link from "next/link";
 import type { Product } from "@/lib/domain/types";
+import { StorefrontShell } from "@/features/storefront/components/storefront-shell";
 
 const line = "https://line.me/ti/p/TT6TRQyMF6";
 export function PublicTeaStorefront({ teas }: { teas: Product[] }) {
-  return <div className="site-shell">
-    <header className="site-header">
-      <Link className="brand-mark" href="/">陳老師茶行</Link>
-      <nav aria-label="主要導覽">
-        <a href="#tea-list">精選茶品</a>
-        <a href="#contact">聯絡訂購</a>
-        <Link href="/cart">購物車</Link>
-      </nav>
-    </header>
-    <main>
+  return <StorefrontShell><main>
       <section className="hero">
         <p className="eyebrow">陳老師茶行</p>
         <h1>慢慢選一杯好茶</h1>
@@ -70,6 +62,5 @@ export function PublicTeaStorefront({ teas }: { teas: Product[] }) {
         </a>
         <p>匯款銀行：中國信託；帳號：026540263310。請先由店家確認訂單金額後再匯款。</p>
       </section>
-    </main>
-  </div>;
+    </main></StorefrontShell>;
 }

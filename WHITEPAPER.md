@@ -724,6 +724,16 @@ This remains a local synthetic Demo. No AI image composition, image-recognition 
 - 產品主線正式回到前台視覺與使用體驗：保留已通過的商品照片、茶湯、人物與購物流程，先處理購物車並列按鈕、放棄購買與手機排版，再整理品牌視覺系統。
 - 在設計提案獲確認前，不修改前台程式、不覆蓋正式 10000、不裁切或替換人物、茶湯與商品原始素材；所有後續實作使用獨立分支與候選環境。
 
+## 67. 2026-10-16 前台設計第一階段候選施工
+
+- 從 `8365372` 建立候選分支 `codex/frontend-design-phase1-20261016` 與獨立 worktree；正式前台、後台、訂單、商品資料、照片原檔、音訊與正式部署均未修改。
+- 建立可重用 `StorefrontShell`／Header，統一首頁、購物車、結帳與 public storefront 的品牌與導覽；首頁既有人物、茶席、茶湯、商品照片與 opt-in 音訊保持原路徑與內容。
+- 購物車主要行動為「前往結帳」，「繼續購買」為次要入口；空購物車仍提供完整前台導覽。數量、移除、金額與既有 CartService 持久化行為未改寫。
+- 結帳新增放棄購買二次確認。取消確認保留目前 draft 與 cart；確認放棄使用既有 `clearCart()` 清除本次未送出購物車，並清除元件內 draft，再顯示空購物車狀態；已成立訂單不經過此清除路徑。
+- 390px 實測兩個主要操作並列，各約 55px 高，文字完整且無水平捲動；五種驗收寬度為 390／412／768／1080／1440px。
+- 驗證矩陣：TypeScript PASS；production build PASS；修改檔案 ESLint 0 errors／5 existing warnings；前台定向測試 37/37 PASS；完整 Vitest 因既有 SQLite 測試長時間未完成而 BLOCKED/TIMEOUT；完整 ESLint 因基準既有 3 errors FAIL，未因本階段新增錯誤。
+- 此候選版停在人工驗收閘門，不代表正式部署或品牌美術第二階段已核准。
+
 ## 2026-10-12 PR #29 integration closeout (supersedes older runtime notes)
 
 PR #29 remains draft/unmerged. User-reported iPhone Safari acceptance on 2026-10-11: Passkey logout/re-login, synthetic order completion, product publish/unpublish/edit, ORDER-01 reversal, and ORDER-02 package reopening passed. ORDER-03 shipment correction and Samsung's three Android Chrome entries remain pending.

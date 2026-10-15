@@ -1084,3 +1084,17 @@ This checkpoint records preparation only; the 10/14 switch has **not** been perf
 - 角色切換：Acer Codex 由部署工程師切換為前台網頁設計師。
 - 新主線：先讀取前台原始碼、設計文件、素材與既有驗收紀錄，盤點未完成 UX 問題；優先處理購物車按鈕並列、放棄購買與手機排版，再提出字體、色調、留白、按鈕、商品卡片與品牌質感提案。
 - 本階段只產出現況截圖、差異清單與設計提案；任何前台修改須在獨立分支／候選環境，經確認後才可開始，正式 10000 不得覆蓋。
+
+## 2026-10-16 前台設計第一階段候選版
+
+- 恢復基準：`8365372`；候選 worktree：`C:\Users\alluser\Documents\Codex\2026-10-16\github-johnyu88-cheng-tea-shop-codex\phase1-candidate`。
+- 候選分支：`codex/frontend-design-phase1-20261016`。本階段只修改候選前台，不修改正式 `:10000`、後台、商品／庫存、訂單、照片原檔或音訊。
+- 新增共用 `StorefrontShell`／Header，套用首頁、購物車、結帳與 public storefront；品牌維持「陳老師茶行」，保留首頁人物、茶席、茶湯、商品照片與音訊路徑。
+- 購物車維持數量調整、移除、服務計算與持久化；空購物車也提供首頁、繼續選茶、購物車導覽。
+- 結帳 review step 新增「放棄本次購買」二次確認。取消確認不呼叫清除服務並保留 draft；確認放棄只呼叫既有 `CartService.clearCart()`（若 adapter 不提供則逐項 remove），清除目前購物車與 React 內結帳 draft，已成立訂單不在此流程內。
+- 前台定向 RTL／整合測試：`37/37 PASS`。修改檔案限定 ESLint：`0 errors / 5 warnings`；完整 ESLint 仍有基準既有 3 errors，見測試紀錄。
+- TypeScript：`PASS`。Production build：`PASS`，僅既有 6 個 Turbopack 動態檔案存取 warnings。
+- 完整 Vitest：執行超過兩分鐘後仍未完成且只有既有 SQLite experimental warnings，已停止並列為 `BLOCKED/TIMEOUT`，不可視為 PASS。
+- Production server 瀏覽器驗收：390、412、768、1080、1440px 首頁／空購物車／空結帳均 `scrollWidth <= viewport`；390px 有商品結帳流程確認視窗、取消保留 draft、確認清空購物車均通過。
+- 截圖：`C:\Users\alluser\Documents\Codex\2026-10-16\github-johnyu88-cheng-tea-shop-codex\phase1-screenshots`，含五種寬度首頁／購物車／結帳及 `checkout-abandon-dialog-390.png`。
+- 下一步：等待總管與使用者人工驗收；未經核准不得進入第二階段品牌美術、合併 main 或部署正式環境。
