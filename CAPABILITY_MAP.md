@@ -541,3 +541,15 @@ Phase 10 is planning-only. No real customer/product data has been sent to an ERP
 | HTTP final-unit concurrency | ✅ local PASS | Two concurrent HTTP requests produce one success and zero oversell |
 | Packing photo object storage | 🟨 TEST DOUBLE ONLY | Explicit test substitute; real S3/GCS upload and restore remain blocked |
 | Formal deployment / iPhone Safari | ⛔ BLOCKED | No cloud resource, DNS, formal data, deployment or real-device test |
+
+## XI. CLOUD-02-STORAGE-01 物件儲存與還原（2026-10-16）
+
+| Capability | Status | Evidence / limitation |
+|---|---:|---|
+| Real bytes S3-compatible put/get | ✅ local PASS | RustFS + PostgreSQL isolated test, 9/9 suite |
+| Private photo access and MIME/checksum validation | ✅ local PASS | Unauthorized, missing, delete and MIME mismatch cases |
+| Product replacement/version retention | ✅ local PASS | Immutable object keys; local bucket versioning enabled |
+| Packing photo order/actor/checksum linkage | ✅ local PASS | Candidate PostgreSQL repository and transition gate |
+| PostgreSQL/object backup manifest and restore rehearsal | ✅ local PASS | Manifest, checksum comparison, restore prefix and missing detection |
+| GCP Cloud Storage / IAM / HTTPS | ⛔ BLOCKED | No cloud resource or deployment authorized in this stage |
+| Formal photo migration and iPhone acceptance | ⛔ BLOCKED | Synthetic local data only; not run |

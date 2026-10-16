@@ -1142,3 +1142,11 @@ This checkpoint records preparation only; the 10/14 switch has **not** been perf
 - Photo boundary: the HTTP test uses an explicit `CLOUD02_TEST_PHOTO_STORAGE=1` test double and returns `storage: test-double` / `realObjectStorage: false`; no real object storage PASS is claimed. Multipart remains the production-shaped path; the test double uses JSON metadata to avoid pretending bytes were persisted remotely.
 - Regression evidence: DB-01 **11/11 PASS**, DB-02 **9/9 PASS**, full Vitest command exit 0, TypeScript PASS, full lint 0 errors / 17 existing warnings, production build PASS, secret scan pending final command in this branch.
 - No GCP/Render resource, formal site, DNS, real customer data, Acer, 4090 or CLOUD-03 action was performed. Rollback is a branch revert; Demo routes remain the operational fallback.
+
+## 2026-10-16 CLOUD-02-STORAGE-01 真實物件儲存與備份還原
+
+- Branch: `codex/cloud-02-storage-01-20261016`, based on `56189a8e010a89e3bfc422920a738bc708d3742b`.
+- Added candidate-only S3-compatible adapter, PostgreSQL photo repository, reference migration and storage validation spec. S3 mode requires explicit `enabled: true` and complete endpoint/bucket/credential configuration; Demo remains default.
+- Local evidence: disposable PostgreSQL 17 plus RustFS S3-compatible container, synthetic bytes only. Real storage test **9/9 PASS**: bytes/MIME/size/SHA, adapter restart, private access, immutable product replacement, packing metadata, DB-failure compensation, fail-closed upload validation, manifest/restore/missing detection, MIME rejection and Demo isolation.
+- Bucket versioning was explicitly enabled in the local fixture. Product replacement uses new immutable keys and retains old metadata; packing records retain order, actor, object version and checksum.
+- No GCP/Render, formal site/data, DNS, Acer, 4090 or Tailscale service was touched. Cloud Storage and mobile acceptance remain **BLOCKED / NOT RUN**. Rollback is branch revert; Demo adapter remains the fallback.

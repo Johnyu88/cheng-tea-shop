@@ -91,3 +91,10 @@ Current live verification status: **BLOCKED**. The local contract is tested, but
 - Photo evidence is explicitly **TEST DOUBLE ONLY**. The route does not claim S3/GCS/object-storage persistence; response marks `storage: test-double` and `realObjectStorage: false`.
 - Cloud/formal boundary remains **BLOCKED**: no route was deployed, no real merchant session or customer data was used, no object storage was contacted, and no iPhone acceptance was performed.
 
+## CLOUD-02-STORAGE-01 PostgreSQL/photo consistency evidence (2026-10-16)
+
+- Reference migration: `docs/architecture/cloud-02-storage-01-migration.sql`; additive manifest tables only, never applied to formal data.
+- The local storage repository verifies active product photo rows and packing photo rows against S3-compatible HEAD metadata before creating a manifest. PostgreSQL numeric byte lengths are normalized before comparison.
+- Real local evidence: 9/9 storage tests PASS on disposable PostgreSQL 17 + RustFS; synthetic PNG bytes only. DB-01/DB-02/DB-03 regressions are separate gates and are rerun in the final quality pass.
+- Cloud SQL backup, Cloud Storage versioning/IAM, scheduled jobs and formal restore remain BLOCKED until CLOUD-03 approval.
+

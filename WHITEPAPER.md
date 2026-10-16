@@ -780,3 +780,9 @@ The closeout source/UI commit `a521b3732edf8c5db8f20248c993564f9f9c934a` complet
 
 本輪包裝照片只使用明確標記的 test double，回應標示 `realObjectStorage: false`，不代表 S3/GCS 通過。候選 route 尚未部署，Cloud SQL、真實照片儲存、正式資料、DNS 與 iPhone Safari 仍未驗證；Demo 路徑仍是回退方式。
 
+## 73. 2026-10-16 CLOUD-02-STORAGE-01 真實物件儲存
+
+候選版加入 AWS SDK S3-compatible adapter，只有明確啟用與完整環境設定才會使用；Demo SQLite／JSON 路徑維持預設。商品與包裝照片以真實 bytes 寫入私有 bucket，服務端驗證 MIME、大小、SHA-256、版本與授權；商品更換建立新 immutable key，舊照片保留。
+
+在一次性本地 PostgreSQL 17＋RustFS 環境，真實物件儲存與備份還原測試 9/9 PASS。manifest 對照 PostgreSQL photo rows 與 S3 HEAD metadata；缺物件或 checksum 不符會被偵測，DB transaction 失敗會刪除本次新物件。正式 GCP Cloud Storage、IAM、定期備份、跨區復原與手機驗收仍未執行，不能宣稱雲端驗收完成。
+

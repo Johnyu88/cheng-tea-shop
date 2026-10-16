@@ -1,0 +1,28 @@
+import { createHash, randomUUID } from "node:crypto";
+import type { Pool, PoolClient } from "pg";
+import { type StoredObject, createS3ObjectStorage } from "./s3-object-storage";
+
+type Storage = ReturnType<typeof createS3ObjectStorage>;
+const hash = (bytes: Buffer) => createHash("sha256").update(bytes).digest("hex");
+const transaction = async <T>(pool: Pool, fn: (client: PoolClient) => Promise<T>) => { const client = await pool.connect(); try { await client.query("BEGIN"); const result = await fn(client); await client.query("COMMIT"); return result; } catch (error) { await client.query("ROLLBACK"); throw error; } finally { client.release(); } };
+
+export function createPostgresPhotoRepository(pool: Pool, storage: Storage) {
+  const saveManifestItem = async (client: PoolClient, manifestId: string, object: StoredObject, sourceTable: string, sourceId: string) => client.query("INSERT INTO cloud02_photo_backup_manifest_items(manifest_id,object_key,object_version,sha256_hex,byte_length,mime_type,source_table,source_id) VALUES($1,$2,$3,$4,$5,$6,$7,$8)", [manifestId, object.key, object.versionId, object.sha256Hex, object.byteLength, object.mimeType, sourceTable, sourceId]);
+  return {
+    async replaceProductImage(input: { productId: string; bytes: Buffer; mimeType: "image/jpeg" | "image/png" | "image/webp"; altText: string }) {
+      const object = await storage.put({ scope: "product", ownerId: input.productId, bytes: input.bytes, mimeType: input.mimeType });
+      try { await transaction(pool, async client => { await client.query("UPDATE product_images SET is_active=false,replaced_at=now() WHERE product_id=$1 AND is_active=true", [input.productId]); await client.query("INSERT INTO product_images(id,product_id,object_key,object_version,mime_type,byte_length,sha256_hex,alt_text,is_primary,is_active) VALUES($1,$2,$3,$4,$5,$6,$7,$8,true,true)", [randomUUID(), input.productId, object.key, object.versionId, object.mimeType, object.byteLength, object.sha256Hex, input.altText]); }); return object; } catch (error) { await storage.delete(object.key).catch(() => undefined); throw error; }
+    },
+    async addPackingPhoto(input: { orderId: string; actorId: string; bytes: Buffer; mimeType: "image/jpeg" | "image/png" | "image/webp" }) {
+      const object = await storage.put({ scope: "packing", ownerId: input.orderId, bytes: input.bytes, mimeType: input.mimeType });
+      try { await transaction(pool, async client => { await client.query("INSERT INTO packing_photos(id,order_id,object_key,object_version,mime_type,byte_length,sha256_hex,confirmed_by) VALUES($1,$2,$3,$4,$5,$6,$7,$8)", [randomUUID(), input.orderId, object.key, object.versionId, object.mimeType, object.byteLength, object.sha256Hex, input.actorId]); await client.query("SELECT transition_cloud02_order($1,'packed',$2,'staff',$3,$4)", [input.orderId, input.actorId, `photo-${object.key}`, hash(input.bytes)]); }); return object; } catch (error) { await storage.delete(object.key).catch(() => undefined); throw error; }
+    },
+    async createManifest(label: string) {
+      const rows = await pool.query("SELECT id::text AS id,object_key,object_version,mime_type,byte_length,sha256_hex,'product_images' AS source_table FROM product_images WHERE is_active=true UNION ALL SELECT id::text,object_key,object_version,mime_type,byte_length,sha256_hex,'packing_photos' FROM packing_photos"); const id = randomUUID();
+      const objects: Array<StoredObject & { sourceTable: string; sourceId: string }> = []; for (const row of rows.rows) { const object = (await storage.list(row.source_table === "product_images" ? "product" : "packing")).find(item => item.key === row.object_key); if (!object || object.sha256Hex !== row.sha256_hex || object.byteLength !== Number(row.byte_length)) throw new Error(`Backup manifest object mismatch: ${row.object_key} db=${row.sha256_hex}/${row.byte_length} storage=${object ? `${object.sha256Hex}/${object.byteLength}` : "missing"}`); objects.push({ ...object, sourceTable: row.source_table, sourceId: row.id }); }
+      await transaction(pool, async client => { await client.query("INSERT INTO cloud02_photo_backup_manifests(id,label) VALUES($1,$2)", [id, label]); for (const object of objects) await saveManifestItem(client, id, object, object.sourceTable, object.sourceId); }); return { id, count: objects.length };
+    },
+    async verifyManifest(id: string) { const rows = await pool.query("SELECT object_key,sha256_hex,byte_length FROM cloud02_photo_backup_manifest_items WHERE manifest_id=$1", [id]); const missing: string[] = []; for (const row of rows.rows) { try { const object = (await storage.list(row.object_key.startsWith("product/") ? "product" : "packing")).find(item => item.key === row.object_key); if (!object || object.sha256Hex !== row.sha256_hex || object.byteLength !== row.byte_length) missing.push(row.object_key); } catch { missing.push(row.object_key); } } return { missing }; },
+    async restoreManifest(id: string, restorePrefix: string) { const rows = await pool.query("SELECT object_key,sha256_hex,mime_type FROM cloud02_photo_backup_manifest_items WHERE manifest_id=$1", [id]); const missing: string[] = []; for (const row of rows.rows) { try { const object = await storage.get(row.object_key, { authorized: true }); if (object.sha256Hex !== row.sha256_hex) throw new Error("checksum"); await storage.put({ scope: row.object_key.startsWith("product/") ? "product" : "packing", ownerId: `${restorePrefix}/${row.object_key}`, bytes: object.bytes, mimeType: row.mime_type as "image/jpeg" | "image/png" | "image/webp" }); } catch { missing.push(row.object_key); } } return { missing, count: rows.rowCount }; },
+  };
+}
