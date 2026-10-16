@@ -718,6 +718,12 @@ This remains a local synthetic Demo. No AI image composition, image-recognition 
 
 ## 66. 2026-10-16 正式部署完成，轉入前台設計主線
 
+## 67. 2026-10-16 CLOUD-02 正式雲端架構設計決策
+
+本階段將既有 Demo／本機 SQLite、JSON 與 local media 視為展示與測試資料，正式營運改採 staging／production 完全隔離的 Render Paid Web Service、Managed PostgreSQL 與私有 S3-compatible Object Storage。正式後台以 Better Auth／Passkey 優先、伺服器 Session、owner／staff／customer 最小權限與 Secrets 管理保護；圖片以私有 bucket、短效 signed URL、checksum、版本化與備份 manifest 管理。
+
+參考成本基準為 production $13/月（Render Web $7 + PostgreSQL $6；R2 於免費額度內為 $0），可拋棄 staging $0 但只允許 synthetic data；需持久化的 staging 與 production 同為 $13/月，按需啟動僅能作測試成本最佳化。沒有雲端資源、資料遷移、部署或 DNS 切換前，不得宣稱正式上線或手機驗收通過。
+
 - PROD-ADMIN-24 已完成正式後台切換；部署交接基準為 commit `541e245`，正式後台容器為 `tea-private-v5-prod-admin-24-live`。
 - 正式資料、照片、訂單、Caddy、Funnel 與前台 10000 的保護邊界維持不變；原正式容器保留作為回退基準。
 - 後台的一般手機密碼登入與實機操作仍列為人工驗收事項，不能以自動化 HTTP 或 Playwright 證據取代。

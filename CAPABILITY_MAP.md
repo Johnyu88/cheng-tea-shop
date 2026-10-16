@@ -470,3 +470,14 @@ Phase 10 is planning-only. No real customer/product data has been sent to an ERP
 | Built-in image recognition / extraction / composition | ❌ cancelled / out of scope | External preparation is required before upload; no Mock flow or fake progress is part of the website contract |
 | Existing eight products and history | ✅ preserved | No fixture reset, catalog duplication or historical-order deletion in this change |
 | Physical phone acceptance | ⬜ pending | Browser tests do not replace tomorrow's real-device walkthrough |
+
+## V. CLOUD-02 正式雲端架構（2026-10-16）
+
+| Capability | Status | Evidence / limitation |
+|---|---:|---|
+| Production cloud architecture | ✅ designed only | Render Paid Web + Managed PostgreSQL + private S3-compatible storage; no resource created |
+| Staging / production isolation | ✅ specified only | Separate services, databases, buckets, secrets and hostnames; no deployment performed |
+| Formal admin authentication | ✅ specified only | Better Auth/Passkey-first, secure server sessions, RBAC, CSRF/origin, rate limits and secret rotation |
+| PostgreSQL production schema | ✅ reference design | `docs/architecture/cloud-02-postgresql-schema.sql`; reference-only, not an executed migration |
+| Backup / restore / rollback / migration | ✅ specified only | Runbooks and gates in `docs/architecture/cloud-02-backup-migration-rollback.md`; no backup or restore executed |
+| iPhone Safari no-Tailscale acceptance | 🟨 prepared / not run | Eight manual scripts in `docs/testing/cloud-02-iphone-safari-acceptance.md`; real-device evidence pending |

@@ -1084,3 +1084,11 @@ This checkpoint records preparation only; the 10/14 switch has **not** been perf
 - 角色切換：Acer Codex 由部署工程師切換為前台網頁設計師。
 - 新主線：先讀取前台原始碼、設計文件、素材與既有驗收紀錄，盤點未完成 UX 問題；優先處理購物車按鈕並列、放棄購買與手機排版，再提出字體、色調、留白、按鈕、商品卡片與品牌質感提案。
 - 本階段只產出現況截圖、差異清單與設計提案；任何前台修改須在獨立分支／候選環境，經確認後才可開始，正式 10000 不得覆蓋。
+
+## 2026-10-16 CLOUD-02 正式雲端架構設計交接
+
+- 已在獨立分支 `codex/cloud-02-architecture-20261016` 完成正式雲端架構、PostgreSQL 參考 Schema、私有物件儲存、後台登入安全、成本、備份／復原／回退、資料遷移規格與無 Tailscale iPhone Safari 八項驗收腳本。
+- 核准方向：Render Paid Web Service、Managed PostgreSQL、私有 S3-compatible Object Storage；staging／production 完全隔離。
+- 本階段只完成文件與靜態驗證；未建立任何雲端資源、未產生付費、未部署、未遷移資料、未切換 DNS，亦未修改 Acer、4090 或既有正式站。
+- 生產固定基準成本為 Render Web Service $7/月 + Managed PostgreSQL $6/月 = $13/月；R2 在 10 GB-month、1M Class A、10M Class B 免費額度內可為 $0，超額與流量／建置費依用量計算。可拋棄 staging 僅適合合成資料驗證；正式 staging 預估與 production 同為 $13/月，按需啟動 8 小時約 $0.15、24 小時約 $0.43（直線換算，實際以供應商計量為準）。
+- 八項 iPhone Safari 腳本目前為 `PREPARED / NOT RUN`，不可視為實機通過；待管理者審查並另行批准建立資源後，才進入部署與資料驗證階段。
