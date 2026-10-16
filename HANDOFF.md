@@ -1,5 +1,15 @@
 # HANDOFF
 
+## PRODUCT-11-RELEASE-07 minimal candidate seal — 2026-10-16
+
+- Minimal branch: `fix/product-11-fix-01-minimal`; starting commit `206d0cbb4221ed3c73e7987f10fc803f9d81ea6d` was verified before release checks.
+- The branch excludes only the unrelated `features/checkout/components/public-order-checkout.tsx` effect/lint change. PRODUCT-11 route, catalog store, ID verification, sync handling, cross-process lock, persistence tests, and diagnostics remain present.
+- PASS: focused suite, 5 files / 25 tests. PASS: direct TypeScript check. PASS: Docker Linux production build; isolated image was `tea-nextjs:product-11-minimal-07-206d0cb` at `sha256:f5c750a07ec16cee266f6201dc3f6fa85ea87fd1628980f282722a8186d53733`.
+- FAIL: full lint has the intentionally excluded checkout effect error plus 17 existing warnings. This is a known release gate decision, not a new PRODUCT-11 regression.
+- PASS: official gitleaks v8.30.0 archive checksum verified; incremental `e6267388377ff51b6f3aaa895d262da4fcf96a68..HEAD` scan covered 3 commits and found no leaks. Full repository historical findings remain a separate security-event blocker.
+- PASS by comparison: CONTAINER-06 evidence remains applicable because the minimal branch changes only checkout code and does not touch the tested catalog persistence path. No formal service or data was accessed.
+- Deployment remains unapproved. Use the stepwise backup, preflight, deployment, post-check, and rollback checklist in `docs/testing/product-11-release-07-2026-10-16.md`.
+
 ## PRODUCT-11-PREFLIGHT-05 pre-deployment readiness — 2026-10-16
 
 - Formal image PASS: `tea-nextjs:prod-admin-14-2be6be0` exists locally at `sha256:e4be4719acae0837c10c8244f268b220b3b14b12b89b05bcd812d2bb423a7f7f`; non-sensitive container config, ports, bridge network, and RW mounts were read-only recorded.
