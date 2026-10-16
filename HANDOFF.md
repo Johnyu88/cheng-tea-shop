@@ -1,5 +1,19 @@
 # HANDOFF
 
+## PRODUCT-11-GATE-08 dual-phone failure diagnosis — 2026-10-16
+
+- Field evidence: both Chen Teacher's Samsung Z Fold6 and the user's own phone failed to add product 11 before PRODUCT-11 was deployed. No new formal-site write request was sent during this investigation.
+- PASS: both phones used the same formal route documented for the incident: Tailscale `:10001` → Caddy `:8090` → `tea-private-v5-prod-admin-24-live:8130`.
+- PASS: formal container remains on `tea-nextjs:prod-admin-14-2be6be0`, digest `sha256:e4be4719acae0837c10c8244f268b220b3b14b12b89b05bcd812d2bb423a7f7f`, with the two RW mounts unchanged.
+- PASS: read-only catalog summary is 10 products: 4 drafts and 6 published. IDs were recorded in the separate evidence file without product content.
+- UNKNOWN: retained formal app logs contain only startup and merchant-auth success events; no product POST/PATCH, request ID, HTTP status, product ID, server write status, or sync status for either phone.
+- UNKNOWN: retained Caddy logs contain catalog media GETs but no catalog POST/PATCH entries that identify either phone. Device-to-request correlation is unavailable.
+- UNKNOWN: whether either POST reached the API, whether a product ID was generated, whether private persistence succeeded, whether public sync succeeded, and whether a success UI was shown despite failed persistence.
+- No confirmed root cause. There is no evidence in the retained snapshot of a current permission failure or lock file: the container user owns `catalog.json`, directories are writable, and no `.lock` file was present at inspection time. This does not prove the state during the incident.
+- Formal image bundle did not expose the candidate `x-demo-write-status`/`syncStatus` markers in the bounded read-only scan. Exact source provenance remains unproven.
+- Lint decision remains open: A preserves the minimal candidate with one documented pre-existing checkout error; B adds the independent checkout lint-only fix and requires revalidation. No option was selected automatically.
+- Deployment remains unapproved. Backup, write-freeze, switch, post-check, and rollback checklist: `docs/testing/product-11-gate-08-2026-10-16.md`.
+
 ## PRODUCT-11-RELEASE-07 minimal candidate seal — 2026-10-16
 
 - Minimal branch: `fix/product-11-fix-01-minimal`; starting commit `206d0cbb4221ed3c73e7987f10fc803f9d81ea6d` was verified before release checks.
