@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { merchantRequestCookie } from "@/lib/server/merchant-request-access";
 import { writePublicTeaPublication } from "@/lib/server/public-tea-publication";
 
@@ -7,7 +8,18 @@ import { demoFailure, demoSuccess } from "@/lib/server/demo-route-response";
 import { validateProductDraftDto } from "@/lib/domain";
 import type { CatalogQuery, ProductDraft, TeaCategory, TasteTag } from "@/lib/domain";
 
+const instanceId = process.env.HOSTNAME || "unknown";
+const diagnosticHeaders = (requestId: string, extra: Record<string, string> = {}) => ({
+  "cache-control": "private, no-store",
+  "x-demo-request-id": requestId,
+  "x-demo-instance-id": instanceId,
+  ...extra,
+});
+
+const report = (event: Record<string, string>) => console.info(JSON.stringify({ scope: "demo-catalog", ...event }));
+
 export async function GET(request: Request) {
+  const requestId = randomUUID();
   try {
     assertLocalDemoHttpRequest(request, "GET");
     const url = new URL(request.url);
@@ -24,11 +36,12 @@ export async function GET(request: Request) {
     const limit = Math.min(Math.max(Number.parseInt(url.searchParams.get("limit") ?? "12", 10) || 12, 1), 50);
     const safeStart = Number.isInteger(start) && start >= 0 ? start : 0;
     const items = filtered.slice(safeStart, safeStart + limit);
-    return demoSuccess({ items, nextCursor: safeStart + items.length < filtered.length ? String(safeStart + items.length) : null, total: filtered.length });
-  } catch (error) { return demoFailure(error); }
+    return demoSuccess({ items, nextCursor: safeStart + items.length < filtered.length ? String(safeStart + items.length) : null, total: filtered.length }, { headers: diagnosticHeaders(requestId) });
+  } catch (error) { return demoFailure(error, 400, { headers: diagnosticHeaders(requestId, { "x-demo-write-status": "not-applicable" }) }); }
 }
 
 export async function PATCH(request: Request) {
+  const requestId = randomUUID();
   try {
     assertLocalDemoHttpRequest(request, "PATCH", "json");
     if (!await merchantRequestCookie(request)) throw new Error("Merchant access required");
@@ -38,7 +51,8 @@ export async function PATCH(request: Request) {
       const product = await getDemoCatalogStore().setPublication(body.id, body.publication);
       if (!product) throw new Error("找不到商品");
       await writePublicTeaPublication(await getDemoCatalogStore().list());
-      return demoSuccess(product);
+      report({ requestId, instanceId, method: "PATCH", writeStatus: "persisted", syncStatus: "completed" });
+      return demoSuccess(product, { headers: diagnosticHeaders(requestId, { "x-demo-write-status": "persisted", "x-demo-sync-status": "completed" }) });
     }
     const changes: ProductUpdate = {};
     if (typeof body.name === "string") changes.name = body.name;
@@ -66,11 +80,13 @@ export async function PATCH(request: Request) {
     const product = await getDemoCatalogStore().update(body.id, changes);
     if (!product) throw new Error("找不到商品");
     await writePublicTeaPublication(await getDemoCatalogStore().list());
-    return demoSuccess(product);
-  } catch (error) { return demoFailure(error); }
+    report({ requestId, instanceId, method: "PATCH", writeStatus: "persisted", syncStatus: "completed" });
+    return demoSuccess(product, { headers: diagnosticHeaders(requestId, { "x-demo-write-status": "persisted", "x-demo-sync-status": "completed" }) });
+  } catch (error) { return demoFailure(error, 400, { headers: diagnosticHeaders(requestId) }); }
 }
 
 export async function POST(request: Request) {
+  const requestId = randomUUID();
   try {
     assertLocalDemoHttpRequest(request, "POST", "json");
     if (!await merchantRequestCookie(request)) throw new Error("Merchant access required");
@@ -78,7 +94,14 @@ export async function POST(request: Request) {
     const validated = validateProductDraftDto(await request.json());
     if (!validated.ok) return demoFailure(new Error(validated.error.message));
     const product = await getDemoCatalogStore().publish(validated.value as ProductDraft, publication);
-    await writePublicTeaPublication(await getDemoCatalogStore().list());
-    return demoSuccess(product, { status: 201 });
-  } catch (error) { return demoFailure(error); }
+    report({ requestId, instanceId, method: "POST", writeStatus: "persisted", syncStatus: "started" });
+    try {
+      await writePublicTeaPublication(await getDemoCatalogStore().list());
+    } catch {
+      report({ requestId, instanceId, method: "POST", writeStatus: "persisted", syncStatus: "failed" });
+      return demoFailure(new Error("商品已寫入，但公開同步尚未完成；請勿重複新增。"), 503, { headers: diagnosticHeaders(requestId, { "x-demo-write-status": "persisted", "x-demo-sync-status": "failed" }) });
+    }
+    report({ requestId, instanceId, method: "POST", writeStatus: "persisted", syncStatus: "completed" });
+    return demoSuccess(product, { status: 201, headers: diagnosticHeaders(requestId, { "x-demo-write-status": "persisted", "x-demo-sync-status": "completed" }) });
+  } catch (error) { return demoFailure(error, 400, { headers: diagnosticHeaders(requestId) }); }
 }

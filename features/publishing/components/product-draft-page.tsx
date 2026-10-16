@@ -23,6 +23,7 @@ export function ProductDraftPage(): JSX.Element {
   const [confirmed, setConfirmed] = useState(false);
   const [publishedProduct, setPublishedProduct] = useState<Product>();
   const [savedDraftName, setSavedDraftName] = useState("");
+  const [savedDraftId, setSavedDraftId] = useState("");
   const [hydrated, setHydrated] = useState(false);
   const activeOperation = useRef<Operation>("idle");
   const photosRef = useRef<ProductDraftPhoto[]>([]);
@@ -60,7 +61,17 @@ export function ProductDraftPage(): JSX.Element {
     const submission = validate();
     if (!submission || !start("saving")) return;
     const result = await publishingService.saveDraft(submission);
-    if (result.ok) { setStatus("商品草稿已儲存，尚未上架。"); setSavedDraftName(submission.name); } else { setError(result.error); setStatus(result.error.message); }
+    if (result.ok) {
+      if (!result.value.id) {
+        const uncertain = { code: "publishing-unavailable" as const, message: "尚未確認儲存，請先查詢商品清單，勿重複新增。", retryable: false };
+        setError(uncertain);
+        setStatus(uncertain.message);
+      } else {
+        setStatus("商品草稿已儲存，尚未上架。");
+        setSavedDraftName(submission.name);
+        setSavedDraftId(result.value.id);
+      }
+    } else { setError(result.error); setStatus(result.error.message); }
     finish();
   };
   const publishDraft = async () => {
@@ -102,7 +113,7 @@ export function ProductDraftPage(): JSX.Element {
   };
   const canPublish = minimumProblems(draft).length === 0 && confirmed && operation !== "publishing";
   if (publishedProduct) return <PublishedSuccess product={publishedProduct} />;
-  if (savedDraftName) return <SavedDraftSuccess name={savedDraftName} />;
+  if (savedDraftName) return <SavedDraftSuccess id={savedDraftId} name={savedDraftName} />;
 
   return <main className="product-draft-page py-8 md:py-12" data-hydrated={hydrated ? "true" : "false"}>
     <p role="status" aria-live="polite" className="product-draft-status">{status}</p>
@@ -117,7 +128,7 @@ export function ProductDraftPage(): JSX.Element {
   </main>;
 }
 
-function SavedDraftSuccess({ name }: { name: string }): JSX.Element { return <main className="product-draft-page py-8 md:py-12"><section className="product-draft-card" aria-labelledby="draft-saved-heading"><p role="status" aria-live="polite">商品草稿已儲存，尚未上架。</p><h1 id="draft-saved-heading">儲存成功</h1><p>「{name}」已保存到商品管理，顧客目前看不到這項草稿。</p><div className="form-actions"><Link className="primary-action" href="/admin/products">返回商品管理</Link><Link className="text-button" href="/admin/products/new">繼續新增商品</Link></div></section></main>; }
+function SavedDraftSuccess({ id, name }: { id: string; name: string }): JSX.Element { return <main className="product-draft-page py-8 md:py-12"><section className="product-draft-card" aria-labelledby="draft-saved-heading"><p role="status" aria-live="polite">商品草稿已儲存，尚未上架。</p><h1 id="draft-saved-heading">儲存成功</h1><p>「{name}」已保存到商品管理，顧客目前看不到這項草稿。</p><p>商品編號：{id}</p><div className="form-actions"><Link className="primary-action" href="/admin/products">返回商品管理</Link><Link className="text-button" href="/admin/products/new">繼續新增商品</Link></div></section></main>; }
 
 function ValidationSummary({ problems }: { problems: FieldProblem[] }): JSX.Element { return <div role="alert" className="product-draft-alert"><strong>請先完成必填欄位：</strong><ul>{problems.map((problem) => <li key={problem.field}>{problem.label}：{problem.message}</li>)}</ul></div>; }
 function PhotoPicker({ photos, onAdd, onRemove }: { photos: ProductDraftPhoto[]; onAdd: (event: ChangeEvent<HTMLInputElement>) => void; onRemove: (id: string) => void }): JSX.Element { return <section className="product-draft-photos" aria-labelledby="product-photo-heading"><h2 id="product-photo-heading">商品照片（選填）</h2><p>照片由店家自行拍攝或於外部工具處理後上傳；網站只保存已確認的照片。</p><label className="form-field" htmlFor="product-photos">選擇商品照片（最多三張）<input id="product-photos" className="form-input" type="file" accept="image/*" multiple onChange={onAdd} /></label><p>已選擇 {photos.length}／3 張照片</p>{photos.length > 0 && <ul className="product-draft-photo-list">{photos.map((photo) => <li key={photo.id}><img src={photo.previewUrl} alt={photo.alt} /><button className="text-button" type="button" onClick={() => onRemove(photo.id)}>移除 {photo.alt.replace(" 預覽", "")}</button></li>)}</ul>}</section>; }

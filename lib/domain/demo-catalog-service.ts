@@ -1,6 +1,6 @@
 import { domainError } from "./errors";
 import type { CatalogService } from "./catalog-service";
-import type { PublishingService } from "./publishing-service";
+import type { PublishingService, SavedProductDraft } from "./publishing-service";
 import type { CatalogQuery, Page, Product, ProductDraft, ProductSlug } from "./types";
 import type { ServiceResult } from "./result";
 import { createMockPublishingService } from "./mock/mock-publishing-service";
@@ -9,7 +9,7 @@ const failure = <T>(message: string): ServiceResult<T> => ({ ok: false, error: d
 
 async function demoJson<T>(input: RequestInfo | URL, init?: RequestInit): Promise<ServiceResult<T>> {
   try {
-    const response = await fetch(input, { ...init, headers: { "content-type": "application/json", ...(init?.headers ?? {}) } });
+    const response = await fetch(input, { credentials: "same-origin", ...init, headers: { "content-type": "application/json", ...(init?.headers ?? {}) } });
     const payload = await response.json() as { ok?: boolean; value?: T; error?: string };
     if (!response.ok || !payload.ok || payload.value === undefined) return failure(payload.error ?? "Demo 資料目前無法取得，請稍後再試。");
     return { ok: true, value: payload.value };
@@ -37,11 +37,18 @@ export const createDemoCatalogService = (): CatalogService => ({
 export const createDemoPublishingService = (): PublishingService => {
   const local = createMockPublishingService();
   return {
-    async saveDraft(draft: ProductDraft): Promise<ServiceResult<ProductDraft>> {
+    async saveDraft(draft: ProductDraft): Promise<ServiceResult<SavedProductDraft>> {
       const validated = await local.saveDraft(draft);
       if (!validated.ok) return validated;
       const persisted = await demoJson<Product>("/api/demo/catalog?publication=draft", { method: "POST", body: JSON.stringify(validated.value) });
-      return persisted.ok ? { ok: true, value: validated.value } : persisted;
+      if (!persisted.ok || !persisted.value.id) {
+        return { ok: false, error: domainError("publishing-unavailable", "商品已送出，但尚未確認儲存；請先查詢商品清單，勿重複新增。", false) };
+      }
+      const verified = await demoJson<{ items: Product[] }>("/api/demo/catalog?limit=50&includeUnpublished=true");
+      if (!verified.ok || !verified.value.items.some((item) => item.id === persisted.value.id)) {
+        return { ok: false, error: domainError("publishing-unavailable", "商品可能已寫入，但尚未完成查詢確認；請先查詢商品清單，勿重複新增。", false) };
+      }
+      return { ok: true, value: { ...validated.value, id: persisted.value.id } };
     },
     async publishDraft(draft: ProductDraft, confirmation): Promise<ServiceResult<Product>> {
       if (!confirmation.confirmed) return { ok: false, error: domainError("invalid-draft", "發布前必須明確確認。", false) };
