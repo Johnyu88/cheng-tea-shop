@@ -1,5 +1,14 @@
 # HANDOFF
 
+## PRODUCT-11-FIX-01 candidate — 2026-10-16
+
+- Candidate branch: `fix/product-11-fix-01`; candidate SHA before evidence docs: `8807cbea14520d586939787ae7733b228812f742`.
+- Isolated worktree: `product-11-fix-01-worktree`; no Acer container, formal `catalog.json`, formal photos, DNS, Tailscale, deployment, restart, or CLOUD work was accessed.
+- Scope: POST now returns the persisted product ID; the same-session GET verifies that ID before showing success. A failed verification is reported as uncertain persistence and instructs the operator not to resubmit. File writes retain atomic replacement and add a cross-instance lock plus request/instance/write/sync diagnostics without PII or secrets.
+- Candidate tests: focused persistence/sync/UI/photo tests PASS (5 files, 24 tests); full suite has 344 PASS and 6 pre-existing FAIL in 5 unrelated files. TypeScript PASS; production build PASS. Full lint remains FAIL on the pre-existing `features/checkout/components/public-order-checkout.tsx:18` rule violation plus 17 warnings. `gitleaks` is unavailable in the local runner; lightweight pattern scan found no new credential material.
+- Formal deployment: none. Waiting for manager acceptance; do not deploy or merge this candidate.
+- Evidence: `docs/testing/product-11-fix-01-2026-10-16.md`.
+
 ## Latest mobile OTP acceptance — 2026-10-02 Taipei
 
 - Password demo /orders now uses two visible stages; OTP123456, expiry, cooldown and actionable errors. See docs/testing/otp-two-stage-2026-10-02.md.
