@@ -1129,5 +1129,16 @@ This checkpoint records preparation only; the 10/14 switch has **not** been perf
 - Adapter operations are transaction-scoped: create/reserve, manual payment confirmation, packing photo transition, shipment/consume, and cancellation/release. PostgreSQL environment is fail-closed unless explicitly opted in.
 - Added reservation release/consume/expiry functions. Expiry skips orders with confirmed payment; repeated release does not restore stock twice; cancellation after shipped/delivered/cancelled is rejected.
 - Local synthetic evidence: disposable localhost-only `postgres:17` container `cloud-02-db-02-postgres`; DB-02 **9/9 PASS**, DB-01 **11/11 PASS**. No formal DB, cloud, DNS, Acer, 4090, or real customer data was touched.
-- Quality evidence so far: full lint **PASS, 0 errors / 18 warnings**; TypeScript **PASS**; `git diff --check` **PASS**. Full Vitest, production build and secret scan still must be run before final commit claim.
+- Quality evidence at DB-02 closeout: full lint **PASS, 0 errors / 18 warnings**; TypeScript **PASS**; production build **PASS**; full Vitest command exit 0; secret-pattern scan and `git diff --check` **PASS**.
 - Stop boundary: no deployment or CLOUD-03. Remaining review items are API route selection, real object storage/photo manifest, Cloud SQL compatibility, and formal backup/restore; all remain blocked pending separate approval.
+
+## 2026-10-16 CLOUD-02-DB-03 HTTP Route 接線與端到端驗證
+
+- Branch: `codex/cloud-02-db-03-20261016`, based on `e43db2b3df74808cb02ee22f3fc3659241a4235d`.
+- Added isolated `/api/candidate/...` route handlers for order creation, OTP-protected lookup, authenticated merchant payment/shipping/delivery/cancellation, and packing-photo confirmation. Existing `/api/demo/...` routes were not changed.
+- Candidate routes are fail-closed unless `CLOUD02_HTTP_MODE=candidate`, `COMMERCE_BACKEND=postgres`, and a PostgreSQL URL are all present. Default Demo mode remains unchanged.
+- Server derives the candidate phone digest, validates the fixed candidate delivery/payment choices and line shape, reads authoritative product prices/inventory through the adapter, and never accepts client totals or order numbers.
+- HTTP evidence: disposable localhost-only PostgreSQL 17 with synthetic fixtures; **7/7 PASS**. Covered one-order replay, final-unit HTTP concurrency, explicit-mode off, unauthenticated merchant 403, payment → packing → shipping → delivery, OTP lookup, and candidate test-photo labeling.
+- Photo boundary: the HTTP test uses an explicit `CLOUD02_TEST_PHOTO_STORAGE=1` test double and returns `storage: test-double` / `realObjectStorage: false`; no real object storage PASS is claimed. Multipart remains the production-shaped path; the test double uses JSON metadata to avoid pretending bytes were persisted remotely.
+- Regression evidence: DB-01 **11/11 PASS**, DB-02 **9/9 PASS**, full Vitest command exit 0, TypeScript PASS, full lint 0 errors / 17 existing warnings, production build PASS, secret scan pending final command in this branch.
+- No GCP/Render resource, formal site, DNS, real customer data, Acer, 4090 or CLOUD-03 action was performed. Rollback is a branch revert; Demo routes remain the operational fallback.

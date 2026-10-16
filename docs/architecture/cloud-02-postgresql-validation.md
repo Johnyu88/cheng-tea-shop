@@ -82,3 +82,12 @@ Current live verification status: **BLOCKED**. The local contract is tested, but
 - Repository quality: full lint **PASS with 18 existing warnings and 0 errors** after correcting the three recorded baseline errors; TypeScript **PASS**; `git diff --check` **PASS**. Full Vitest/build/secret scan remain pending at this checkpoint.
 - Formal/cloud/mobile boundary: **BLOCKED / NOT RUN**. No API deployment, Cloud SQL, Render, object storage, real data, DNS, or iPhone acceptance was touched.
 
+## CLOUD-02-DB-03 HTTP route evidence (2026-10-16)
+
+- Candidate route namespace: `/api/candidate/...`; the existing `/api/demo/...` namespace remains Demo-only and unchanged.
+- Environment gate: candidate handlers require `CLOUD02_HTTP_MODE=candidate`, `COMMERCE_BACKEND=postgres`, and a PostgreSQL URL. Missing or disabled mode returns 404; bad backend configuration fails closed.
+- HTTP operations covered: create/replay, OTP lookup, merchant-authenticated manual payment, packing confirmation, shipment, delivery and cancellation handler wiring. The adapter remains responsible for authoritative price, amount, inventory and state checks.
+- Local evidence: 7/7 HTTP tests PASS; DB-01 11/11 PASS; DB-02 9/9 PASS. Test DB is disposable localhost-only PostgreSQL 17 with synthetic fixtures.
+- Photo evidence is explicitly **TEST DOUBLE ONLY**. The route does not claim S3/GCS/object-storage persistence; response marks `storage: test-double` and `realObjectStorage: false`.
+- Cloud/formal boundary remains **BLOCKED**: no route was deployed, no real merchant session or customer data was used, no object storage was contacted, and no iPhone acceptance was performed.
+

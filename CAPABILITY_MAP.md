@@ -529,3 +529,15 @@ Phase 10 is planning-only. No real customer/product data has been sent to an ERP
 | DB-01 regression | ✅ local PASS | Original 11/11 contract tests remain passing |
 | Full lint baseline | ✅ 0 errors | Three known errors fixed; 18 pre-existing warnings remain |
 | Cloud/formal API/mobile acceptance | ⛔ BLOCKED | No deployment, real data, Cloud SQL/Render or iPhone test performed |
+
+## X. CLOUD-02-DB-03 HTTP Route 接線（2026-10-16）
+
+| Capability | Status | Evidence / limitation |
+|---|---:|---|
+| Candidate HTTP order creation/replay | ✅ local PASS | `/api/candidate/orders`; one order and identical replay response verified |
+| Candidate HTTP payment/packing/shipping/delivery/cancel wiring | ✅ local PASS | Authenticated route-handler tests over disposable PostgreSQL |
+| Candidate OTP lookup | ✅ local PASS | Challenge, code, phone and order number required; cross-device result verified |
+| Candidate mode isolation | ✅ local PASS | Missing explicit candidate mode returns 404; Demo routes remain unchanged |
+| HTTP final-unit concurrency | ✅ local PASS | Two concurrent HTTP requests produce one success and zero oversell |
+| Packing photo object storage | 🟨 TEST DOUBLE ONLY | Explicit test substitute; real S3/GCS upload and restore remain blocked |
+| Formal deployment / iPhone Safari | ⛔ BLOCKED | No cloud resource, DNS, formal data, deployment or real-device test |

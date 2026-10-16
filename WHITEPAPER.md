@@ -774,3 +774,9 @@ The closeout source/UI commit `a521b3732edf8c5db8f20248c993564f9f9c934a` complet
 
 在 disposable localhost-only PostgreSQL 17 與合成 fixture 上，DB-02 adapter 9/9 PASS，DB-01 原有 11/11 PASS；完整 lint 0 errors（18 個既有 warnings）與 TypeScript PASS。沒有部署、雲端資源、正式資料、DNS、Acer、4090 或 CLOUD-03 操作。Cloud SQL 相容性、正式 API route selection、私有照片 manifest、備份還原與 iPhone 實機驗收仍是後續審查／批准後才可執行的阻塞事項。
 
+## 72. 2026-10-16 CLOUD-02-DB-03 HTTP Route 接線
+
+在不改動現有 `/api/demo/...` 的前提下，新增明確候選命名空間 `/api/candidate/...`。只有同時設定 candidate mode、PostgreSQL backend 與資料庫 URL 時才會啟用；預設與錯誤設定均 fail closed。HTTP 測試已驗證下單重送、最後一件並發、商家登入邊界、付款、包裝、出貨、送達與 OTP 查單。
+
+本輪包裝照片只使用明確標記的 test double，回應標示 `realObjectStorage: false`，不代表 S3/GCS 通過。候選 route 尚未部署，Cloud SQL、真實照片儲存、正式資料、DNS 與 iPhone Safari 仍未驗證；Demo 路徑仍是回退方式。
+

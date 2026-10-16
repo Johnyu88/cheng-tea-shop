@@ -3,7 +3,7 @@ import type { Pool, PoolClient } from "pg";
 
 export type PostgresOrderLine = { productId: string; variantId: string; quantity: number };
 export type PostgresOrderRequest = {
-  idempotencyKey: string; orderNumber: string; customerName: string; phoneDigest: string;
+  idempotencyKey: string; orderNumber?: string; customerName: string; phoneDigest: string;
   paymentMethod: "bank_transfer" | "cash" | "phone_confirmation" | "line_voice_confirmation";
   lines: PostgresOrderLine[]; shippingAmount?: number; expiresAt?: Date;
 };
@@ -38,14 +38,14 @@ export class PostgresOrderAdapter {
         const row = found.rows[0] as { name: string; specification: string; price_amount: number };
         subtotal += row.price_amount * line.quantity; lines.push({ input: line, name: row.name, specification: row.specification, price: row.price_amount });
       }
-      const shipping = request.shippingAmount ?? 0; const total = subtotal + shipping;
-      await client.query("INSERT INTO orders(id,order_number,customer_name,phone_digest,delivery_method,payment_method,subtotal_amount,shipping_amount,total_amount,lookup_digest) VALUES($1,$2,$3,$4,'store_pickup',$5,$6,$7,$8,$4)", [orderId, request.orderNumber, request.customerName, request.phoneDigest, request.paymentMethod, subtotal, shipping, total]);
+      const shipping = request.shippingAmount ?? 0; const total = subtotal + shipping; const orderNumber = request.orderNumber ?? `${new Date().toISOString().slice(2, 10).replaceAll("-", "")}-${orderId.slice(-3)}`;
+      await client.query("INSERT INTO orders(id,order_number,customer_name,phone_digest,delivery_method,payment_method,subtotal_amount,shipping_amount,total_amount,lookup_digest) VALUES($1,$2,$3,$4,'store_pickup',$5,$6,$7,$8,$4)", [orderId, orderNumber, request.customerName, request.phoneDigest, request.paymentMethod, subtotal, shipping, total]);
       for (const line of lines) {
         await client.query("INSERT INTO order_items(id,order_id,product_id,variant_id,product_name_snapshot,specification_snapshot,unit_price_amount,quantity,line_total_amount) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)", [randomUUID(), orderId, line.input.productId, line.input.variantId, line.name, line.specification, line.price, line.input.quantity, line.price * line.input.quantity]);
         await client.query("SELECT reserve_cloud02_inventory($1,$2,$3,$4)", [line.input.variantId, orderId, line.input.quantity, randomUUID()]);
       }
       await client.query("INSERT INTO payments(id,order_id,method,amount) VALUES($1,$2,$3,$4)", [randomUUID(), orderId, request.paymentMethod, total]);
-      const result = { orderId, orderNumber: request.orderNumber, status: "confirmed", totalAmount: total };
+      const result = { orderId, orderNumber, status: "confirmed", totalAmount: total };
       await client.query("UPDATE cloud02_idempotency_keys SET response_body=$3,response_code=201 WHERE scope='order-create' AND key=$1 AND request_hash=$2", [request.idempotencyKey, requestHash, JSON.stringify(result)]);
       return result;
     });
@@ -68,7 +68,15 @@ export class PostgresOrderAdapter {
     return this.transaction(async client => { const h=hash({orderId,objectKey,actorId}); await client.query("INSERT INTO packing_photos(id,order_id,object_key,mime_type,byte_length,sha256_hex,confirmed_by) VALUES($1,$2,$3,'image/jpeg',10,repeat('a',64),$4)",[resourceId("photo",idempotencyKey),orderId,objectKey,actorId]); await client.query("SELECT transition_cloud02_order($1,'packed',$2,'staff',$3,$4)",[orderId,actorId,idempotencyKey,h]); return {orderId,status:"packed",objectKey}; });
   }
   async ship(orderId: string, idempotencyKey: string, actorId: string) { return this.transaction(async client => { const h=hash({orderId,actorId,action:"ship"}); await client.query("SELECT transition_cloud02_order($1,'shipped',$2,'staff',$3,$4)",[orderId,actorId,idempotencyKey,h]); await client.query("SELECT consume_cloud02_inventory($1)",[orderId]); return {orderId,status:"shipped"}; }); }
+  async deliver(orderId: string, idempotencyKey: string, actorId: string) { return this.transaction(async client => { const h=hash({orderId,actorId,action:"deliver"}); await client.query("SELECT transition_cloud02_order($1,'delivered',$2,'staff',$3,$4)",[orderId,actorId,idempotencyKey,h]); return {orderId,status:"delivered"}; }); }
   async cancel(orderId: string, idempotencyKey: string, actorId: string) { return this.transaction(async client => { const h=hash({orderId,actorId,action:"cancel"}); await client.query("SELECT cancel_cloud02_order($1,$2,$3,$4)",[orderId,actorId,idempotencyKey,h]); return {orderId,status:"cancelled"}; }); }
+  async lookupOrder(orderNumber: string, phoneDigest: string) {
+    const result = await this.pool.query("SELECT id,order_number,status,customer_name,total_amount FROM orders WHERE order_number=$1 AND phone_digest=$2", [orderNumber, phoneDigest]);
+    if (result.rowCount !== 1) return null;
+    const order = result.rows[0];
+    const items = await this.pool.query("SELECT product_name_snapshot AS name,specification_snapshot AS specification,unit_price_amount AS \"unitPrice\",quantity,line_total_amount AS \"lineTotal\" FROM order_items WHERE order_id=$1 ORDER BY id", [order.id]);
+    return { orderId: order.id, orderNumber: order.order_number, status: order.status, customerName: order.customer_name, totalAmount: order.total_amount, lines: items.rows };
+  }
 }
 
 export { requireProductionPostgres };
