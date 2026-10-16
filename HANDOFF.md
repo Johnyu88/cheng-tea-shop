@@ -1,5 +1,16 @@
 # HANDOFF
 
+## PRODUCT-11-VERIFY-02 deployment-gate evidence — 2026-10-16
+
+- Verification base: `9a8a1c5e16a41a3b4c11856b79c9dc59b37eb19d`; worktree was clean at start. Verification changes are pending in this isolated worktree only.
+- PASS: six baseline failures were reproduced on `f4bc5c00413186831fc3189ee4c0f1eecb6ec4d3` and reproduced identically on the candidate; no new regression was introduced.
+- PASS: full lint has 0 errors after the minimal `PublicOrderCheckout` effect scheduling fix; 17 existing warnings remain.
+- PASS: TypeScript; PASS: production build; PASS: 346 full-suite tests. Full suite still has 6 pre-existing failures in 5 unrelated UI/integration files and 1 intentionally skipped child-process helper test.
+- PASS: two separate Node processes wrote synthetic products, stopped, and a fresh store read both products; abandoned-lock timeout and recovery PASS; sync retry reuses the persisted product without a duplicate; diagnostics test confirms product name and synthetic secret are absent from logs.
+- BLOCKED: official gitleaks v8.30.0 Windows x64 was checksum-verified and ran, but the full repository contains 4 pre-existing generic-api-key findings at `public/private-app/index.html:51`, `app/api/demo/admin/session/route.test.ts:7`, and `lib/domain/demo-order-storage.ts:28,52`. No candidate secret was added; owner review/cleanup is required before a PASS.
+- Formal Acer image comparison is bounded: live container image is `tea-nextjs:prod-admin-14-2be6be0` (`sha256:e4be4719acae0837c10c8244f268b220b3b14b12b89b05bcd812d2bb423a7f7f`), with no source-commit label. Candidate impact modules are the demo catalog POST/PATCH/GET route, catalog store, publishing service/UI, and the checkout effect lint fix; no deployment config changed. Exact binary-to-source equivalence remains BLOCKED.
+- No formal restart, deployment, data access, photo access, Caddy/Tailscale/DNS operation, real order operation, main merge, or CLOUD interaction occurred.
+
 ## PRODUCT-11-FIX-01 candidate — 2026-10-16
 
 - Candidate branch: `fix/product-11-fix-01`; candidate SHA before evidence docs: `8807cbea14520d586939787ae7733b228812f742`.
