@@ -1,5 +1,14 @@
 # HANDOFF
 
+## PRODUCT-11-SECURITY-04 historical key isolation — 2026-10-16
+
+- Historical `public/private-app` was an offline merchant accounting PWA using a hard-coded browser WebCrypto key. The key was not read, reconstructed, or recorded.
+- Current candidate has no WebCrypto/PBKDF2/AES-GCM implementation or dependency; `proxy.ts` only denies the retired route. PRODUCT-11 does not depend on the historical key.
+- No committed encrypted backup artifact was found in Git history. Whether old exported backups or browser localStorage remain in formal data is UNKNOWN because formal data was not read.
+- Acer metadata: `tea-private-v5-prod-admin-24-live` runs `tea-nextjs:prod-admin-14-2be6be0` at `sha256:e4be4719acae0837c10c8244f268b220b3b14b12b89b05bcd812d2bb423a7f7f`; RW mounts are `C:\data\tea-staging\private-accounting-v1-data -> /app/data` and `C:\data\tea-staging\public-visibility-live -> /app/catalog-sync`.
+- Local rollback image was found: `tea-nextjs:reauth-05f058e` at `sha256:ab3e1e3673aefe55916569852d8246b5501a48c3994905639da61cfa134b2db4`. Registry/deployment-host availability remains unverified.
+- Result: conditional deployment review only; no deployment approval. Full event record and backup/deploy/verify/rollback checklist: `docs/security/product-11-security-04-historical-webcrypto-key.md`.
+
 ## PRODUCT-11-VERIFY-02 deployment-gate evidence — 2026-10-16
 
 - Verification base: `9a8a1c5e16a41a3b4c11856b79c9dc59b37eb19d`; worktree was clean at start. Verification changes are pending in this isolated worktree only.
