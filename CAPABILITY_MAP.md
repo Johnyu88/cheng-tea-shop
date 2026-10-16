@@ -500,9 +500,20 @@ Phase 10 is planning-only. No real customer/product data has been sent to an ERP
 | GCP staging deployment preparation | ✅ documented only | Docker, HTTPS, Cloud SQL connection, private Storage, IAM and project isolation contract; no resource created |
 | GCP cost protection | ✅ documented only | US$25 trial budget with 50/80/100% alerts, residual-charge list and lifecycle runbook; alerts do not auto-stop billing |
 | Hermes VM inventory | ❌ BLOCKED | No GCP access; VM, disk, IP, other services and budget consumption not inferred or modified |
-| PostgreSQL transition/payment gates | ❌ FAIL / design gap | Separate enums/tables exist, but no enforced transition matrix or payment-before-shipping database contract |
-| PostgreSQL amount reconciliation | ❌ FAIL / design gap | Non-negative checks exist; line/subtotal/total/payment equality is not enforced |
-| PostgreSQL inventory concurrency | ❌ FAIL / design gap | No reservation/ledger or atomic decrement contract exists |
-| PostgreSQL idempotency | 🟨 PARTIAL | Unique keys exist, but endpoint scope/resource binding and replay contract are missing |
+| PostgreSQL transition/payment gates | ✅ local contract PASS | `transition_cloud02_order` locks the row, enforces payment/photo gates and legal status edges; Cloud SQL staging not run |
+| PostgreSQL amount reconciliation | ✅ local contract PASS | Deferred triggers enforce line, subtotal, shipping, total and payment equality; adapter integration pending |
+| PostgreSQL inventory concurrency | ✅ local contract PASS | Row-locking reservation test proves final unit has exactly one winner; expiry/reconciliation pending |
+| PostgreSQL idempotency | ✅ local contract PASS | Scope/key/request hash/resource binding replays same requests and rejects changed requests; API adapter pending |
 | Backup/photo consistency | 🟨 PARTIAL / BLOCKED live proof | Metadata fields exist; no live backup/restore/object-manifest verification was executed |
 | CLOUD-03 deployment readiness | ❌ NOT READY | Requires GCP read-only access, API/quota/eligibility checks, resource approval, budget owner and staging approval |
+
+## VIII. CLOUD-02-DB-01 PostgreSQL 契約修正（2026-10-16）
+
+| Capability | Status | Evidence / limitation |
+|---|---:|---|
+| Status/payment/packing/shipping gates | ✅ local PASS | Isolated PostgreSQL contract test covers legal transitions, payment gate, packing photo gate and replayed transition events |
+| Amount consistency | ✅ local PASS | Four mismatch classes reject at transaction commit; integer TWD only |
+| Inventory concurrency | ✅ local PASS | Two concurrent final-unit reservations yield exactly one success and no negative stock |
+| Idempotency | ✅ local PASS | Order, payment-event and shipment-event scopes replay same hash/resource and reject changed hash/resource |
+| Migration repeatability | ✅ local PASS | Version/hash marker, safe re-run and incompatible-version rejection verified |
+| Cloud/formal DB application | ⛔ BLOCKED | Migration is reference-only; no Render, GCP, formal site or real data access |

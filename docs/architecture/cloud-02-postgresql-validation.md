@@ -7,15 +7,15 @@
 | Contract | Status | Evidence / gap | Next-phase proof |
 |---|---|---|---|
 | Payment/packing/shipping are distinct fields | PASS | Separate payment, packing-photo and shipment tables/status enums exist | Contract test transition gates |
-| Legal order status transitions | FAIL | No transition table, trigger or SQL constraint validates `order_events.from_status → to_status` | Transactional service test for every allowed/denied edge |
-| Payment before packing/shipping | FAIL | Schema has independent statuses but no database enforcement | Lock order row; verify payment confirmed and packing before shipment |
-| Duplicate order prevention | PARTIAL | `orders.order_number`, event idempotency and `idempotency_keys.key` are unique | Replayed create request returns same response and no second order |
-| Idempotency scope/request binding | FAIL | Key has request hash but no endpoint/scope or resource binding | Add route/scope and response replay contract in migration review |
-| Amount consistency | FAIL | `total_amount`, line totals and payment amount have non-negative checks only | Verify `line_total = unit × quantity`, `subtotal = Σ lines`, `total = subtotal + shipping`, payment = total |
-| Inventory race safety | FAIL | Quantity fields have no reservation/ledger, lock or atomic decrement contract | Concurrent checkout test; decide reservation/ledger migration before real data |
+| Legal order status transitions | PASS (local contract) | `transition_cloud02_order` locks the order, enumerates the legal path and appends one event | Cloud SQL staging compatibility and API adapter review remain pending |
+| Payment before packing/shipping | PASS (local contract) | Transition function requires confirmed payment matching the immutable order total and a confirmed packing photo before shipment | Cloud SQL staging compatibility remains pending |
+| Duplicate order prevention | PASS (local contract) | `claim_cloud02_idempotency` replays the stored response for the same scope/key/hash and binds the resource | API create-order adapter must call the function before order insert |
+| Idempotency scope/request binding | PASS (local contract) | Composite scope/key plus request hash, resource type and resource ID reject changed requests | API endpoint mapping and expiry policy remain pending |
+| Amount consistency | PASS (local contract) | Deferred PostgreSQL triggers validate unit × quantity, line sum, shipping, order total and payment amount | API currency/provider mapping remains pending |
+| Inventory race safety | PASS (local contract) | `reserve_cloud02_inventory` locks the variant row and records a unique reservation; final-unit concurrency is 1 success / 1 rejection | Expiry/release/reconciliation jobs remain pending |
 | Cross-environment isolation | PARTIAL | Environment is outside DDL; separate DB roles/buckets are specified in architecture | Wrong-DB/wrong-bucket negative test and environment marker |
 | Backup/photo consistency | PARTIAL | `packing_photos` stores object key/version/checksum but no manifest table | Restore test compares DB rows, object HEAD and manifest checksums |
-| Migration rollback | PARTIAL | Expand/contract is documented but no `schema_migrations` runner or compatibility test exists | Dry-run on isolated database and previous-image compatibility test |
+| Migration rollback | PASS (local repeatability) | Version/hash marker is compatibility-checked; re-application is safe and incompatible version is rejected in isolated PostgreSQL | Application-image compatibility and formal migration approval remain pending |
 
 ## Required transaction contracts
 
@@ -60,5 +60,15 @@ Static SQL/contract checks must reject line totals or order totals that do not r
 - Do not execute the reference DDL directly against any live database.
 - Destructive columns/tables require a separate migration approval, backup marker and observation window.
 
-Current live verification status: **BLOCKED**. No local PostgreSQL contract test was run in this review because no isolated database was started and no production data was touched.
+## CLOUD-02-DB-01 local evidence (2026-10-16)
+
+- Test file: `tests/cloud-02-db-01-contracts.test.ts`.
+- Test environment: disposable localhost-only Docker `postgres:17` container named `cloud-02-db-01-postgres`; no existing project container or formal data was used.
+- Migration: `docs/architecture/cloud-02-db-01-contract-migration.sql`; reference-only and never executed against Render, GCP or formal data.
+- Result: **11/11 PASS**. Covered migration repeatability and incompatible-version rejection, four amount mismatch classes, payment/packing/shipping gates, transition replay without duplicate events, order/payment/shipment idempotency replay and conflict, final-unit concurrent reservation, and rollback without stock loss.
+- Local PostgreSQL contract is PASS; focused lint and typecheck are PASS; full Vitest is **73 files / 371 tests PASS**; production build is PASS with six existing dynamic filesystem tracing warnings.
+- Full repository lint is **FAIL at the existing baseline**: three errors remain in unchanged `app/admin/products/page.tsx`, `features/checkout/components/public-order-checkout.tsx`, and `tests/admin-products-diagnostic.test.ts`, plus existing warnings. This task did not alter those files; the new contract test focused lint is PASS.
+- Cloud SQL/Render application, real API adapter, production migration, backup/object restore and mobile acceptance remain **BLOCKED / NOT RUN**.
+
+Current live verification status: **BLOCKED**. The local contract is tested, but no Cloud SQL/Render migration, production data, object restore, or formal deployment was executed.
 

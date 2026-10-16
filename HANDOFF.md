@@ -1110,3 +1110,14 @@ This checkpoint records preparation only; the 10/14 switch has **not** been perf
 - Hermes VM 只讀盤點：**BLOCKED**。目前沒有 GCP 存取能力，未推測 VM 是否 TERMINATED、磁碟／IP 是否計費、其他服務或 budget 消耗；不得刪除任何資源。
 - PostgreSQL 靜態驗證：payment/packing/shipping 分表為 PASS；transition enforcement、amount reconciliation、inventory race safety、idempotency scope、live backup/restore 為 FAIL/PARTIAL/BLOCKED，詳見 validation spec；沒有執行 DDL 或正式資料庫測試。
 - CLOUD-03 前置條件尚未全部具備：需先取得只讀 GCP Console、完成 asia-east1/API/quota/Cloud SQL eligibility 檢查，並另行批准資源、預算、合成資料與 staging 部署。
+
+## 2026-10-16 CLOUD-02-DB-01 PostgreSQL 契約修正與測試
+
+- Branch: `codex/cloud-02-db-01-20261016`, based on `bd53c554e14666809d915a12991da4b9f077470c`.
+- Scope is limited to the four Review-03 database gaps: legal order status/payment/packing/shipping gates, integer-TWD amount reconciliation, row-locked inventory reservation, and request-bound idempotency.
+- Added reference-only `docs/architecture/cloud-02-db-01-contract-migration.sql` and isolated Vitest contract coverage in `tests/cloud-02-db-01-contracts.test.ts`; added `pg` / `@types/pg` as test dependencies.
+- Local environment: disposable localhost-only Docker `postgres:17` container `cloud-02-db-01-postgres`, synthetic fixtures only. No existing project container, formal database, GCP, Render, Acer or 4090 was modified.
+- Focused result: **11/11 PASS**. Evidence includes migration safe re-run and incompatible marker rejection; four amount mismatch classes; payment and packing gates before shipment; replay without duplicate transition events; order/payment/shipment idempotency; final-unit two-client race with one winner; rollback preserving stock.
+- Static/live boundary: local PostgreSQL contract is PASS; Cloud SQL/Render application, real API adapter, production migration, backup/object restore and mobile acceptance remain **BLOCKED / NOT RUN**.
+- Quality evidence: focused PostgreSQL contract `11/11 PASS`; full Vitest `73 files / 371 tests PASS`; TypeScript PASS; focused lint PASS; production build PASS with six existing dynamic filesystem tracing warnings. Full repository lint remains FAIL at the unchanged baseline with three errors in `app/admin/products/page.tsx`, `features/checkout/components/public-order-checkout.tsx`, and `tests/admin-products-diagnostic.test.ts`, plus existing warnings. No production or cloud write is authorized by this checkpoint.
+- The disposable `cloud-02-db-01-postgres` container was removed after testing. No existing project container was stopped, rebuilt, or modified. The test connection is supplied only through `CLOUD02_DB_URL`; no password or API key is committed.

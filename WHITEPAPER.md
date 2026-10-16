@@ -736,6 +736,17 @@ Cloud Storage 台灣區不享有 US-only Always Free storage，Cloud Run 的免�
 
 本輪只完成 GCP staging deployment-prep、資源停止守則、Hermes read-only procedure 與 PostgreSQL contract review。Cloud SQL 狀態轉換、金額一致性、庫存競爭、idempotency scope 與 live restore 尚未由程式或資料庫驗證；因此保持 FAIL／PARTIAL／BLOCKED，不視為通過。CLOUD-03 尚未具備完整前置條件，需先取得 GCP 只讀存取、完成 trial/API/quota/region 檢查，再由游老師另行批准建立 staging 資源。
 
+## 70. 2026-10-16 CLOUD-02-DB-01 PostgreSQL 契約修正
+
+本輪只修正 Review-03 指出的四項 PostgreSQL 契約，沒有把 Demo SQLite／JSON 直接升級成正式資料庫，也沒有套用到任何 Render、GCP 或正式資料。新增的 reference migration 以版本／hash marker 做相容性閘門，並提供：
+
+- `transition_cloud02_order`：鎖定訂單列、明確列舉合法狀態路徑，付款確認與包裝照片均通過後才可出貨；相同 transition request 重送不增加事件。
+- `cloud02_validate_order_amounts` 延遲 trigger：在交易提交時驗證單價 × 數量、明細合計、運費、訂單總額與付款金額。
+- `reserve_cloud02_inventory`：鎖定商品變體列、寫入唯一 reservation，兩個交易競爭最後一件時只允許一筆成功。
+- `claim_cloud02_idempotency`：以 scope／key／request hash／resource binding 保存回應；同請求重送 replay，不同內容重用 key 拒絕。
+
+本地 disposable PostgreSQL `postgres:17` 合成 fixture 測試為 **11/11 PASS**；完整 Vitest 為 **73 files / 371 tests PASS**，TypeScript、focused lint 與 production build PASS。全域 lint 仍受本工單未修改的三個既有 error 阻擋，build 保留六個既有動態檔案追蹤警告。這只證明 migration／SQL contract 的隔離測試，不等於 Cloud SQL、Render、正式 API adapter、備份還原或 iPhone 實機驗收通過。CLOUD-03 仍需另行批准與 staging 實測。
+
 - PROD-ADMIN-24 已完成正式後台切換；部署交接基準為 commit `541e245`，正式後台容器為 `tea-private-v5-prod-admin-24-live`。
 - 正式資料、照片、訂單、Caddy、Funnel 與前台 10000 的保護邊界維持不變；原正式容器保留作為回退基準。
 - 後台的一般手機密碼登入與實機操作仍列為人工驗收事項，不能以自動化 HTTP 或 Playwright 證據取代。
