@@ -1,5 +1,14 @@
 # HANDOFF
 
+## PRODUCT-11-PREFLIGHT-05 pre-deployment readiness — 2026-10-16
+
+- Formal image PASS: `tea-nextjs:prod-admin-14-2be6be0` exists locally at `sha256:e4be4719acae0837c10c8244f268b220b3b14b12b89b05bcd812d2bb423a7f7f`; non-sensitive container config, ports, bridge network, and RW mounts were read-only recorded.
+- Rollback image exists locally as `tea-nextjs:reauth-05f058e` at `sha256:ab3e1e3673aefe55916569852d8246b5501a48c3994905639da61cfa134b2db4`, but registry/deployment-host pullability and actual recreate remain BLOCKED by scope.
+- PASS: isolated Windows synthetic multi-process, lock timeout/recovery, fsync/atomic replacement, and process-stop/reopen tests. BLOCKED: exact Linux container plus Windows bind-mount reproduction; no formal directory was touched.
+- Candidate source does not depend on historical WebCrypto KEY. Security event remains separate and unchanged; no old key or encrypted backup was read.
+- Remaining approvals before deployment: staging mount clone test, controlled formal backup window, deployment window, rollback image pullability, historical backup existence decision, and gitleaks historical-hit disposition.
+- Detailed checklist: `docs/testing/product-11-preflight-05-2026-10-16.md`.
+
 ## PRODUCT-11-SECURITY-04 historical key isolation — 2026-10-16
 
 - Historical `public/private-app` was an offline merchant accounting PWA using a hard-coded browser WebCrypto key. The key was not read, reconstructed, or recorded.
