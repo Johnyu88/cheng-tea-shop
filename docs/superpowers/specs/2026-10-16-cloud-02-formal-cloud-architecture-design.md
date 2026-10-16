@@ -20,6 +20,8 @@
 - 無 Tailscale iPhone Safari 八項驗收腳本；
 - 後續實作計畫。
 
+本次 review-02 追加 GCP 參考方案，與 Render 方案並列評估；不改變目前「只設計、不建立資源」的批准邊界。
+
 本階段不包含：建立 Render／R2 資源、部署、資料遷移、DNS 切換、正式商品輸入、付款或簡訊 provider 開通，以及 Acer／4090 變更。
 
 ## 2. 推薦拓樸
@@ -62,12 +64,34 @@
 
 The four existing Render Free services remain test fixtures and are not promoted or attached to either environment.
 
+### GCP parallel candidate
+
+```text
+ iPhone Safari ─ HTTPS ─▶ Cloud Run production service
+                               │ Cloud SQL connector/Auth Proxy
+                               ▼
+                         Cloud SQL PostgreSQL
+                               │
+              private Cloud Storage bucket (objects)
+              Secret Manager / IAM / Cloud Logging
+
+ staging uses a separate GCP project, service, database,
+ bucket, service account and secrets.
+```
+
+The GCP candidate keeps the same application/domain contracts and PostgreSQL schema. Cloud Run uses request-based billing, `minInstances=0`, a bounded `maxInstances`, and the existing standalone container. Cloud SQL uses the connector/Auth Proxy or approved private connectivity; no public database IP is accepted for production. Cloud Storage buckets remain non-public and objects are served through short-lived signed URLs. Secret Manager stores runtime secrets; Cloud Logging receives structured logs with sensitive fields redacted; IAM uses separate deploy, runtime and read-only backup identities.
+
+Candidate regions are `asia-east1` (Taiwan, Tier 1 Cloud Run), `asia-northeast1` (Tokyo, Tier 1) and `asia-northeast3` (Seoul, Tier 2). Taiwan is the default candidate for latency and Tier 1 pricing; Tokyo is the fallback if a required Cloud SQL or service feature is unavailable. Cloud Run price tiers are not identical across Asian regions, and Cloud Storage Always Free storage applies only to qualifying US regions, so the Taiwan design must budget real object-storage charges.
+
+The GCP trial is not treated as production capacity. The supplied account state is NT$9,653 remaining until 2026-11-13; this is an operator-provided status, not a live API verification. No GCP project, API, billing upgrade or resource is created by CLOUD-02-REVIEW-02.
+
 ## 3. Runtime and networking
 
 - Use the existing Next.js standalone Docker image as the portable application artifact.
 - Bind `0.0.0.0:$PORT`; Render terminates TLS at the edge and forwards HTTP to the container.
 - Health path: `/api/health`, containing no database or secret values. A deeper authenticated readiness check is separate and never public.
 - Use Render internal Postgres URL from the same region. External database access is for controlled migrations/backup tooling only and must use TLS.
+- For the GCP candidate, use Cloud SQL connector/Auth Proxy or approved private connectivity; never embed a database password in the image or client bundle. Keep Cloud Run and Cloud SQL in the same region to avoid avoidable cross-region egress and latency.
 - Keep one production Web Service instance at the baseline. Do not add a persistent disk to the app service; it would impose single-instance and non-zero-downtime constraints.
 - No public database, bucket, admin API key, or direct object URL.
 
@@ -232,6 +256,14 @@ At least once before production use and monthly thereafter:
 - R2 Standard: US$0 within 10 GB-month + 1M Class A + 10M Class B allowance; then US$0.015/GB-month, US$4.50/million Class A and US$0.36/million Class B.
 - Hobby bandwidth: 5 GB/month included, then US$0.15/GB.
 - Production fixed baseline: **US$13/month**, before overages, domain, email/SMS/payment/物流 providers and taxes.
+
+### GCP cost baseline and trial controls
+
+Under the documented low-volume assumption—one Cloud Run service, 1 vCPU, 0.5 GiB, request billing, `minInstances=0`, 500,000 requests/month at 100 ms average; one Cloud SQL shared-core `db-f1-micro`, 10 GiB SSD, 5 GiB used backups; 10 GiB Cloud Storage Standard in `asia-east1`; 10,000 object writes, 100,000 reads, under 50 GiB logs and six active secret versions—the 28-day trial forecast is approximately **US$10.73 of list-price consumption** before any account credit, consisting mainly of Cloud SQL compute/storage/backup. Cloud Run usage is under the published request-based free-tier quantities; Secret Manager and Logging are within their published free allotments; Taiwan Cloud Storage is budgeted as billable because its Always Free storage allowance is US-only. This is a forecast, not actual account usage.
+
+After trial, the same low-volume GCP baseline is approximately **US$11.67/month** before network egress, build/registry charges, taxes and price changes: Cloud SQL compute about $7.67, 10 GiB SSD about $3.40, 5 GiB used backup about $0.40, Cloud Storage/operations about $0.20, Cloud Run/Secret Manager/Logging $0 under the stated allowances. A shared-core Cloud SQL instance has no Cloud SQL SLA; the smallest dedicated-core or HA configuration materially increases the monthly amount and must be quoted separately.
+
+The GCP budget gate is: create no resource until a separate approval names project, region, service account, monthly ceiling and stop owner; create billing budgets at 25%/50%/75%/90% of the approved trial budget; alert at 75%; set Cloud Run `maxInstances`, disable minimum instances, cap log retention, cap storage lifecycle and use a scheduled shutdown/deletion runbook for staging. A budget alert does not stop spending by itself, so a manual or approved automation stop action is required.
 - Production must not use Free Postgres or Free Web filesystem because Free Postgres expires after 30 days and Free local files are ephemeral.
 
 ## 10. Deployment preparation steps (not execution authorization)
@@ -246,6 +278,10 @@ At least once before production use and monthly thereafter:
 8. Review evidence and approve production resources separately.
 9. Create production resources and migrate only approved data after a separate migration approval.
 10. Perform DNS cutover only after production acceptance and rollback rehearsal.
+
+11. For a GCP evaluation, first confirm trial eligibility, API enablement, quota and region availability in the console without creating runtime resources.
+12. Deploy only to a separate GCP staging project after resource and billing approval; run the GCP acceptance additions and backup/restore proof.
+13. Choose Render or GCP only after comparing measured latency, connection behavior, storage access and restore evidence; do not dual-write production.
 
 ## 11. Stop conditions
 

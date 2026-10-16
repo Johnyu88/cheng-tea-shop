@@ -724,6 +724,14 @@ This remains a local synthetic Demo. No AI image composition, image-recognition 
 
 參考成本基準為 production $13/月（Render Web $7 + PostgreSQL $6；R2 於免費額度內為 $0），可拋棄 staging $0 但只允許 synthetic data；需持久化的 staging 與 production 同為 $13/月，按需啟動僅能作測試成本最佳化。沒有雲端資源、資料遷移、部署或 DNS 切換前，不得宣稱正式上線或手機驗收通過。
 
+## 68. 2026-10-16 CLOUD-02-REVIEW-02 GCP 並列評估
+
+GCP 納入正式候選，但不取代既有 Render 方案。Cloud Run 提供 scale-to-zero，Cloud SQL 提供 PostgreSQL，Cloud Storage 保管私有照片，Secret Manager、IAM 與 Cloud Logging 分別承擔機密、權限與紀錄；staging／production 必須分屬不同 GCP project。`asia-east1`（台灣）是預設候選，Tokyo 是 Tier 1 fallback，Seoul 是 Tier 2 比較項。
+
+在低流量假設下，GCP post-trial 模型約 US$11.67/月，預算建議 US$15/月；Render 既有基準為 US$13/月。GCP 的成本優勢來自 Cloud Run scale-to-zero，但 Cloud SQL 仍有固定 shared-core、storage、backup 成本，且 `db-f1-micro` 沒有 Cloud SQL SLA。試用期預估消耗約 US$10.73 list price，受現有試用贈金覆蓋；這不是實際帳戶讀值，也不授權建立資源。
+
+Cloud Storage 台灣區不享有 US-only Always Free storage，Cloud Run 的免費額度按 billing account 聚合，Secret Manager／Logging 有各自免費額度；所有告警、max instances、log retention、lifecycle 與停止責任人必須在任何建立前定義。正式選型仍以 staging 實測延遲、連線、照片 signed URL、重啟持久性與 restore proof 為準。
+
 - PROD-ADMIN-24 已完成正式後台切換；部署交接基準為 commit `541e245`，正式後台容器為 `tea-private-v5-prod-admin-24-live`。
 - 正式資料、照片、訂單、Caddy、Funnel 與前台 10000 的保護邊界維持不變；原正式容器保留作為回退基準。
 - 後台的一般手機密碼登入與實機操作仍列為人工驗收事項，不能以自動化 HTTP 或 Playwright 證據取代。

@@ -41,3 +41,39 @@ This mode is low cost only if staging is suspended or destroyed between approved
 ## Recommendation
 
 Start with disposable $0 staging for adapter and UI work. Use a paid staging window for backup/restore and cross-device acceptance. Keep production at the $13/month baseline until traffic, connection count, backup retention or HA requirements justify a larger Postgres plan or Render Pro workspace.
+
+## GCP parallel evaluation (checked 2026-10-16)
+
+The following is a reproducible low-volume budget model, not a promise of a fixed bill. It uses USD list prices and the operator-provided Free Trial balance of NT$9,653 through 2026-11-13. No GCP resource or billing change was performed.
+
+### Assumptions
+
+| Component | Assumption | 28-day trial estimate | Post-trial monthly list estimate |
+|---|---|---:|---:|
+| Cloud Run | 1 service, request billing, 1 vCPU/0.5 GiB, min 0, 500k requests, 100 ms average | $0.00 under published free quantities | $0.00 under same allowance |
+| Cloud SQL PostgreSQL | `db-f1-micro`, 672 h / 730 h, 10 GiB SSD, 5 GiB used backup | $7.06 + $3.13 + $0.37 = **$10.56** | $7.67 + $3.40 + $0.40 = **$11.47** |
+| Cloud Storage | 10 GiB Standard in `asia-east1`, 10k Class A, 100k Class B | **$0.17** | **$0.20** |
+| Secret Manager | 6 active versions, ≤10k access operations | $0.00 | $0.00 |
+| Cloud Logging | ≤50 GiB/project/month, default retention | $0.00 | $0.00 |
+| **Modeled subtotal** | excludes egress, build/registry, tax and price changes | **about $10.73** | **about $11.67** |
+
+The Cloud SQL calculation uses the published shared-core rate of $0.0105/hour, SSD $0.000465753/GiB-hour, and used backup $0.000109589/GiB-hour. Cloud Storage uses the published Taiwan Standard rate of $0.000027397/GiB-hour and single-region operation rates. The rounded planning reserve is **US$25 for the 28-day trial** and **US$15/month post-trial** for this tiny workload; the reserve is a budget ceiling proposal, not a charge authorization. Cloud SQL free-trial instances are separate 30-day test instances, have no SLA/backups, and require account/project eligibility checks.
+
+### Render vs GCP
+
+| Option | Fixed/low-traffic baseline | Strength | Risk/cost caveat |
+|---|---:|---|---|
+| Render production | **$13/month** | Simplest reuse of current Docker/Next.js and current schema plan | Paid web + Postgres are always-on; R2 remains separate |
+| GCP production candidate | **about $11.67 modeled; budget $15/month** | Cloud Run scale-to-zero, native IAM/Secret Manager/Logging, Cloud Storage | Cloud SQL is the floor; shared-core has no SLA; networking/build/storage can exceed model |
+| GCP HA/dedicated | **not included; quote required** | Better performance/availability | Cloud SQL HA/dedicated compute and storage are materially higher; no trial assumption |
+
+### Region comparison
+
+`asia-east1` (Taiwan) is the default candidate: lowest user latency and Cloud Run Tier 1 pricing. `asia-northeast1` (Tokyo) is also Tier 1 and is the fallback for service availability. `asia-northeast3` (Seoul) is Tier 2 Cloud Run pricing and should not be selected for cost reasons without a latency requirement. Cloud SQL and Cloud Storage prices remain region-dependent; the final console quote is required. GCP Cloud Storage Always Free storage is limited to US regions, so the Taiwan design must not claim a zero-cost storage tier.
+
+### Budget, shutdown and eligibility gates
+
+- Keep the existing Free Trial account; do not click Activate/upgrade. Trial credit covers eligible usage but does not prevent resource shutdown at expiry.
+- Before any creation, verify that Cloud Run, Cloud SQL PostgreSQL, Cloud Storage, Secret Manager, IAM and Logging APIs are available to this billing/project state. Cloud SQL's 30-day free-trial instance is one per project, scheduled for deletion, has no backups and is not production-capable.
+- Apply a budget with alerts at 25%, 50%, 75% and 90% of the approved NT$/USD ceiling. Add a hard `maxInstances`, `minInstances=0`, log retention limit, Storage lifecycle and a named shutdown owner. Budget alerts alone do not cap charges.
+- Staging is disposable and synthetic-only. Stop or delete it after each approved window; never delete a database without a fresh export and explicit approval.

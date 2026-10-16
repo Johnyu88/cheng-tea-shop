@@ -4,9 +4,9 @@
 
 **Goal:** Implement the approved isolated staging/production data boundary and replace Demo persistence with production-safe Postgres and private object storage adapters after separate resource approval.
 
-**Architecture:** Keep the existing Next.js domain interfaces and introduce Postgres-backed repositories, Better Auth Postgres storage and an S3-compatible object adapter behind those interfaces. Staging and production use separate Render services, databases, buckets and secrets; Demo SQLite/JSON remains a local synthetic adapter.
+**Architecture:** Keep the existing Next.js domain interfaces and introduce Postgres-backed repositories, Better Auth Postgres storage and an S3-compatible object adapter behind those interfaces. Render remains the simplest production reuse path; GCP Cloud Run/Cloud SQL/Cloud Storage/Secret Manager/IAM/Logging is a parallel candidate with separate projects and credentials. Staging and production use separate services, databases, buckets and secrets; Demo SQLite/JSON remains a local synthetic adapter.
 
-**Tech Stack:** Next.js 16 standalone Docker, TypeScript, PostgreSQL, Better Auth, S3-compatible SDK, Render Web Service/Postgres, Cloudflare R2 candidate, Playwright plus physical iPhone Safari evidence.
+**Tech Stack:** Next.js 16 standalone Docker, TypeScript, PostgreSQL, Better Auth, S3-compatible SDK, Render Web Service/Postgres, Cloudflare R2 candidate, GCP Cloud Run/Cloud SQL/Cloud Storage/Secret Manager, Playwright plus physical iPhone Safari evidence.
 
 **Spec:** `docs/superpowers/specs/2026-10-16-cloud-02-formal-cloud-architecture-design.md`
 
@@ -79,10 +79,34 @@
 - [ ] Run physical iPhone Safari checklist over cellular network with Tailscale disconnected.
 - [ ] Record PASS/FAIL/BLOCKED evidence and redact personal data/secrets.
 
+### Task 6: GCP candidate and billing guardrails
+
+**Files:**
+- Modify: `docs/superpowers/specs/2026-10-16-cloud-02-formal-cloud-architecture-design.md`
+- Modify: `docs/architecture/cloud-02-cost-model.md`
+- Modify: `docs/testing/cloud-02-iphone-safari-acceptance.md`
+
+- [ ] Record Cloud Run, Cloud SQL, Cloud Storage, Secret Manager, Logging and IAM boundaries, including separate GCP projects and `asia-east1`/Tokyo fallback.
+- [ ] Record the 28-day trial forecast, post-trial list-price model, region caveats, budget alert thresholds and shutdown controls.
+- [ ] Add GCP-specific acceptance cases without marking them executed.
+- [ ] Re-run secret scan, file completeness scan and Markdown/SQL diff checks.
+
+### Task 7: GitHub delivery
+
+**Files:**
+- Modify: `HANDOFF.md`
+- Modify: `WHITEPAPER.md`
+- Modify: `CAPABILITY_MAP.md`
+
+- [ ] Confirm the requested branch contains the commit and seven existing delivery files.
+- [ ] Push only `codex/cloud-02-architecture-20261016`; verify remote SHA with `git ls-remote`.
+- [ ] Update GitHub Issue #30 with full SHA, file links, cost evidence and unexecuted-test status.
+
 ### Verification gate
 
 - [ ] `git diff --check`
 - [ ] Static markdown/schema checks
 - [ ] Secret scan over changed files
 - [ ] No Render create/update/deploy tool calls
+- [ ] No GCP project/API/resource creation, billing upgrade, deployment or migration
 - [ ] No DNS, migration or data-write operation

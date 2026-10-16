@@ -481,3 +481,14 @@ Phase 10 is planning-only. No real customer/product data has been sent to an ERP
 | PostgreSQL production schema | ✅ reference design | `docs/architecture/cloud-02-postgresql-schema.sql`; reference-only, not an executed migration |
 | Backup / restore / rollback / migration | ✅ specified only | Runbooks and gates in `docs/architecture/cloud-02-backup-migration-rollback.md`; no backup or restore executed |
 | iPhone Safari no-Tailscale acceptance | 🟨 prepared / not run | Eight manual scripts in `docs/testing/cloud-02-iphone-safari-acceptance.md`; real-device evidence pending |
+
+## VI. CLOUD-02-REVIEW-02 GCP 並列評估（2026-10-16）
+
+| Capability | Status | Evidence / limitation |
+|---|---:|---|
+| GCP Cloud Run candidate | ✅ designed only | Request billing, scale-to-zero, bounded max instances; no project or service created |
+| GCP Cloud SQL PostgreSQL | ✅ costed only | `db-f1-micro` low-volume model; no SLA for shared-core; no instance created |
+| GCP private Cloud Storage | ✅ designed only | Private bucket, signed URLs, checksum/version rules; Taiwan storage is billable outside US-only Always Free |
+| GCP Secret Manager / IAM / Logging | ✅ designed only | Separate runtime/deploy/backup identities, redacted structured logs and budget controls; no API enabled |
+| GCP trial eligibility | 🟨 pending console verification | Operator supplied NT$9,653 through 2026-11-13; no live billing/API read performed |
+| GCP mobile/restore acceptance | 🟨 prepared / not run | Five additional scripts appended to the original eight-item Safari flow |

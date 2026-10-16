@@ -1092,3 +1092,11 @@ This checkpoint records preparation only; the 10/14 switch has **not** been perf
 - 本階段只完成文件與靜態驗證；未建立任何雲端資源、未產生付費、未部署、未遷移資料、未切換 DNS，亦未修改 Acer、4090 或既有正式站。
 - 生產固定基準成本為 Render Web Service $7/月 + Managed PostgreSQL $6/月 = $13/月；R2 在 10 GB-month、1M Class A、10M Class B 免費額度內可為 $0，超額與流量／建置費依用量計算。可拋棄 staging 僅適合合成資料驗證；正式 staging 預估與 production 同為 $13/月，按需啟動 8 小時約 $0.15、24 小時約 $0.43（直線換算，實際以供應商計量為準）。
 - 八項 iPhone Safari 腳本目前為 `PREPARED / NOT RUN`，不可視為實機通過；待管理者審查並另行批准建立資源後，才進入部署與資料驗證階段。
+
+## 2026-10-16 CLOUD-02-REVIEW-02 GCP 架構補強
+
+- 已確認 commit `713bc608787911d702f30db71b18e95f491868a8` 存在於本地分支；本次修復會只推送 `codex/cloud-02-architecture-20261016`，不合併 `main`。
+- GCP 以 Cloud Run、Cloud SQL PostgreSQL、Cloud Storage、Secret Manager、Cloud Logging、IAM 與獨立 staging／production projects 作為 Render 的並列候選；預設區域 `asia-east1`，Tokyo 為 Tier 1 fallback，Seoul 為 Tier 2 供延遲比較。
+- 低流量模型：Cloud Run 1 vCPU/0.5 GiB、500k requests/月、100 ms；Cloud SQL `db-f1-micro`、10 GiB SSD、5 GiB backup；10 GiB Taiwan Cloud Storage。28 天 trial list-price forecast 約 US$10.73；trial 後約 US$11.67/月，規劃預算上限分別為 US$25／月與 US$15／月，未含 egress、build/registry、稅與價格變動。
+- Google Cloud 試用餘額 NT$9,653、到期 2026-11-13 為操作人員提供的帳戶狀態；未透過 API 驗證，亦未建立資源、啟用 API、升級 billing、部署或遷移。
+- 新增 GCP HTTPS、PostgreSQL 持久化、Cloud Storage 照片、重啟保留、故障復原／備份還原五項追加腳本；全部維持 `PREPARED / NOT RUN`。

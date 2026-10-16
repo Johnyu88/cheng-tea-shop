@@ -74,3 +74,45 @@ PASS：狀態 gate、照片私有權限、替換不破壞原版本、事件與 a
 3. 由測試人員執行一次 staging restore proof，再重做唯讀查詢。
 
 PASS：狀態、商品、付款事件、照片 metadata、audit event 在重登與受控 restore 後一致；沒有把未完成 restore 或資料丟失隱藏為 PASS。
+
+## GCP 追加驗收（維持同一八項流程，另記錄以下五項）
+
+以下項目只能在核准的 GCP staging、無 Tailscale、一般 iPhone Safari 上執行；目前均為 `PREPARED / NOT RUN`。
+
+## 9. GCP HTTPS 公開存取
+
+1. 使用行動網路開啟 GCP Cloud Run staging HTTPS URL，不使用 Tailscale、VPN 或內網 DNS。
+2. 檢查憑證、HTTPS redirect、前台與後台 host boundary；嘗試 HTTP 應被導向 HTTPS。
+
+PASS：Cloud Run 公開入口可達、TLS 正常、後台仍需登入，沒有 Cloud Run IAM token 被錯誤要求給顧客前台。
+
+## 10. PostgreSQL 資料持久化
+
+1. 執行八項流程中產生一筆 synthetic order、付款事件與商品變更。
+2. 重新部署／重啟 Cloud Run revision，不變更 Cloud SQL。
+3. 重新登入並查詢相同 order id、event sequence 與 product version。
+
+PASS：資料不在容器檔案系統；重啟後資料與事件順序一致，沒有重複訂單或遺失狀態轉換。
+
+## 11. Cloud Storage 照片存取
+
+1. 在後台上傳商品照片與包裝照片，記錄 object key、checksum、content type 與版本。
+2. 以顧客、未登入商家及已授權商家三種身分嘗試讀取。
+3. 等待 signed URL 過期後重新請求。
+
+PASS：bucket/object 不公開；只有授權商家取得短效 URL；顧客只看到允許的商品照片；過期 URL 失效；替換保留可追溯版本。
+
+## 12. GCP 服務重啟後資料保留
+
+1. 對 Cloud Run 執行 controlled restart 或切換至已驗證 revision；不重建或刪除 Cloud SQL／Storage。
+2. 重新執行前台查單、後台付款確認、包裝照片與出貨唯讀查詢。
+
+PASS：資料庫、物件 metadata、audit event 與登入狀態的預期行為符合規格；若 session 被撤銷，重新登入後仍能查到相同業務資料。
+
+## 13. GCP 故障復原與備份還原
+
+1. 以隔離 restore target 驗證 Cloud SQL backup/PITR 或 approved logical dump；禁止覆蓋 production。
+2. 驗證 Storage object manifest、checksum 與照片版本數量。
+3. 比對 order total、payment event、packing photo、shipment event、audit event count。
+
+PASS：restore target 通過一致性檢查並保留證據；任何 backup、PITR、object restore 或 GCP trial expiry 未實測時，保持 `BLOCKED`，不得標為 PASS。
