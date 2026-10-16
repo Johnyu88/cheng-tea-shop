@@ -728,9 +728,13 @@ This remains a local synthetic Demo. No AI image composition, image-recognition 
 
 GCP 納入正式候選，但不取代既有 Render 方案。Cloud Run 提供 scale-to-zero，Cloud SQL 提供 PostgreSQL，Cloud Storage 保管私有照片，Secret Manager、IAM 與 Cloud Logging 分別承擔機密、權限與紀錄；staging／production 必須分屬不同 GCP project。`asia-east1`（台灣）是預設候選，Tokyo 是 Tier 1 fallback，Seoul 是 Tier 2 比較項。
 
-在低流量假設下，GCP post-trial 模型約 US$11.67/月，預算建議 US$15/月；Render 既有基準為 US$13/月。GCP 的成本優勢來自 Cloud Run scale-to-zero，但 Cloud SQL 仍有固定 shared-core、storage、backup 成本，且 `db-f1-micro` 沒有 Cloud SQL SLA。試用期預估消耗約 US$10.73 list price，受現有試用贈金覆蓋；這不是實際帳戶讀值，也不授權建立資源。
+在低流量假設下，GCP post-trial 模型約 US$11.67/月，長期 reserve 建議 US$15/月；Render 既有基準為 US$13/月。試用期另設 US$25 budget，50%／80%／100% 警告，且警告不會自動停止計費。GCP 的成本優勢來自 Cloud Run scale-to-zero，但 Cloud SQL 仍有固定 shared-core、storage、backup 成本，且 `db-f1-micro` 沒有 Cloud SQL SLA。試用期預估消耗約 US$10.73 list price，受現有試用贈金覆蓋；這不是實際帳戶讀值，也不授權建立資源。
 
 Cloud Storage 台灣區不享有 US-only Always Free storage，Cloud Run 的免費額度按 billing account 聚合，Secret Manager／Logging 有各自免費額度；所有告警、max instances、log retention、lifecycle 與停止責任人必須在任何建立前定義。正式選型仍以 staging 實測延遲、連線、照片 signed URL、重啟持久性與 restore proof 為準。
+
+## 69. 2026-10-16 CLOUD-02-REVIEW-03 部署前閘門
+
+本輪只完成 GCP staging deployment-prep、資源停止守則、Hermes read-only procedure 與 PostgreSQL contract review。Cloud SQL 狀態轉換、金額一致性、庫存競爭、idempotency scope 與 live restore 尚未由程式或資料庫驗證；因此保持 FAIL／PARTIAL／BLOCKED，不視為通過。CLOUD-03 尚未具備完整前置條件，需先取得 GCP 只讀存取、完成 trial/API/quota/region 檢查，再由游老師另行批准建立 staging 資源。
 
 - PROD-ADMIN-24 已完成正式後台切換；部署交接基準為 commit `541e245`，正式後台容器為 `tea-private-v5-prod-admin-24-live`。
 - 正式資料、照片、訂單、Caddy、Funnel 與前台 10000 的保護邊界維持不變；原正式容器保留作為回退基準。

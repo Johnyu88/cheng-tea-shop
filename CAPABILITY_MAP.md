@@ -492,3 +492,17 @@ Phase 10 is planning-only. No real customer/product data has been sent to an ERP
 | GCP Secret Manager / IAM / Logging | ✅ designed only | Separate runtime/deploy/backup identities, redacted structured logs and budget controls; no API enabled |
 | GCP trial eligibility | 🟨 pending console verification | Operator supplied NT$9,653 through 2026-11-13; no live billing/API read performed |
 | GCP mobile/restore acceptance | 🟨 prepared / not run | Five additional scripts appended to the original eight-item Safari flow |
+
+## VII. CLOUD-02-REVIEW-03 部署前能力狀態（2026-10-16）
+
+| Capability | Status | Evidence / limitation |
+|---|---:|---|
+| GCP staging deployment preparation | ✅ documented only | Docker, HTTPS, Cloud SQL connection, private Storage, IAM and project isolation contract; no resource created |
+| GCP cost protection | ✅ documented only | US$25 trial budget with 50/80/100% alerts, residual-charge list and lifecycle runbook; alerts do not auto-stop billing |
+| Hermes VM inventory | ❌ BLOCKED | No GCP access; VM, disk, IP, other services and budget consumption not inferred or modified |
+| PostgreSQL transition/payment gates | ❌ FAIL / design gap | Separate enums/tables exist, but no enforced transition matrix or payment-before-shipping database contract |
+| PostgreSQL amount reconciliation | ❌ FAIL / design gap | Non-negative checks exist; line/subtotal/total/payment equality is not enforced |
+| PostgreSQL inventory concurrency | ❌ FAIL / design gap | No reservation/ledger or atomic decrement contract exists |
+| PostgreSQL idempotency | 🟨 PARTIAL | Unique keys exist, but endpoint scope/resource binding and replay contract are missing |
+| Backup/photo consistency | 🟨 PARTIAL / BLOCKED live proof | Metadata fields exist; no live backup/restore/object-manifest verification was executed |
+| CLOUD-03 deployment readiness | ❌ NOT READY | Requires GCP read-only access, API/quota/eligibility checks, resource approval, budget owner and staging approval |

@@ -75,5 +75,34 @@ The Cloud SQL calculation uses the published shared-core rate of $0.0105/hour, S
 
 - Keep the existing Free Trial account; do not click Activate/upgrade. Trial credit covers eligible usage but does not prevent resource shutdown at expiry.
 - Before any creation, verify that Cloud Run, Cloud SQL PostgreSQL, Cloud Storage, Secret Manager, IAM and Logging APIs are available to this billing/project state. Cloud SQL's 30-day free-trial instance is one per project, scheduled for deletion, has no backups and is not production-capable.
-- Apply a budget with alerts at 25%, 50%, 75% and 90% of the approved NT$/USD ceiling. Add a hard `maxInstances`, `minInstances=0`, log retention limit, Storage lifecycle and a named shutdown owner. Budget alerts alone do not cap charges.
+- Apply a **US$25 trial budget** with alerts at **50% = US$12.50**, **80% = US$20.00**, and **100% = US$25.00**. Add a hard `maxInstances`, `minInstances=0`, log retention limit, Storage lifecycle and a named shutdown owner. Budget alerts are notifications only; they do not stop spending, revoke credentials, delete resources or prevent charges already in flight.
 - Staging is disposable and synthetic-only. Stop or delete it after each approved window; never delete a database without a fresh export and explicit approval.
+
+### Charges excluded from the US$11.67 model
+
+- Cloud Run usage above free quantities, request/CPU/memory billing, minimum-instance idle billing, instance-based billing, outbound internet egress, VPC connector/NAT and load-balancer or domain-related services.
+- Cloud SQL higher machine class, HA/regional standby, dedicated core, provisioned storage growth, backup/PITR retention beyond the model, public-IP charges, cross-region/internet egress, maintenance and unsupported feature add-ons.
+- Cloud Storage bytes, noncurrent/soft-deleted object versions, Class A/B operations, retrieval/early deletion, dual/multi-region replication, network egress and lifecycle/Autoclass features.
+- Secret Manager active versions beyond six, access operations beyond 10,000 and rotation notifications beyond three.
+- Cloud Logging ingestion beyond 50 GiB/project/month, retention beyond the default 30 days, log-based metrics, alerting/Monitoring data and exported sinks such as BigQuery or Pub/Sub.
+- Artifact Registry image storage and pulls, Cloud Build minutes, build cache, container vulnerability scanning, Cloud Scheduler/Tasks, Pub/Sub, Cloud DNS zones/queries, NAT gateway/IPs and any support, tax or currency conversion.
+
+### Stop and cleanup accounting
+
+Stopping Cloud Run at `minInstances=0` does not erase revisions, images or related services. Stopping Cloud SQL suspends instance compute but storage and IP charges continue. Stopped or deleted VMs can still retain Persistent Disk and static IP charges; Cloud Storage versions, soft-deleted objects and backups continue until their retention or deletion policy acts. Cleanup is therefore a separate approved action after export, manifest and restore evidence—not an automatic consequence of stopping.
+
+### Trial expiry
+
+Before 2026-11-13, freeze staging writes, export the synthetic database, export/verify the object manifest and checksums, save the image digest/schema version, confirm the final Billing view and stop staging. Do not assume unused credit extends the trial or preserves resources. If no paid-account approval exists, do not upgrade; preserve only approved offline/exported evidence and keep production data out of the trial project.
+
+## Official pricing and lifecycle references
+
+- https://cloud.google.com/free/docs/free-cloud-features
+- https://cloud.google.com/run/pricing?hl=zh-TW
+- https://cloud.google.com/sql/pricing?hl=en
+- https://cloud.google.com/storage/pricing
+- https://cloud.google.com/secret-manager/pricing
+- https://cloud.google.com/products/observability/pricing
+- https://docs.cloud.google.com/sql/docs/postgres/start-stop-restart-instance
+- https://cloud.google.com/vpc/pricing
+- https://docs.cloud.google.com/compute/docs/disks

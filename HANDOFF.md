@@ -1100,3 +1100,13 @@ This checkpoint records preparation only; the 10/14 switch has **not** been perf
 - 低流量模型：Cloud Run 1 vCPU/0.5 GiB、500k requests/月、100 ms；Cloud SQL `db-f1-micro`、10 GiB SSD、5 GiB backup；10 GiB Taiwan Cloud Storage。28 天 trial list-price forecast 約 US$10.73；trial 後約 US$11.67/月，規劃預算上限分別為 US$25／月與 US$15／月，未含 egress、build/registry、稅與價格變動。
 - Google Cloud 試用餘額 NT$9,653、到期 2026-11-13 為操作人員提供的帳戶狀態；未透過 API 驗證，亦未建立資源、啟用 API、升級 billing、部署或遷移。
 - 新增 GCP HTTPS、PostgreSQL 持久化、Cloud Storage 照片、重啟保留、故障復原／備份還原五項追加腳本；全部維持 `PREPARED / NOT RUN`。
+
+## 2026-10-16 CLOUD-02-REVIEW-03 GCP 部署準備與成本防護
+
+- 基準分支仍為 `codex/cloud-02-architecture-20261016`；本輪只補文件、靜態檢查與本地合約規格，不建立 GCP/Render 資源、不升級 billing、不部署、不遷移。
+- 已新增 `docs/architecture/cloud-02-gcp-deployment-preparation.md`、`cloud-02-resource-lifecycle-stop-runbook.md`、`cloud-02-postgresql-validation.md` 與 Review-03 plan。
+- GCP staging contract：Cloud Run standalone Docker、Cloud SQL connector/Auth Proxy、private Cloud Storage、Secret Manager、IAM、Logging；staging／production 使用不同 projects、databases、buckets、service accounts 與 secrets；staging 僅合成資料。
+- US$25 trial budget 明確設定 50%／80%／100% 警告（US$12.50／20.00／25.00）；警告不會自動停止計費。已列出 Cloud SQL stopped storage/IP、Persistent Disk、static IP、Storage versions/backups、NAT、Logging、Artifact Registry、Cloud Build、DNS 等殘留費用。
+- Hermes VM 只讀盤點：**BLOCKED**。目前沒有 GCP 存取能力，未推測 VM 是否 TERMINATED、磁碟／IP 是否計費、其他服務或 budget 消耗；不得刪除任何資源。
+- PostgreSQL 靜態驗證：payment/packing/shipping 分表為 PASS；transition enforcement、amount reconciliation、inventory race safety、idempotency scope、live backup/restore 為 FAIL/PARTIAL/BLOCKED，詳見 validation spec；沒有執行 DDL 或正式資料庫測試。
+- CLOUD-03 前置條件尚未全部具備：需先取得只讀 GCP Console、完成 asia-east1/API/quota/Cloud SQL eligibility 檢查，並另行批准資源、預算、合成資料與 staging 部署。
