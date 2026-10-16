@@ -50,6 +50,11 @@ describe.skipIf(!url)("CLOUD-02 DB-03 candidate HTTP routes", () => {
     const lookup = await lookupOrder(jsonRequest({ orderId: createdBody.value.orderNumber, phone: "0912000000", phoneLastThree: "000", challengeId: "candidate-otp", code: "123456" })); expect(lookup.status).toBe(200); expect((await lookup.json()).value.status).toBe("delivered");
   }, 15000);
   it("allows only one concurrent HTTP buyer of the final unit", async () => { await query("UPDATE product_variants SET inventory_quantity=1 WHERE id=$1", [ids.variant]); const results = await Promise.all([createOrder(jsonRequest(orderBody("http-race-001"))), createOrder(jsonRequest(orderBody("http-race-002")))]); expect(results.filter(response => response.status === 201)).toHaveLength(1); expect((await query("SELECT inventory_quantity FROM product_variants WHERE id=$1", [ids.variant])).rows[0].inventory_quantity).toBe(0); });
+  it("cancels an authenticated HTTP order once and restores its reservation", async () => {
+    const created = await createOrder(jsonRequest(orderBody("http-cancel-001"))); const body = await created.json() as { value: { orderId: string } };
+    const response = await adminOrder(new Request("http://candidate.test", { method: "POST", headers: { cookie: "candidate-auth=test", "content-type": "application/json" }, body: JSON.stringify({ action: "cancel", idempotencyKey: "http-cancel-event-001" }) }), { params: Promise.resolve({ orderId: body.value.orderId }) });
+    expect(response.status).toBe(200); expect((await query("SELECT status FROM orders WHERE id=$1", [body.value.orderId])).rows[0].status).toBe("cancelled"); expect((await query("SELECT inventory_quantity FROM product_variants WHERE id=$1", [ids.variant])).rows[0].inventory_quantity).toBe(2);
+  });
   it("does not claim real object storage for the packing photo test double", async () => {
     const order = await createOrder(jsonRequest(orderBody("http-photo-001"))); const body = await order.json() as { value: { orderId: string } }; const response = await adminOrder(new Request("http://candidate.test", { method: "POST", headers: { "content-type": "application/json", cookie: "candidate-auth=test" }, body: JSON.stringify({ action: "confirm-payment", idempotencyKey: "http-photo-payment-001" }) }), { params: Promise.resolve({ orderId: body.value.orderId }) }); expect(response.status).toBe(200);
   });

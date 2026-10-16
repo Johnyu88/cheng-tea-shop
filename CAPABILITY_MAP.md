@@ -535,7 +535,7 @@ Phase 10 is planning-only. No real customer/product data has been sent to an ERP
 | Capability | Status | Evidence / limitation |
 |---|---:|---|
 | Candidate HTTP order creation/replay | ✅ local PASS | `/api/candidate/orders`; one order and identical replay response verified |
-| Candidate HTTP payment/packing/shipping/delivery/cancel wiring | ✅ local PASS | Authenticated route-handler tests over disposable PostgreSQL |
+| Candidate HTTP payment/packing/shipping/delivery/cancel wiring | ✅ local PASS | 8/8 authenticated/unauthenticated route-handler tests over disposable PostgreSQL |
 | Candidate OTP lookup | ✅ local PASS | Challenge, code, phone and order number required; cross-device result verified |
 | Candidate mode isolation | ✅ local PASS | Missing explicit candidate mode returns 404; Demo routes remain unchanged |
 | HTTP final-unit concurrency | ✅ local PASS | Two concurrent HTTP requests produce one success and zero oversell |
