@@ -1,0 +1,21 @@
+:18092 {
+    log_append diag_path {http.request.uri.path}
+    log_append diag_request_id {http.request.header.X-Diag-Request-ID}
+
+    log {
+        output file /var/log/caddy/product-11-access-v2.json {
+            roll_size 1MiB
+            roll_keep 2
+            roll_keep_for 24h
+        }
+        format filter {
+            request>uri delete
+            request>headers>Cookie delete
+            request>headers>Authorization delete
+            request>headers>Proxy-Authorization delete
+            request>headers>X-Session-Token delete
+        }
+    }
+
+    reverse_proxy host.docker.internal:18090
+}
