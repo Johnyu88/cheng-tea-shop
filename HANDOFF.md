@@ -1,5 +1,17 @@
 # HANDOFF
 
+## PRODUCT-11-DIAG-09 formal diagnostic capability — 2026-10-16
+
+- PASS: candidate HEAD verified as `b6d137a1ec87d4ebfed725af549b3349be875b49`; no code scope expansion was made.
+- PASS: formal route remains Tailscale `:10001` → Caddy `:8090` → `tea-private-v5-prod-admin-24-live:8130`; formal image remains `sha256:e4be4719acae0837c10c8244f268b220b3b14b12b89b05bcd812d2bb423a7f7f`.
+- PASS: formal catalog was read only as a count/ID summary: 10 records, 4 draft, 6 published. No new formal write request was sent.
+- BLOCKED: formal app retained 13 log lines but 0 product diagnostic lines; no request ID, POST/PATCH status, product ID, write result, or sync result is available for the two phone incidents.
+- BLOCKED: Caddyfile has no access-log directive and retained Caddy logs have no usable catalog write entry. Existing route can confirm the shared entrance, not the phone operation outcome.
+- BLOCKED: bounded formal bundle scan found no candidate `x-demo-request-id`, write-status, or sync-status markers. This is bounded runtime evidence, not source provenance.
+- Conclusion: existing formal diagnostics are insufficient. The next phone operation can be captured without a formal write only by an operator using a browser Network/remote-debugging view or an approved request-observability layer; a phone-specific POST result cannot be reconstructed from current logs.
+- Proposed next-step options are not authorized here: (1) use a desktop DevTools Network view for a controlled operator reproduction, without resubmitting on unknown persistence; or (2) separately approve a minimal candidate/Caddy observability change. No formal setting was changed.
+- Deployment remains blocked until the owner approves the diagnostic method, resolves the provenance risk, and accepts the one-time lint exception. Evidence: `docs/testing/product-11-diag-09-2026-10-16.md`.
+
 ## PRODUCT-11-GATE-08 dual-phone failure diagnosis — 2026-10-16
 
 - Field evidence: both Chen Teacher's Samsung Z Fold6 and the user's own phone failed to add product 11 before PRODUCT-11 was deployed. No new formal-site write request was sent during this investigation.
