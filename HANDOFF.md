@@ -1,5 +1,16 @@
 # HANDOFF
 
+## PRODUCT-11-CONTAINER-06 Linux bind-mount isolation — 2026-10-16
+
+- PASS: candidate source `aae6a9b7f63054498b09918ddbaac29d64267518` built as isolated Linux image `tea-nextjs:product-11-container-06-aae6a9b`; image digest `sha256:fa2c5b56b2eaa1880a6be7d213cba1a93be2b1cd788c835e456edac8d93f007e`.
+- PASS: fresh Windows directories were bind-mounted to `/app/data` and `/app/catalog-sync`; isolated ports were `127.0.0.1:8443`, `8444`, and `8445`. Formal mounts, catalog, photos, orders, Caddy, Tailscale, and DNS were not used.
+- PASS: two synthetic products were POSTed with HTTP 201 and persisted IDs; same-session GET found both; stopping and restarting the candidate container preserved both IDs.
+- PASS: two candidate containers concurrently wrote synthetic products to the same bind mount; both returned persisted/completed and both were present after re-query. Abandoned lock timeout returned HTTP 400; removing only the isolated lock allowed a retry to return HTTP 201 with one matching ID.
+- PASS: read-only public-sync mount produced HTTP 503; container log recorded `writeStatus=persisted` and `syncStatus=failed`. The private product remained present. Writable retry via PATCH returned HTTP 200 and public catalog contained the ID exactly once.
+- PASS: original formal image `tea-nextjs:prod-admin-14-2be6be0` started in an isolated container at `sha256:e4be4719acae0837c10c8244f268b220b3b14b12b89b05bcd812d2bb423a7f7f`; `/api/health` returned 200. This did not test formal mounts or switch the formal container.
+- PASS: checkout lint change was safely isolated. Minimal branch `fix/product-11-fix-01-minimal` commit `206d0cbb4221ed3c73e7987f10fc803f9d81ea6d` removes only that independent effect change; focused 5-file suite passed 25/25. It was not pushed or substituted for the existing candidate branch.
+- Remaining BLOCKED: minimal branch commit was local only; exact formal image/source mapping and registry rollback pullability remain unverified. Detailed evidence: `docs/testing/product-11-container-06-2026-10-16.md`.
+
 ## PRODUCT-11-PREFLIGHT-05 pre-deployment readiness — 2026-10-16
 
 - Formal image PASS: `tea-nextjs:prod-admin-14-2be6be0` exists locally at `sha256:e4be4719acae0837c10c8244f268b220b3b14b12b89b05bcd812d2bb423a7f7f`; non-sensitive container config, ports, bridge network, and RW mounts were read-only recorded.
