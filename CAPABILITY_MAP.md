@@ -517,3 +517,15 @@ Phase 10 is planning-only. No real customer/product data has been sent to an ERP
 | Idempotency | ✅ local PASS | Order, payment-event and shipment-event scopes replay same hash/resource and reject changed hash/resource |
 | Migration repeatability | ✅ local PASS | Version/hash marker, safe re-run and incompatible-version rejection verified |
 | Cloud/formal DB application | ⛔ BLOCKED | Migration is reference-only; no Render, GCP, formal site or real data access |
+
+## IX. CLOUD-02-DB-02 API adapter 與資料庫整合（2026-10-16）
+
+| Capability | Status | Evidence / limitation |
+|---|---:|---|
+| PostgreSQL candidate order adapter | ✅ local PASS | `lib/server/postgres-order-adapter.ts`; explicit opt-in only, Demo remains default |
+| Atomic create/payment/packing/shipping/cancel | ✅ local PASS | 9 adapter integration tests on disposable PostgreSQL; rollback tested |
+| Reservation lifecycle | ✅ local PASS | cancellation release, shipping consume, expiry guard and duplicate-operation protection |
+| Idempotency replay/conflict/concurrency | ✅ local PASS | replay returns original result; changed content rejects; final-unit race has one winner |
+| DB-01 regression | ✅ local PASS | Original 11/11 contract tests remain passing |
+| Full lint baseline | ✅ 0 errors | Three known errors fixed; 18 pre-existing warnings remain |
+| Cloud/formal API/mobile acceptance | ⛔ BLOCKED | No deployment, real data, Cloud SQL/Render or iPhone test performed |

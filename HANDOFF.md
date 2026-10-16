@@ -1121,3 +1121,13 @@ This checkpoint records preparation only; the 10/14 switch has **not** been perf
 - Static/live boundary: local PostgreSQL contract is PASS; Cloud SQL/Render application, real API adapter, production migration, backup/object restore and mobile acceptance remain **BLOCKED / NOT RUN**.
 - Quality evidence: focused PostgreSQL contract `11/11 PASS`; full Vitest `73 files / 371 tests PASS`; TypeScript PASS; focused lint PASS; production build PASS with six existing dynamic filesystem tracing warnings. Full repository lint remains FAIL at the unchanged baseline with three errors in `app/admin/products/page.tsx`, `features/checkout/components/public-order-checkout.tsx`, and `tests/admin-products-diagnostic.test.ts`, plus existing warnings. No production or cloud write is authorized by this checkpoint.
 - The disposable `cloud-02-db-01-postgres` container was removed after testing. No existing project container was stopped, rebuilt, or modified. The test connection is supplied only through `CLOUD02_DB_URL`; no password or API key is committed.
+
+## 2026-10-16 CLOUD-02-DB-02 API Adapter 與資料庫整合
+
+- Branch: `codex/cloud-02-db-02-20261016`, based on `fd360cbade24a3fec69aff0657d63270f5d484a5`.
+- Added candidate-only `PostgresOrderAdapter` and reference-only DB-02 additive migration. The existing `/api/demo/...` routes and Demo SQLite/JSON default were not changed or redirected.
+- Adapter operations are transaction-scoped: create/reserve, manual payment confirmation, packing photo transition, shipment/consume, and cancellation/release. PostgreSQL environment is fail-closed unless explicitly opted in.
+- Added reservation release/consume/expiry functions. Expiry skips orders with confirmed payment; repeated release does not restore stock twice; cancellation after shipped/delivered/cancelled is rejected.
+- Local synthetic evidence: disposable localhost-only `postgres:17` container `cloud-02-db-02-postgres`; DB-02 **9/9 PASS**, DB-01 **11/11 PASS**. No formal DB, cloud, DNS, Acer, 4090, or real customer data was touched.
+- Quality evidence so far: full lint **PASS, 0 errors / 18 warnings**; TypeScript **PASS**; `git diff --check` **PASS**. Full Vitest, production build and secret scan still must be run before final commit claim.
+- Stop boundary: no deployment or CLOUD-03. Remaining review items are API route selection, real object storage/photo manifest, Cloud SQL compatibility, and formal backup/restore; all remain blocked pending separate approval.

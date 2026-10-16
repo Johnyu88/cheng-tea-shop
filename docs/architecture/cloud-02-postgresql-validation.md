@@ -72,3 +72,13 @@ Static SQL/contract checks must reject line totals or order totals that do not r
 
 Current live verification status: **BLOCKED**. The local contract is tested, but no Cloud SQL/Render migration, production data, object restore, or formal deployment was executed.
 
+## CLOUD-02-DB-02 candidate API adapter evidence (2026-10-16)
+
+- Candidate adapter: `lib/server/postgres-order-adapter.ts`. It is injected with a `pg.Pool`, requires explicit `COMMERCE_BACKEND=postgres` plus a valid PostgreSQL URL, and is not selected by the existing Demo runtime.
+- Candidate migration: `docs/architecture/cloud-02-db-02-adapter-migration.sql`; reference-only and never executed against Cloud SQL, Render, formal data or the existing site.
+- Transaction coverage: order/idempotency claim + authoritative price read + order/items/payment + inventory reservation; payment confirmation; packing/photo transition; shipment/consumption; cancellation/release. Each uses `BEGIN`/`COMMIT` with rollback on error.
+- Reservation lifecycle: active → released on cancellation, active → consumed on shipping, active → expired only for expired unpaid reservations. Repeated release is a no-op; paid reservations are protected from expiry.
+- Local evidence: disposable localhost-only `postgres:17`, synthetic fixtures, DB-02 adapter **9/9 PASS**, DB-01 contracts **11/11 PASS**, run serially because each suite resets the same isolated schema.
+- Repository quality: full lint **PASS with 18 existing warnings and 0 errors** after correcting the three recorded baseline errors; TypeScript **PASS**; `git diff --check` **PASS**. Full Vitest/build/secret scan remain pending at this checkpoint.
+- Formal/cloud/mobile boundary: **BLOCKED / NOT RUN**. No API deployment, Cloud SQL, Render, object storage, real data, DNS, or iPhone acceptance was touched.
+

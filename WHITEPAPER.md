@@ -768,3 +768,9 @@ Acer's 8443 listener is tailnet-only on isolated localhost 8092; 443 → 8090, o
 
 The closeout source/UI commit `a521b3732edf8c5db8f20248c993564f9f9c934a` completed Quality as failure: lint, typecheck, 65 files / 334 tests, build, browser/accessibility, and container smoke passed; synthetic mobile E2E was 3/1/1. The sole failure is the same unchanged catalog-persistence 商品已上架 heading assertion reproduced on dce323c. Both dependency audit steps were skipped; no fresh security clearance. Following changes are handoff-only.
 
+## 71. 2026-10-16 CLOUD-02-DB-02 API Adapter 與資料庫整合
+
+候選 PostgreSQL adapter 以明確 opt-in 方式加入，既有 Demo SQLite／JSON 路徑仍是預設且未被切換。訂單建立、庫存 reservation、人工付款確認、包裝照片、出貨消耗與取消釋放各自包在 PostgreSQL transaction；DB-01 的狀態、金額、競爭與 idempotency 契約由 adapter 重用。新增 reservation 的 released／consumed／expired 生命週期，付清訂單不會被逾期工作釋放庫存。
+
+在 disposable localhost-only PostgreSQL 17 與合成 fixture 上，DB-02 adapter 9/9 PASS，DB-01 原有 11/11 PASS；完整 lint 0 errors（18 個既有 warnings）與 TypeScript PASS。沒有部署、雲端資源、正式資料、DNS、Acer、4090 或 CLOUD-03 操作。Cloud SQL 相容性、正式 API route selection、私有照片 manifest、備份還原與 iPhone 實機驗收仍是後續審查／批准後才可執行的阻塞事項。
+

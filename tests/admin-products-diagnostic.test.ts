@@ -32,7 +32,7 @@ describe("admin products diagnostic bridge", () => {
     const source = readFileSync(resolve("public/diagnostics/admin-products.js"), "utf8");
     new Function("window", "document", source)(window, document);
 
-    const bridge = (globalThis as { __teaAdminDiagnostics?: { recordApi: Function } }).__teaAdminDiagnostics;
+    const bridge = (globalThis as { __teaAdminDiagnostics?: { recordApi: (...args: unknown[]) => unknown } }).__teaAdminDiagnostics;
     expect(document.body.textContent).toContain("JS-STARTED");
     expect(bridge).toBeDefined();
     bridge?.recordApi("catalog", { status: 200, contentType: "application/json", durationMs: 9 });

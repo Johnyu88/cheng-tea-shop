@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { ProductManagementPage } from "@/features/publishing/components/product-management-page";
 
 export const metadata: Metadata = {
@@ -18,7 +19,7 @@ export default async function Page({ searchParams }: { searchParams?: Promise<Re
         <ol id="tea-admin-diagnostics-events" />
         <noscript>HTML 已載入；JavaScript 未啟動。</noscript>
       </section>
-      <script src="/diagnostics/admin-products.js" />
+      <Script src="/diagnostics/admin-products.js" strategy="afterInteractive" />
     </>}
     <ProductManagementPage />
   </>;
