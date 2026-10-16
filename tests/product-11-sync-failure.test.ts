@@ -52,4 +52,9 @@ it("reports persisted-but-unsynced instead of inviting a duplicate POST", async 
   const diagnostics = info.mock.calls.flat().join(" ");
   expect(diagnostics).not.toContain("合成同步失敗");
   expect(diagnostics).not.toContain("33".repeat(32));
+  const entries = info.mock.calls.map(([line]) => JSON.parse(String(line)) as Record<string, string>);
+  expect(entries).toEqual(expect.arrayContaining([
+    expect.objectContaining({ event: "received", requestId: expect.any(String), method: "POST" }),
+    expect.objectContaining({ event: "completed", method: "POST", httpStatus: "503", writeStatus: "persisted", syncStatus: "failed", durationMs: expect.stringMatching(/^\d+$/) }),
+  ]));
 });

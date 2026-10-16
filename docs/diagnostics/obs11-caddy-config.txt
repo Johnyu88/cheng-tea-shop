@@ -1,6 +1,5 @@
 :18092 {
     log_append diag_path {http.request.uri.path}
-    log_append diag_request_id {http.request.header.X-Diag-Request-ID}
 
     log {
         output file /var/log/caddy/product-11-access-v2.json {
@@ -10,10 +9,7 @@
         }
         format filter {
             request>uri delete
-            request>headers>Cookie delete
-            request>headers>Authorization delete
-            request>headers>Proxy-Authorization delete
-            request>headers>X-Session-Token delete
+            request>headers delete
         }
     }
 

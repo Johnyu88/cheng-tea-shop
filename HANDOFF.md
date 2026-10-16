@@ -1,5 +1,15 @@
 # HANDOFF
 
+## PRODUCT-11-OBS-12 complete diagnostic chain — 2026-10-16
+
+- Scope: isolated candidate development and synthetic tests only; no formal Acer, Caddy, Tailscale, DNS, product, photo, order, deployment, or CLOUD operation.
+- OBS-11 baseline commit `49ace4a4570938a67f5c9caf089676d7ce1018b7` was verified before changes. The OBS-11 Caddy candidate now removes complete request headers from access-log output; application response headers remain available for request-ID correlation.
+- PASS: catalog POST accepts a bounded inbound `x-demo-request-id` from the approved diagnostic path, otherwise generates a UUID; logs only received/completed metadata, instance ID, HTTP status, duration, write status, and sync status.
+- PASS: diagnostic sink exceptions are swallowed and do not fail product persistence. No product name, price, photo, phone, name, Cookie, Token, password, or request body is logged.
+- PASS: focused diagnostic/persistence/sync suite: 5 tests. PASS: existing POST 201, persisted product ID, sync-failure 503 without duplicate, request-ID propagation, status/duration logging, and diagnostic-sink failure isolation.
+- BLOCKED for formal use: formal image/source provenance remains UNKNOWN; formal application diagnostics are not changed; Caddy short-term log and application diagnostics still require explicit deployment approval.
+- Candidate deployment remains unapproved. The formal one-time test must correlate the Caddy `resp_headers.X-Demo-Request-ID` with the application `requestId`; a proxy 200/201 alone is not persistence evidence.
+
 ## PRODUCT-11-DIAG-09 formal diagnostic capability — 2026-10-16
 
 - PASS: candidate HEAD verified as `b6d137a1ec87d4ebfed725af549b3349be875b49`; no code scope expansion was made.
