@@ -40,6 +40,12 @@ jobs:
         run: pnpm test:e2e
       - name: Synthetic mobile order and catalog tests
         run: pnpm exec playwright test --config=playwright.demo.config.ts
+      - name: Build private cloud demo
+        run: pnpm build
+        env:
+          NEXT_PUBLIC_DEMO_COMMERCE: enabled
+      - name: Private cloud production order loop
+        run: node cloud-demo-smoke.mjs
       - name: Dependency audit
         run: pnpm audit --audit-level=high
       - name: Production dependency audit

@@ -1,3 +1,4 @@
+import { assertDemoEnabled, cloudDemoRequested } from "./demo-cloud";
 import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 
 const loopbackCookieName = "__Host-demo_merchant";
@@ -6,13 +7,10 @@ const durationMs = 30 * 60 * 1000;
 const context = "local-demo-merchant-v1";
 const loopback = new Set(["localhost", "127.0.0.1", "[::1]"]);
 function cookieName(): string {
-  return process.env.DEMO_COMMERCE_LAN === "enabled" ? lanCookieName : loopbackCookieName;
+  return !cloudDemoRequested() && process.env.DEMO_COMMERCE_LAN === "enabled" ? lanCookieName : loopbackCookieName;
 }
 function assertEnabled(): void {
-  if (process.release?.name !== "node" || process.env.NODE_ENV === "production"
-    || process.env.DEMO_COMMERCE_LOCAL !== "enabled") {
-    throw new Error("Local demo access is disabled");
-  }
+  assertDemoEnabled();
 }
 function secret(): Buffer {
   assertEnabled();
@@ -28,6 +26,7 @@ const mac = (key: Buffer, payload: string) =>
 /** Caller must pass the real socket peer; headers alone do not prove locality. */
 export function assertLocalDemoPost(request: Request, peerAddress: string): void {
   assertEnabled();
+  if (cloudDemoRequested()) throw new Error("Local bootstrap unavailable in cloud");
   const url = new URL(request.url);
   if (!loopback.has(peerAddress) || !loopback.has(url.hostname)
     || url.protocol !== "http:" || url.username || url.password

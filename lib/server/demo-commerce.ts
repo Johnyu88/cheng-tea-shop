@@ -1,3 +1,4 @@
+import { assertDemoEnabled } from "./demo-cloud";
 import type { Cart, CheckoutDraft, Product } from "../domain/types";
 import type { DemoOtpService } from "../domain/demo-otp-service";
 import type { DemoOrderService, DemoOrderSnapshot } from "../domain/demo-order-service";
@@ -13,10 +14,7 @@ type OrderInput = {
 type Dependencies = { otp: DemoOtpService; orders: DemoOrderService; reviewAddress?: (address: string) => boolean; catalogProducts?: () => Product[] };
 const syntheticPhones = new Set(["0912000000", "0912000001"]);
 function assertLocalDemo(): void {
-  if (typeof process === "undefined" || process.release?.name !== "node" || process.env.NODE_ENV === "production"
-    || process.env.DEMO_COMMERCE_LOCAL !== "enabled") {
-    throw new Error("Local demo commerce is disabled");
-  }
+  assertDemoEnabled();
 }
 function record(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);

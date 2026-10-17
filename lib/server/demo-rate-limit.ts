@@ -1,3 +1,4 @@
+import { assertDemoEnabled } from "./demo-cloud";
 import { createHash } from "node:crypto";
 import { mkdirSync } from "node:fs";
 import { join, resolve } from "node:path";
@@ -18,9 +19,7 @@ export function enforceDemoRateLimit(
   periodMs: number,
   now = Date.now(),
 ): void {
-  if (process.env.DEMO_COMMERCE_LOCAL !== "enabled" || process.env.NODE_ENV === "production") {
-    throw new Error("Local demo rate limiter is unavailable");
-  }
+  assertDemoEnabled();
   const directory = resolve(process.env.DEMO_DATA_DIR || ".demo-data/local");
   mkdirSync(directory, { recursive: true });
   const db = new DatabaseSync(join(directory, "rate-limits.sqlite"));
