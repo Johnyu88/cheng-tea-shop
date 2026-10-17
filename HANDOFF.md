@@ -1,5 +1,19 @@
 # HANDOFF
 
+## Ordering decision and branch cleanup — 2026-10-17
+
+- **Decision (user, 2026-10-17): orders stay LINE-based.** The website builds the order text and the customer sends it to the shop by LINE. The website does not save orders or customer personal data (name, phone, address).
+- `feature/merchant-simple-order-inbox` (a server-side SQLite order inbox from 10/13; never deployed, no tests) is therefore not pursued. Revisit only if the user later asks for website-side order intake. That work would need a security/privacy review and should be planned together with cloud-02 storage.
+- PR #15 (2026-09-24 demo priorities) was closed as superseded. PR #26 (payment/contact details) was retargeted to `main` and stays open pending verification.
+- This session cannot delete remote branches (HTTP 403). The user should delete them in GitHub → Branches:
+  - Fully merged: `claude/revert-08c0bef`; `codex/frontend-design-phase1-20261016`; `codex/prod-restore-20261015`; `codex/wave-6-checkout-product-draft`; `codex/wave-7-mobile-demo-base`; `codex/wave-7-shopping-quality-gate`; `feat/mobile-three-pwa-entries`; `feature/issue-24-mobile-login`; `feature/private-cloud-demo`; `fix/acer-demo-build-flag-regression`; `fix/acer-https-demo-passkey-pr25`; `fix/brace-expansion-security`; `fix/current-product-form-e2e`; `fix/docker-and-cloud-order-loop`; `fix/wave-7-pnpm11-build-policy`; `docs/desktop-responsive-states-20260914`; `docs/elder-friendly-publishing-20260914`; `docs/mobile-wireframes-design-system-20260914`; `docs/storefront-brand-and-shopping-20260914`.
+  - Squash-merged (every file already on `main`): `docs/agent-workflow-20260914`; `docs/brand-catalog-publishing-20260914`; `docs/frontend-implementation-plan-20260914`; `docs/homepage-real-content-validation-20260914`; `docs/resilient-agent-governance`; `docs/resume-prompt-20260914`; `docs/reuse-first-principle-20260914`; `docs/wave-0-template-audit-20260914`; `fix/pnpm11-allow-builds`.
+  - Superseded or not pursued: `feature/restore-tea-contact`; `feature/v1-line-checkout-guidance` (both also contained in `fix/product-11-*`); `feature/v1-storefront-polish`; `feature/v1-type-color-buttons`; `feature/merchant-simple-order-inbox`; `docs/mobile-demo-priority-2026-09-24`.
+- Keep for now:
+  - `feature/wave-1-reproducible-baseline`: has commits after 10/03, and 53 of its files are not on `main`; review before deleting.
+  - `docs/2026-09-29-traditional-checkout` and `docs/catalog-taxonomy-revision`: each has one document that is not on `main`.
+  - `codex/cloud-02-*`, `fix/product-11-*`, `assets/cheng-tea-photo-library-20261015` and `docs/teacher-payment-contact-20261008`: work still in progress.
+
 ## Production frontend merged to main — 2026-10-17
 
 - Merged `codex/frontend-design-phase1-20261016` into `main`. It contains `codex/prod-restore-20261015`. Production at this point:
