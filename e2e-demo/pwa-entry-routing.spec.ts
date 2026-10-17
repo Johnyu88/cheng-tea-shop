@@ -39,7 +39,7 @@ test("each mobile launch entry keeps its identity, icons, and launch route after
     }
     await expect(page).toHaveTitle(entry.title);
     const heading = entry.path.startsWith("/admin/products") ? "商品管理登入"
-      : entry.path.startsWith("/admin/orders") ? "商家訂單 Demo" : "慢慢選一杯好茶";
+      : entry.path.startsWith("/admin/orders") ? "商家訂單" : "慢慢選一杯好茶";
     await expect(page.getByRole("heading", { name: heading }).first()).toBeVisible();
     expect(url.pathname + url.search).toBe(entry.path);
     await page.reload();

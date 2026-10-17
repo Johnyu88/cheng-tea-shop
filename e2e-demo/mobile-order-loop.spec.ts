@@ -29,7 +29,7 @@ test("mobile synthetic order closes customer and merchant status loop", async ({
   await page.getByLabel("驗證碼").fill("123456");
   await page.getByRole("button", { name: "下一步" }).click();
   await expect(page.getByRole("heading", { name: "配送與付款" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "付款與聯絡資訊（展示資料）" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "付款與聯絡資訊" })).toBeVisible();
   await page.getByRole("button", { name: "下一步" }).click();
   await expect(page.getByText("付款方式：傳統人工確認（匯款／現金／電話／LINE）", { exact: true })).toBeVisible();
   await expect(page.getByText("付款狀態：待人工確認（不會扣款）", { exact: true })).toBeVisible();
