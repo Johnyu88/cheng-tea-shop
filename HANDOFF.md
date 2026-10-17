@@ -595,3 +595,14 @@ Follow `RESUME_PROMPT.md`, `AGENTS.md`, and `WORKFLOW.md`. If newer explicit use
 - Full Quality remains FAIL: browser suite passed 26/30; four failures are the desktop/phone legacy product-draft tests in Chromium and WebKit (`e2e/checkout-product-draft.spec.ts`, lines 90 and 114). They look for removed Demo copy and the former `新增一項茶品` heading. Audits, Docker build and container smoke were skipped after that failure and must not be reported as passed.
 - Next task: inspect the current product-management flow and replace obsolete draft-flow E2E expectations with equivalent coverage of the approved simplified form; retain save/edit/publish behavior coverage rather than suppressing failures. This is separate from the narrow installation repair.
 - PR #19 targets `codex/wave-7-shopping-quality-gate`, not main; neither PR #19 nor PR #16 was merged. Work was performed through the GitHub connector and cloud runner without Acer/4090.
+
+
+## 2026-09-30 Current product-form browser tests — PR #20
+
+- Branch `fix/current-product-form-e2e` is stacked on PR #19 (`fix/wave-7-pnpm11-build-policy`). Runtime-verified implementation commit: `f15445ae2b4e894f549b916a37b841a87ae841cc`.
+- Replaced obsolete AI-generated introduction/preview expectations with current manual product fields. Added desktop unpublished saving, manual introduction/price editing, confirmation reset after edits, explicit publication, and current 360px phone saving/overflow coverage. Checkout tests are preserved. No application or authentication changes.
+- Test review found and corrected the literal NT$ price expectation and a repeated-fill locator issue: initial accessible label is checked, then textarea edits use the existing stable product-summary ID. Independent QA approved the final diff.
+- Fresh cloud Quality run `36663002694`: frozen install, lint, typecheck, 42 unit/component files / 209 tests, production build, all 32 Chromium/WebKit browser/accessibility tests, and both dependency audits PASSED.
+- Full Quality still FAIL at Docker build: Dockerfile deps stage copies only package.json and pnpm-lock.yaml, omitting pnpm-workspace.yaml before frozen installation. Therefore container install repeats ERR_PNPM_IGNORED_BUILDS for unrs-resolver@1.12.2. Container smoke was skipped. Next task: restore workspace-config COPY in the deps stage (compare existing main baseline), then rerun cloud Quality.
+- Standard browser checks exercise in-memory prototype publishing; they do not prove durable storage. Actual file-backed catalog editing/photo replacement tests remain in e2e-demo/catalog-persistence.spec.ts and were not part of this standard workflow.
+- PR #20 and #19 remain unmerged; no deployment or computer-local data change. Update was completed using GitHub cloud execution while user computers were offline.
