@@ -6,6 +6,7 @@ import type { CatalogService, Product } from "@/lib/domain";
 import { createDemoCatalogService, createMockCatalogService } from "@/lib/domain";
 import { publicTeaCatalogService } from "@/lib/domain/in-memory-adapters";
 import { CatalogBrowser } from "@/features/catalog/components/catalog-browser";
+import { StorefrontShell } from "@/features/storefront/components/storefront-shell";
 
 type HomePageProps = {
   catalogService?: CatalogService;
@@ -55,7 +56,7 @@ function CatalogPreview({ catalogService }: { catalogService: CatalogService }):
       {state.status === "ready" && (
         <div className="product-grid">
           {state.products.map((product) => {
-            const variant = product.variants[0];
+            const variant = Array.isArray(product.variants) ? product.variants[0] : undefined;
             return (
               <article className="product-card" key={product.id}>
               <div className="product-placeholder" role="img" aria-label={product.image.alt}>
@@ -63,12 +64,12 @@ function CatalogPreview({ catalogService }: { catalogService: CatalogService }):
                 </div>
                 <div className="product-card-content">
                   <p className="product-taste">{product.tasteTags.join("・")}</p>
-                  <h3>{product.name}</h3>
-                  <p className="product-summary">{product.summary}</p>
-                  <p className="product-meta">
-                    {variant?.specification}／NT${variant?.price.amount.toLocaleString("zh-TW")}
+                  <h3 className="product-card-title">{product.name}</h3>
+                  <p className="product-summary product-card-summary">{product.summary}</p>
+                  <p className="product-meta product-card-price">
+                    {variant?.specification ?? "未設定"}／NT${variant?.price?.amount?.toLocaleString("zh-TW") ?? "—"}
                   </p>
-                  <Link className="product-link" href={`/tea/${product.slug}`}>
+                  <Link className="product-link button-quiet" href={`/tea/${product.slug}`}>
                     查看茶品
                   </Link>
                 </div>
@@ -83,22 +84,13 @@ function CatalogPreview({ catalogService }: { catalogService: CatalogService }):
 
 export function HomePage({ catalogService = defaultCatalogService }: HomePageProps): JSX.Element {
   return (
-    <div id="top" className="site-shell">
-      <header className="site-header" role="banner">
-        <a className="brand-mark" href="#top" aria-label="陳老師茶行">
-          陳老師茶行
-        </a>
-        <nav aria-label="主要導覽">
-          <a href="#baseline">茶品導覽</a>
-        </nav>
-      </header>
-
+    <StorefrontShell homePage>
       <main>
         <section className="hero" aria-labelledby="storefront-heading">
           <p className="eyebrow">陳老師茶行</p>
           <h1 id="storefront-heading">慢慢選一杯好茶</h1>
           <p className="hero-copy">從喜歡的香氣與口感開始，不必先懂茶，也能找到適合自己的茶。</p>
-          <a className="primary-action" href="#baseline">開始選茶</a>
+          <a className="primary-action button-primary" href="#baseline">開始選茶</a>
         </section>
 
         <section className="teacher-story" aria-labelledby="teacher-story-heading">
@@ -116,7 +108,7 @@ export function HomePage({ catalogService = defaultCatalogService }: HomePagePro
             </picture>
             <div className="teacher-story-audio">
               <p>鳥鳴 2／茶園自然聲景</p>
-              <audio aria-label="茶園鳥鳴 2 音效" controls preload="none">
+              <audio aria-label="茶園鳥鳴 2 音效" controls preload="metadata">
                 <source src="/media/tea-stream-birds.wav" type="audio/wav" />
                 您的瀏覽器不支援音訊播放。
               </audio>
@@ -139,6 +131,6 @@ export function HomePage({ catalogService = defaultCatalogService }: HomePagePro
           </a>
         </section>
       </main>
-    </div>
+    </StorefrontShell>
   );
 }

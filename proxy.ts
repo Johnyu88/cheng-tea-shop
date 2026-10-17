@@ -26,6 +26,8 @@ export function proxy(request: NextRequest) {
       || path === "/api/demo/admin/passkey/enroll"
       || path === "/api/demo/catalog"
       || path.startsWith("/api/demo/catalog/media/")
+      || path === "/api/demo/otp"
+      || path.startsWith("/api/demo/orders")
       || path.startsWith("/api/auth/")
       || path.startsWith("/_next/")
       || path.startsWith("/icons/")

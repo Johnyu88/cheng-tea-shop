@@ -108,9 +108,9 @@ export function CartPage(): JSX.Element {
         <div aria-label="購物車摘要" role="region">
           <p aria-label={`購物車總小計 ${formatMoney(cart.subtotal.amount)}`}>小計：{formatMoney(cart.subtotal.amount)}</p>
         </div>
-        <Link href="/#catalog">繼續購買</Link>
-        <button type="button" onClick={() => window.history.back()}>返回上一頁</button>
-        <Link href="/checkout">前往結帳</Link>
+        <Link className="button-quiet" href="/#catalog">繼續購買</Link>
+        <button className="button-quiet" type="button" onClick={() => window.history.back()}>返回上一頁</button>
+        <Link className="button-primary" href="/checkout">前往結帳</Link>
       </section>
     </main>
   );
