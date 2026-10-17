@@ -9,7 +9,7 @@ export function StorefrontShell({ children, homePage = false }: { children: Reac
           陳老師茶行
         </Link>
         <nav aria-label={homePage ? "主要導覽" : "前台導覽"}>
-          {homePage ? <><Link className="button-quiet" href="#baseline">茶品導覽</Link><Link className="button-quiet" href="/orders">訂單查詢</Link></> : <Link className="button-quiet" href="/" aria-label="回首頁">首頁</Link>}
+          {homePage ? <><Link className="button-quiet" href="#baseline">茶品導覽</Link></> : <Link className="button-quiet" href="/" aria-label="回首頁">首頁</Link>}
           <Link className="button-quiet" href="/#catalog" aria-label="繼續選茶">繼續選茶</Link>
           <Link className="button-quiet" href="/cart" aria-label="查看購物車">購物車</Link>
         </nav>
