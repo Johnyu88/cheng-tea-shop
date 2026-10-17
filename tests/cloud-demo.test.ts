@@ -103,6 +103,28 @@ describe("private Acer HTTPS demo", () => {
     expect(acerDemoOrigin().origin).toBe("https://acer-v5.tail4d8b5a.ts.net");
   });
   it.each(["http://tea-staging.home.arpa", "https://attacker.example", "https://x.tea-staging.home.arpa", "https://tea-staging.home.arpa:8443", "https://tea-staging.home.arpa/path"])("rejects unsafe Acer origin configuration %s", origin => { vi.stubEnv("DEMO_ACER_ORIGIN", origin); expect(() => acerDemoOrigin()).toThrow(); });
+  it("accepts a public HTTPS origin only when DEMO_ACER_PUBLIC_HOST names that exact host", () => {
+    const origin = "https://admin-104-199-148-195.sslip.io";
+    vi.stubEnv("DEMO_ACER_ORIGIN", origin);
+    vi.stubEnv("DEMO_ACER_PUBLIC_HOST", "");
+    expect(() => acerDemoOrigin()).toThrow();
+    vi.stubEnv("DEMO_ACER_PUBLIC_HOST", "other.sslip.io");
+    expect(() => acerDemoOrigin()).toThrow();
+    vi.stubEnv("DEMO_ACER_PUBLIC_HOST", "admin-104-199-148-195.sslip.io");
+    expect(acerDemoOrigin().origin).toBe(origin);
+    const request = new Request(`${origin.replace("https:", "http:")}/api/demo/otp`, {
+      method: "POST",
+      headers: { host: "admin-104-199-148-195.sslip.io", origin, authorization: auth, "content-type": "application/json",
+        "x-forwarded-proto": "https", "sec-fetch-site": "same-origin" },
+    });
+    expect(() => assertAcerDemoRequest(request)).not.toThrow();
+    expect(() => assertAcerDemoRequest(new Request(request, { headers: { ...Object.fromEntries(request.headers), origin: "https://attacker.example" } }))).toThrow();
+  });
+  it.each(["http://admin.example.com", "https://admin.example.com:8443", "https://admin.example.com/path", "https://user:pw@admin.example.com"])("rejects an opted-in public host with unsafe origin shape %s", origin => {
+    vi.stubEnv("DEMO_ACER_PUBLIC_HOST", "admin.example.com");
+    vi.stubEnv("DEMO_ACER_ORIGIN", origin);
+    expect(() => acerDemoOrigin()).toThrow();
+  });
   it("accepts only authenticated same-origin HTTPS traffic", () => { expect(() => assertAcerDemoRequest(acerRequest())).not.toThrow(); expect(() => assertAcerDemoRequest(acerRequest("POST", { origin: "https://attacker.example" }))).toThrow(); expect(() => assertAcerDemoRequest(acerRequest("POST", { host: "attacker.example" }))).toThrow(); expect(() => assertAcerDemoRequest(acerRequest("POST", { "x-forwarded-proto": "http" }))).toThrow(); expect(() => assertAcerDemoRequest(acerRequest("POST", { authorization: "" }))).toThrow(); expect(() => assertAcerDemoRequest(acerRequest("POST", { forwarded: "proto=https" }))).toThrow(); });
   it("accepts explicitly configured private HTTPS :8443 with exact Host and Origin", () => {
     const origin = "https://acer-v5.tail4d8b5a.ts.net:8443";

@@ -91,6 +91,7 @@ docker build -t tea-nextjs:admin-$rev --label org.opencontainers.image.revision=
 - 機密類（商家密鑰、session secret、管理員密碼等）**全部重新產生**，不沿用 Acer 的值；新的後台密碼由使用者設定並交給陳老師。
 - 路徑類改成容器內路徑（例：`PUBLIC_CATALOG_VISIBILITY_PATH=/app/catalog-sync/publication.json`），與 Acer 相同。
 - 原本為 Acer/Tailscale 設定的 origin／host 白名單類變數，改成新的 HTTPS 網址。
+- 後台：`DEMO_ACER_ORIGIN` 設為後台的完整 HTTPS 網址（例：`https://admin.<網域>`，不可帶埠號或路徑），並另外設定 `DEMO_ACER_PUBLIC_HOST` 為**同一個主機名稱**（例：`admin.<網域>`）。兩者必須一致才會接受公開網域；Origin／Host 檢查照常運作，Caddy 不需要改寫標頭。
 
 ### 2.6 啟動容器
 
