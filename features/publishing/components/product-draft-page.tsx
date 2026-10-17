@@ -7,6 +7,7 @@ import { useEffect, useRef, useState, type ChangeEvent, type JSX } from "react";
 import Link from "next/link";
 import type { DomainError, Product, ProductDraft, ProductDraftPhoto } from "@/lib/domain";
 import { useCommerce } from "@/features/commerce/components/commerce-provider";
+import { preparePhotoDataUrl } from "@/lib/client/prepare-photo";
 import { initialDraft, minimumProblems, ProductFields, toProductDraft, type FieldProblem, type FormDraft } from "./product-form";
 
 type Operation = "idle" | "saving" | "publishing";
@@ -89,17 +90,17 @@ export function ProductDraftPage(): JSX.Element {
     if (photos.length + files.length > 3) { setError({ code: "invalid-draft", message: "商品照片最多三張；原本選擇的照片與文字都已保留。", retryable: false }); return; }
     const additions = files.map((file) => ({ id: `local-photo-${nextPhotoId.current++}`, previewUrl: URL.createObjectURL(file), fileName: file.name, alt: `${file.name} 預覽` }));
     setPhotos((current) => [...current, ...additions]);
-    void Promise.all(files.map((file) => new Promise<string | undefined>((resolve) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(typeof reader.result === "string" ? reader.result : undefined);
-      reader.onerror = () => resolve(undefined);
-      reader.readAsDataURL(file);
-    }))).then((dataUrls) => {
-      setPhotos((current) => current.map((photo) => {
+    void Promise.all(files.map((file) => preparePhotoDataUrl(file))).then((prepared) => {
+      const failedIds = additions.filter((_, index) => !prepared[index]?.ok).map((addition) => addition.id);
+      setPhotos((current) => current.flatMap((photo) => {
         const additionIndex = additions.findIndex((addition) => addition.id === photo.id);
-        const dataUrl = additionIndex >= 0 ? dataUrls[additionIndex] : undefined;
-        return dataUrl ? { ...photo, dataUrl } : photo;
+        if (additionIndex < 0) return [photo];
+        const result = prepared[additionIndex];
+        if (!result?.ok) { URL.revokeObjectURL(photo.previewUrl); return []; }
+        return [{ ...photo, dataUrl: result.dataUrl }];
       }));
+      const failure = prepared.find((result) => !result.ok);
+      if (failedIds.length > 0 && failure && !failure.ok) setError({ code: "invalid-draft", message: `${failure.message}（已移除無法讀取的照片，其他內容都已保留）`, retryable: false });
     });
     setConfirmed(false);
     setError(undefined);

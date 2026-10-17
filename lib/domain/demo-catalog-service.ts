@@ -7,11 +7,16 @@ import { createMockPublishingService } from "./mock/mock-publishing-service";
 
 const failure = <T>(message: string): ServiceResult<T> => ({ ok: false, error: domainError("catalog-unavailable", message, true) });
 
-async function demoJson<T>(input: RequestInfo | URL, init?: RequestInit): Promise<ServiceResult<T>> {
+type DemoJsonResult<T> = ServiceResult<T> & { rejectedBeforeWrite?: boolean };
+
+async function demoJson<T>(input: RequestInfo | URL, init?: RequestInit): Promise<DemoJsonResult<T>> {
   try {
     const response = await fetch(input, { credentials: "same-origin", ...init, headers: { "content-type": "application/json", ...(init?.headers ?? {}) } });
     const payload = await response.json() as { ok?: boolean; value?: T; error?: string };
-    if (!response.ok || !payload.ok || payload.value === undefined) return failure(payload.error ?? "Demo 資料目前無法取得，請稍後再試。");
+    if (!response.ok || !payload.ok || payload.value === undefined) {
+      const rejectedBeforeWrite = response.status === 400 && response.headers.get("x-demo-write-status") === "not-started";
+      return { ...failure<T>(payload.error ?? "Demo 資料目前無法取得，請稍後再試。"), rejectedBeforeWrite };
+    }
     return { ok: true, value: payload.value };
   } catch {
     return failure("Demo 資料目前無法取得，請確認手機與主機在同一網路。");
@@ -41,6 +46,10 @@ export const createDemoPublishingService = (): PublishingService => {
       const validated = await local.saveDraft(draft);
       if (!validated.ok) return validated;
       const persisted = await demoJson<Product>("/api/demo/catalog?publication=draft", { method: "POST", body: JSON.stringify(validated.value) });
+      if (!persisted.ok && persisted.rejectedBeforeWrite) {
+        const reason = persisted.error.message.includes("Merchant access required") ? "商家登入已失效，請重新登入後再儲存。" : persisted.error.message;
+        return { ok: false, error: domainError("invalid-draft", `商品未儲存：${reason}`, true) };
+      }
       if (!persisted.ok || !persisted.value.id) {
         return { ok: false, error: domainError("publishing-unavailable", "商品已送出，但尚未確認儲存；請先查詢商品清單，勿重複新增。", false) };
       }

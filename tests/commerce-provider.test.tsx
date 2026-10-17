@@ -101,3 +101,39 @@ it("throws an actionable error when used outside the provider", () => {
     "useCommerce must be used within a CommerceProvider",
   );
 });
+
+it("persists new products through the demo catalog API when an admin build also enables the public storefront", async () => {
+  vi.stubEnv("NEXT_PUBLIC_PUBLIC_STOREFRONT", "enabled");
+  vi.stubEnv("NEXT_PUBLIC_DEMO_COMMERCE", "enabled");
+  const created = { id: "demo-published-11", slug: "s", name: "第11樣茶", category: "black", tasteTags: [], summary: "", image: { src: null, alt: "", isPlaceholder: true }, variants: [], publication: "draft" };
+  const fetchMock = vi.fn()
+    .mockResolvedValueOnce(new Response(JSON.stringify({ ok: true, value: created }), { status: 201 }))
+    .mockResolvedValueOnce(new Response(JSON.stringify({ ok: true, value: { items: [created], nextCursor: null, total: 1 } }), { status: 200 }));
+  vi.stubGlobal("fetch", fetchMock);
+  let publishing: PublishingService | undefined;
+  try {
+    render(<CommerceProvider><CommerceProbe onServices={(_catalog, _cart, _checkout, service) => { publishing = service; }} /></CommerceProvider>);
+    const result = await publishing!.saveDraft({ name: "第11樣茶", specification: "一兩", price: { currency: "TWD", amount: 888 }, category: "black", inventoryStatus: "available", tasteTags: [] });
+    expect(result).toMatchObject({ ok: true, value: { id: "demo-published-11" } });
+    expect(fetchMock).toHaveBeenNthCalledWith(1, "/api/demo/catalog?publication=draft", expect.objectContaining({ method: "POST" }));
+  } finally {
+    vi.unstubAllEnvs();
+    vi.unstubAllGlobals();
+  }
+});
+
+it("keeps the public storefront build away from the demo catalog write API", async () => {
+  vi.stubEnv("NEXT_PUBLIC_PUBLIC_STOREFRONT", "enabled");
+  vi.stubEnv("NEXT_PUBLIC_DEMO_COMMERCE", "disabled");
+  const fetchMock = vi.fn();
+  vi.stubGlobal("fetch", fetchMock);
+  let publishing: PublishingService | undefined;
+  try {
+    render(<CommerceProvider><CommerceProbe onServices={(_catalog, _cart, _checkout, service) => { publishing = service; }} /></CommerceProvider>);
+    await publishing!.saveDraft({ name: "測試", specification: "一兩", price: { currency: "TWD", amount: 1 }, category: "black", inventoryStatus: "available", tasteTags: [] });
+    expect(fetchMock).not.toHaveBeenCalled();
+  } finally {
+    vi.unstubAllEnvs();
+    vi.unstubAllGlobals();
+  }
+});

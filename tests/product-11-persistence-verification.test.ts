@@ -94,4 +94,30 @@ describe("PRODUCT-11 persisted draft verification", () => {
       error: { code: "publishing-unavailable", retryable: false },
     });
   });
+
+  it("shows the server reason when the POST was rejected before any write", async () => {
+    const fetchMock = vi.fn().mockResolvedValueOnce(new Response(JSON.stringify({ ok: false, error: "商品圖片格式或大小無效。限 PNG、JPEG、WebP 且不超過 5 MB。" }), {
+      status: 400,
+      headers: { "content-type": "application/json", "x-demo-write-status": "not-started" },
+    }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(createDemoPublishingService().saveDraft(draft("合成第11筆"))).resolves.toMatchObject({
+      ok: false,
+      error: { code: "invalid-draft", message: expect.stringContaining("商品未儲存：商品圖片格式或大小無效"), retryable: true },
+    });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps the uncertain-save warning when the write status is not a definite rejection", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValueOnce(new Response(JSON.stringify({ ok: false, error: "商品已寫入，但公開同步尚未完成；請勿重複新增。" }), {
+      status: 503,
+      headers: { "content-type": "application/json", "x-demo-write-status": "persisted" },
+    })));
+
+    await expect(createDemoPublishingService().saveDraft(draft("合成第11筆"))).resolves.toMatchObject({
+      ok: false,
+      error: { code: "publishing-unavailable", message: expect.stringContaining("勿重複新增"), retryable: false },
+    });
+  });
 });
