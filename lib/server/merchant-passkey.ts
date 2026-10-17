@@ -5,6 +5,7 @@ import { createHmac, randomUUID } from "node:crypto";
 import { DatabaseSync } from "node:sqlite";
 import { mkdirSync } from "node:fs";
 import { join, resolve } from "node:path";
+import { acerDemoOrigin, acerDemoRequested } from "./demo-cloud";
 
 type Options = { origin: string; directory: string; secret: string };
 type Binding = { user_id: string; email: string };
@@ -56,13 +57,17 @@ type Store = ReturnType<typeof createMerchantPasskeyStore>;
 const stores = new Map<string, Store>();
 export function getMerchantPasskeyStore(): Store | null {
   const cloud = process.env.DEMO_COMMERCE_CLOUD === "enabled";
-  const rawOrigin = cloud ? process.env.DEMO_CLOUD_ORIGIN || process.env.RENDER_EXTERNAL_URL : process.env.DEMO_PASSKEY_LOCAL_ORIGIN;
+  const acer = acerDemoRequested();
+  const rawOrigin = cloud ? process.env.DEMO_CLOUD_ORIGIN || process.env.RENDER_EXTERNAL_URL
+    : acer ? process.env.DEMO_ACER_ORIGIN : process.env.DEMO_PASSKEY_LOCAL_ORIGIN;
   const secret = process.env.DEMO_MERCHANT_SECRET ?? "";
   if (!rawOrigin || !/^[a-fA-F0-9]{64}$/.test(secret)) return null;
   const origin = new URL(rawOrigin);
   if (origin.origin !== rawOrigin || origin.username || origin.password || origin.search || origin.hash) return null;
   if (cloud ? rawOrigin !== "https://cheng-tea-password-demo.onrender.com" || process.env.DEMO_AUTH_ENV !== "isolated-demo"
     || process.env.DEMO_AUTH_PROVIDER !== "password" || (process.env.DEMO_AUTH_PASSWORD ?? "").length < 3
+    : acer ? rawOrigin !== acerDemoOrigin().origin || process.env.DEMO_AUTH_ENV !== "acer-demo"
+      || process.env.DEMO_AUTH_PROVIDER !== "password" || (process.env.DEMO_AUTH_PASSWORD ?? "").length < 12
     : process.env.DEMO_COMMERCE_LOCAL !== "enabled" || origin.protocol !== "http:" || !["localhost", "127.0.0.1"].includes(origin.hostname)) return null;
   const directory = resolve(process.env.DEMO_DATA_DIR || ".demo-data/local");
   const key = [rawOrigin, directory, secret].join("|");

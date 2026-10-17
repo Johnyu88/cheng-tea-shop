@@ -95,3 +95,22 @@ test("password selection disables both SMS issuance and operator inbox routes", 
   expect(inbox.status).toBe(403);
   for (const name of ["DEMO_MERCHANT_PHONE", "DEMO_MERCHANT_PHONE_CONFIRMED", "DEMO_MERCHANT_SMS_MODE"]) delete process.env[name];
 });
+
+test("Acer HTTPS staging accepts only its configured demo password and binds the signed session to that origin", async () => {
+  const acerOrigin = "https://tea-staging.home.arpa";
+  const acerPassword = "Acer-staging-password-2026";
+  vi.stubEnv("DEMO_COMMERCE_CLOUD", "");
+  vi.stubEnv("DEMO_COMMERCE_ACER", "enabled");
+  vi.stubEnv("DEMO_ACER_ORIGIN", acerOrigin);
+  vi.stubEnv("DEMO_AUTH_ENV", "acer-demo");
+  vi.stubEnv("DEMO_AUTH_PROVIDER", "password");
+  vi.stubEnv("DEMO_AUTH_PASSWORD", acerPassword);
+  const provider = createPasswordAuthProvider();
+  expect(provider.status().state).toBe("ready");
+  expect(provider.verify({ password: acerPassword })).toBe(true);
+  expect(provider.sessionContext()).toContain(acerOrigin);
+  await new Promise(resolve => setTimeout(resolve, 1_100));
+  const cookie = issueDemoMerchantAuthCookie({ password: acerPassword });
+  expect(cookie).toContain("__Host-demo_merchant=");
+  expect(cookie).toContain("Secure;");
+});

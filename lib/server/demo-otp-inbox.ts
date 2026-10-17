@@ -1,9 +1,10 @@
 import { randomInt } from "node:crypto";
+import { acerDemoRequested } from "./demo-cloud";
 import { createDemoOtpService, type DemoOtpService } from "../domain/demo-otp-service";
 
 function assertEnabled(): void {
-  if (process.release?.name !== "node" || process.env.NODE_ENV === "production"
-    || process.env.DEMO_COMMERCE_LOCAL !== "enabled") {
+  if (process.release?.name !== "node" || (!acerDemoRequested() && (process.env.NODE_ENV === "production"
+    || process.env.DEMO_COMMERCE_LOCAL !== "enabled"))) {
     throw new Error("Local demo OTP inbox is disabled");
   }
 }

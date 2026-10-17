@@ -38,3 +38,16 @@ test("public signup/password signin blocked and anonymous registration denied", 
   expect((await vendorPost(req("/api/auth/passkey/verify-registration", "POST"))).status).toBe(403);
 });
 
+
+
+test("Acer Passkey store binds to its single private HTTPS origin", () => {
+  const directory = mkdtempSync(join(tmpdir(), "acer-passkey-route-")); folders.push(directory);
+  vi.stubEnv("NODE_ENV", "production"); vi.stubEnv("DEMO_COMMERCE_CLOUD", ""); vi.stubEnv("DEMO_COMMERCE_LOCAL", "");
+  vi.stubEnv("DEMO_COMMERCE_ACER", "enabled"); vi.stubEnv("DEMO_ACER_ORIGIN", "https://tea-staging.home.arpa");
+  vi.stubEnv("DEMO_MERCHANT_SECRET", "a".repeat(64)); vi.stubEnv("DEMO_DATA_DIR", directory);
+  vi.stubEnv("DEMO_AUTH_ENV", "acer-demo"); vi.stubEnv("DEMO_AUTH_PROVIDER", "password"); vi.stubEnv("DEMO_AUTH_PASSWORD", "test-only-long-password");
+  expect(getMerchantPasskeyStore()).not.toBeNull();
+  vi.stubEnv("DEMO_ACER_ORIGIN", "https://attacker.example");
+  expect(() => getMerchantPasskeyStore()).toThrow();
+  vi.stubEnv("DEMO_ACER_ORIGIN", "https://tea-staging.home.arpa");
+});

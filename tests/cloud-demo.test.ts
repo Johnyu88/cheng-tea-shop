@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createHash } from "node:crypto";
-import { assertDemoEnabled, assertCloudDemoRequest } from "@/lib/server/demo-cloud";
+import { assertDemoEnabled, assertCloudDemoRequest, acerDemoRequested, acerDemoOrigin, assertAcerDemoRequest } from "@/lib/server/demo-cloud";
 import { assertLocalDemoHttpRequest } from "@/lib/server/demo-http-guard";
 import { issueDemoMerchantCookie, issueDemoMerchantPhoneCookie, verifyDemoMerchantCookie } from "@/lib/server/demo-access";
 
@@ -83,4 +83,23 @@ describe("private synthetic cloud demo", () => {
     expect(verifyDemoMerchantCookie(cookie.replace(String(issued) + ".", String(issued + 1) + "."), issued + 2)).toBe(false);
     expect(issueDemoMerchantPhoneCookie("0912000000", challenge.challengeId, code)).toBeNull();
   });
+});
+
+describe("private Acer HTTPS demo", () => {
+  const acer = "https://tea-staging.home.arpa";
+  const tokenValue = "a".repeat(32);
+  const auth = "Basic " + Buffer.from("preview:" + tokenValue).toString("base64");
+  function acerRequest(method = "POST", overrides: Record<string, string> = {}) {
+    return new Request("http://tea-staging.home.arpa/api/demo/orders", { method, headers: { host: "tea-staging.home.arpa", origin: acer, authorization: auth, "content-type": "application/json", "x-forwarded-proto": "https", "sec-fetch-site": "same-origin", ...overrides } });
+  }
+  beforeEach(() => {
+    vi.stubEnv("NODE_ENV", "production"); vi.stubEnv("DEMO_COMMERCE_CLOUD", ""); vi.stubEnv("DEMO_COMMERCE_ACER", "enabled"); vi.stubEnv("DEMO_COMMERCE_LOCAL", ""); vi.stubEnv("DEMO_COMMERCE_LAN", ""); vi.stubEnv("DEMO_ACER_ORIGIN", acer); vi.stubEnv("DEMO_PREVIEW_TOKEN_SHA256", createHash("sha256").update(tokenValue).digest("hex")); vi.stubEnv("DEMO_MERCHANT_SECRET", "b".repeat(64));
+  });
+  it("enables production demo only with explicit Acer mode and a single private HTTPS origin", () => { expect(acerDemoRequested()).toBe(true); expect(acerDemoOrigin().origin).toBe(acer); expect(() => assertDemoEnabled()).not.toThrow(); });
+  it("accepts the explicit fully qualified private Tailscale DNS name", () => {
+    vi.stubEnv("DEMO_ACER_ORIGIN", "https://acer-v5.tail4d8b5a.ts.net");
+    expect(acerDemoOrigin().origin).toBe("https://acer-v5.tail4d8b5a.ts.net");
+  });
+  it.each(["http://tea-staging.home.arpa", "https://attacker.example", "https://x.tea-staging.home.arpa", "https://tea-staging.home.arpa:8443", "https://tea-staging.home.arpa/path"])("rejects unsafe Acer origin configuration %s", origin => { vi.stubEnv("DEMO_ACER_ORIGIN", origin); expect(() => acerDemoOrigin()).toThrow(); });
+  it("accepts only authenticated same-origin HTTPS traffic", () => { expect(() => assertAcerDemoRequest(acerRequest())).not.toThrow(); expect(() => assertAcerDemoRequest(acerRequest("POST", { origin: "https://attacker.example" }))).toThrow(); expect(() => assertAcerDemoRequest(acerRequest("POST", { host: "attacker.example" }))).toThrow(); expect(() => assertAcerDemoRequest(acerRequest("POST", { "x-forwarded-proto": "http" }))).toThrow(); expect(() => assertAcerDemoRequest(acerRequest("POST", { authorization: "" }))).toThrow(); expect(() => assertAcerDemoRequest(acerRequest("POST", { forwarded: "proto=https" }))).toThrow(); });
 });

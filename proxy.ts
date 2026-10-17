@@ -1,17 +1,22 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { assertCloudDemoRequest, cloudDemoRequested, hasCloudDemoAuthorization } from "@/lib/server/demo-cloud";
+import { assertAcerDemoRequest, acerDemoRequested, assertCloudDemoRequest, cloudDemoRequested, hasCloudDemoAuthorization } from "@/lib/server/demo-cloud";
 
 // Global budget is deliberately single-instance and contains no addresses or credentials.
 let failures = 0;
 let windowStart = 0;
 export function proxy(request: NextRequest) {
-  if (!cloudDemoRequested()) return NextResponse.next();
-  // Render health checks reveal no application data and still require the health handler.
+  const cloud = cloudDemoRequested();
+  const acer = acerDemoRequested();
+  if (!cloud && !acer) return NextResponse.next();
+  // Health returns no application data; staging is reachable only inside the Tailscale tailnet.
   if (request.nextUrl.pathname === "/api/health" && request.method === "GET") return NextResponse.next();
   const now = Date.now();
   if (now - windowStart >= 60_000) { failures = 0; windowStart = now; }
   if (failures >= 120 && !hasCloudDemoAuthorization(request)) return new NextResponse("Please retry later", { status: 429, headers: { "retry-after": "60", "cache-control": "no-store" } });
-  try { assertCloudDemoRequest(request); }
+  try {
+    if (cloud) assertCloudDemoRequest(request);
+    else assertAcerDemoRequest(request);
+  }
   catch (error) {
     console.warn("Preview request denied:", error instanceof Error ? error.message : "Invalid request");
     failures += 1;
