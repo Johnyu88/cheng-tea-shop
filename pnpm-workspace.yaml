@@ -8,3 +8,10 @@ overrides:
 
 patchedDependencies:
   braces@3.0.3: patches/braces@3.0.3.patch
+
+# GHSA-vfj7-8cjw-p6xm: braces 3.0.4 is not published on npm; the nesting-depth
+# limit is backported via patches/braces@3.0.3.patch (dev-only path via
+# eslint-config-next). Remove this entry once braces >=3.0.4 is available.
+auditConfig:
+  ignoreGhsas:
+    - GHSA-vfj7-8cjw-p6xm

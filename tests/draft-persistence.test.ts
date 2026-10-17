@@ -27,6 +27,7 @@ it("POST draft survives GET and remains hidden from public catalog", async () =>
   directory = await mkdtemp(join(tmpdir(), "tea-route-draft-"));
   vi.stubEnv("DEMO_COMMERCE_LOCAL", "enabled");
   vi.stubEnv("DEMO_DATA_DIR", directory);
+  vi.stubEnv("PUBLIC_CATALOG_VISIBILITY_PATH", join(directory, "public", "publication.json"));
   vi.stubEnv("DEMO_MERCHANT_SECRET", "11".repeat(32));
   const cookie = issueDemoMerchantCookie("11".repeat(32))!.split(";")[0]!;
   const base = "http://127.0.0.1:3014/api/demo/catalog";

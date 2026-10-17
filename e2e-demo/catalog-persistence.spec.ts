@@ -26,7 +26,7 @@ test("homepage assets load and a ninth demo product survives a reload", async ({
   await page.goto("/");
   await expect(page.getByRole("img", { name: "陳老師茶行首頁合成照" })).toBeVisible();
   await expect(page.locator("video")).toHaveCount(0);
-  await expect(page.getByRole("link", { name: "訂單查詢" })).toHaveAttribute("href", "/orders");
+  await expect(page.getByRole("link", { name: "訂單查詢" })).toHaveCount(0);
   await expect(page.getByLabel("茶園鳥鳴 2 音效")).toHaveAttribute("controls");
   await expect(page.locator("audio source")).toHaveAttribute("src", "/media/tea-stream-birds.wav");
   await expect(page.getByText("台灣蜜香野生山茶").first()).toBeVisible();

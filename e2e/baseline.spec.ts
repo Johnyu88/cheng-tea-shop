@@ -8,14 +8,15 @@ test("homepage exposes the storefront starting point", async ({ page }) => {
   await expect(page.getByRole("link", { name: "開始選茶" })).toHaveAttribute("href", "#baseline");
 });
 
-test("mobile brand navigation keeps order lookup visible in the viewport", async ({ page }) => {
+test("mobile brand navigation stays in the viewport without the retired order lookup", async ({ page }) => {
   await page.setViewportSize({ width: 360, height: 800 });
   await page.goto("/");
 
-  const orderLookup = page.getByRole("link", { name: "訂單查詢" });
-  await expect(orderLookup).toBeVisible();
+  await expect(page.getByRole("link", { name: "訂單查詢" })).toHaveCount(0);
+  const browseTeas = page.getByRole("navigation", { name: "主要導覽" }).getByRole("link", { name: "茶品導覽" });
+  await expect(browseTeas).toBeVisible();
 
-  const box = await orderLookup.boundingBox();
+  const box = await browseTeas.boundingBox();
   expect(box).not.toBeNull();
   expect(box!.x).toBeGreaterThanOrEqual(0);
   expect(box!.y).toBeGreaterThanOrEqual(0);

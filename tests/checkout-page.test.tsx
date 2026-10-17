@@ -277,7 +277,7 @@ it("shows the deterministic order reference and primary phone help on success", 
 
   await waitFor(() => expect(screen.getByText("訂單編號：MOCK-ORDER-001")).toBeInTheDocument());
   expect(screen.getByRole("link", { name: "電話聯絡我們" })).toHaveAttribute("href", "tel:0800000000");
-  expect(screen.getByRole("link", { name: "LINE 聯絡我們" })).toHaveAttribute("href", "https://line.me/R/ti/p/@longying-tea-shop");
+  expect(screen.getByRole("link", { name: "LINE 聯絡我們" })).toHaveAttribute("href", "https://line.me/ti/p/TT6TRQyMF6");
 });
 
 it("uses polite live status and visible error summary semantics", async () => {

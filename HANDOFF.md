@@ -1,5 +1,22 @@
 # HANDOFF
 
+## Stack recovery and merge to main — 2026-10-17
+
+- Branch: `claude/check-restore-program-state-o43nkc`. GitHub state: `SYNCED` once pushed.
+- Finding: `main` had stopped at `81e05cb` (Wave 1). All later work lived in the unmerged PR stack #16 → #19 → #20 → #21 → #22 → #23 → #25 → #27 → #28 → #29 (head `f9748e1`, 2026-10-13). Only #22 had green CI.
+- `main`'s Wave 1 commits were made independently of `feature/wave-1-reproducible-baseline`, which the stack is built on. A bridge merge (`-s ours`) records `main` as merged into `codex/wave-7-mobile-demo-base` and keeps the stack's newer files.
+- Approved plan (user, 2026-10-17): get the final state green first, then merge the layers into `main` in order with merge commits. `main` is briefly red while the layers land. Production runs from Docker images on the Acer host, not from `main`.
+- Fixes on top of #29:
+  - ported `0b36c71` (removes the demo login blockers and updates outdated unit tests);
+  - fixed the `react-hooks/set-state-in-effect` lint error in public checkout;
+  - e2e: configured `PUBLIC_CATALOG_VISIBILITY_PATH` and updated outdated headings;
+  - removed the homepage "訂單查詢" and success-page "主動查看訂單" links to the retired `/orders` page (user decision: keep customer lookup retired);
+  - aligned `cloud-demo-smoke.mjs` with the current UI.
+- Security note: GHSA-vfj7-8cjw-p6xm (braces) has no published fix on npm (latest is 3.0.3). The depth limit is backported via `patches/braces@3.0.3.patch`, and the advisory is listed in `auditConfig.ignoreGhsas` with a removal note. It is reachable only through the dev dependency chain under eslint-config-next. The production audit is clean.
+- Local verification (Node 24.19.0): lint 0 errors, typecheck, Vitest 343/343, build, the three Playwright suites on Chromium (16, 1 and 3 tests), the cloud demo smoke, and both audits. WebKit and the Docker smoke are verified in CI only.
+- Not merged in this pass (newer than #29, no PRs yet): `codex/prod-restore-20261015` → `codex/frontend-design-phase1-20261016` and `codex/cloud-02-*`; `fix/product-11-fix-01(-minimal)`; `feature/v1-*`; `feature/merchant-simple-order-inbox`; `assets/cheng-tea-photo-library-20261015`. PR #26 (payment/contact docs) and PR #15 (docs) also stay open.
+- Still pending from `docs/PRODUCTION_TRUTH_2026-10-12.md`: real-iPhone acceptance of re-login → photo save → storefront sync, and production Passkey enrolment.
+
 ## Latest mobile OTP acceptance — 2026-10-02 Taipei
 
 - Password demo /orders now uses two visible stages; OTP123456, expiry, cooldown and actionable errors. See docs/testing/otp-two-stage-2026-10-02.md.
@@ -968,3 +985,9 @@ This checkpoint records preparation only; the 10/14 switch has **not** been perf
 - 現場茶品檔僅有八筆樣品候選，另有黑茶/特殊茶名稱未提供，黃茶與老茶分類可能與樣品重疊；照片映射也有候選衝突。檔內價格/庫存不是已核定正式資料。正式匯款、電話、LINE QR、運費/免運條件待陳老師確認，機密值不得寫入 Git。
 - 10/14 才依現場包逐項執行切換前閘門；只有全數條件通過才改 :8443→8095。任一關鍵失敗，只回退 :8443→8092，保持 443→8090，保留容器/資料/監測。若不通過，維持舊版展示備援。
 - 10/15 現場順序：前台商品→購物車→下單→商家登入→訂單確認付款→包裝拍照→出貨→顧客查單。付款/訂單皆標示合成演示；ORDER-03 仍待實機驗收，不可標通過。Samsung 若無法安裝三個獨立 PWA，改建三個 Chrome 主畫面捷徑並記錄。
+## 2026-10-15 PROD-ADMIN-02 階段 02：四項失敗修復
+
+- 工作樹：`codex/prod-restore-20261015`；保留恢復基準 `f9748e187fa1cd74860c5fda79045dced9124d0d` 與備份 `C:\data\tea-staging\recovery\prod-restore-20261015-pre-render`。
+- 修正：草稿測試配置公開目錄同步路徑；首頁主要導覽補回訂單查詢；結帳電話改為目前核定的 0800 聯絡號碼；後台改為既有管理員密碼登入介面，移除前台 Passkey/SMS 登入入口與 Demo 文案。
+- 回歸測試：`69` files、`343/343` tests PASS；`typecheck` PASS；`production build` PASS。Build 仍報告既有 Demo 檔案路徑的動態 filesystem tracing 警告。
+- 未完成：正式 PostgreSQL、物件儲存、資料遷移、Render 付費 Web Service、正式 HTTPS 與真實環境 E2E 尚未執行；不得以本階段測試結果宣稱正式部署完成。

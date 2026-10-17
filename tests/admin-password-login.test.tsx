@@ -10,7 +10,7 @@ beforeEach(() => {
 });
 test("password provider offers one password field and resumes same merchant orders", async () => {
   render(<AdminOrdersPage />);
-  const input = await screen.findByLabelText("Demo 密碼");
+  const input = await screen.findByLabelText("管理員密碼");
   expect(input).toHaveAttribute("type", "password");
   expect(screen.queryByLabelText("已綁定手機")).not.toBeInTheDocument();
   expect(screen.getByRole("button", { name: "登入" })).toBeDisabled();
@@ -24,7 +24,7 @@ test("password provider offers one password field and resumes same merchant orde
 test("failed password clears the field and pending configuration cannot login", async () => {
   vi.mocked(demoApi.merchantPasswordLogin).mockRejectedValue(new Error("登入失敗，請稍後重試。"));
   render(<AdminOrdersPage />);
-  const input = await screen.findByLabelText("Demo 密碼");
+  const input = await screen.findByLabelText("管理員密碼");
   fireEvent.change(input, { target: { value: "wrong-password" } });
   fireEvent.click(screen.getByRole("button", { name: "登入" }));
   await screen.findByRole("alert");
@@ -34,7 +34,7 @@ test("failed password clears the field and pending configuration cannot login", 
 test("password-pending fails closed in the interface", async () => {
   vi.mocked(demoApi.merchantStatus).mockResolvedValue({ provider: "password", state: "password-pending", simulated: false });
   render(<AdminOrdersPage />);
-  fireEvent.change(await screen.findByLabelText("Demo 密碼"), { target: { value: "synthetic-password" } });
+  fireEvent.change(await screen.findByLabelText("管理員密碼"), { target: { value: "synthetic-password" } });
   expect(screen.getByRole("button", { name: "登入" })).toBeDisabled();
   expect(demoApi.merchantPasswordLogin).not.toHaveBeenCalled();
 });

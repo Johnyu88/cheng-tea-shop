@@ -24,6 +24,7 @@ export default defineConfig({
       DEMO_AUTH_ENV: "",
       DEMO_AUTH_PASSWORD: "",
       DEMO_DATA_DIR: resolve(`.demo-data/playwright-${process.pid}`),
+      PUBLIC_CATALOG_VISIBILITY_PATH: resolve(`.demo-data/playwright-${process.pid}/public/publication.json`),
       NEXT_PUBLIC_DEMO_COMMERCE: "enabled",
     },
     url: `${baseURL}/api/health`,

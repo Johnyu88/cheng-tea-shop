@@ -163,32 +163,23 @@ try {
     await page.getByLabel("驗證碼", { exact: true }).fill("123456");
     await page.getByRole("button", { name: "下一步", exact: true }).click();
     await expect(page.getByRole("heading", { name: "配送與付款" })).toBeVisible();
-    await expect(page.getByRole("heading", { name: "付款與聯絡資訊（展示資料）" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "付款與聯絡資訊" })).toBeVisible();
     await page.getByRole("button", { name: "下一步", exact: true }).click();
     await expect(page.getByText("付款狀態：待人工確認（不會扣款）", { exact: true })).toBeVisible();
     await page.getByRole("button", { name: "建立示範訂單" }).click();
     await expect(page.getByRole("heading", { name: "感謝您的購買" })).toBeVisible();
     await expect(page).toHaveURL(/\/checkout\/success\?order=[0-9]{6}-/);
-    const lookupHref = await page.getByRole("link", { name: "主動查看訂單" }).getAttribute("href");
-    const shortNumber = lookupHref.match(/[0-9]{6}-[0-9]{3,}/)[0];
-    assert.equal(lookupHref.includes("token="), false);
+    const shortNumber = new URL(page.url()).searchParams.get("order");
+    assert.match(shortNumber, /^[0-9]{6}-[0-9]{3,}$/);
+    await expect(page.getByRole("link", { name: "主動查看訂單" })).toHaveCount(0);
     await page.evaluate(() => { window.__copiedOrder = ""; Object.defineProperty(navigator, "clipboard", { configurable: true, value: { writeText: async text => { window.__copiedOrder = text; } } }); });
     await page.getByRole("button", { name: "複製訂單編號", exact: true }).click();
     await expect(page.getByText("已複製訂單編號", { exact: true })).toBeVisible();
     assert.equal(await page.evaluate(() => window.__copiedOrder), shortNumber);
-    await page.goto(lookupHref);
-    await page.getByLabel("顧客姓名").fill("合成顧客");
-    await page.getByLabel("手機末三碼").fill("000");
-    await page.getByRole("button", { name: "取得查單驗證碼" }).click();
-    const firstLookupAt = Date.now();
-    await page.getByLabel("驗證碼", { exact: true }).fill("123456");
-    await page.getByRole("button", { name: "查詢訂單", exact: true }).click();
-    await expect(page.getByRole("heading", { name: "訂單成立", exact: true })).toBeVisible();
     await page.goto("/admin/orders");
     if (authProvider === "password") {
-      await page.getByRole("button", { name: "緊急密碼登入", exact: true }).click();
-      await page.getByLabel("緊急登入密碼", { exact: true }).fill(password);
-      await page.getByRole("button", { name: "使用密碼登入", exact: true }).click();
+      await page.getByLabel("管理員密碼", { exact: true }).fill(password);
+      await page.getByRole("button", { name: "登入", exact: true }).click();
     }
     const orderCard = page.locator(".demo-order-card").filter({ hasText: shortNumber }).first();
     await expect(orderCard).toBeVisible();
@@ -224,48 +215,13 @@ try {
     await expect(orderCard).toContainText("已出貨");
     await orderCard.getByRole("button", { name: "模擬送達" }).click();
     await expect(orderCard).toContainText("已送達");
-    while (Date.now() < firstLookupAt + 61_000) await page.waitForTimeout(Math.min(1000, firstLookupAt + 61_000 - Date.now()));
-    await page.goto(lookupHref);
-    await page.getByLabel("顧客姓名").fill("合成顧客");
-    await page.getByLabel("手機末三碼").fill("000");
-    await page.getByRole("button", { name: "取得查單驗證碼" }).click();
-    await page.getByLabel("驗證碼", { exact: true }).fill("123456");
-    await page.getByRole("button", { name: "查詢訂單", exact: true }).click();
-    await expect(page.getByRole("heading", { name: "已送達", exact: true })).toBeVisible();
-    await expect(page.getByText("包裝照片：已由店家上傳")).toBeVisible();
-    await expect(page.getByText("訂單編號：" + shortNumber, { exact: true })).toBeVisible();
     await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(412);
+    assert.equal((await page.goto("/orders")).status(), 404, "Retired customer order lookup stays unavailable");
 
     await page.goto("/admin/products");
     await expect(page.getByRole("heading", { name: "商品管理", exact: true })).toBeVisible();
     await expect(page.getByText("商品資料無法取得", { exact: true })).toHaveCount(0);
     await context.close();
-    const { webkit } = await import("@playwright/test");
-    const engine = process.env.DEMO_SMOKE_BROWSER === "webkit" ? webkit : chromium;
-    const safari = await engine.launch();
-    try {
-      const fresh = await safari.newContext({ baseURL: browserBase, viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, httpCredentials: { username: "preview", password: token } });
-      const other = await fresh.newPage();
-      await other.goto("/orders");
-      assert.equal(await other.evaluate(() => sessionStorage.length), 0, "New device has no receipt");
-      await expect(other.getByLabel("查單憑證")).toHaveCount(0);
-      await expect(other.getByLabel("驗證用手機")).toHaveCount(0);
-      const requests = [];
-      other.on("request", r => { if (r.method() === "POST" && /\/api\/demo\/(otp|orders\/lookup)$/.test(r.url())) requests.push(r.postDataJSON()); });
-      await other.getByLabel("訂單編號").fill(order.orderNumber);
-      await other.getByLabel("顧客姓名").fill(draft.name);
-      await other.getByLabel("手機末三碼").fill("001");
-      await other.getByRole("button", { name: "取得查單驗證碼" }).click();
-      await other.getByLabel("驗證碼", { exact: true }).fill("123456");
-      await other.getByRole("button", { name: "查詢訂單", exact: true }).click();
-      await expect(other.getByRole("heading", { name: "已送達", exact: true })).toBeVisible();
-      assert.equal(requests.length, 2);
-      assert.ok(requests.every(r => !("accessSecret" in r) && !("phone" in r)));
-      await expect.poll(() => other.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
-      await fresh.close();
-      console.log("Mobile "+engine.name()+" cross-device PASS: empty storage, three fields+OTP, delivered, no secret/full phone, 390px no overflow.");
-    } finally { await safari.close(); }
-
   } finally { await browser.close(); await new Promise(resolve => edge.close(resolve)); }
   console.log("Cloud browser smoke passed: phone checkout, Basic forwarding, Secure merchant cookie, catalog management.");
   console.log("Cloud smoke passed: private routes, CSRF, merchant cookie, bank-transfer order, packing, delivery, lookup.");

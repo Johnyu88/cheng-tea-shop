@@ -9,7 +9,7 @@ test("shows short public number while retaining the private receipt", async () =
   }));
   render(<DemoCheckoutSuccessPage orderId={internal} status="confirmed" />);
   await waitFor(() => expect(screen.getByText("訂單編號：260930-001")).toBeInTheDocument());
-  expect(screen.getByRole("link", {name: "主動查看訂單"})).toHaveAttribute("href", "/orders?order=260930-001");
+  expect(screen.queryByRole("link", {name: "主動查看訂單"})).toBeNull();
   expect(document.body).not.toHaveTextContent(internal);
   expect(document.body).not.toHaveTextContent("private-secret");
 });
