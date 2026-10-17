@@ -18,7 +18,7 @@ export default async function Page({ searchParams }: { searchParams?: Promise<Re
         <ol id="tea-admin-diagnostics-events" />
         <noscript>HTML 已載入；JavaScript 未啟動。</noscript>
       </section>
-      <script src="/diagnostics/admin-products.js" />
+      <script src="/diagnostics/admin-products.js" defer />
     </>}
     <ProductManagementPage />
   </>;
