@@ -1,4 +1,3 @@
-import { randomInt } from "node:crypto";
 import pino from "pino";
 
 // One JSON line per event on stdout. On the VM the Ops Agent ships these lines to
@@ -41,9 +40,15 @@ export const logger = createLogger();
 
 // Short and unambiguous so a non-technical user can read it out or screenshot it.
 const errorCodeAlphabet = "23456789ABCDEFGHJKMNPQRSTUVWXYZ";
+// Web Crypto rather than node:crypto: instrumentation.ts is also bundled for the edge runtime.
 export function newErrorCode(): string {
   let code = "";
-  for (let index = 0; index < 6; index++) code += errorCodeAlphabet[randomInt(errorCodeAlphabet.length)];
+  const random = new Uint32Array(1);
+  while (code.length < 6) {
+    globalThis.crypto.getRandomValues(random);
+    // Reject the top partial range so every character is equally likely.
+    if (random[0]! < 0x1_0000_0000 - (0x1_0000_0000 % errorCodeAlphabet.length)) code += errorCodeAlphabet[random[0]! % errorCodeAlphabet.length];
+  }
   return code;
 }
 
