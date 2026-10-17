@@ -1,4 +1,5 @@
-import { describe, expect, it } from "vitest";
+import fs from "node:fs";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
   PROD_ADMIN_24_EXPECTATIONS,
@@ -61,6 +62,13 @@ const options = {
 };
 
 describe("PROD-ADMIN-24 production switch guardrails", () => {
+  // The verified backup lives on the Acer host; simulate only that path so these guardrail tests run anywhere.
+  beforeEach(() => {
+    const existsSync = fs.existsSync.bind(fs);
+    vi.spyOn(fs, "existsSync").mockImplementation((path) => String(path).startsWith(options.backupRoot) || existsSync(path));
+  });
+  afterEach(() => vi.restoreAllMocks());
+
   it("rejects a candidate image mismatch before any mutation", async () => {
     const engine = fakeEngine();
     await expect(preflightProductionSwitch(engine, { ...options, expected: { ...options.expected, candidateImageId: "sha256:wrong" } })).rejects.toThrow(/candidate image/i);
