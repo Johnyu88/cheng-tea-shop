@@ -1,5 +1,47 @@
 # HANDOFF
 
+## 部署前測試 main `605e806`（Acer，2026-10-17）
+
+依 `docs/operations/deploy-main-605e806-2026-10-17.md` 只執行第 2、3.1、3.2、4.2 節。**未做任何正式切換**：正式容器 `tea-public-adbe430-live`、`tea-private-v5-prod-admin-24-live` 未停止、未重啟、未改名（admin RestartCount 0，StartedAt 2026-10-15T16:02:32Z）；Caddy／Tailscale／DNS 未改；未對正式後台寫入；未執行 `production-switch`。未印出任何環境變數值、密碼、cookie 或 token。
+
+| 項目 | 結果 | 證據 |
+|---|---|---|
+| 2 檢查與 build | PASS | `605e806` detached；`corepack pnpm@11.19.0`（PATH 上沒有 pnpm）；frozen install OK；lint 0 errors／17 warnings；typecheck PASS；Vitest 389 passed／1 skipped；`pnpm build` PASS。Node 為 v24.13.1（專案要求 24.19.0，只有 engine 警告；Docker build 使用 `node:24.19.0-alpine`）。 |
+| 2.1 正式 image build 參數 | PASS | 最終 stage 的 `docker history` 沒有 build arg（multi-stage）；改從 BuildKit 建置紀錄 `docker buildx history inspect` 取得，紀錄匯出的 digest 與正式 image ID 完全相同。前台 `owl5t18a8jj2zrfezroq6cfst`（VCS `adbe430…`）→ `sha256:46310721…`；後台 `8tkx2er3m53gacyco6qbagvca`（VCS `2be6be0…`）→ `sha256:e4be4719…`。 |
+| 2.2 建立新 image | PASS | 兩個 image 都帶 `org.opencontainers.image.revision=605e8068ab452de4ea7664973c3dc7c70130795b`。 |
+| 3.1 前台現況（唯讀） | PASS | 掛載只有 `C:\data\tea-staging\public-visibility-live` → `/app/catalog-sync`（RO）；`127.0.0.1:8131→3000`；env 名稱：`NEXT_PUBLIC_MERCHANT_MANUAL_ORDER`、`NEXT_PUBLIC_DEMO_COMMERCE`、`NEXT_PUBLIC_PUBLIC_STOREFRONT`、`PUBLIC_CATALOG_VISIBILITY_PATH`、`PUBLIC_STOREFRONT_SERVER`，加上 image 預設值；沒有機密類名稱。Restart policy `no`。 |
+| 3.2 前台候選 `127.0.0.1:8141` | PASS（有一項與文件不同，見下） | 使用相同 env（與正式逐一相同）與 RO 掛載。`/`、`/cart`、`/checkout`、`/api/public/catalog` 200；`/api/health` 404；`/orders` 404。首頁沒有「訂單查詢」。公開 catalog 與正式一致：6 件，`cheng-tea-9600,9602,9604,9606,9607,9608`。390px 時 `/`、`/cart`、`/checkout` 的 `scrollWidth` 都是 390。候選容器已移除。 |
+| 4.2 後台候選（複本資料） | PASS | 見下方。 |
+
+**建置參數（已確認，未猜測）**
+
+| image | `NEXT_PUBLIC_MERCHANT_MANUAL_ORDER` | `NEXT_PUBLIC_DEMO_COMMERCE` | `NEXT_PUBLIC_PUBLIC_STOREFRONT` |
+|---|---|---|---|
+| 前台 `prod-frontend-adbe430` → `prod-frontend-605e806` | enabled | disabled | enabled |
+| 後台 `prod-admin-14-2be6be0` → `prod-admin-605e806` | enabled | enabled | enabled |
+
+**新 image**
+
+- `tea-nextjs:prod-frontend-605e806`：`sha256:a5ab102d1bcd43727b2d2a167e36dbe5d8910085275e9e5933b36a4b8d96c50f`
+- `tea-nextjs:prod-admin-605e806`：`sha256:41b96f60d924f030d83785b47a5123177856cfb02d6465aec604e1fa89ec0a86`
+
+**與文件不同：前台「訂單查詢」死連結（使用者已知悉，同意繼續）**
+
+文件第 0 節說正式 `:10000` 首頁有「訂單查詢」死連結。實測正式 `8131` 的首頁 HTML 沒有這個連結。原因：連結只存在於 `StorefrontShell` 的首頁模式，但正式環境設定 `PUBLIC_STOREFRONT_SERVER=enabled`，`app/page.tsx` 改用 `PublicTeaStorefront` 渲染。修正確實在新 bundle 裡（新 image 內含「訂單查詢」的檔案數為 0，舊 image 為 3），但正式模式下 `/`、`/cart`、`/checkout` 的 HTML 除了靜態資源 hash 之外，新舊完全相同。所以這次前台部署在正式模式下沒有看得到的變化。
+
+**4.2 後台掛載相容性測試**
+
+- 複本：robocopy `private-accounting-v1-data` → `…\prod-admin-605e806-staging\data`、`public-visibility-live` → `…\catalog-sync`（只讀取正式目錄）；`catalog.json`、`publication.json` 的 SHA-256 與正式相同。
+- 候選 `tea-private-605e806-candidate`，`127.0.0.1:8142`，兩個複本都以 RW 掛載。Env 名稱與正式相同，非機密值也相同；**`DEMO_MERCHANT_SECRET`、`DEMO_PREVIEW_TOKEN_SHA256`、`DEMO_AUTH_PASSWORD` 換成新產生的合成值**（使用者同意），所以沒有使用正式密碼或 session key。
+- 基準：登入後列出 10 件，與複本的 ID／草稿狀態一致。
+- 合成商品 A：POST 回 201，有 ID，`write=persisted`、`sync=completed`；重啟後仍在；不在 `publication.json`；只有 1 筆。
+- 合成商品 C：POST 201 後，**同一個 session** 讀回存在（draft）；重啟後仍在；不在公開目錄。
+- 公開同步失敗：第二個候選 `tea-private-605e806-candidate-syncfail` 把 `catalog-sync` 以 RO 掛載。合成商品 B 回 503 `商品已寫入，但公開同步尚未完成；請勿重複新增。`，`write=persisted`、`sync=failed`；目錄中正好 1 筆 B；`publication.json` 沒有變。前端 `product-draft-page.tsx` 直接顯示伺服器訊息（只看過原始碼，沒有在瀏覽器點測）。
+- 注意：密碼登入在 1 秒內再次嘗試會回 403（既有的 rate limit）。測試程式已加上間隔。
+- 兩個候選容器與整個複本目錄都已移除。正式 `8131 /` 200；正式後台 `/admin/products` 200（`/` 404 是這個容器原本的設計）。
+
+**下一步（需要使用者當下明確同意）**：3.3 前台切換（因為正式模式沒有可見變化，先決定是否值得做）、4.1 PROD-ADMIN-25 工具更新或手動同等保護、4.3 後台切換（停寫、備份、清點）。舊的候選 image 與容器都沒有刪除。
+
 ## PRODUCT-11 fix ported to main — 2026-10-17
 
 - Problem: adding a product in the admin could show success while the product was never actually saved.
