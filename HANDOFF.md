@@ -1,5 +1,22 @@
 # HANDOFF
 
+## Stack recovery and merge to main — 2026-10-17
+
+- Branch: `claude/check-restore-program-state-o43nkc`. GitHub state: `SYNCED` once pushed.
+- Finding: `main` had stopped at `81e05cb` (Wave 1). All later work lived in the unmerged PR stack #16 → #19 → #20 → #21 → #22 → #23 → #25 → #27 → #28 → #29 (head `f9748e1`, 2026-10-13). Only #22 had green CI.
+- `main`'s Wave 1 commits were made independently of `feature/wave-1-reproducible-baseline`, which the stack is built on. A bridge merge (`-s ours`) records `main` as merged into `codex/wave-7-mobile-demo-base` and keeps the stack's newer files.
+- Approved plan (user, 2026-10-17): get the final state green first, then merge the layers into `main` in order with merge commits. `main` is briefly red while the layers land. Production runs from Docker images on the Acer host, not from `main`.
+- Fixes on top of #29:
+  - ported `0b36c71` (removes the demo login blockers and updates outdated unit tests);
+  - fixed the `react-hooks/set-state-in-effect` lint error in public checkout;
+  - e2e: configured `PUBLIC_CATALOG_VISIBILITY_PATH` and updated outdated headings;
+  - removed the homepage "訂單查詢" and success-page "主動查看訂單" links to the retired `/orders` page (user decision: keep customer lookup retired);
+  - aligned `cloud-demo-smoke.mjs` with the current UI.
+- Security note: GHSA-vfj7-8cjw-p6xm (braces) has no published fix on npm (latest is 3.0.3). The depth limit is backported via `patches/braces@3.0.3.patch`, and the advisory is listed in `auditConfig.ignoreGhsas` with a removal note. It is reachable only through the dev dependency chain under eslint-config-next. The production audit is clean.
+- Local verification (Node 24.19.0): lint 0 errors, typecheck, Vitest 343/343, build, the three Playwright suites on Chromium (16, 1 and 3 tests), the cloud demo smoke, and both audits. WebKit and the Docker smoke are verified in CI only.
+- Not merged in this pass (newer than #29, no PRs yet): `codex/prod-restore-20261015` → `codex/frontend-design-phase1-20261016` and `codex/cloud-02-*`; `fix/product-11-fix-01(-minimal)`; `feature/v1-*`; `feature/merchant-simple-order-inbox`; `assets/cheng-tea-photo-library-20261015`. PR #26 (payment/contact docs) and PR #15 (docs) also stay open.
+- Still pending from `docs/PRODUCTION_TRUTH_2026-10-12.md`: real-iPhone acceptance of re-login → photo save → storefront sync, and production Passkey enrolment.
+
 ## Latest mobile OTP acceptance — 2026-10-02 Taipei
 
 - Password demo /orders now uses two visible stages; OTP123456, expiry, cooldown and actionable errors. See docs/testing/otp-two-stage-2026-10-02.md.
