@@ -29,7 +29,7 @@ export async function POST(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
-    assertLocalDemoHttpRequest(request, "DELETE", "json");
+    assertLocalDemoHttpRequest(request, "DELETE");
     const store = getMerchantPasskeyStore();
     const vendor = store ? await store.auth.api.signOut({ headers: request.headers, asResponse: true }) : null;
     const response = demoSuccess({ authenticated: false }, { headers: { "Cache-Control": "no-store" } });
