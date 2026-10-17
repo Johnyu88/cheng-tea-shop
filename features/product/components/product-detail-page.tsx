@@ -142,7 +142,7 @@ export function ProductDetailPage({ slug }: ProductDetailPageProps): JSX.Element
           {readyProduct.image.src === null ? readyProduct.image.alt : <img src={readyProduct.image.src} alt={readyProduct.image.alt} />}
         </div>
         <h1 id="product-detail-heading">{readyProduct.name}</h1>
-        <p>{readyProduct.summary}</p>
+        {readyProduct.summary.trim() && <p>{readyProduct.summary}</p>}
         <TeaFacts product={readyProduct} />
         <p>{variant.specification}</p>
         <p>{formatPrice(variant)}</p>
