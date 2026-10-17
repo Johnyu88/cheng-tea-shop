@@ -1,5 +1,16 @@
 # HANDOFF
 
+## PRODUCT-11 fix ported to main — 2026-10-17
+
+- Problem: adding a product in the admin could show success while the product was never actually saved.
+- Fix (ported from `fix/product-11-fix-01-minimal`, code and tests only):
+  - The catalog API returns the server-created product ID, plus the write and public-sync status.
+  - Store writes go through a temp file, fsync and atomic rename under a cross-process lock.
+  - The new-product page shows success only when it receives a persisted ID; otherwise it tells the operator not to resubmit.
+  - The mock publishing service now returns a draft ID, so the mock path can reach the success state.
+- Not deployed. The production admin (`tea-private-v5-prod-admin-24-live`, `tea-nextjs:prod-admin-14-2be6be0`, as recorded in the PRODUCT-11 docs) does not include this fix yet. Deploy only with the user's approval, following the backup and rollback checklist in `docs/testing/product-11-release-07-2026-10-16.md`.
+- **Security follow-up (open, see `docs/security/product-11-security-04-historical-webcrypto-key.md`):** the retired `/private-app/` accounting PWA embedded a fixed WebCrypto `KEY` in browser JavaScript, and that key remains in Git history. The tool has been removed. The owner still needs to confirm whether any old encrypted exports or browser data exist. Treat the key as exposed. Any Git history rewrite needs explicit approval.
+
 ## Ordering decision and branch cleanup — 2026-10-17
 
 - **Decision (user, 2026-10-17): orders stay LINE-based.** The website builds the order text and the customer sends it to the shop by LINE. The website does not save orders or customer personal data (name, phone, address).
