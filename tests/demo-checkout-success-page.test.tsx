@@ -21,17 +21,17 @@ it("uses only the matching tab receipt when the route already has an order numbe
     orderId: "DEMO-OTHER", accessSecret: "other-private-token", status: "shipped",
   }));
   const { unmount } = render(<DemoCheckoutSuccessPage orderId="DEMO-ROUTE" status="confirmed" />);
-  expect(screen.getByText(/此分頁沒有完整查單憑證/)).toBeInTheDocument();
+  expect(screen.getByText(/在其他裝置查單，只需訂單編號/)).toBeInTheDocument();
   expect(document.body).not.toHaveTextContent("other-private-token");
-  expect(screen.getByRole("link", { name: "前往安全的訂單查詢" })).toHaveAttribute("href", "/orders?order=DEMO-ROUTE");
-  expect(screen.queryByRole("link", { name: "主動查看訂單" })).not.toBeInTheDocument();
+  expect(screen.getByRole("link", { name: "主動查看訂單" })).toHaveAttribute("href", "/orders?order=DEMO-ROUTE");
+  expect(screen.queryByText(/查詢密語/)).not.toBeInTheDocument();
   expect(document.body).not.toHaveTextContent("matching-private-token");
   window.sessionStorage.setItem(demoCheckoutSuccessStorageKey, JSON.stringify({
     orderId: "DEMO-ROUTE", accessSecret: "matching-private-token", status: "confirmed",
   }));
   unmount();
   render(<DemoCheckoutSuccessPage orderId="DEMO-ROUTE" status="confirmed" />);
-  await waitFor(() => expect(screen.queryByText(/此分頁沒有完整查單憑證/)).not.toBeInTheDocument());
+  await waitFor(() => expect(screen.getByRole("link", { name: "主動查看訂單" })).toHaveAttribute("href", "/orders?order=DEMO-ROUTE"));
   expect(screen.getByText("訂單編號：DEMO-ROUTE")).toBeInTheDocument();
   expect(document.body).not.toHaveTextContent("matching-private-token");
 });

@@ -1,4 +1,5 @@
 import { assertDemoEnabled, cloudDemoRequested } from "./demo-cloud";
+import { getMerchantAuthProvider, merchantAuthSessionContext, merchantAuthStatus, providerSessionRequired, type MerchantAuthInput } from "./merchant-auth-provider";
 import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 
 const loopbackCookieName = "__Host-demo_merchant";
@@ -21,7 +22,8 @@ function secret(): Buffer {
   return Buffer.from(value, "hex");
 }
 const mac = (key: Buffer, payload: string) =>
-  createHmac("sha256", key).update(context).update(":").update(payload).digest("hex");
+  createHmac("sha256", key).update(providerSessionRequired() ? merchantAuthSessionContext() : context)
+    .update(":").update(payload).digest("hex");
 
 /** Caller must pass the real socket peer; headers alone do not prove locality. */
 export function assertLocalDemoPost(request: Request, peerAddress: string): void {
@@ -42,12 +44,26 @@ export function assertLocalDemoPost(request: Request, peerAddress: string): void
 /** The independent merchant credential is never stored in a cookie. */
 export function issueDemoMerchantCookie(candidate: string, now = Date.now()): string | null {
   const key = secret();
+  if (providerSessionRequired()) return null;
   const supplied = /^[0-9a-fA-F]{64,}$/.test(candidate) && candidate.length % 2 === 0
     ? Buffer.from(candidate, "hex") : Buffer.alloc(0);
   if (supplied.length !== key.length || !timingSafeEqual(supplied, key)) return null;
+  return signCookie(now);
+}
+
+export function issueDemoMerchantAuthCookie(input: MerchantAuthInput): string | null {
+  if (!getMerchantAuthProvider().verify(input)) return null;
+  return signCookie(Date.now());
+}
+export function issueDemoMerchantPhoneCookie(phone: string, challengeId: string, code: string): string | null {
+  if (merchantAuthStatus().provider !== "sms") return null;
+  return issueDemoMerchantAuthCookie({ phone, challengeId, code });
+}
+function signCookie(now: number): string {
+  const key = secret();
   const payload = now + "." + randomBytes(16).toString("hex");
   const signature = mac(key, payload);
-  const secure = process.env.DEMO_COMMERCE_LAN === "enabled" ? "" : " Secure;";
+  const secure = !cloudDemoRequested() && process.env.DEMO_COMMERCE_LAN === "enabled" ? "" : " Secure;";
   return cookieName() + "=" + payload + "." + signature
     + "; HttpOnly;" + secure + " SameSite=Strict; Path=/; Max-Age=1800";
 }
@@ -55,6 +71,7 @@ export function issueDemoMerchantCookie(candidate: string, now = Date.now()): st
 /** Pass Cookie header only. Duplicate names and altered signatures fail closed. */
 export function verifyDemoMerchantCookie(cookieHeader: string | null, now = Date.now()): boolean {
   const key = secret();
+  if (providerSessionRequired() && merchantAuthStatus().state !== "ready") return false;
   if (!cookieHeader || cookieHeader.length > 4096) return false;
   const expectedName = cookieName();
   const matches = cookieHeader.split(";").map(part => part.trim())
@@ -68,3 +85,6 @@ export function verifyDemoMerchantCookie(cookieHeader: string | null, now = Date
   const expected = Buffer.from(mac(key, match[1] + "." + match[2]), "hex");
   return timingSafeEqual(expected, Buffer.from(match[3]!, "hex"));
 }
+
+/** Server-only transient adapter, used only after live vendor authorization. Never return it to a client. */
+export function issueVerifiedMerchantBridgeCookie(): string { return signCookie(Date.now()); }

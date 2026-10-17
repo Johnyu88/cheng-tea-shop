@@ -66,13 +66,13 @@ export function DemoCheckoutPage() {
       });
       setCompleted(result);
       try { window.sessionStorage.setItem(demoCheckoutSuccessStorageKey, JSON.stringify({ ...result, customerName: draft.name.trim(), phone: draft.phone })); } catch { /* receipt remains visible even when storage is blocked */ }
-      try { window.location.assign(`/checkout/success?order=${encodeURIComponent(result.orderId)}`); } catch { /* keep the confirmed receipt on screen if navigation is unavailable */ }
+      try { window.location.assign(`/checkout/success?order=${encodeURIComponent(result.orderNumber ?? result.orderId)}`); } catch { /* keep the confirmed receipt on screen if navigation is unavailable */ }
     } catch (caught) { setError(caught instanceof Error ? caught.message : "示範訂單建立失敗"); }
     finally { setBusy(false); }
   };
-  if (completed) return <DemoCheckoutSuccessPage orderId={completed.orderId} accessSecret={completed.accessSecret} status="confirmed" />;
+  if (completed) return <DemoCheckoutSuccessPage orderId={completed.orderId} {...(completed.orderNumber ? { orderNumber: completed.orderNumber } : {})} accessSecret={completed.accessSecret} status="confirmed" />;
   if (!cart) return <main><p role="status">正在準備本機示範結帳</p>{error && <p role="alert">{error}</p>}</main>;
-  if (!cart.lines.length && previousSuccess) return <DemoCheckoutSuccessPage orderId={previousSuccess.orderId} accessSecret={previousSuccess.accessSecret} status="confirmed" />;
+  if (!cart.lines.length && previousSuccess) return <DemoCheckoutSuccessPage orderId={previousSuccess.orderId} {...(previousSuccess.orderNumber ? { orderNumber: previousSuccess.orderNumber } : {})} accessSecret={previousSuccess.accessSecret} status="confirmed" />;
   if (!cart.lines.length) return <main><h1>購物車是空的</h1><p>尚未建立本次訂單。</p><Link href="/#catalog">返回首頁／繼續選茶</Link></main>;
   return <><CheckoutExitNav /><main className="py-8"><p className="prototype-notice"><strong>本機 Demo：</strong>只接受合成手機與資料；付款、Email、推送皆為模擬，不會呼叫外部服務。</p>{error && <div role="alert" className="product-draft-alert">{error}</div>}<section className="demo-panel" aria-label="本機結帳 Demo">
     {step === "identity" && <><p className="eyebrow">步驟 1／3</p><h1>身分確認</h1><label className="form-field mt-6">姓名<input className="form-input" value={draft.name} onChange={e => change("name", e.target.value)} /></label><label className="form-field mt-4">合成手機<input className="form-input" inputMode="tel" value={draft.phone} onChange={e => change("phone", e.target.value)} /></label><label className="form-field mt-4">Email（選填，僅模擬通知）<input className="form-input" value={draft.email ?? ""} onChange={e => change("email", e.target.value)} /></label><button className="filter-button mt-4" disabled={busy} onClick={() => void issue()}>取得合成驗證碼</button>{challenge && <p role="status" className="prototype-notice">本機驗證碼：<strong>{challenge.demoCode}</strong></p>}<label className="form-field mt-4">驗證碼<input className="form-input" inputMode="numeric" value={code} onChange={e => setCode(e.target.value)} /></label><button className="primary-action mt-6" onClick={identityNext}>下一步</button></>}

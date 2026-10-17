@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, test } from "vitest";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { randomBytes } from "node:crypto";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -28,6 +28,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  vi.useRealTimers();
   delete process.env.DEMO_COMMERCE_LOCAL;
   delete process.env.DEMO_MERCHANT_SECRET;
   for (const directory of directories.splice(0)) rmSync(directory, { recursive: true, force: true });
@@ -125,4 +126,31 @@ describe("local demo runtime composition", () => {
       runtime.close();
     }
   });
+});
+
+test("short lookup keeps customer name, phone suffix and secret identity gates", () => {
+  vi.useFakeTimers({ toFake: ["Date"] });
+  let timestamp = Date.now();
+  const advance = () => { timestamp += 60 * 60_000; vi.setSystemTime(timestamp); };
+  const runtime = fixture();
+  try {
+    const challenge = runtime.issueOtp(phone, "checkout");
+    const placed = runtime.placeOrder({ phone, challengeId: challenge.challengeId, code, draft: draftWithoutEmail,
+      lines: [{ productId: "mock-tea-001", variantId: "mock-tea-001-variant", quantity: 1 }] });
+    for (const customerName of ["", "其他顧客"]) {
+      advance();
+      const otp = runtime.issueOtp(phone, "lookup");
+      expect(() => runtime.lookupOrder({ orderId: placed.orderNumber, accessSecret: placed.accessSecret,
+        customerName, phone, phoneLastThree: "000", challengeId: otp.challengeId, code })).toThrow("Unable to verify demo order");
+    }
+    advance();
+    const valid = runtime.issueOtp(phone, "lookup");
+    expect(runtime.lookupOrder({ orderId: placed.orderNumber, accessSecret: placed.accessSecret,
+      customerName: draft.name, phone, phoneLastThree: "000", challengeId: valid.challengeId, code }))
+      .toMatchObject({ orderId: placed.orderId, orderNumber: placed.orderNumber });
+    advance();
+    const invalid = runtime.issueOtp(phone, "lookup");
+    expect(() => runtime.lookupOrder({ orderId: placed.orderNumber, accessSecret: "",
+      customerName: draft.name, phone, phoneLastThree: "000", challengeId: invalid.challengeId, code })).toThrow("Unable to verify demo order");
+  } finally { runtime.close(); }
 });

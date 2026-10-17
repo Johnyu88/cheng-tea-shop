@@ -1,0 +1,280 @@
+node : The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the
+resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your V
+ite config instead.
+位於 線路:1 字元:150
++ ... st-fix.mjs; node node_modules/vitest/vitest.mjs run *> docs/testing/e ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (The plugin...g instead.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+
+
+ RUN  v5.0.0 C:/Users/edea7/.codex/worktrees/issue-24/cheng-tea-shop
+
+ ??[39m tests/demo-fixed-seed.test.ts (4 tests) 85ms
+ ??[39m tests/issue24-short-success.test.tsx (2 tests) 150ms
+ ??[39m tests/demo-notification-outbox.test.ts (3 tests) 63ms
+ ??[39m tests/demo-order-service.test.ts (14 tests) 157ms
+ ??[39m tests/demo-rate-limit.test.ts (2 tests) 73ms
+ ??[39m tests/demo-checkout-success-page.test.tsx (2 tests) 148ms
+ ??[39m tests/demo-order-progress.test.tsx (3 tests) 167ms
+ ??[39m tests/demo-catalog-store.test.ts (5 tests) 77ms
+ ??[39m tests/cross-device-lookup-page.test.tsx (1 test) 175ms
+ ??[39m tests/issue24-short-lookup.test.tsx (1 test) 220ms
+ ??[39m tests/demo-checkout-receipt-recovery.test.tsx (2 tests) 213ms
+ ??[39m tests/admin-password-login.test.tsx (3 tests) 302ms
+ ??[39m tests/admin-orders-navigation.test.tsx (3 tests) 307ms
+ ??[39m tests/draft-persistence.test.ts (2 tests) 39ms
+ ??[39m tests/product-management-page.test.tsx (4 tests) 495ms
+stdout | tests/merchant-auth-provider.test.ts > three-character demo password works only in the explicitly isolated origin
+{"scope":"merchant-auth","provider":"password","event":"verify-success","at":1790879871695}
+
+ ??[39m tests/phase-8-integration-smoke.test.tsx (2 tests) 41ms
+ ??[39m tests/commerce-provider.test.tsx (3 tests) 178ms
+stderr | tests/home-page.test.tsx > gives visitors one clear storefront starting point
+An update to CatalogPreview inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/w
+rap-tests-with-act
+
+stderr | tests/home-page.test.tsx > gives visitors one clear storefront starting point
+An update to CatalogBrowser inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/w
+rap-tests-with-act
+
+ ??[39m tests/order-lookup-page.test.tsx (6 tests) 478ms
+stderr | tests/home-page.test.tsx > provides a named storefront shell for keyboard and assistive
+technology users
+An update to CatalogPreview inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/w
+rap-tests-with-act
+
+stderr | tests/home-page.test.tsx > provides a named storefront shell for keyboard and assistive
+technology users
+An update to CatalogBrowser inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/w
+rap-tests-with-act
+
+ ??[39m tests/demo-merchant-workflow.test.ts (4 tests) 440ms
+ ??[39m tests/demo-runtime.test.ts (4 tests) 480ms
+ ??[39m tests/admin-orders-packing-photo.test.tsx (3 tests) 643ms
+   ??[39m admin packing photo confirmation flow (3)
+     ??[22m offers camera and gallery, previews a selection, and waits for explicit confirmation 330ms
+ ??[39m tests/demo-rate-limit-routes.test.ts (4 tests) 521ms
+ ??[39m tests/catalog-browser.test.tsx (3 tests) 443ms
+stderr | tests/home-page.test.tsx > introduces the teacher with the homepage composite
+An update to CatalogPreview inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/w
+rap-tests-with-act
+
+stderr | tests/home-page.test.tsx > introduces the teacher with the homepage composite
+An update to CatalogBrowser inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/w
+rap-tests-with-act
+
+stderr | tests/home-page.test.tsx > uses approved desktop/mobile composite candidates instead of
+a video
+An update to CatalogPreview inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/w
+rap-tests-with-act
+
+stderr | tests/home-page.test.tsx > uses approved desktop/mobile composite candidates instead of
+a video
+An update to CatalogBrowser inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/w
+rap-tests-with-act
+
+stdout | tests/merchant-auth-provider.test.ts > constant-time password verification throttles attempts and locks after five wrong guesses
+{"scope":"merchant-auth","provider":"password","event":"verify-denied","at":100000}
+{"scope":"merchant-auth","provider":"password","event":"verify-denied","at":101000}
+{"scope":"merchant-auth","provider":"password","event":"verify-denied","at":102000}
+{"scope":"merchant-auth","provider":"password","event":"verify-denied","at":103000}
+{"scope":"merchant-auth","provider":"password","event":"verify-denied","at":104000}
+{"scope":"merchant-auth","provider":"password","event":"verify-success","at":1005000}
+{"scope":"merchant-auth","provider":"password","event":"verify-success","at":1006000}
+
+stderr | tests/home-page.test.tsx > exposes order lookup from the primary navigation
+An update to CatalogPreview inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/w
+rap-tests-with-act
+
+stderr | tests/home-page.test.tsx > exposes order lookup from the primary navigation
+An update to CatalogBrowser inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/w
+rap-tests-with-act
+
+stderr | tests/home-page.test.tsx > does not expose the retired brand name in the public storefro
+nt shell
+An update to CatalogPreview inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/w
+rap-tests-with-act
+
+stderr | tests/home-page.test.tsx > does not expose the retired brand name in the public storefro
+nt shell
+An update to CatalogBrowser inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/w
+rap-tests-with-act
+
+ ??[39m tests/home-page.test.tsx (9 tests) 574ms
+stdout | tests/merchant-auth-provider.test.ts > same session cookie revokes on password rotation, provider change or isolation removal
+{"scope":"merchant-auth","provider":"password","event":"verify-success","at":1790879872163}
+
+stderr | tests/commerce-flow.integration.test.tsx > mounts the commerce provider at the root layo
+ut
+In HTML, <html> cannot be a child of <div>.
+This will cause a hydration error.
+
+ ??[39m tests/merchant-auth-provider.test.ts (6 tests) 730ms
+   ??[22m constant-time password verification throttles attempts and locks after five wrong guesses 418ms
+ ??[39m tests/product-detail-page.test.tsx (8 tests) 836ms
+ ??[39m tests/commerce-flow.integration.test.tsx (3 tests) 759ms
+   ??[22m shares injected commerce state when route content remounts under one provider 447ms
+ ??[39m tests/cart-page.test.tsx (7 tests) 813ms
+   ??[22m shows loading and then the empty cart state 310ms
+ ??[39m tests/demo-cross-device-lookup.test.ts (8 tests) 1427ms
+ ??[39m tests/demo-packing-photo.test.ts (4 tests) 34ms
+stdout | tests/cloud-demo.test.ts > private synthetic cloud demo > rejects raw cloud credentials and issues expiring Secure cookies only after OTP
+{"scope":"merchant-auth","event":"issue","identity":"2caeb88ab5c3414bcd4cf284b1bdd6a331feb22c2895b290e6bc3050721cef30","at":1790879873274}
+
+stdout | tests/cloud-demo.test.ts > private synthetic cloud demo > rejects raw cloud credentials and issues expiring Secure cookies only after OTP
+{"scope":"merchant-auth","event":"verify-success","identity":"2caeb88ab5c3414bcd4cf284b1bdd6a331feb22c2895b290e6bc3050721cef30","at":1790879873277}
+{"scope":"merchant-auth","event":"verify-denied","identity":"2ded7f06ca5006378ebce0ba3bab32f0727a757833d84c7ce9548aa3b631c56b","at":1790879873279}
+
+ ??[39m tests/cloud-demo.test.ts (23 tests) 22ms
+stdout | tests/merchant-phone-auth.test.ts > phone challenge establishes signed session through guarded HTTP route
+{"scope":"merchant-auth","event":"issue","identity":"d173d0a8147c1defdcfc98741139951731d559e2b8a05605b1f3e16a81e0c8c2","at":1790879873285}
+
+stdout | tests/merchant-phone-auth.test.ts > phone challenge establishes signed session through guarded HTTP route
+{"scope":"merchant-auth","event":"verify-success","identity":"d173d0a8147c1defdcfc98741139951731d559e2b8a05605b1f3e16a81e0c8c2","at":1790879873291}
+
+stdout | tests/merchant-phone-auth.test.ts > phone challenge establishes signed session through guarded HTTP route
+{"scope":"merchant-auth","event":"verify-denied","identity":"72a4a0dfa56f25e5b946df5a0a70157361e8c63e07a53d95426790e52c374d9a","at":1790879873295}
+
+ ??[39m tests/merchant-phone-auth.test.ts (7 tests) 30ms
+ ??[39m tests/demo-http-guard.test.ts (3 tests) 10ms
+ ??[39m tests/demo-access.test.ts (6 tests) 14ms
+ ??[39m tests/short-order-number.test.ts (5 tests) 2354ms
+   ??[22m parallel worker processes reserve distinct short numbers through the real SQLite service 2130ms
+ ??[39m tests/demo-commerce.test.ts (6 tests) 11ms
+ ??[39m tests/merchant-sms.test.ts (3 tests) 10ms
+ ??[39m tests/mock-checkout-service.test.ts (9 tests) 7ms
+ ??[39m tests/integration-contracts.test.ts (14 tests) 10ms
+ ??[39m tests/mock-publishing-service.test.ts (9 tests) 8ms
+ ??[39m tests/demo-otp-service.test.ts (6 tests) 7ms
+ ??[39m tests/phase-9a-product-import.test.ts (5 tests) 8ms
+ ??[39m tests/domain-types.test.ts (6 tests) 5ms
+ ??[39m tests/health-route.test.ts (1 test) 4ms
+ ??[39m tests/product-draft-page.test.tsx (14 tests) 1702ms
+ ??[39m tests/demo-address.test.ts (3 tests) 3ms
+ ??[39m tests/mock-cart-service.test.ts (4 tests) 5ms
+ ??[39m tests/checkout-page.test.tsx (18 tests) 1780ms
+   ??[22m submits through the real default checkout service when optional email is omitted 400ms
+ ??[39m tests/mock-checkout-and-publishing.test.ts (2 tests) 4ms
+ ??[39m tests/mock-catalog-service.test.ts (3 tests) 3ms
+ ??[39m tests/demo-notification-preview.test.ts (1 test) 2ms
+ ??[39m tests/demo-checkout-page.test.ts (2 tests) 2ms
+ ??[39m tests/brand-metadata.test.ts (1 test) 2ms
+ ??[39m tests/checkout-success-route.test.tsx (1 test) 2ms
+
+ Test Files  54 passed (54)
+      Tests  277 passed (277)
+   Start at  02:37:48
+   Duration  4.92s (environment 61%, tests 14%, setup 13%, transform 9%, import 3%, worker 1%)
+
+Environment  jsdom was created 54 times 繚 74.51s total, 61% of tracked time
+             create it once per worker with pool: 'vmThreads' (keeps per-file isolation) or isolate: false (shares it across files)
+             learn more: https://vitest.dev/guide/improving-performance#test-environments

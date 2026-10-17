@@ -1,0 +1,10 @@
+Skipping host requirements validation logic because `PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS` env variable is set.
+PASS explicit stage 2, OTP focus/in-viewport, query button in-viewport, 123456 hint, expiry, resend cooldown {"otp":{"x":37,"y":345.375,"width":316,"height":50},"viewport":{"width":390,"height":664}}
+locator.waitFor: Error: strict mode violation: getByRole('alert') resolved to 2 elements:
+    1) <div role="alert" tabindex="-1" class="product-draft-alert mt-4">…</div> aka getByRole('alert').filter({ hasText: '查無符合資料的訂單，或驗證碼無效／過期，請確認訂單編號、姓名及手機末三碼後再試' })
+    2) <div role="alert" aria-live="assertive" id="__next-route-announcer__"></div> aka locator('[id="__next-route-announcer__"]')
+
+Call log:
+[2m  - waiting for getByRole('alert') to be visible[22m
+
+    at /tmp/tea-otp-regression.cjs:15:248

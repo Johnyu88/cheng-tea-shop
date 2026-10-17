@@ -8,6 +8,7 @@ import { POST as otp } from "@/app/api/demo/otp/route";
 vi.mock("@/lib/server/demo-runtime-singleton", () => ({
   getLocalDemoRuntime: () => ({
     lookupOrder: () => { throw new Error("No matching order"); },
+    issueLookupOtp: () => ({ challengeId: "opaque", expiresAt: 999999999, delivery: "simulated" }),
     issueOtp: () => ({ challengeId: "test-challenge", expiresAt: 999999999 }),
   }),
 }));
@@ -44,4 +45,32 @@ it("rejects fourth OTP issue without exposing the demo code", async () => {
   const blocked = await otp(req("/api/demo/otp", body));
   expect(blocked.status).toBe(429);
   expect(await blocked.json()).toMatchObject({ok:false, error:"嘗試次數過多，請稍後再試。"});
+});
+
+it("cross-device OTP has no phone/secret and blocks fourth issue generically", async () => {
+  setup(); const body = { purpose: "lookup", orderId: "261002-001", customerName: "Test", phoneLastThree: "000" };
+  for (let i = 0; i < 3; i++) {
+    const response = await otp(req("/api/demo/otp", body)); expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject({ ok: true, value: { challengeId: "opaque", delivery: "simulated" } });
+  }
+  const blocked = await otp(req("/api/demo/otp", body)); expect(blocked.status).toBe(429);
+  expect(Number(blocked.headers.get("Retry-After"))).toBeGreaterThan(0);
+  expect(JSON.stringify(await blocked.json())).not.toContain("123456");
+});
+it("cross-device order quota survives changing the name and suffix", async () => {
+  setup();
+  for (let i = 0; i < 5; i++) expect((await lookup(req("/api/demo/orders/lookup", {
+    orderId: "261002-001", customerName: "Name" + i, phoneLastThree: String(i).padStart(3, "0")
+  }))).status).toBe(403);
+  const blocked = await lookup(req("/api/demo/orders/lookup", { orderId: "261002-001", customerName: "Other", phoneLastThree: "999" }));
+  expect(blocked.status).toBe(429);
+});
+
+it("lookup errors give actionable generic no-match or expired-code text", async () => {
+  setup();
+  const response = await lookup(req("/api/demo/orders/lookup", {
+    orderId: "261002-001", customerName: "Test", phoneLastThree: "000", challengeId: "opaque", code: "000000"
+  }));
+  expect(response.status).toBe(403);
+  expect(await response.json()).toEqual({ ok: false, error: "查無符合資料的訂單，或驗證碼無效／過期，請確認訂單編號、姓名及手機末三碼後再試" });
 });

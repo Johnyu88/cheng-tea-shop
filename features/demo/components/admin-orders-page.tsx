@@ -1,15 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { demoApi, type DemoAdminOrder, type DemoLookupSecretRotation } from "../demo-api";
+import { useEffect, useState } from "react";
+import { demoApi, type DemoAdminOrder, type DemoLookupSecretRotation, type DemoMerchantStatus, type DemoMerchantChallenge } from "../demo-api";
+import { AdminPasskeyLogin } from "./admin-passkey-login";
+import { merchantPasskeyClient } from "../merchant-passkey-client";
 import { DemoOrderProgress } from "./demo-order-progress";
 
 const statusLabel = { confirmed: "已確認", packed: "已打包", shipped: "已出貨", delivered: "已送達" } as const;
 
 export function AdminOrdersPage() {
-  const [credential, setCredential] = useState("");
-  const [showCredential, setShowCredential] = useState(false);
+  const [password, setPassword] = useState("");
+  const [phone, setPhone] = useState("");
+  const [code, setCode] = useState("");
+  const [challenge, setChallenge] = useState<DemoMerchantChallenge>();
+  const [loginStatus, setLoginStatus] = useState<DemoMerchantStatus>();
+  const [resendSeconds, setResendSeconds] = useState(0);
   const [authenticated, setAuthenticated] = useState(false);
   const [orders, setOrders] = useState<DemoAdminOrder[]>([]);
   const [error, setError] = useState("");
@@ -18,9 +24,24 @@ export function AdminOrdersPage() {
   const [rotation, setRotation] = useState<{ orderId: string; accessSecret: string }>();
   const [copyMessage, setCopyMessage] = useState("");
   const [pendingPhoto, setPendingPhoto] = useState<{ orderId: string; file: File; previewUrl: string }>();
-  const normalizedCredential = credential.trim();
-  const credentialValid = /^[0-9a-fA-F]{64}$/.test(normalizedCredential);
-  const invalidCharacters = [...normalizedCredential].filter(char => !/[0-9a-fA-F]/.test(char)).length;
+  useEffect(() => {
+    let alive = true;
+    void demoApi.merchantStatus().then(async status => {
+      if (!alive) return;
+      setLoginStatus(status);
+      if (status.authenticated) {
+        const existingOrders = await demoApi.adminOrders();
+        if (alive) { setOrders(existingOrders); setAuthenticated(true); }
+      }
+    })
+      .catch(() => { if (alive) setError("無法讀取登入設定，請重新整理。"); });
+    return () => { alive = false; };
+  }, []);
+  useEffect(() => {
+    if (resendSeconds <= 0) return;
+    const timer = setTimeout(() => setResendSeconds(value => Math.max(0, value - 1)), 1000);
+    return () => clearTimeout(timer);
+  }, [resendSeconds]);
 
   const clearRotation = () => {
     setRotation(undefined);
@@ -37,14 +58,43 @@ export function AdminOrdersPage() {
     clearRotation();
     setOrders(await demoApi.adminOrders());
   };
-  const login = async () => {
+  const sendCode = async () => {
     try {
       setBusy(true);
-      await demoApi.merchantLogin(normalizedCredential);
-      setAuthenticated(true);
-      setCredential("");
+      const receipt = await demoApi.merchantIssueOtp(phone);
+      setChallenge(receipt); setCode(""); setResendSeconds(receipt.resendAfterSeconds); setError("");
+    } catch (e) { setError(e instanceof Error ? e.message : "驗證碼傳送失敗"); }
+    finally { setBusy(false); }
+  };
+  const resumePasskey = async () => {
+    const status = await demoApi.merchantStatus();
+    if (!status.authenticated) throw new Error("尚未取得商家權限，請重新登入。");
+    setLoginStatus(status); await refresh(); setAuthenticated(true); setError("");
+  };
+  const logout = async () => {
+    try { setBusy(true); await demoApi.merchantLogout(); clearPendingPhoto(); clearRotation(); setOrders([]); setAuthenticated(false); setLoginStatus(await demoApi.merchantStatus()); setError(""); }
+    catch { setError("登出未完成，請重試。"); } finally { setBusy(false); }
+  };
+  const registerPasskey = async () => {
+    try { setBusy(true); const result = await merchantPasskeyClient.passkey.addPasskey({ name: "茶行後台手機", authenticatorAttachment: "platform" }); if(result.error) throw new Error(); setLoginStatus(await demoApi.merchantStatus()); setError(""); }
+    catch { setError("註冊未完成。若使用緊急密碼登入，請先登出並使用首次設定。"); } finally { setBusy(false); }
+  };
+  const passwordLogin = async () => {
+    try {
+      setBusy(true);
+      await demoApi.merchantPasswordLogin(password);
+      setPassword("");
+      await refresh(); setAuthenticated(true); setError("");
+    } catch (e) { setPassword(""); setError(e instanceof Error ? e.message : "登入失敗，請稍後重試。"); }
+    finally { setBusy(false); }
+  };
+  const login = async () => {
+    if (!challenge) return;
+    try {
+      setBusy(true);
+      await demoApi.merchantPhoneLogin({ phone, challengeId: challenge.challengeId, code });
       await refresh();
-      setError("");
+      setAuthenticated(true); setPhone(""); setCode(""); setChallenge(undefined); setError("");
     } catch (e) {
       setError(e instanceof Error ? e.message : "商家登入失敗");
     } finally { setBusy(false); }
@@ -104,26 +154,50 @@ export function AdminOrdersPage() {
   };
 
   return <main className="py-8">
-    <p className="prototype-notice">Demo 專用：不會寄送真實通知，也不會連接付款或外部服務。</p>
+    <p className="prototype-notice">訂單 Demo：付款由人工確認。</p>
     <section className="demo-panel">
       <h1>商家訂單 Demo</h1>
       <Link className="filter-button mt-4 inline-flex" href="/">回到首頁</Link>
       {error && <div role="alert" className="product-draft-alert">{error}</div>}
       {!authenticated ? <>
-        <label className="form-field mt-6">商家 Demo 憑證
-          <input className="form-input" type={showCredential ? "text" : "password"} autoComplete="off" spellCheck={false} value={credential}
-            onChange={e => { setCredential(e.target.value); setError(""); }} autoCapitalize="off" autoCorrect="off" />
+        {loginStatus?.passkey?.enabled ? <AdminPasskeyLogin registered={loginStatus.passkey.registered} onAuthenticated={resumePasskey} /> : loginStatus?.provider === "password" ? <>
+          <h2 className="mt-6">Demo 密碼登入</h2>
+          <p className="muted mt-3">請輸入授權驗收人員取得的 Demo 密碼。</p>
+          {loginStatus.state !== "ready" && <p role="status">Demo 密碼登入尚未設定，請聯絡管理員。</p>}
+          <form onSubmit={event => { event.preventDefault(); if (!busy && password && loginStatus.state === "ready") void passwordLogin(); }}>
+            <label className="form-field mt-4">Demo 密碼
+              <input className="form-input" type="password" autoComplete="current-password" maxLength={128} value={password} onChange={event => setPassword(event.target.value)} />
+            </label>
+            <button className="primary-action mt-4" type="submit" disabled={busy || !password || loginStatus.state !== "ready"}>{busy ? "登入中…" : "登入"}</button>
+          </form>
+        </> : <>
+        <h2 className="mt-6">手機驗證登入</h2>
+        {!loginStatus && <p role="status">正在讀取登入設定…</p>}
+        {loginStatus?.state === "binding-pending" && <p role="status" className="prototype-notice mt-3">尚未完成陳老師本人確認與手機綁定。請聯絡授權管理員協助本人確認及綁定；請勿提供驗證碼給管理員。</p>}
+        {loginStatus?.state === "sms-pending" && <p role="status" className="prototype-notice mt-3">手機已完成本人確認；簡訊服務尚未啟用。</p>}
+        {loginStatus?.simulated && <p className="prototype-notice mt-3">模擬簡訊：不會發送真實簡訊，驗證碼由受保護的操作員收件匣交付。</p>}
+        <label className="form-field mt-6">已綁定手機
+          <input className="form-input" type="tel" inputMode="tel" autoComplete="tel" maxLength={10} value={phone}
+            onChange={e => { setPhone(e.target.value.replace(/\D/g, "").slice(0, 10)); setChallenge(undefined); setCode(""); setError(""); }} />
         </label>
-        <p role="status" className="muted mt-3">憑證長度：{normalizedCredential.length}/64 {credential.length !== normalizedCredential.length ? "已忽略前後空白" : ""}{credentialValid ? "格式正確" : invalidCharacters ? `有 ${invalidCharacters} 個非十六進位字元` : "請輸入 64 個十六進位字元"}</p>
-        <button type="button" className="filter-button mt-3" onClick={() => { setCredential(""); setShowCredential(false); setError(""); }}>清除憑證</button>
-        <button className="filter-button mt-3" type="button" aria-pressed={showCredential} onClick={() => setShowCredential(value => !value)}>{showCredential ? "隱藏憑證" : "顯示憑證"}</button>
-        <button className="primary-action mt-6" disabled={busy || !credentialValid} onClick={() => void login()}>登入商家 Demo</button>
+        <button className="primary-action mt-4" disabled={busy || loginStatus?.state !== "ready" || !/^09\d{8}$/.test(phone) || resendSeconds > 0} onClick={() => void sendCode()}>
+          {challenge ? resendSeconds > 0 ? `重新傳送（${resendSeconds} 秒）` : "重新傳送驗證碼" : "傳送驗證碼"}
+        </button>
+        {challenge && <>
+          <p role="status" className="muted mt-3">驗證碼五分鐘內有效，只能使用一次。</p>
+          <label className="form-field mt-4">六位數驗證碼
+            <input className="form-input" type="text" inputMode="numeric" autoComplete="one-time-code" maxLength={6} value={code}
+              onChange={e => { setCode(e.target.value.replace(/\D/g, "").slice(0, 6)); setError(""); }} />
+          </label>
+          <button className="primary-action mt-4" disabled={busy || !/^\d{6}$/.test(code)} onClick={() => void login()}>驗證並登入</button>
+        </>}
+        </>}
       </> : <>
-        <button className="filter-button mt-6" onClick={() => void refresh()}>重新載入</button>
+        <div className="form-actions mt-6"><button className="filter-button" onClick={() => void refresh()}>重新載入</button><button className="filter-button" disabled={busy} onClick={() => void logout()}>登出</button>{loginStatus?.passkey?.enabled && <button className="filter-button" disabled={busy} onClick={() => void registerPasskey()}>新增這支手機的 Passkey</button>}</div>
         <div className="demo-order-list">
           {orders.length === 0 && <p>目前沒有示範訂單。</p>}
           {orders.map(({ order, notifications }) => <article className="demo-order-card" key={order.orderId}>
-            <h2>{statusLabel[order.status]}</h2><p>{order.orderId}</p>
+            <h2>{statusLabel[order.status]}</h2><p>訂單編號：{order.orderNumber ?? order.orderId}</p>
             <DemoOrderProgress order={order} />
             <p>付款：{order.paymentStatus === "manual-confirmed" ? "已人工確認" : "待人工確認"}</p>
             {order.paymentStatus === "pending-manual-verification" && <button className="filter-button" disabled={busy} onClick={() => void act(order.orderId, "confirm-payment")}>人工確認付款</button>}

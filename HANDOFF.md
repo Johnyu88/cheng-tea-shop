@@ -1,5 +1,14 @@
 # HANDOFF
 
+## Latest mobile OTP acceptance — 2026-10-02 Taipei
+
+- Password demo /orders now uses two visible stages; OTP123456, expiry, cooldown and actionable errors. See docs/testing/otp-two-stage-2026-10-02.md.
+- Deployed app snapshot22111ed; existing service/deploydep-davbahbbc2fs73c7bpa0 LIVE. Auto-deploy off.
+- Full292 tests/type/lint/build PASS; local order/photo-preview loop PASS; deployed WebKit390x664 viewport/error tests and actual fresh-context delivered lookup PASS.
+- Current synthetic phone fixture261002-002 / 手機查單 /001; delivered. Ignore the older006 fixture in historical notes.
+- Physical Safari keyboard check remains; separate Passkey sandbox is not tea-order authentication. Existing next-env.d.ts user modification preserved.
+
+
 Last updated: 2026-09-21
 
 ## Wave 1 status
@@ -656,3 +665,65 @@ Follow `RESUME_PROMPT.md`, `AGENTS.md`, and `WORKFLOW.md`. If newer explicit use
 - Preview username is `preview`; preview access token and separate merchant credential are held outside Git. Supply preview token privately in the user's chat for access; merchant credential when guiding authorized merchant testing. Never put credentials into URL/docs/logs.
 - Only synthetic testing; ephemeral preview storage resets on restart/deployment. Allowlisted synthetic phones0912000000/0912000001 and synthetic OTP123456. No genuine bank transfer, external notification or fulfilment.
 - Remaining: **游老師親自測試新匯款流程** on actual phone; automation and live API evidence do not satisfy user acceptance. No main merge or production release performed.
+
+## Issue 24 preview handoff (2026-09-30)
+- Implementation: 8d12431; PR #25 targets feature/private-cloud-demo; main remains unchanged.
+- Verified: 49 files / 252 tests, TypeScript, production build, 2 mobile E2E cases, production cloud API/browser smoke. Lint: 0 errors / 9 warnings.
+- Isolated Render preview: https://cheng-tea-issue24-preview.onrender.com (srv-daujlk093c1s73egl1r0). Original preview and orders untouched.
+- Teacher phone binding remains pending; real SMS integration is unavailable. Simulated OTP is explicitly labeled and protected.
+- New Yu / TWD800 seed is synthetic reconstruction, not a backup. Free preview storage is ephemeral; no database clearing is performed.
+- Yu final acceptance and teacher authorization remain required; keep issue #24 open.
+
+
+## First merchant binding continuation (2026-10-01 Taipei)
+
+- User accepted creation/lookup of 261001-001; preserve the live preview containing this order.
+- Administrator-assisted enrollment procedure: docs/merchant-first-binding.md. Shared preview access does not authorize binding. Teacher consent and phone possession must be confirmed; teacher alone enters received OTP.
+- Real SMS adapter work: Twilio fixed HTTPS Messages endpoint; configuration via protected TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_MESSAGING_SERVICE_SID and DEMO_MERCHANT_SMS_MODE=twilio. No provider calls without valid protected configuration.
+- Activation blockers: actual teacher confirmation/phone and authorized SMS account configuration unavailable. Never fabricate confirmation or reuse simulated inbox as real SMS.
+- Deployment blocker: current service is free with ephemeral /tmp storage; no complete backup route exists. Do not redeploy or change env (which restarts service) before consistent full backup and verified restore of databases/catalog/media/photos. Existing source changes may safely push because autoDeploy is off.
+- No cloud environment, original service, or live order data changed in this continuation. Do not mark issue complete or ask Yu to test merchant actions until binding, real OTP and data protection are actually ready.
+- Verified continuation: 50 test files / 257 tests pass; TypeScript exit 0; lint exit 0 (0 errors / 9 existing warnings). Real-provider tests mock HTTP: no real SMS or handset delivery claimed.
+- Production build --webpack exit 0. Independent security review approved adapter/auth; deployment remains blocked to protect live order.
+
+## Password Demo acceptance continuation (2026-10-01 Taipei)
+
+Latest user decision supersedes SMS prerequisite: provider-selected DemoPasswordProvider now used for isolated Demo; retain SmsOtpProvider implementation for later formal integration. Both use common merchant session; business APIs unchanged.
+No changes to old Render service srv-daujlk093c1s73egl1r0 or original srv-dau9s69srm7s73bd3deg. Orders 261001-001/002 remain only in their old temporary-data environment; no migration claimed. New password acceptance station uses separate fresh data and credentials, autoDeploy off.
+Source/verification work continues on the same feature/issue-24-mobile-login branch and PR #25. Do not write credentials/OTP into GitHub, logs, screenshots or URLs. Deliver private Demo access to authorized Yu only.
+
+- Password backup verification: production build passed; mobile SMS E2E 2 passed; cloud password and SMS full API/browser loops passed including initial/final lookup and camera/gallery cancel/reselect/explicit confirmation. OTP issue/operator refuse non-SMS provider.
+- Latest user strategy: stop new self-built authentication; evaluate Better Auth/passkey 1.7.6 in separate sandboxes/passkey-lock app. Install/test native library, verify server session plus separate merchant allowlist, then AuthProvider-only integration after testing. Business API source remains unchanged. Physical Face ID/fingerprint requires human phone acceptance; virtual-authenticator evidence must be labeled.
+
+- Deployed password backup version 12a60bd105b84fe1840be7420c90235a60da05de to srv-daukf2ojo6nc73dhmrfg, https://cheng-tea-password-demo.onrender.com ; Render live deploy dep-daukf38jo6nc73dhmuag commit matches. Production HTTPS mobile-sized acceptance 12/12 passed, test order retained in new service (short 261001-001). Identical short numbers across independent stations do not indicate migration; this is a newly created synthetic order.
+- Release validation: 52 test files / 266 tests; TypeScript/lint/build passed (lint 0 errors / 9 warnings). Existing 261001-001/002 on srv-daujlk093c1s73egl1r0 were not modified or migrated. Private test configuration removed after live run; no credentials in source/output.
+
+## 2026-10-02 Final order-loop checkpoint
+- Fresh local verification on a91e0e3: 266/266 tests, TypeScript, lint (9 existing warnings), production build, full local API + mobile-browser order loop and two independent virtual Passkey fixtures PASS, all commands exit 0.
+- Details and retained logs: docs/testing/final-acceptance-2026-10-02.md and docs/testing/evidence/2026-10-02-final-*.log.
+- Independent QA source review: phone-ready final delivery cannot be claimed. Customer lookup requires original-tab receipt or saved order number/secret/full phone plus OTP. Passkey remains a separate sandbox with no merchant business authorization bridge.
+- BLOCKED_EXTERNAL: current cloud access/merchant/bootstrap secrets are unavailable; prior private test configs were intentionally removed. Render live deployment references were read, but no authenticated live revalidation or retained test order was created this round.
+- Do not redeploy/restart existing ephemeral services without verified full backup/restore. No application changes, product-management rework, payment-provider change or main merge.
+- Next: obtain current valid private test credentials; run authenticated live loop and preserve a fresh test receipt; phone Passkey acceptance precedes existing AuthProvider integration. Cross-device name/suffix-only lookup remains unimplemented.
+
+## 2026-10-02 live acceptance recovery
+- User authorized replacement of ephemeral password-demo orders for gate recovery.
+- Rotated only DEMO_PREVIEW_TOKEN_SHA256; existing service deployed source 0fe4a50.
+- Cloud browser acceptance: exit 0, 12/12 passed; retained delivered order 261002-001.
+- Pending phone order 261002-002 created and queried; synthetic phone 0912000000.
+- User screenshots show phone Passkey registration/logout/re-login success in independent sandbox.
+- Current evidence/limits: docs/testing/live-acceptance-2026-10-02.md. No secrets committed.
+- Still pending: actual handset camera preview, Passkey tea authorization integration, new-device lookup simplification.
+
+## 2026-10-02 cross-device lookup redesign
+- Explicit user instruction replaced customer long-secret steps with order number/name/phone suffix + mandatory OTP.
+- Frontend and backend implemented on existing feature branch; no service/architecture replacement.
+- Full tests 54/277 PASS, typecheck/lint/build PASS, local full order loop plus empty-storage mobile Chromium cross-device delivered lookup PASS.
+- Security reviewer approved only private synthetic demo scope. OTP remains simulated; physical iPhone Safari not yet verified.
+- Current report: docs/testing/cross-device-lookup-2026-10-02.md; retained evidence logs include Windows WebKit failure.
+- Existing next-env.d.ts unrelated change preserved. Passkey merchant integration remains separate unfinished task.
+
+- Cloud lookup release e05fa2c LIVE deploy dep-davakg2d0e5s73f85vj0; new mobile Chromium HTTPS full loop 12/12 PASS.
+- Linux mobile WebKit HTTPS fresh-context cross-device lookup PASS, no secret/full-phone transmitted, delivered shown.
+- Current phone fixture 261002-006 / 手機查單 / suffix000. No long-secret handoff needed. Private runner configuration removed.
+- Remaining: actual iPhone Safari final confirmation; OTP/delivery still simulated and Passkey merchant bridge separate.

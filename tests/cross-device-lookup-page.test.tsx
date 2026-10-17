@@ -1,0 +1,24 @@
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { afterEach, expect, it, vi } from "vitest";
+import { OrderLookupPage } from "@/features/demo/components/order-lookup-page";
+vi.mock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams() }));
+afterEach(() => { sessionStorage.clear(); vi.unstubAllGlobals(); });
+it("queries from an empty browser using three fields and OTP without any receipt secret", async () => {
+  const fetcher = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ ok: true, value: { challengeId: "bound", expiresAt: "", demoCode: "123456" } }) });
+  vi.stubGlobal("fetch", fetcher);
+  render(<OrderLookupPage />);
+  expect(screen.queryByLabelText("查單憑證")).not.toBeInTheDocument();
+  expect(screen.queryByLabelText("驗證用手機")).not.toBeInTheDocument();
+  fireEvent.change(screen.getByLabelText("訂單編號"), { target: { value: "261002-002" } });
+  fireEvent.change(screen.getByLabelText("顧客姓名"), { target: { value: "手機驗收" } });
+  fireEvent.change(screen.getByLabelText("手機末三碼"), { target: { value: "000" } });
+  const issue = screen.getByRole("button", { name: "取得查單驗證碼" });
+  expect(issue).toBeEnabled();
+  fireEvent.click(issue);
+  await waitFor(() => expect(fetcher).toHaveBeenCalledTimes(1));
+  expect(fetcher).toHaveBeenCalledWith("/api/demo/otp", expect.objectContaining({ body: JSON.stringify({ purpose: "lookup", orderId: "261002-002", customerName: "手機驗收", phoneLastThree: "000" }) }));
+  await screen.findByLabelText("驗證碼");
+  fireEvent.click(screen.getByRole("button", { name: "修改查單資料" }));
+  fireEvent.change(screen.getByLabelText("顧客姓名"), { target: { value: "另一位" } });
+  expect(screen.queryByLabelText("驗證碼")).not.toBeInTheDocument();
+});

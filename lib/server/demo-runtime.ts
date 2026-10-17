@@ -1,3 +1,4 @@
+import { createDemoLookupChallenge, type LookupIdentity } from "./demo-lookup-challenge";
 import { join, resolve } from "node:path";
 import { mkdirSync } from "node:fs";
 import { createHash, timingSafeEqual } from "node:crypto";
@@ -23,8 +24,8 @@ type PlaceOrderInput = {
 };
 type LookupInput = {
   orderId: string;
-  accessSecret: string;
-  phone: string;
+  accessSecret?: string;
+  phone?: string;
   phoneLastThree: string;
   customerName?: string;
   challengeId: string;
@@ -47,6 +48,7 @@ export function createLocalDemoRuntime({ directory, otpCode = "123456", catalogS
   if (!columns.some((column) => column.name === "name_digest")) identities.exec("ALTER TABLE demo_order_identity ADD COLUMN name_digest BLOB");
   const saveIdentity = identities.prepare("INSERT INTO demo_order_identity (order_id, phone_digest, name_digest) VALUES (?, ?, ?)");
   const findIdentity = identities.prepare("SELECT phone_digest, name_digest FROM demo_order_identity WHERE order_id = ?");
+  const crossDeviceOtp = createDemoLookupChallenge(identities, otpCode);
   const checkoutOtp = createDemoOtpService({ codeFactory: () => otpCode });
   const lookupOtp = createDemoOtpService({ codeFactory: () => otpCode });
   const commerce = createLocalDemoCommerce({
@@ -69,6 +71,21 @@ export function createLocalDemoRuntime({ directory, otpCode = "123456", catalogS
       if (!phone || !syntheticPhones.has(phone)) throw new Error("Synthetic phone required");
       return (purpose === "checkout" ? checkoutOtp : lookupOtp).issue(phone);
     },
+
+    issueLookupOtp(input: LookupIdentity) {
+      if (!input || typeof input.orderId !== "string" || !/^[0-9]{6}-[0-9]{3,10}$/.test(input.orderId.trim())
+        || typeof input.customerName !== "string" || !input.customerName.trim() || input.customerName.length > 100
+        || typeof input.phoneLastThree !== "string" || !/^[0-9]{3}$/.test(input.phoneLastThree)) throw new Error("Unable to issue demo verification");
+      const order = orders.listInternalForMerchant().find(item => item.orderNumber === input.orderId.trim());
+      const identity = order ? findIdentity.get(order.orderId) as { phone_digest?: Uint8Array; name_digest?: Uint8Array } | undefined : undefined;
+      const expectedPhone = identity?.phone_digest ? Buffer.from(identity.phone_digest) : Buffer.alloc(0);
+      const expectedName = identity?.name_digest ? Buffer.from(identity.name_digest) : Buffer.alloc(0);
+      const suppliedName = nameDigest(input.customerName);
+      const phone = [...syntheticPhones].find(candidate => candidate.endsWith(input.phoneLastThree)
+        && expectedPhone.length === 32 && timingSafeEqual(expectedPhone, phoneDigest(candidate)));
+      const match = order && phone && expectedName.length === 32 && timingSafeEqual(expectedName, suppliedName);
+      return crossDeviceOtp.issue(input, match ? order.orderId : null);
+    },
     placeOrder(input: PlaceOrderInput) {
       const placed = commerce.placeOrder(input);
       const normalizedPhone = normalizeTaiwanMobile(input.phone);
@@ -87,12 +104,26 @@ export function createLocalDemoRuntime({ directory, otpCode = "123456", catalogS
       return { ...placed, notificationStatus };
     },
     lookupOrder(input: LookupInput) {
-      const phone = normalizeTaiwanMobile(input.phone);
+
+      if (!input || typeof input.orderId !== "string" || typeof input.customerName !== "string"
+        || input.orderId.length > 100 || input.customerName.length > 100
+        || typeof input.phoneLastThree !== "string" || !/^[0-9]{3}$/.test(input.phoneLastThree)
+        || typeof input.challengeId !== "string" || input.challengeId.length > 100 || typeof input.code !== "string" || input.code.length > 20) throw new Error("Unable to verify demo order");
+      if (input.accessSecret === undefined && input.phone === undefined) {
+        const orderId = crossDeviceOtp.verify(input as LookupIdentity, input.challengeId, input.code);
+        const order = orderId ? orders.listInternalForMerchant().find(item => item.orderId === orderId) : undefined;
+        if (!order) throw new Error("Unable to verify demo order");
+        return order;
+      }
+      const phone = typeof input.phone === "string" ? normalizeTaiwanMobile(input.phone) : null;
       const genericFailure = () => { throw new Error("Unable to verify demo order"); };
       if (!phone || !syntheticPhones.has(phone) || !/^\d{3}$/.test(input.phoneLastThree)
         || !phone.endsWith(input.phoneLastThree)
         || !lookupOtp.verify(phone, input.challengeId, input.code)) return genericFailure();
-      const identity = findIdentity.get(input.orderId) as { phone_digest?: Uint8Array; name_digest?: Uint8Array } | undefined;
+      const order = commerce.lookup(input.orderId, input.accessSecret ?? "");
+      if (!order) return genericFailure();
+      if (/^[0-9]{6}-[0-9]{3,}$/.test(input.orderId) && (typeof input.customerName !== "string" || !input.customerName.trim())) return genericFailure();
+      const identity = findIdentity.get(order.orderId) as { phone_digest?: Uint8Array; name_digest?: Uint8Array } | undefined;
       const storedDigest = identity?.phone_digest ? Buffer.from(identity.phone_digest) : Buffer.alloc(0);
       const suppliedDigest = phoneDigest(phone);
       if (storedDigest.length !== suppliedDigest.length || !timingSafeEqual(storedDigest, suppliedDigest)) {
@@ -104,8 +135,6 @@ export function createLocalDemoRuntime({ directory, otpCode = "123456", catalogS
         const supplied = nameDigest(input.customerName);
         if (expected.length !== supplied.length || !timingSafeEqual(expected, supplied)) return genericFailure();
       }
-      const order = commerce.lookup(input.orderId, input.accessSecret);
-      if (!order) return genericFailure();
       return order;
     },
     notifications(orderId: string) {

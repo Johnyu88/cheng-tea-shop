@@ -1,0 +1,164 @@
+▲ Next.js 16.3.6 (Turbopack)
+✓ Running next.config.ts took 25ms
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 543ms
+  Running TypeScript ...
+  Finished TypeScript in 1527ms ...
+  Collecting page data using 24 workers ...
+  Generating static pages using 24 workers (0/19) ...
+  Generating static pages using 24 workers (4/19)
+  Generating static pages using 24 workers (9/19)
+  Generating static pages using 24 workers (14/19)
+✓ Generating static pages using 24 workers (19/19) in 507ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ○ /admin/orders
+├ ○ /admin/products
+├ ○ /admin/products/new
+├ ƒ /api/demo/admin/orders
+├ ƒ /api/demo/admin/orders/[orderId]
+├ ƒ /api/demo/admin/orders/[orderId]/packing-photo
+├ ƒ /api/demo/admin/otp
+├ ƒ /api/demo/admin/otp/operator
+├ ƒ /api/demo/admin/session
+├ ƒ /api/demo/catalog
+├ ƒ /api/demo/catalog/media/[fileName]
+├ ƒ /api/demo/orders
+├ ƒ /api/demo/orders/lookup
+├ ƒ /api/demo/otp
+├ ƒ /api/health
+├ ○ /cart
+├ ○ /checkout
+├ ƒ /checkout/success
+├ ○ /orders
+└ ƒ /tea/[slug]
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+Turbopack build encountered 4 warnings:
+./lib/server/demo-catalog-store.ts:192:21
+Warning: Dynamic filesystem access causes tracing of the whole project
+  190 |
+  191 | export const getDemoCatalogStore = (): DemoCatalogStore => {
+> 192 |   const directory = resolve(process.env.DEMO_DATA_DIR || ".demo-data/local");
+      |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  193 |   const key = directory.toLowerCase();
+  194 |   const existing = stores.get(key);
+  195 |   if (existing) return existing;
+
+Static analysis determined that this filesystem access causes the whole project to be traced and included in the output.
+This is usually unintentional and leads to all source files (including the public folder) to be deployed as part of the server code.
+This can slow down deployments or lead to failures when size limits are exceeded.
+To resolve this, you can
+- make sure the path is statically scoped to some subfolder, for example path.join(process.cwd(), 'data', bar), or
+- only use them in development, or
+- opt out by adding an ignore comment to the highlighted call: path.resolve(/*turbopackIgnore: true*/ ...), or
+- remove them.
+
+Import traces:
+  #1 [App Route]:
+    ./lib/server/demo-catalog-store.ts
+    ./app/api/demo/catalog/media/[fileName]/route.ts
+
+  #2 [App Route]:
+    ./lib/server/demo-catalog-store.ts
+    ./lib/server/demo-rate-limit.ts
+    ./app/api/demo/orders/lookup/route.ts
+
+
+./lib/server/demo-catalog-store.ts:202:57
+Warning: Dynamic filesystem access causes tracing of the whole project
+  200 | ...
+  201 | ...chronous order boundary; still local-only and file-backed. */
+> 202 | ...= (directory = resolve(process.env.DEMO_DATA_DIR || ".demo-data/local"), fallbackProdu...
+      |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  203 | ...og.json");
+  204 | ...});
+  205 | ...c(filePath, JSON.stringify({ version: 1, products: clone(fallbackProducts) }, null, 2)...
+
+Static analysis determined that this filesystem access causes the whole project to be traced and included in the output.
+This is usually unintentional and leads to all source files (including the public folder) to be deployed as part of the server code.
+This can slow down deployments or lead to failures when size limits are exceeded.
+To resolve this, you can
+- make sure the path is statically scoped to some subfolder, for example path.join(process.cwd(), 'data', bar), or
+- only use them in development, or
+- opt out by adding an ignore comment to the highlighted call: path.resolve(/*turbopackIgnore: true*/ ...), or
+- remove them.
+
+Import traces:
+  #1 [App Route]:
+    ./lib/server/demo-catalog-store.ts
+    ./app/api/demo/catalog/media/[fileName]/route.ts
+
+  #2 [App Route]:
+    ./lib/server/demo-catalog-store.ts
+    ./lib/server/demo-rate-limit.ts
+    ./app/api/demo/orders/lookup/route.ts
+
+
+./lib/server/demo-rate-limit.ts:23:21
+Warning: Dynamic filesystem access causes tracing of the whole project
+  21 | ): void {
+  22 |   assertDemoEnabled();
+> 23 |   const directory = resolve(process.env.DEMO_DATA_DIR || ".demo-data/local");
+     |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  24 |   mkdirSync(directory, { recursive: true });
+  25 |   const db = new DatabaseSync(join(directory, "rate-limits.sqlite"));
+  26 |   const hash = createHash("sha256").update(scope).update(":").update(subject).digest("hex");
+
+Static analysis determined that this filesystem access causes the whole project to be traced and included in the output.
+This is usually unintentional and leads to all source files (including the public folder) to be deployed as part of the server code.
+This can slow down deployments or lead to failures when size limits are exceeded.
+To resolve this, you can
+- make sure the path is statically scoped to some subfolder, for example path.join(process.cwd(), 'data', bar), or
+- only use them in development, or
+- opt out by adding an ignore comment to the highlighted call: path.resolve(/*turbopackIgnore: true*/ ...), or
+- remove them.
+
+Import traces:
+  #1 [App Route]:
+    ./lib/server/demo-rate-limit.ts
+    ./app/api/demo/otp/route.ts
+
+  #2 [App Route]:
+    ./lib/server/demo-rate-limit.ts
+    ./lib/server/demo-rate-limit.ts
+    ./app/api/demo/orders/lookup/route.ts
+
+
+./lib/server/demo-runtime-singleton.ts:12:21
+Warning: Dynamic filesystem access causes tracing of the whole project
+  10 | ...t function getLocalDemoRuntime(): Runtime {
+  11 | ...ertDemoEnabled();
+> 12 | ...st directory = resolve(process.env.DEMO_DATA_DIR || ".demo-data/local");
+     |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  13 | ...(!globalRuntime.__chengTeaDemoRuntime) seedIndependentDemo(directory);
+  14 | ...balRuntime.__chengTeaDemoRuntime ??= createLocalDemoRuntime({ directory, catalogSeed: c...
+  15 | ...urn globalRuntime.__chengTeaDemoRuntime;
+
+Static analysis determined that this filesystem access causes the whole project to be traced and included in the output.
+This is usually unintentional and leads to all source files (including the public folder) to be deployed as part of the server code.
+This can slow down deployments or lead to failures when size limits are exceeded.
+To resolve this, you can
+- make sure the path is statically scoped to some subfolder, for example path.join(process.cwd(), 'data', bar), or
+- only use them in development, or
+- opt out by adding an ignore comment to the highlighted call: path.resolve(/*turbopackIgnore: true*/ ...), or
+- remove them.
+
+Import traces:
+  #1 [App Route]:
+    ./lib/server/demo-runtime-singleton.ts
+    ./app/api/demo/otp/route.ts
+
+  #2 [App Route]:
+    ./lib/server/demo-runtime-singleton.ts
+    ./lib/server/demo-rate-limit.ts
+    ./app/api/demo/orders/lookup/route.ts
