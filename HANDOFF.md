@@ -1,5 +1,23 @@
 # HANDOFF
 
+## Production frontend merged to main — 2026-10-17
+
+- Merged `codex/frontend-design-phase1-20261016` into `main`. It contains `codex/prod-restore-20261015`. Production at this point:
+  - 10000 storefront: `adbe430`, image `tea-nextjs:prod-frontend-adbe430`.
+  - 10001 admin: `tea-nextjs:prod-admin-03-0b36c71-r1`.
+- Fixes made on top of that merge:
+  - removed the storefront-shell "訂單查詢" link to the retired `/orders`;
+  - deferred the admin diagnostic `<script>` instead of using `next/script`, so it still runs when Next chunks are blocked;
+  - ported the typed test bridge from cloud-02;
+  - stubbed the Acer-only backup path in the prod-admin-23 guardrail tests.
+- Production 10000 (`adbe430`) still shows the dead "訂單查詢" link until the storefront is redeployed. No deployment was made.
+- Still not on `main`:
+  - `codex/cloud-02-*` (PostgreSQL and object-storage candidates);
+  - `fix/product-11-fix-01(-minimal)` (a candidate, not deployed; built on the 10/13 line);
+  - the 10/13 branches `feature/restore-tea-contact`, `feature/v1-*` and `feature/merchant-simple-order-inbox`, which the deployed frontend appears to re-implement;
+  - `assets/cheng-tea-photo-library-20261015`.
+- The temporary branch `claude/revert-08c0bef` still exists; this session could not delete it.
+
 ## Stack recovery and merge to main — 2026-10-17
 
 - Branch: `claude/check-restore-program-state-o43nkc`. GitHub state: `SYNCED` once pushed.
