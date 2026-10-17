@@ -8,6 +8,21 @@ test("homepage exposes the storefront starting point", async ({ page }) => {
   await expect(page.getByRole("link", { name: "開始選茶" })).toHaveAttribute("href", "#baseline");
 });
 
+test("mobile brand navigation keeps order lookup visible in the viewport", async ({ page }) => {
+  await page.setViewportSize({ width: 360, height: 800 });
+  await page.goto("/");
+
+  const orderLookup = page.getByRole("link", { name: "訂單查詢" });
+  await expect(orderLookup).toBeVisible();
+
+  const box = await orderLookup.boundingBox();
+  expect(box).not.toBeNull();
+  expect(box!.x).toBeGreaterThanOrEqual(0);
+  expect(box!.y).toBeGreaterThanOrEqual(0);
+  expect(box!.x + box!.width).toBeLessThanOrEqual(360);
+  expect(box!.y + box!.height).toBeLessThanOrEqual(800);
+});
+
 test("health endpoint reports readiness", async ({ request }) => {
   const response = await request.get("/api/health");
 

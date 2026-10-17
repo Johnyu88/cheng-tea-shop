@@ -1,5 +1,14 @@
 # HANDOFF
 
+## Latest mobile OTP acceptance — 2026-10-02 Taipei
+
+- Password demo /orders now uses two visible stages; OTP123456, expiry, cooldown and actionable errors. See docs/testing/otp-two-stage-2026-10-02.md.
+- Deployed app snapshot22111ed; existing service/deploydep-davbahbbc2fs73c7bpa0 LIVE. Auto-deploy off.
+- Full292 tests/type/lint/build PASS; local order/photo-preview loop PASS; deployed WebKit390x664 viewport/error tests and actual fresh-context delivered lookup PASS.
+- Current synthetic phone fixture261002-002 / 手機查單 /001; delivered. Ignore the older006 fixture in historical notes.
+- Physical Safari keyboard check remains; separate Passkey sandbox is not tea-order authentication. Existing next-env.d.ts user modification preserved.
+
+
 Last updated: 2026-09-21
 
 ## Wave 1 status
@@ -375,3 +384,587 @@ Follow `RESUME_PROMPT.md`, `AGENTS.md`, and `WORKFLOW.md`. If newer explicit use
 - The CLI is dry-run only: it emits a structured JSON report with `wouldWrite: false`; `--apply` is rejected, and it never overwrites existing fixtures or uploads files. Error reports include row, field, stable code, and readable message.
 - Added typed declaration coverage and `tests/phase-9a-product-import.test.ts`. Focused import tests passed 5/5; full Vitest remains the project regression gate. Phase 9-A preflight checks the templates, map, tool markers, and preparation docs.
 - No external service, database, payment, logistics, ERP, preview, or formal deployment was started. Wait for store data, image permissions, fact sources, and reviewer information.
+
+## Phase 10 ERP reuse & integration planning — planning complete, not integrated — 2026-09-22
+
+- Added `docs/erp/phase-10-erp-reuse-integration-planning.md` covering ERP capability requirements, module plan, candidate comparison, Website ↔ ERP contract, mapping, sync direction, normalized errors, ownership, implementation slices, and minimal PoC.
+- Research candidates: ERPNext is the first fixture-mapping candidate; Odoo and Dolibarr are ERP alternatives; Medusa, Saleor, and Vendure are commerce-oriented comparison baselines. No final ERP selection or license approval was made.
+- The plan preserves the current architecture: UI uses project-owned DTO/service boundaries; future server-side adapters own provider mapping, idempotency, retries, reconciliation, and sensitive-field exclusion. The website keeps brand content, UX, SEO, human validation, and publishing approval gates.
+- Proposed next step only: Phase 10-B offline ERP-shaped fixture mapping contract PoC using synthetic data. It must not start an ERP, database, Docker environment, payment, logistics, or production deployment.
+- Verification for this documentation-only slice: source links and capability mapping reviewed; no runtime code changed. Run `git diff --check` and the existing Vitest regression before commit.
+- Preserve existing local environment changes: `AGENTS.md` and `next-env.d.ts` remain untouched and must not be staged or committed.
+
+## 手機 Demo 購物車修正檢查點 — 2026-09-24
+
+- 工作樹 `codex/wave-7-shopping-quality-gate` 原有未提交的 AGENTS、CAPABILITY_MAP、HANDOFF、WHITEPAPER、商品頁導向、next-env.d.ts 及 `docs/erp/`；先盤點並保留。商品頁加入成功後 `router.push('/cart')` 為既有修改，本階段未重寫該功能。
+- 本階段修補商品頁及整合測試所需的 Router mock、驗證成功導向 `/cart`；購物車原有「繼續選茶」改為「繼續購買」，保留 `/checkout`；瀏覽器測試改為成功後直接檢查 `/cart`。
+- edea 的 `pnpm` 不在 PATH；Corepack 已緩存 pnpm 11.19.0。`corepack pnpm test:run` 因無 TTY 的 modules purge 提示失敗；使用已安裝的 `node_modules/.bin/*.cmd` 執行檢查，不刪除既有 node_modules。Node 24.21.0 與 package.json 要求的 24.19.0 不一致。
+- 驗證：Vitest 18 files／119 tests 通過；`tsc --noEmit --incremental false` 通過；ESLint 0 errors／1 個既有 `<img>` warning；`next build --webpack` 通過。Playwright Chromium 已安裝指定 v1243；獨立埠 3013 的購物車／結帳 10/10 通過。測試伺服器會將 build 的 static/public 複製到 standalone 目錄後啟動；3000 埠有既存 Node 進程，未碰觸。
+- PR #15 的 S1 門檻仍未達成：目前 checkout 無 OTP／地址核實，Mock 訂單使用固定 `MOCK-ORDER-001` 且無持久化；沒有安全查單、顧客／店家通知、受權店家待辦、照片歸檔或出貨狀態。不得將現有原型當成手機 Demo 驗收通過；雲端測試部署必須等待本機功能與實機驗收。
+- 下一步：建立服務端唯一且持久的測試訂單與受控模擬 OTP／查單權限，接著按狀態實作通知、店家拍照及人工交寄，再做手機驗收。正式金流與正式環境均未啟用。
+
+## 手機 Demo 下一個本機切片 — 2026-09-24
+
+- 增加台灣手機格式與正規化（前台、Mock service）；格式檢查不等於 SMS OTP，仍不能解鎖 PR #15 的後端驗證閘門。
+- 已找到 edea 缺少 `pnpm` PATH 的安全執行方式：`corepack pnpm --config.verifyDepsBeforeRun=false test:run`，使用緩存 pnpm 11.19.0 並保留既有 node_modules；未做新的 frozen install。Node 24.21.0 與宣告 24.19.0 仍不同。
+- 正在建立伺服端 Demo 訂單純記憶體契約與測試，沒有接入顧客／店家頁面，沒有持久化或真正通知。這只是下一階段的基礎，不代表手機 Demo 驗收完成。
+
+## 手機 Demo 本機閉環收尾 — 2026-09-26
+
+- 沿用既有 `router.push('/cart')`、SQLite Demo order/outbox、OTP、地址、merchant workflow 與 packing-photo 契約，沒有重寫已完成服務。新增 local-only runtime 與 API 組合，僅在 `DEMO_COMMERCE_LOCAL=enabled`、非 production、loopback／同源請求下可用。
+- `/checkout` 在 `NEXT_PUBLIC_DEMO_COMMERCE=enabled` 時切換到合成 OTP 結帳；預設 build 仍保留原 prototype。`/orders` 要求高熵 token、下單手機、後三碼及一次性 OTP；訂單另存手機摘要，另一支有效合成手機也不能查詢。
+- `/admin/orders` 使用獨立高熵店家密碼簽發短效 HttpOnly cookie，可模擬付款、上傳本機私有包裝照、明確人工出貨／送達、通知成功／失敗／重試。包裝完成只進入 `packed`，不會自動標為出貨。
+- Email 是 outbox 的 `simulated-email`；手機推送只產生 `preview-only` payload，不註冊 service worker、不排隊、不送達外部裝置。地址只有指定合成地址可通過受控覆核，其他地址維持「需要人工介入」。
+- 本機操作文件：`docs/testing/mobile-demo-local-runbook.md`。`.demo-data/` 已加入 Git ignore；測試資料、包裝照片、查單 token 與店家密碼不提交。
+- 已通過 focused HTTP guard、runtime 與 mobile push preview tests，以及 Pixel 7 Chromium 顧客→店家→顧客閉環。正式付款、物流、SMS、Email、Web Push、會員、production、公開網路及正式客戶資料均未啟用。
+- 完整交付閘門已通過：Vitest 29 files／167 tests；TypeScript；ESLint 0 errors（1 個既有 `<img>` warning）；Webpack build；既有 Chromium 14/14；Pixel 7 focused mobile Chromium 1/1；`git diff --check` 與常見 secret pattern scan 均無問題。WebKit 未重跑，沿用既知 Avast 隔離環境限制，未修改防毒設定。
+- `AGENTS.md` 與 `next-env.d.ts` 是進場前既有環境變更，本階段未修改且不得納入提交。
+
+## W. 第三輪真人驗收修正 — 2026-09-27
+
+- 已追查首頁素材：`public/media/tea-sample-composite.png` 是既有 synthetic 示意圖，不是店家正式合成照；本階段不再將它當正式首頁素材，首頁改為明確提示正式合成照尚未提供。原始人物照、影片與 `tea-stream-birds.wav` 保留；鳥叫需明確點擊播放。
+- 購物車新增「返回上一頁」；checkout 新增「返回上一頁」與「取消本次結帳」回購物車。離開不建立訂單，也不清空既有購物車。
+- OTP 保留服務端驗證；同一有效 challenge 在 cooldown 期間重用，避免手機重按取得驗證碼卡死；錯誤 OTP 顯示明確提示。測試資料仍為允許的合成手機與 `123456`，不連接 SMS。
+- 新增 `/admin/products` 本機 Demo 商品工作台：列出商品、照片、分類、規格、價格、庫存與上下架操作。下架只改 publication、保留商品與歷史訂單；公開 Catalog 與 authoritative order boundary 皆拒絕下架商品。
+- 第九種素材流程以可替換 Mock 狀態展示「原始照片→檢查→拆解／辨識 Mock→合成預覽 Mock→人工確認→儲存→上架」；未宣稱真正 AI 辨識或合成。現階段原始檔只保留於瀏覽器草稿預覽，publish 會將首張圖片寫成 Demo catalog media；獨立 raw archive／derived manifest 尚未實作。
+- 驗證：focused Vitest 42/42；webpack production build 通過；LAN Pixel 7 Chromium 在全新隔離 Demo data 上 `catalog-persistence` + `mobile-order-loop` 2/2 通過。Turbopack 因 worktree `node_modules` symlink 被限制；production `next start` 仍由安全 guard 禁止 Demo API，安全邊界未放寬。
+- 不宣稱真人手機驗收通過。可供重跑網址：`http://172.20.10.4:3013`；後台：`/admin/products`、`/admin/products/new`、`/admin/orders`。正式合成照仍待店家提供；`AGENTS.md` 與 `next-env.d.ts` 為既有未提交環境變更，本階段未納入。
+- `/admin/products` 目前提供清單、前台檢視與上下架操作；既有商品的獨立編輯表單仍待後續 bounded slice，不以新增頁冒充編輯功能。
+
+## 同一區域網路真實手機驗收準備 — 2026-09-26
+
+- 為實機展示增加明確 LAN opt-in：`DEMO_COMMERCE_LAN=enabled` 時，HTTP guard 只接受 RFC1918 私有 IPv4；未設定時仍只接受 loopback。production、公開／訪客網路與 `0.0.0.0` 綁定仍拒絕。
+- LAN 模式的店家 cookie 改用不帶 `Secure` 的 `HttpOnly; SameSite=Strict; Path=/` 合成 cookie，因 HTTP 手機測試無法使用 `__Host-` cookie；loopback 預設仍維持 `__Host-...; Secure`。這只為本機假資料 Demo，不能帶入正式環境。
+- 實機操作文件已補在 `docs/testing/mobile-demo-local-runbook.md`：取得私有 IP、啟動旗標、必要網址、手機與電腦同網、Windows 防火牆阻擋時停止並交由管理者處理，不自動修改安全設定。
+- 待執行的真人手機驗收：用同一區網手機完整走商品→購物車→結帳→查單→店家處理→出貨狀態；目前尚未把此流程宣稱為真人／店家走查結果。Pixel 7 Chromium 自動化 1/1 仍是腳本證據。
+- 本次已在本機私有介面 `172.20.10.4:3013` 啟動 Demo；必要網址為 `/`、`/cart`、`/checkout`、`/orders`、`/admin/orders`。主機 health／頁面可達；實際手機操作仍待陳老師在同一可信 Wi‑Fi 執行，不能由本機自動化代替。
+- 已以同一 LAN URL `http://172.20.10.4:3013` 重跑 Pixel 7 Chromium synthetic flow，1/1 通過；這證明 LAN host/origin 與完整合成流程相容，不代表真實手機或真人走查已完成。
+- 實機限制：HTTP LAN cookie 不具 Secure，故只允許假資料、假 OTP、假付款與假通知；不要輸入真實客戶／付款資料。Demo 結束應停止 server，並在確認路徑後清除 `.demo-data\lan-demo`。
+- 實機限制：HTTP LAN cookie 不具 Secure，故只允許假資料、假 OTP、假付款與假通知；不要輸入真實客戶／付款資料。Demo 結束應停止 server，並在確認路徑後清除 `.demo-data\lan-demo`。
+
+## V. Real-phone acceptance repair — 2026-09-27
+
+## 第四輪實際 UI 與完整商品流程修正 — 2026-09-27
+
+- 首頁已移除原 `teacher-story.mp4` 播放介面，改以 `picture` 實際引用 `public/media/teacher-hero-desktop-candidate.png` 與 `teacher-hero-mobile-candidate.png`；兩張素材是依現有 `teacher-portrait.webp` 生成的設計候選，尚未取得店家正式核准，不可當作最終品牌素材。`tea-stream-birds.wav` 仍保留為明確點擊播放，未使用 autoplay。
+- 桌面／手機共用 header 已加入 `/orders`「訂單查詢」。下單後改導向獨立 `/checkout/success`，顯示感謝、訂單編號、收到訂單、狀態、返回首頁與查看訂單；查單 token 僅存於同一瀏覽器的 sessionStorage，不出現在成功頁 DOM 或查單連結。
+- `/admin/products` 仍使用前台相同的 file-backed Demo Catalog，初始列出八款商品；新增可用的編輯入口，能更新茶名、類別、規格、價格與庫存而不改商品 identity。上下架仍只改 publication，保留商品及歷史訂單。
+- 第九種流程維持清楚標示的本機 Mock：「原始照片→素材檢查→拆解／辨識 Mock→合成預覽 Mock→人工確認→儲存→上架」。沒有影像辨識／合成外部服務；不可把預覽或生成候選解讀為 AI 辨識已完成。原始照片的獨立 raw archive／derived manifest 仍未完成。
+- 回歸證據：完整 Vitest 31 files／175 tests、TypeScript、ESLint 0 errors（5 warnings，含既有 `<img>` 與內部導向提示）、Webpack build 均通過；乾淨 synthetic data 的 LAN Pixel 7 Chromium `catalog-persistence` + `mobile-order-loop` 2/2 通過；截圖 runner 1/1 通過。
+- 截圖證據保存在 `docs/testing/evidence/fourth-round-2026-09-27/`：`homepage-desktop.png`、`homepage-mobile.png`、`checkout-success.png`、`admin-products-eight.png`、`ninth-material-mock-workflow.png`、`admin-products-ninth-published.png`、`admin-products-ninth-unpublished.png`。這些是瀏覽器渲染證據，不是實體手機或真人走查結果。
+- 實體手機第三輪／第四輪驗收仍未宣稱通過；正式合成照、正式影像處理服務、正式付款、物流、ERP 與公開部署仍未啟用。建議下一步由陳老師在 `http://172.20.10.4:3013` 以合成資料實際操作並回報截圖／問題。
+- 本輪只提交本輪程式、測試、文件與證據；進場前既有 `AGENTS.md`、`next-env.d.ts` 未修改、未 staged、未提交。
+
+- Root causes confirmed: Wave 7 previously lacked the checked-in sample media and used process-only catalog publishing; the active 3013 server was also verified and restarted from the Wave 7 demo with an isolated local data directory.
+- Added the eight sample products and preserved photos, composite hero image, and bird-call WAV. Static checks against `http://172.20.10.4:3013` returned HTTP 200; audio is explicit click-to-play (`controls`, `preload="none"`), not autoplay.
+- Added guarded file-backed local catalog/media storage. Admin publish writes to ignored `.demo-data`, survives reload/restart, and never calls ERP or external services. Catalog/Cart/Publishing continue through service boundaries; published product IDs and encoded Unicode slugs are handled correctly.
+- Verification: Vitest 30 files / 173 tests; TypeScript passed; ESLint 0 errors with 4 existing image warnings; webpack production build passed. Turbopack remains blocked by the worktree `node_modules` symlink panic. LAN Pixel 7 Chromium `catalog-persistence` and `mobile-order-loop` passed 2/2 on clean isolated data.
+- Real physical phone acceptance is still pending at `http://172.20.10.4:3013`; automated Chromium is not human/real-device evidence. `AGENTS.md` and `next-env.d.ts` remain pre-existing uncommitted environment changes and were not staged.
+
+## P0 catalog recovery diagnosis — 2026-09-27
+
+- The active listener is `172.20.10.4:3013`, PID `36808`, `node.exe`, started at 2026-09-27 03:23:58. The command-line query is restricted on this Windows environment, so the launch session itself remains the authoritative process/worktree evidence; the server session was started from this worktree with `DEMO_COMMERCE_LOCAL=enabled`, `DEMO_COMMERCE_LAN=enabled`, `NEXT_PUBLIC_DEMO_COMMERCE=enabled`, an explicit private LAN hostname, and the existing `.demo-data/lan-demo-third-round-final-2` directory.
+- `GET http://172.20.10.4:3013/api/demo/catalog?limit=50` returned HTTP 200 and 8 published products: 台灣蜜香野生山茶、台灣佛手茶、烏龍綠茶、武夷玫瑰紅茶、午時金萱黃茶、白毛猴、大葉烏龍蜜香紅茶、藥香老烏龍。 The backing catalog contains 9 total records: those 8 published records plus the existing synthetic ninth draft; no files were cleared or rebuilt.
+- Frontend and admin use the same `/api/demo/catalog` and file-backed `getDemoCatalogStore()` boundary. A 360×800 Playwright LAN inspection found all 8 product names on `/` and 9 admin rows on `/admin/products`; console, pageerror, requestfailed, hydration and catalog API checks were clean. Server logs recorded 200 for both public and `includeUnpublished=true` requests.
+- Current evidence does not reproduce a missing-data application bug. The failure is consistent with a stale/wrong process, wrong LAN origin, disabled Demo flags, or a different `DEMO_DATA_DIR` being used by the phone session. The runbook now has a P0 preflight requiring PID/server/data-directory/API checks before handing the URL to a phone.
+- Current screenshots: `docs/testing/evidence/p0-catalog-recovery-2026-09-27/homepage-mobile.png` and `admin-products-mobile.png`. These are browser evidence, not real-phone evidence. The phone must reload `http://172.20.10.4:3013/` after the server/API preflight.
+- Focused regression: Vitest 4 files / 31 tests passed with the approved `corepack pnpm` invocation after the sandbox-only `spawn EPERM` retry. Existing `AGENTS.md` and `next-env.d.ts` changes remain untouched and must not be staged.
+- Final cross-browser check: Chromium e2e 14/14 passed after the stale-copy assertion was corrected. WebKit reached 8/14 and then hung without further output in this managed Windows environment; it was stopped rather than treated as a product pass/fail. No WebKit failure implicated the catalog API or the P0 data boundary.
+
+## 第五輪前後台閉環修正 — 2026-09-27
+
+- P0 Catalog 以目前同一份 `.demo-data/lan-demo-third-round-final-2/catalog.json` 完成 API 關卡：價格 `1500 → 1555 → 1500`；下架時 public GET 不回傳、admin GET 顯示 `draft`；重新上架後恢復 `published`。沒有建立第二份商品清單。
+- 目前資料為 10 筆：原始 8 件 published、既有 `第九種 UI 測試茶...` 1 件 draft、使用者新增的 `台灣野生紅茶` 1 件 published。重啟 server 後仍存在；public catalog total 9，admin-inclusive total 10。
+- 真正重現並修正的 checkout P0 是空白選填 Email：UI 初始送出 `email: ""`，server validator 正確回傳 `Invalid email`（400），因此未進成功頁。現在 `normalizeDemoCheckoutDraft` 空白時移除欄位，有內容時保留並交給原有 validator；OTP 與 server 驗證未移除。
+- LAN browser flow（360×800）驗證首頁「訂單查詢」、9 件 published 商品、OTP、`POST /api/demo/orders` 200、`/checkout/success` 感謝／訂單編號／狀態／返回首頁／主動查看訂單；無 pageerror／requestfailed。這仍是自動化 LAN 證據，不是真人手機驗收。
+- P1 未接入影像服務：`raw-data/` 不存在，專案沒有 OCR／茶品辨識／圖片合成服務；只有可選的內建 image generation 能力與 Next 間接依賴的 `sharp`，不能據此宣稱 P1 完成。
+- 驗證：Vitest 32 files／177 tests、TypeScript、Webpack build、ESLint 0 errors（5 warnings）、Chromium e2e 14/14；WebKit 仍受既知本機 hang／Avast 環境限制。`AGENTS.md`、`next-env.d.ts` 維持未提交。
+
+## 第五輪補充驗收 — 2026-09-27
+
+- 3013 已停止後由目前 `codex/wave-7-shopping-quality-gate` 工作樹重新啟動；重啟後 listener 為 `172.20.10.4:3013`，`GET /api/demo/catalog?limit=50` 回傳 HTTP 200。Windows 禁止查詢完整 Node command line，因此以啟動工作樹、啟動環境、listener 與 API 內容作版本證據；不能由此替代真人手機截圖。
+- 第九種合成測試茶 `台灣野生紅茶` 在同一份 `.demo-data/lan-demo-third-round-final-2/catalog.json` 完成 `888 → 999` 價格修改、`published → draft`（公開 Catalog 隱藏）、再 `draft → published`；重啟 3013 後仍為價格 999、`published`，公開總數為 9。未清空或重建資料。
+- 新增 360×800 Playwright 回歸關卡，確認品牌導覽中的「訂單查詢」可見且 bounding box 完整位於 viewport；對目前 Wave 7 渲染結果通過。證據圖為瀏覽器渲染，不是真人手機截圖：`docs/testing/evidence/fifth-round-2026-09-27-home-mobile.png`、`...-home-desktop.png`。
+- 實際影像辨識／資訊提取／主體合成仍 BLOCKED：目前只有明確標示的 Mock 流程，沒有 raw-data 茶樣來源、OCR／vision provider 或可驗證的衍生素材 manifest；不得把 Mock 預覽算作完成。
+- 本輪沒有新增網站業務功能或外部服務；`AGENTS.md`、`next-env.d.ts` 仍為既有未提交環境變更，未 staged、未提交。
+- 本輪新回歸測試與驗證：Vitest 32 files／177 tests、TypeScript、Webpack build、ESLint 0 errors／5 warnings、Chromium e2e 15/15；WebKit 未重新宣稱通過，仍受既知 Avast／managed Windows 限制。
+
+## 2026-09-27 收尾修復與明日交接
+
+- 工程現場：branch `codex/wave-7-shopping-quality-gate`；本節驗證交付點以 Git log 與遠端分支確認為準。`AGENTS.md`、`next-env.d.ts` 是既有 Next.js／環境未提交變更，未覆蓋、未 staged。3013 使用目前 worktree、`DEMO_DATA_DIR=.demo-data/lan-demo-third-round-final-2`、LAN Demo flags，未清空資料。
+- P0 品牌：公開 metadata、首頁品牌導覽與 aria-label 已統一為「陳老師茶行」；歷史 specs、舊證據與交接紀錄保留原貌。新增品牌一致性 tests，程式碼與 public storefront 不再暴露「龍映茗茶」。
+- P0 結帳根因：API 實際回傳 200 且已建立訂單，但 `/checkout/success` route 原先丟棄 `?order=`，只等待 client storage effect，造成手機看見「正在準備訂單資訊」。現在 server page 直接傳入非敏感 order id；同源 LAN Chromium 已實際顯示感謝、訂單編號、狀態、返回首頁、查看訂單，查單 secret 仍不渲染。
+- P0 Catalog：同一 file-backed store 的八種茶與測試茶保留；`台灣野生紅茶` 的 `888 → 999`、下架隱藏、重新上架、重啟持續結果已在前一階段驗證，未建立第二份商品清單。
+- P0 手機導覽：360×800 與 1280×800 LAN browser 均實際看見品牌導覽「訂單查詢」；實體手機仍須明日重新載入 3013 並由陳老師確認，瀏覽器證據不能替代真人驗收。
+- P1 後台欄位：既有／新增商品表單與 Catalog update boundary 已支援中文茶類、售價、庫存、香氣、口感、產地、商品介紹；既有八種 fixture 的 aroma／taste／teaRegion 會載入。圖片仍區分原始素材與未完成合成主圖，不宣稱 AI。
+- P1 影像流程仍 BLOCKED：工作樹沒有可用 raw-data 茶樣、OCR／vision／composition provider 或授權衍生 manifest；目前 Mock 流程只能作 UI boundary。明日唯一優先工作是實體手機重跑 P0 閉環；影像服務需另行提供來源、授權與工具後再決策。
+- 證據：`docs/testing/evidence/2026-09-27-finish/home-mobile.png`、`home-desktop.png`、`checkout-success.png`、`admin-product-fields.png`；均為 LAN Chromium 實際渲染，不是真人手機截圖。
+- GitHub PR #15：本機沒有 `gh` CLI，未宣稱已讀取 PR 狀態；不影響本地修復，明日可用 GitHub connector／瀏覽器補查。
+
+## 2026-09-27 後台商品管理簡化決策
+
+- 內建影像辨識、資訊提取、主體拆解、圖片合成與 Mock 進度流程正式取消；網站不再宣稱或提供這些能力。照片由店家自行拍攝或使用外部工具處理後，再以上傳素材進入網站。
+- `/admin/products` 改用 `ProductManagementPage`，新增頁與編輯頁共用 `ProductFields`、`minimumProblems` 與相同 Catalog PATCH／POST boundary。新增使用空白表單；編輯載入既有商品的名稱、類別、規格、價格、庫存、香氣、口感、產地與介紹。
+- 後台清單保留新增、編輯、上架、下架；前台與後台均讀取同一 `/api/demo/catalog` 與 file-backed Catalog Store。publication 變更只改狀態，不刪除商品或歷史訂單。
+- `PublishingService` 已移除 `generateSummary`，避免 service contract 保留已取消的 Mock 文案生成能力。既有八種茶與 Demo 資料未清空、未重建。
+- `AGENTS.md` 與 `next-env.d.ts` 的既有未提交變更仍未 staged；本階段不得覆蓋或提交。
+- 驗證：Vitest 35 files／176 tests、TypeScript、Webpack production build 通過；ESLint 0 errors、5 個既有 warning（圖片最佳化與 internal navigation）。真人手機驗收仍需由店家執行。影像 AI 現在是已取消／out of scope，不再是網站交付阻塞。
+
+## 2026-09-27 晚間接續檢查（未改動 Demo 商品資料）
+
+- 最新程式提交：`088926f` 保留結帳成功收據；`27326ed` 簡化姓名／手機末三碼查單介面；`17cb377` 為查單與 OTP 增加 SQLite Demo 限流。它們仍是本機合成 LAN Demo，不能視為正式驗證或正式推送服務。
+- 當次重跑 Vitest：40 files／192 tests 全部通過；前一次同一工作目錄的 TypeScript 呼叫沒有顯示編譯錯誤。Node 仍是 24.21.0，和 package.json 固定 24.19.0 不符。後續另一次未先切到工作樹的 Corepack 命令觸發不必要下載，已停止；不將該次列為成功驗證。
+- `http://172.20.10.4:3013/` 及 `/api/demo/catalog?limit=50` 當下均回傳 200，後者 `value.total=8`。舊交接曾記錄公開 9 件、含草稿 10 件；須先核對現行 PID／`DEMO_DATA_DIR`／相對應的 catalog.json，不能據此推定資料遺失，也不得清空、重建或將 fixture 覆寫現存資料。
+- 保留進場前既有 `AGENTS.md`、`next-env.d.ts` 未提交改動；3013 正在運行，不任意終止。真正真人手機驗收、通知實際送達、正式支付與 ERP 均未完成。內建影像辨識及合成已取消，照片由外部處理後上傳。
+- 下一個單一優先步驟：核定唯一 Demo data directory、用同一個 LAN origin 在實體手機完成姓名／末三碼／OTP 查單與感謝頁，並檢查 429 提示；有可重現錯誤才做小範圍修正。
+
+## 2026-09-27 實機查單結果返回入口修正
+
+- 游老師手機實際查單成功，截圖顯示訂單成立、模擬付款狀態及 preview-only 通知；指出結果卡片底部缺少返回首頁入口。這是已觀察到的真人 UI 缺口，不把通知預覽當作已推送。
+- `OrderLookupPage` 在成功結果卡片末端加入前往 `/` 的「返回首頁」連結，未修改查單 OTP、姓名／末三碼、查單憑證、限流或 Demo 資料。回歸測試同時驗證未查到結果前不顯示該連結、查詢成功後連結指向 `/`。
+- 本地驗證：focused Vitest 2/2、TypeScript `tsc --noEmit` 與 `git diff --check` 通過；未做真人手機第二次確認。`AGENTS.md`、`next-env.d.ts` 為原有未提交環境變更，保留不納入此修正。
+
+## 2026-09-27 店家手機導覽接續
+
+- 本機 3013 首頁與 `/admin/orders` 皆 HTTP 200；保留原有店家登入、付款確認、包裝照片、出貨及模擬通知。為店家訂單頁增加「返回首頁」連結，避免手機操作進入後無返回選項。
+- 對應 UI 與工作流 focused Vitest 3 files／6 tests、`tsc --noEmit`、`git diff --check` 通過。沒有建立、修改或刪除任何現存 Demo 訂單／商品，也沒有重啟 3013。真人店家端登入與包裝、出貨仍待操作驗收；請勿於聊天或 Git 分享店家密碼。
+
+## 2026-09-27 查單憑證遺失的 OTP 前置防護
+
+- 實體手機查詢舊訂單時，因原下單分頁被覆蓋、查單憑證未帶入，先前仍能領取 Demo OTP，到提交查單才提示憑證缺失。這不代表舊訂單被刪除；伺服器僅持有查單憑證摘要，不能反推原憑證。
+- 現已在取得 OTP 前檢查完整訂單編號與查單憑證；缺少時停用按鈕並明確提示原下單分頁或自己保存的憑證。查單原有姓名、手機末三碼、一次性 OTP、查單憑證及限流安全條件全部保留。敏感憑證不放入 URL、公開畫面或持久化 localStorage。
+- 驗證：focused Vitest 2 files／5 tests、TypeScript `tsc --noEmit`、`git diff --check` 通過。此功能僅防止無謂領取 OTP，**沒有**完成舊憑證補發、跨分頁自動同步、正式簡訊或顧客實體手機再次驗收。若未來設計補發，需獨立核准身分確認、濫用限制與一次性換發契約。
+- 現有 Demo 資料（8 published／11 total catalog、歷史訂單）未修改；`AGENTS.md`、`next-env.d.ts` 是原有未提交環境變更，不納入提交。
+
+## 2026-09-27 手機查單固定返回入口修正
+
+- 實體手機在缺少原查單憑證時，查單頁只顯示憑證前置警示、無可見返回首頁入口；原本連結誤放在 `result` 成功條件內。本輪改為頁面標題下方固定顯示「返回首頁」，不依賴登入、OTP、憑證或查單結果；成功結果不重複顯示第二個同名連結。
+- 回歸測試覆蓋有保存收據、成功查單、缺少憑證時首頁連結均可見。focused Vitest 2 files／5 tests、TypeScript 與 diff check 通過。未重啟 3013、未清除或修改商品及訂單；截圖左下角顯示 2 Issues，尚未讀取開發 overlay 詳細錯誤，不能宣稱已修復。
+- 先前要求游老師從新訂單開始的流程還未得到成功頁截圖，該驗收不能標註通過。下一步應先由手機驗證固定返回入口，再調查新訂單為何未帶入同分頁查單憑證；不得降低 OTP／查單憑證安全要求。
+
+## 2026-09-27 成功頁同分頁收據重新讀取
+
+- 發現 `/checkout/success?order=...` 的 server props 已有 orderId 時，原版 `DemoCheckoutSuccessPage` 的 effect 直接略過 `sessionStorage`，不會再核對或讀取原下單分頁完整收據；手機另開分頁時 sessionStorage 可能不存在。這是流程銜接問題，不能單憑此認定某筆手機訂單的唯一失敗原因。
+- 修正：成功頁仍以 server 傳來的訂單編號立即顯示，但 client effect 只接受 `orderId` 完全相符的同分頁收據，不接受其他訂單的憑證；當收據缺失時明確說明同分頁限制，仍不在畫面或 URL 顯示 secret。查單端仍需原查單憑證、姓名／末三碼及 OTP，沒有實作繞過驗證的補發。
+- focused Vitest 4 files／8 tests、`tsc --noEmit`、diff check 通過。既有本機 Demo 仍在 3013，未重啟或修改資料；本修正尚未取得真人手機新訂單完整驗收。`AGENTS.md` 與 `next-env.d.ts` 原有環境改動不納入提交。
+
+## 2026-09-27 晚間最終交接 — 真人手機驗收完成
+
+- 游老師本人手機依序完成結帳 1/3 身分與合成 OTP、2/3 配送地址、3/3 確認，看到感謝購買與新訂單編號，再進入同分頁查單；姓名 Yu、末三碼 000、同筆憑證自動帶入，取得查單 OTP 後顯示「訂單成立／待模擬確認」。不要再寫成未經真人驗收或要求重新下同一筆訂單。
+- 查單頂端固定返回入口已真人確認；結果底部再次找不到入口，已於 2870803 新增第二個返回首頁並完成程式測試，但尚未單獨點擊驗收。全站深色實心白粗字按鈕方向已獲真人手機回饋「舒服多了」。
+- Demo 店家密碼僅存 4090 本機權限限制的桌面文字檔，不可納入 Git／聊天；原資料目錄與備份保留，禁止清空商品、訂單。店家登入已真人完成，包裝拍照與出貨端到端仍需逐步真人驗收。
+- 通知僅 preview-only；紅色 Next dev Issues 尚未定位詳情；影像辨識與合成已取消。保留既有 AGENTS.md 與 next-env.d.ts 未提交環境變動，勿 stage／覆寫。
+- 明日先讀 README、AGENTS、WORKFLOW、HANDOFF、WHITEPAPER 和 Git；驗證 3013 與資料目錄，定位 dev Issues，再檢查查單底部返回入口與店家包裝出貨。不得碰正式金流、ERP 或宣稱正式通知完成。
+
+## 2026-09-28 查單導覽安全補強（待實機驗收）
+- 成功頁若缺少同分頁 sessionStorage 查單憑證，顯示補填及聯絡店家說明，入口改為「前往安全的訂單查詢」；不將秘密放入 URL、公開 DOM 或 localStorage，也不繞過 OTP、姓名、末三碼與限流。
+- 查單錯誤提供明確重試、成功後可查另一筆；結帳離開導覽加強深色按鈕及手機寬度排列。只改 UI／提示及其測試，沒有清理 Demo 資料。
+- 先前 Codex 執行 Vitest 遇 spawn EPERM；重新以現有 vitest.cmd 啟動後完成 41 files / 196 tests，TypeScript 與 focused ESLint 均通過，git diff --check 通過。新分頁缺憑證的提示與安全查單入口已增加回歸斷言。
+- edea 3013 LAN dev server 已恢復並讀到既有 catalog 8 件 published；沿用 .demo-data/lan-demo-third-round-final-2，不重建 catalog、orders 或 outbox；非正式對外部署。
+- 待游老師實體手機確認：同分頁下單查詢、新分頁缺憑證復原、查詢另一筆、返回首頁、店家包裝及出貨。正式付款、簡訊、Email/Web Push、ERP 仍未啟用。
+- AGENTS.md 和 next-env.d.ts 是進場前未提交的環境變更，本階段不修改、不 stage、不 commit。
+
+
+## 2026-09-28 店家協助補發查單密語（待手機實機驗收）
+
+- 游老師手機已驗收：顧客下單、OTP 查單、店家模擬付款、上傳包裝照片、確認出貨。原訂單 DEMO-a2afefc2-e142-4469-b8b4-fe82afdd6ff5 在店家端為 shipped；顧客端刷新後 sessionStorage 遺失查單密語，無法驗證同步狀態，不能視為顧客端出貨查詢通過。
+- 已加同分頁憑證重新讀取；若瀏覽器憑證真的遺失，必須由店家先以其他方式核對顧客身分，再於本機 Demo 店家已登入畫面針對單一訂單手動確認並輪替查單密語。舊密語立即失效，新的 32-byte random 密語只在授權回應和當次店家頁面顯示，不能從雜湊還原。回應 no-store，畫面可選取及複製；請勿透過公開聊天傳遞。正式網站尚未實作此功能。
+- 顧客仍需使用訂單編號、完整合成手機號碼、姓名、更新後的查單密語及獨立 OTP；沒有姓名與末三碼直接繞過的捷徑。補發不改付款、出貨、包裝照片或通知紀錄，不自動寄送任何訊息。
+- Codex 交付 commit 78ed6a0，補強 no-store 與可選取密語的兩個檔案尚需本輪單獨提交。獨立驗證：TypeScript 通過；focused 3 files / 22 tests；全套 41 files / 205 tests 通過（Vitest 限定 threads、單 worker，避開 Windows spawn EPERM）。尚未執行真人手機補發/重新查單驗收；不能宣稱端到端完成。
+- 原本 AGENTS.md、next-env.d.ts 未提交修改保留；沒有清除或重建既有 .demo-data；沒有正式金流、物流、Email、推送。店家登入憑證保留在本機私有檔，勿發到聊天。
+
+## 2026-09-28 顧客與店家共用訂單進度燈號（待手機視覺驗收）
+- 五個固定關卡：訂單成立、模擬付款確認、完成包裝、確認出貨、確認送達；完成綠燈、未完成紅燈，搭配文字。依授權 API 訂單狀態判定，顧客仍需 OTP。通知 queued/preview-only 不視為實際送達。手機單欄版。
+- TypeScript、focused 3 files / 12 tests、全套 42 files / 208 tests 通過。未清除既有資料，手機視覺驗收待確認。AGENTS.md、next-env.d.ts 既有修改不動。
+
+## 2026-09-30 Wave 7 shopping quality gate / issue #17
+
+- Customer payment is now traditional/manual only: bank transfer, cash, phone confirmation, or LINE voice confirmation. Credit-card and LINE Pay integration are not implemented. Orders record the selected method and start as `pending-manual-verification`.
+- Only the authenticated merchant workflow can move an order to `manual-confirmed`; packing photo, shipment, and delivered remain separate states. Customer lookup shows the payment method and manual-payment state through the existing OTP and lookup-secret gates.
+- Mobile checkout visibly includes the four traditional choices and explains the no-charge/manual-confirmation boundary. Primary navigation links are dark, high-contrast pill controls. Existing Catalog Store coverage verifies image replacement persistence across reload; the mobile e2e flow now covers delivered status.
+- Scope guard: no AI image composition, OCR/vision provider, ERP expansion, external payment, real notification, or production deployment was added.
+- Actual verification: `tsc --noEmit` passed; focused ESLint passed with 0 errors and 1 existing Next navigation warning; `git diff --check` passed. Vitest could not start because Vite config bundling hit the known Windows worktree symlink `spawn EPERM`; Turbopack hit the known invalid external `node_modules` symlink panic; `next build --webpack` also hit environment `spawn EPERM`. Full lint still reports only the two pre-existing generated `.demo-data/*.cjs` errors plus existing warnings.
+- Commit `0cdd848` is pushed to `origin/codex/wave-7-shopping-quality-gate`; GitHub state is `SYNCED` for this branch. Local `gh` and the browser connector could not read PR #15; this remains an external read limitation, and no PR status is invented. Existing uncommitted `AGENTS.md` and `next-env.d.ts` changes remain untouched, unstaged, and uncommitted.
+
+## 2026-09-30 Wave 7 closeout verification
+
+- Preserved the pre-existing unstaged `AGENTS.md` and `next-env.d.ts` changes. Added only the quality-gate fixes: ignored generated `.demo-data` scripts in ESLint, corrected one-time OTP test fixture reuse, updated Demo E2E selectors to the current traditional-payment/product-photo scope, serialized the shared-data mobile Demo E2E to one worker, and fixed order-lookup hydration plus the product-management link contrast issue.
+- Confirmed the payment boundary remains bank transfer, cash, phone confirmation, or LINE voice confirmation only. No credit-card or LINE Pay path was added. Demo orders remain `pending-manual-verification` until merchant confirmation; packing photo, shipped, and delivered remain distinct.
+- Fresh verification: TypeScript passed; ESLint passed with 0 errors and 7 existing warnings; Vitest 42 files / 209 tests passed; webpack production build passed and generated all 17 static pages; Pixel 7 Chromium Demo E2E passed 2/2 covering catalog image replacement persistence, cart, three-step checkout, traditional payment, thank-you page, OTP lookup, merchant manual confirmation, packing photo, shipped, and delivered.
+- Fresh Chromium axe targeted verification for the current product-new page passed 1/1 after rebuilding standalone output. The full legacy `playwright.config.ts` suite is not a release pass: its current run was 13/30 passed, with WebKit browser contexts closing in this Windows environment and several Chromium product-draft assertions still targeting the superseded pre-Wave-7 draft UI. These are separate from the passing current mobile Demo gate.
+- Cloud Run is documented only as the future Docker target (`asia-east1`); the repository has no safe staging/preview deployment URL or deployment workflow. No cloud or production environment was changed. Remote PR #15 / Issue #17 API reads remained unavailable because `gh` is not installed and outbound GitHub API access was refused.
+
+
+## 2026-09-30 Cloud CI installation repair — PR #19
+
+- Branch `fix/wave-7-pnpm11-build-policy` starts from Wave 7 head `64bed8bb02233874e664c532773f2373b3f077f7`; implementation commit `0159c6cdf947d82a447cdb3ab6acf012fcf9362a`.
+- Root cause: pnpm 11 no longer uses `onlyBuiltDependencies`. Quality run `36625610230` failed frozen installation with `ERR_PNPM_IGNORED_BUILDS` for `unrs-resolver@1.12.2`.
+- Reused the exact `main` configuration: `allowBuilds` permits only `unrs-resolver`. No dependency, lockfile, workflow, application behavior, local data, credential, deployment or merge change. Independent QA review found no blocking issue.
+- Fresh cloud Quality run `36661442847`: frozen install, browser installation, lint, typecheck, 42 test files / 209 tests, and production build all passed. The original installation blocker is resolved.
+- Full Quality remains FAIL: browser suite passed 26/30; four failures are the desktop/phone legacy product-draft tests in Chromium and WebKit (`e2e/checkout-product-draft.spec.ts`, lines 90 and 114). They look for removed Demo copy and the former `新增一項茶品` heading. Audits, Docker build and container smoke were skipped after that failure and must not be reported as passed.
+- Next task: inspect the current product-management flow and replace obsolete draft-flow E2E expectations with equivalent coverage of the approved simplified form; retain save/edit/publish behavior coverage rather than suppressing failures. This is separate from the narrow installation repair.
+- PR #19 targets `codex/wave-7-shopping-quality-gate`, not main; neither PR #19 nor PR #16 was merged. Work was performed through the GitHub connector and cloud runner without Acer/4090.
+
+
+## 2026-09-30 Current product-form browser tests — PR #20
+
+- Branch `fix/current-product-form-e2e` is stacked on PR #19 (`fix/wave-7-pnpm11-build-policy`). Runtime-verified implementation commit: `f15445ae2b4e894f549b916a37b841a87ae841cc`.
+- Replaced obsolete AI-generated introduction/preview expectations with current manual product fields. Added desktop unpublished saving, manual introduction/price editing, confirmation reset after edits, explicit publication, and current 360px phone saving/overflow coverage. Checkout tests are preserved. No application or authentication changes.
+- Test review found and corrected the literal NT$ price expectation and a repeated-fill locator issue: initial accessible label is checked, then textarea edits use the existing stable product-summary ID. Independent QA approved the final diff.
+- Fresh cloud Quality run `36663002694`: frozen install, lint, typecheck, 42 unit/component files / 209 tests, production build, all 32 Chromium/WebKit browser/accessibility tests, and both dependency audits PASSED.
+- Full Quality still FAIL at Docker build: Dockerfile deps stage copies only package.json and pnpm-lock.yaml, omitting pnpm-workspace.yaml before frozen installation. Therefore container install repeats ERR_PNPM_IGNORED_BUILDS for unrs-resolver@1.12.2. Container smoke was skipped. Next task: restore workspace-config COPY in the deps stage (compare existing main baseline), then rerun cloud Quality.
+- Standard browser checks exercise in-memory prototype publishing; they do not prove durable storage. Actual file-backed catalog editing/photo replacement tests remain in e2e-demo/catalog-persistence.spec.ts and were not part of this standard workflow.
+- PR #20 and #19 remain unmerged; no deployment or computer-local data change. Update was completed using GitHub cloud execution while user computers were offline.
+
+
+## 2026-09-30 Docker repair and cloud synthetic transfer loop — PR #21
+
+- Branch `fix/docker-and-cloud-order-loop`, stacked on PR #20. Docker deps now copies pnpm-workspace.yaml before frozen install (exact main baseline); .dockerignore excludes .demo-data.
+- Cloud Quality now runs existing isolated Pixel 7 catalog persistence/photo replacement and order-loop tests. Transfer test explicitly selects bank transfer and verifies pending manual confirmation before order creation, then merchant confirmation, packing photo, shipment, delivery and OTP-protected customer lookup. No real payment/notification/logistics or deployment.
+- Verification run `36663811517` at `212138a`: lint/typecheck, 42 files / 209 unit tests, production build, 32 standard browser checks, and 2 synthetic mobile checks PASSED. Full run failed dependency audit (6 findings: 2 moderate / 4 high; high reports name brace-expansion, advisories GHSA-qhr7-859c-m2p7 and GHSA-6j4-fj2g-mc7p). Production audit and Docker were skipped in that sequential run. No audit suppression or threshold change.
+- Moved unchanged container build/health steps to independent `container` job so container diagnostics execute without removing security gates; overall Quality still fails when quality audit fails. Docker build passed run `36664205975`, but immediate health curl hit connection reset 0.2s after startup. Restored main's retry-all-errors pattern, bounded connect/transfer/retry timeouts, retaining failure logs and exit 1.
+- Fresh run `36664362971` at `ab3e080684464335dc9c52159b529c35bceeb1d3`: container job PASSED both Docker build and health check. Quality job was still running at this checkpoint. Independent QA approved configuration, workflow split and bounded startup retry.
+- **USER ACCEPTANCE: 游老師尚未實測新匯款流程。** Synthetic automation is not user acceptance. Keep test-only; next user walk-through must cover bank-transfer selection, submission, merchant manual verification and customer lookup. Do not mark user acceptance complete before explicit actual test result.
+- Next engineering blocker: assess and repair dependency audit findings using package-manager generated lockfile and fresh security review; do not hand-edit integrity values, ignore advisories or weaken CI. Then rerun complete Quality. No PR merged, production changes or computer-local data touched.
+
+
+## 2026-09-30 Security repair — PR #22 / full cloud Quality PASS
+
+- Branch `fix/brace-expansion-security`, stacked on PR #21; verified implementation commit `600df645d59af43885fd6ef44097ecffec350ef5`.
+- Native audit root cause: brace-expansion 1.1.18 and 5.0.9 affected by GHSA-qhr7-859c-m2p7 and GHSA-6j4f-fj2g-mc7p. Maintainer advisory confirms patches 1.1.20 and 5.0.11. Narrow exact-version overrides preserve existing major lines and change no direct dependency.
+- Lockfile generated by pinned pnpm 11.19.0 on read-only cloud runner with --lockfile-only --ignore-scripts. Reviewed generated diff changes only the two overrides, package versions/integrities, snapshots and minimatch references. Applied generated diff with zero fuzz; no hand-written integrity or resolution changes. Temporary generation workflow removed. Independent QA/security review approved final patch.
+- Fresh Quality run `36665399382` completed SUCCESS: frozen install, lint, typecheck, 42 files / 209 unit/component tests, production build, 32 Chromium/WebKit browser/accessibility tests, 2 Pixel 7 synthetic catalog/order-loop tests, both native audits, Docker build and container health all passed.
+- All-dependency audit: 0 high/critical, 2 moderate findings remain. Production dependency audit: no known vulnerabilities. Audit thresholds/commands were not weakened. The high-filtered log does not identify the two moderate advisory details; collect native full JSON audit and assess them in follow-up before release, review by 2026-10-07. Do not claim all dependencies vulnerability-free.
+- New traditional bank-transfer flow has automated synthetic coverage only. **游老師尚未實測新匯款流程；人工驗收未完成。** No real payment, notification, fulfilment, deployment or merge performed.
+- Next: preserve and review stacked PRs #19→#20→#21→#22; prepare a safe test deployment using existing verified permissions/environment, then arrange user's bank-transfer→order→merchant verification→customer lookup walk-through. Merge/release remain separate approved actions.
+
+
+## Private Render phone preview — 2026-09-30
+
+- User connected Render and explicitly confirmed 馭靈's workspace (`tea-dau8esugekts73ddbt5g`). User requests a phone-accessible test URL while both computers are offline.
+- Branch `feature/private-cloud-demo`; draft PR #23 https://github.com/Johnyu88/cheng-tea-shop/pull/23 stacked on security PR #22. Verified code commit `55c5c34ead0801943a5424b6175fd2315b1c0787`.
+- Added explicit isolated cloud mode, exact HTTPS onrender.com origin, hashed high-entropy Basic preview gate, independent API origin/authentication rechecks, secure merchant cookies, merchant-only catalog mutations/unpublished reads and fail-closed production launcher. Local production remains disabled without validated explicit cloud configuration.
+- Full Quality run https://github.com/Johnyu88/cheng-tea-shop/actions/runs/36669259766 completed SUCCESS on the verified code: frozen install, lint, typecheck, 43 files / 232 tests, production build, 32 browser/accessibility checks, 2 synthetic mobile checks, cloud build and production cloud API/browser smoke, Docker build/health and both native audits. Focused cloud run36669256107 also succeeded.
+- Cloud smoke proves synthetic bank-transfer order → authenticated merchant manual confirmation → packing photo → shipment → delivery → protected lookup. Phone-viewport Chromium proves Basic forwarding, checkout, secure merchant session and catalog access using a test-only loopback edge. This is not evidence of actual Render HTTPS availability or human acceptance.
+- Audit: no high/critical findings; 2 moderate development findings remain as previously recorded. Production audit reports no known vulnerabilities. Existing lint/build warnings remain; thresholds were not weakened. QA review approved final application and smoke adapter with no blocking findings.
+- Deployment state: **BLOCKED_EXTERNAL — NO TEST URL YET.** Direct creation of one free Singapore Node service (`cheng-tea-private-preview`) failed with Render400 “repository URL is invalid or unfetchable” for the correct https://github.com/Johnyu88/cheng-tea-shop URL. GitHub metadata confirms private repository. Render service inventory is empty; no service or live deployment was created.
+- Next required external action: in Render Account Settings → Account Security → Git Deployment Credentials connect GitHub; in Render GitHub app repository access include only Johnyu88/cheng-tea-shop. See https://render.com/docs/git-provider . Plugin OAuth alone does not prove private Git deployment credentials. Do not make repository public or bypass access controls.
+- After access is granted, retry direct creation in confirmed workspace: runtime node, free, Singapore, branch feature/private-cloud-demo, autoDeploy no; NODE_VERSION24.19.0, SKIP_INSTALL_DEPStrue; build `npx --yes pnpm@11.19.0 install --frozen-lockfile && npx --yes pnpm@11.19.0 run build`; start `node start-cloud-demo.mjs`; NEXT_PUBLIC_DEMO_COMMERCE/DEMO_COMMERCE_CLOUD enabled; DEMO_DATA_DIR /tmp/cheng-tea-preview. Generate fresh independent preview/merchant credentials and store only preview SHA256 in provider. Never commit secrets or print them in logs.
+- Verify actual Render live status, HTTPS health/authentication/origin checks and synthetic workflow before delivering URL and access credentials. No main merge or production release authorized/performed.
+- Free service preview storage is ephemeral across restart/deployment; use synthetic entries only. Arbitrary real personal data is not fully prevented by the application. No real payment, shipment or external notification enabled.
+- **游老師尚未實測新匯款流程；人工驗收未完成。** Automated evidence must not be promoted to human acceptance.
+
+## 2026-09-30 13:34 Taipei — Render private preview LIVE (supersedes external blocker above)
+
+- User screenshot confirms Git Deployment Credentials Johnyu88 and Render GitHub app installed with All repositories. Repository access retry succeeded; no additional permissions changed by agent.
+- Created authorized free Singapore Node service `srv-dau9s69srm7s73bd3deg`, cheng-tea-private-preview, in confirmed workspace `tea-dau8esugekts73ddbt5g`. URL https://cheng-tea-private-preview.onrender.com ; dashboard https://dashboard.render.com/web/srv-dau9s69srm7s73bd3deg .
+- Deployment `dep-dau9s7hsrm7s73bd3jp0` is LIVE for commit `efd047f8575b6cbd2806ba9f616fdf7caa2b7770`; initial build finished2026-09-30T05:30:30Z. autoDeploy remains OFF; these checkpoint-only commits do not redeploy.
+- Actual public HTTPS verification PASSED: generic unauth health200; protected HTML/API/image401; authenticated homepage200/no-store/DENY; missing/null/wrong Origin and wrong forwarded host401; unpublished catalog denied before merchant session; catalog read; synthetic bank-transfer order using allowed phone0912000001; secure __Host-demo_merchant cookie; merchant manual payment confirmation; packing PNG; ship; deliver; secret+OTP protected lookup delivered.
+- Live smoke initially used an unsupported synthetic phone0912000002, correctly rejected400. Corrected harness to allowed0912000001; full rerun exited0. No product validation relaxed. Execution needed HTTPS environment proxy because direct Node DNS was unavailable; Python/proxied Node both reached actual HTTPS origin.
+- Render log backend temporarily returned503 during build; this is a provider log-query outage, not application failure. App health and complete live API smoke are independently verified.
+- Preview username is `preview`; preview access token and separate merchant credential are held outside Git. Supply preview token privately in the user's chat for access; merchant credential when guiding authorized merchant testing. Never put credentials into URL/docs/logs.
+- Only synthetic testing; ephemeral preview storage resets on restart/deployment. Allowlisted synthetic phones0912000000/0912000001 and synthetic OTP123456. No genuine bank transfer, external notification or fulfilment.
+- Remaining: **游老師親自測試新匯款流程** on actual phone; automation and live API evidence do not satisfy user acceptance. No main merge or production release performed.
+
+## Issue 24 preview handoff (2026-09-30)
+- Implementation: 8d12431; PR #25 targets feature/private-cloud-demo; main remains unchanged.
+- Verified: 49 files / 252 tests, TypeScript, production build, 2 mobile E2E cases, production cloud API/browser smoke. Lint: 0 errors / 9 warnings.
+- Isolated Render preview: https://cheng-tea-issue24-preview.onrender.com (srv-daujlk093c1s73egl1r0). Original preview and orders untouched.
+- Teacher phone binding remains pending; real SMS integration is unavailable. Simulated OTP is explicitly labeled and protected.
+- New Yu / TWD800 seed is synthetic reconstruction, not a backup. Free preview storage is ephemeral; no database clearing is performed.
+- Yu final acceptance and teacher authorization remain required; keep issue #24 open.
+
+
+## First merchant binding continuation (2026-10-01 Taipei)
+
+- User accepted creation/lookup of 261001-001; preserve the live preview containing this order.
+- Administrator-assisted enrollment procedure: docs/merchant-first-binding.md. Shared preview access does not authorize binding. Teacher consent and phone possession must be confirmed; teacher alone enters received OTP.
+- Real SMS adapter work: Twilio fixed HTTPS Messages endpoint; configuration via protected TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_MESSAGING_SERVICE_SID and DEMO_MERCHANT_SMS_MODE=twilio. No provider calls without valid protected configuration.
+- Activation blockers: actual teacher confirmation/phone and authorized SMS account configuration unavailable. Never fabricate confirmation or reuse simulated inbox as real SMS.
+- Deployment blocker: current service is free with ephemeral /tmp storage; no complete backup route exists. Do not redeploy or change env (which restarts service) before consistent full backup and verified restore of databases/catalog/media/photos. Existing source changes may safely push because autoDeploy is off.
+- No cloud environment, original service, or live order data changed in this continuation. Do not mark issue complete or ask Yu to test merchant actions until binding, real OTP and data protection are actually ready.
+- Verified continuation: 50 test files / 257 tests pass; TypeScript exit 0; lint exit 0 (0 errors / 9 existing warnings). Real-provider tests mock HTTP: no real SMS or handset delivery claimed.
+- Production build --webpack exit 0. Independent security review approved adapter/auth; deployment remains blocked to protect live order.
+
+## Password Demo acceptance continuation (2026-10-01 Taipei)
+
+Latest user decision supersedes SMS prerequisite: provider-selected DemoPasswordProvider now used for isolated Demo; retain SmsOtpProvider implementation for later formal integration. Both use common merchant session; business APIs unchanged.
+No changes to old Render service srv-daujlk093c1s73egl1r0 or original srv-dau9s69srm7s73bd3deg. Orders 261001-001/002 remain only in their old temporary-data environment; no migration claimed. New password acceptance station uses separate fresh data and credentials, autoDeploy off.
+Source/verification work continues on the same feature/issue-24-mobile-login branch and PR #25. Do not write credentials/OTP into GitHub, logs, screenshots or URLs. Deliver private Demo access to authorized Yu only.
+
+- Password backup verification: production build passed; mobile SMS E2E 2 passed; cloud password and SMS full API/browser loops passed including initial/final lookup and camera/gallery cancel/reselect/explicit confirmation. OTP issue/operator refuse non-SMS provider.
+- Latest user strategy: stop new self-built authentication; evaluate Better Auth/passkey 1.7.6 in separate sandboxes/passkey-lock app. Install/test native library, verify server session plus separate merchant allowlist, then AuthProvider-only integration after testing. Business API source remains unchanged. Physical Face ID/fingerprint requires human phone acceptance; virtual-authenticator evidence must be labeled.
+
+- Deployed password backup version 12a60bd105b84fe1840be7420c90235a60da05de to srv-daukf2ojo6nc73dhmrfg, https://cheng-tea-password-demo.onrender.com ; Render live deploy dep-daukf38jo6nc73dhmuag commit matches. Production HTTPS mobile-sized acceptance 12/12 passed, test order retained in new service (short 261001-001). Identical short numbers across independent stations do not indicate migration; this is a newly created synthetic order.
+- Release validation: 52 test files / 266 tests; TypeScript/lint/build passed (lint 0 errors / 9 warnings). Existing 261001-001/002 on srv-daujlk093c1s73egl1r0 were not modified or migrated. Private test configuration removed after live run; no credentials in source/output.
+
+## 2026-10-02 Final order-loop checkpoint
+- Fresh local verification on a91e0e3: 266/266 tests, TypeScript, lint (9 existing warnings), production build, full local API + mobile-browser order loop and two independent virtual Passkey fixtures PASS, all commands exit 0.
+- Details and retained logs: docs/testing/final-acceptance-2026-10-02.md and docs/testing/evidence/2026-10-02-final-*.log.
+- Independent QA source review: phone-ready final delivery cannot be claimed. Customer lookup requires original-tab receipt or saved order number/secret/full phone plus OTP. Passkey remains a separate sandbox with no merchant business authorization bridge.
+- BLOCKED_EXTERNAL: current cloud access/merchant/bootstrap secrets are unavailable; prior private test configs were intentionally removed. Render live deployment references were read, but no authenticated live revalidation or retained test order was created this round.
+- Do not redeploy/restart existing ephemeral services without verified full backup/restore. No application changes, product-management rework, payment-provider change or main merge.
+- Next: obtain current valid private test credentials; run authenticated live loop and preserve a fresh test receipt; phone Passkey acceptance precedes existing AuthProvider integration. Cross-device name/suffix-only lookup remains unimplemented.
+
+## 2026-10-02 live acceptance recovery
+- User authorized replacement of ephemeral password-demo orders for gate recovery.
+- Rotated only DEMO_PREVIEW_TOKEN_SHA256; existing service deployed source 0fe4a50.
+- Cloud browser acceptance: exit 0, 12/12 passed; retained delivered order 261002-001.
+- Pending phone order 261002-002 created and queried; synthetic phone 0912000000.
+- User screenshots show phone Passkey registration/logout/re-login success in independent sandbox.
+- Current evidence/limits: docs/testing/live-acceptance-2026-10-02.md. No secrets committed.
+- Still pending: actual handset camera preview, Passkey tea authorization integration, new-device lookup simplification.
+
+## 2026-10-02 cross-device lookup redesign
+- Explicit user instruction replaced customer long-secret steps with order number/name/phone suffix + mandatory OTP.
+- Frontend and backend implemented on existing feature branch; no service/architecture replacement.
+- Full tests 54/277 PASS, typecheck/lint/build PASS, local full order loop plus empty-storage mobile Chromium cross-device delivered lookup PASS.
+- Security reviewer approved only private synthetic demo scope. OTP remains simulated; physical iPhone Safari not yet verified.
+- Current report: docs/testing/cross-device-lookup-2026-10-02.md; retained evidence logs include Windows WebKit failure.
+- Existing next-env.d.ts unrelated change preserved. Passkey merchant integration remains separate unfinished task.
+
+- Cloud lookup release e05fa2c LIVE deploy dep-davakg2d0e5s73f85vj0; new mobile Chromium HTTPS full loop 12/12 PASS.
+- Linux mobile WebKit HTTPS fresh-context cross-device lookup PASS, no secret/full-phone transmitted, delivered shown.
+- Current phone fixture 261002-006 / 手機查單 / suffix000. No long-secret handoff needed. Private runner configuration removed.
+- Remaining: actual iPhone Safari final confirmation; OTP/delivery still simulated and Passkey merchant bridge separate.
+
+## 2026-10-11 Acer tea staging deployment checkpoint
+- Branch `fix/acer-https-demo-passkey-pr25`; application image built from `db392973e1809547a24f7334f18b79a323b2ba19`; draft PR #27 targets `feature/issue-24-mobile-login`. No merge to main.
+- Live staging is Tailnet-only: https://acer-v5.tail4d8b5a.ts.net/ . Tailscale Serve is enabled; Funnel is not. Docker Next app has no published host port and shares an isolated staging network with Caddy. Caddy host binding remains 127.0.0.1:8090.
+- Containers `tea-nextjs-staging` and `tea-caddy-staging` were running at checkpoint. Tailnet HTTPS `/api/health` and local Caddy `/api/health` both returned HTTP 200.
+- E2E synthetic acceptance: `/admin/orders` 200; `/admin/products` 200; Demo merchant session POST 200; session authenticated=true; Secure + HttpOnly `__Host-demo_merchant` cookie; Passkey enabled=true, registered=false; orders API 200; catalog API 200. Phone Safari/Face ID enrollment still requires manual acceptance.
+- Build passed on the application commit. Full unit suite: 319/319; typecheck passed; lint 0 errors / 9 existing warnings. Final targeted suite after proxy guard: 46/46. High-severity audit still reports one upstream `braces@3.0.3` advisory plus two moderate findings; nested-brace depth backport and regression test are included because registry has no newer release. Do not describe audit as clean.
+- Persistence check: stopped Next app, copied five data files to `C:\\data\\tea-staging\\backups\\snapshot-20261011-165248`, restored them into isolated `restore-check-20261011-165248`; SHA-256 hashes matched. Restarted Next app and API health returned 200.
+- Five-day soak monitor started 2026-10-11T08:53:12Z (2026-10-11 16:53:12 Taiwan); planned end 2026-10-16T08:53:12Z. Process PID 23292 was alive at startup verification. JSONL log: `C:\\data\\tea-staging\\soak\\soak-20261011.jsonl`; initial sample had both APIs 200, both containers running, error count 0. Monitor process persistence across Windows reboot is not configured; a reboot may interrupt the soak.
+- Staging credentials are stored only in the restricted local file `C:\\data\\tea-staging\\staging-access.txt`; never copy secrets into Git or chat. User should open that file locally on Acer to access Basic Preview and Demo login, then complete phone Passkey enrollment while iPhone is on the Tailnet.
+- Open: one high and two moderate audit findings remain visible to npm audit; physical iPhone Safari/Passkey acceptance pending; five-day soak is in progress and has not completed. Work/Codex quota was unavailable to query; last known Remote Desktop Commander remaining-call estimate was 27%.
+
+
+## Acer regression recovery 2026-10-11
+
+- Regression matrix and evidence: `docs/testing/acer-feature-regression-2026-10-11.md`.
+- Root cause was missing build-time `NEXT_PUBLIC_DEMO_COMMERCE=enabled` in Acer image. Repair commit `6a2b2e9014c53a657c4808729e0aeb5016924f40`; full touch-emulated mobile flow passed against isolated candidate after rebuilding. No app functionality was recreated.
+- Last documented live mobile-browser acceptance source is `0fe4a50ebb65ad9f66814e41915ebfe36987c368` (412x915 emulation); no Tea full-flow physical iPhone evidence is documented. Physical Safari/Face ID/photo picker remains a human gate.
+- Candidate `tea-nextjs-regression` serves through private Tailnet/Caddy; original `tea-nextjs-staging` remains running for rollback. Candidate data restored from synthetic snapshot after E2E. Caddy is bound to localhost port 8090; public exposure is off.
+- Five-day soak began `2026-10-11T10:13:06Z`, due `2026-10-16T10:13:06Z`; log at `C:\\data\\tea-staging\\soak\\soak-20261011-demo-mode-fix.jsonl`. In progress only.
+- Teacher bank/contact data in PR #26 remains unverified; no import. PR #28 is draft/unmerged; main was not changed.
+
+## 2026-10-12 PR #29 integration closeout
+
+- PR #29 remains open/draft on `feat/mobile-three-pwa-entries`; source head before closeout edits `3bc328337c23a7fac95e26bcfe5b036c7d64fd2f`; no main merge.
+- User-reported iPhone Safari acceptance 2026-10-11: Passkey logout/re-login, synthetic order loop, product publish/unpublish/edit, ORDER-01 payment reversal, ORDER-02 reopen packing accepted. ORDER-03 remains **not fully physically verified**.
+- Correction dialog is clarified as required, max 500 chars, with native required metadata; order behavior unchanged. Acer keeps its existing pre-copy 3bc build; this closeout does not rebuild it.
+- Quality run #133: lint/typecheck, 65 files/334 tests, build, browser/accessibility, default Playwright 32/32, and container smoke pass. Demo mobile E2E 3 pass / 1 fail / 1 skip; unchanged catalog persistence assertion fails at heading 商品已上架 and also failed on ancestor dce323c. Dependency audits skipped; security is not clean.
+- Acer :8443: isolated `tea-nextjs-pr29-8443-accept`, image `tea-nextjs-staging:pr29-8443-3bc3283`, ID `sha256:e6d7cfe92a7ef59b01547e2522c1a0747a42b941cad356ecd58bced0fffb8c33`, localhost 8092, independent path `C:\\data\\tea-staging\\pr29-8443-accept-v2-data`; exact Origin `https://acer-v5.tail4d8b5a.ts.net:8443`. Security checks passed. 443 → 8090 unchanged; both Serve ports tailnet-only; Funnel off.
+- Latest soak UTC 2026-10-11T23:49:56Z: local/Tailnet API 200, app/Caddy running, 0 errors. AUTH-02 UTC 2026-10-11T23:45:30Z: HTTPS 200, running, 0 errors. Five-day monitor is still **IN PROGRESS**, due 2026-10-16; original JSONL retained.
+- Full matrix, asset source gaps, Samsung instructions, deployment rollback and cloud gate: `docs/testing/pr29-integration-closeout-2026-10-12.md`.
+- Listener-only rollback: `tailscale serve --https=8443 off`; verify 443 still points to 8090. Do not remove containers or data.
+
+
+## 2026-10-12 Quality run #134 final result
+
+Run #134 tested closeout commit `a521b3732edf8c5db8f20248c993564f9f9c934a` and completed with Quality = failure; container job passed. Lint, typecheck, 65 files / 334 tests, production build, browser/accessibility all passed. Demo mobile E2E: 3 passed, 1 failed, 1 skipped. The failure is still the unchanged `e2e-demo/catalog-persistence.spec.ts:23` assertion for the 商品已上架 heading, matching the same failure on ancestor dce323c. Dependency audit and production dependency audit were skipped, so security remains unverified. No code behavior changed after run #134; subsequent handoff-only commit updates these findings.
+
+
+
+## 2026-10-12 deployment-preparation evidence (PR #29)
+
+PR #29 is still draft and unmerged. Current branch head: `ce888befb5f87614190e9171d44b3f2759cc8d36`; base `fix/acer-demo-build-flag-regression` remains at `dce7db10524dee93d35b04571c93e411b13d1ca9`. No merge or cloud deployment occurred.
+
+Quality #135's dependency and production audits were skipped by the workflow's implicit success condition after the catalog E2E step failed. The workflow now explicitly runs both audits after earlier failures (`always() && !cancelled()`). New run #138 is pending at handoff update time.
+
+Catalog E2E root-cause evidence: demo Playwright config selects simulated SMS auth; the catalog persistence spec previously opened `/admin/products/new` and submitted without creating a merchant Session. The product management page gates its form on authenticated Session and otherwise shows its login state. The original success heading assertion remains intact. Commit `c41d978f16d09442fea2a3db4d1c0c7aa8a3541a` adds the missing OTP/operator login setup; follow-up `b9d5f9bbaf6e58984e76583be6cc56f0fb4af2f7` preserves the original cart URL assertion syntax. Run #138 will verify the corrected flow; until then, root cause is evidence-based but remediation is not yet confirmed.
+
+Acer read-only checkpoint: existing 8443 candidate remains image `tea-nextjs-staging:pr29-8443-3bc3283`, localhost 8092; old PR #29 f95ba80 remains 8091; AUTH-02 and Caddy remain running. Tailscale Serve is still tailnet-only 443→8090 and 8443→8092. Health returned 200 for 8090, 8091, 8092 and both HTTPS URLs. Monitoring supervisors 20756, 12000 and 1932 were alive; original JSONL files were retained and still receiving updates. Five-day monitoring remains in progress. No candidate build, data write, Serve change or service replacement has occurred in this preparation phase.
+
+
+## 2026-10-12 follow-up: catalog test isolation and audit evidence
+
+Current code/workflow branch head before this handoff update: `5b996e8444c37641854f2bb4aaca490e55e8188b`; the handoff update commit will supersede it. PR #29 remains draft/unmerged.
+
+Quality #138 verifies the original catalog failure was fixed: catalog persistence passed after explicit SMS/operator merchant login. The same run then exposed a separate suite-isolation failure in `mobile-order-loop.spec.ts:49`: catalog and order tests shared one dev-server process and merchant OTP singleton; the simulated merchant OTP service enforces a 60-second resend cooldown, so the next test received a 403 without `value.challengeId`. The production cooldown is correct and remains unchanged. New config `playwright.demo.catalog.config.ts` runs catalog E2E on an isolated port/data/server; the main config excludes only that spec, and Quality runs both configs sequentially. Run #143 will verify the latest combined test harness.
+
+ORDER-03 automatic coverage was extended in `tests/order-corrections.test.ts` to cover all three actions (shipping exception, intercept request, shipping record correction), verify actor/reason/audit event, and prove shipment status remains shipped after a repeated ship attempt. This is automated synthetic coverage only; iPhone physical acceptance stays pending.
+
+Security audit was actually run on the PR lockfile in Quality #138 and independently against the clean Acer clone using pnpm 11.19.0: total 3 findings (2 moderate, 1 high), all in development tooling paths. The high advisory is `braces <=3.0.3` via `eslint-config-next > @next/eslint-plugin-next > fast-glob > micromatch > braces`, patched at `>=3.0.4`. The two moderate advisories are `brace-expansion` findings through ESLint/minimatch paths (patched versions reported by the audit are `>=1.1.21` and `>=5.0.12`). Production dependency audit reported no known vulnerabilities. Full dependency audit therefore remains red; do not label security completely clear. PR changes do not modify package manifests or lockfile, so these are existing dependency-tree findings.
+
+A fresh, clean Git clone of the PR branch exists at `C:\\data\\tea-staging\\pr29-1014-build` for isolated build work. It has not been installed, built, or used to change any running service/data. Existing Acer containers, both Serve routes, monitoring processes and original JSONL logs remain as recorded above.
+
+
+## 2026-10-12 PR #29 deployment acceptance checkpoint
+
+PR #29 remains open, draft, and unmerged. The feature branch head before this HANDOFF-only commit is `9a53b34a35b497ff6d95913d87aea305c573c866`; base remains `dce7db10524dee93d35b04571c93e411b13d1ca9`. No main merge, cloud deployment, or Tailscale Serve change occurred.
+
+Quality run #143 (run ID `38193685121`) tested application/workflow source commit `5b996e8444c37641854f2bb4aaca490e55e8188b`; intervening branch commits are handoff-only. Container job passed. Lint, typecheck, unit/component tests, production build, browser/accessibility, both isolated synthetic mobile E2E configurations, private cloud demo build, and private cloud order-loop smoke all passed. Both dependency audits executed. Production audit passed with no known production dependency vulnerabilities. Full dependency audit failed with 3 pre-existing development-tooling findings (1 high, 2 moderate): high `braces <=3.0.3` in the eslint-config-next / fast-glob / micromatch path; moderate `brace-expansion` findings through ESLint/minimatch paths. No manifest or lockfile change in PR #29. Quality is therefore red; the audit findings remain a cloud release blocker and must not be described as a clean security audit. Catalog persistence root cause is addressed by explicit simulated SMS/operator login and its own isolated Playwright server/data; ORDER-03 action coverage passes in CI but is synthetic, not physical acceptance.
+
+A new isolated Acer candidate was built from clean PR head `9a53b34a35b497ff6d95913d87aea305c573c866`:
+- Image: `tea-nextjs-staging:pr29-8443-9a53b34`; image ID `sha256:772bd29ad25e6e22c1cf160364c4f0dabfd5c436425a99273316c56d1619a82d`; image label confirms `NEXT_PUBLIC_DEMO_COMMERCE=enabled`.
+- Container: `tea-nextjs-pr29-8443-1014`, bind `127.0.0.1:8093 → 3000`; separate data directory `C:\\data\\tea-staging\\pr29-1014-accept-data`. No existing app data path was reused.
+- Credential-file values were compared in memory with the candidate's configured preview token hash and merchant password; both comparisons matched. No credential values were logged or copied.
+- Local health `/api/health` returned 200. Basic preview auth returned 401 without credentials and 200 with the file-matched credentials. Auth status returned provider=password/state=ready, Passkey enabled=true/registered=false on the fresh isolated data. A wrong :8444 Origin request was rejected with 401.
+- The valid merchant password POST to `/api/demo/admin/session` returned 403 despite matching the configured value. Therefore merchant login, session cookie flags/session replay, and full CSRF/Host negative matrix are **not accepted** on this candidate; investigate this before exposing it. The new candidate remains local-only and must not receive the 8443 mapping yet.
+- Existing `tea-nextjs-pr29-8443-accept` image `pr29-8443-3bc3283` remains running on 8092 and is still the current 8443 destination. Existing f95ba80 candidate, AUTH-02, and Caddy also remain running. Read-only health checks returned 200 on local 8090–8093; AUTH-02 is internal and had no direct 127.0.0.1:3000 listener.
+- Tailscale Serve remains tailnet-only 443 → 8090 and 8443 → 8092; Funnel remains off. No route was changed.
+- Roll-forward only after login/session/cookie, Host/Origin/CSRF/port rejection, Passkey RP ID, and regression gates pass: confirm both 8092 and 8093 health plus Serve JSON and monitor health, then change only `tailscale serve --https=8443 http://127.0.0.1:8093`; verify 443→8090 and 8443→8093. Rollback only that mapping with `tailscale serve --https=8443 http://127.0.0.1:8092`; recheck 443→8090. Keep both candidate containers/data; do not use Funnel.
+
+Five-day monitoring remains **IN PROGRESS**, due 2026-10-16. At the 2026-10-12 Acer checkpoint, all three known monitor supervisor PIDs (20756, 12000, 1932) were alive, original JSONL files remained present, and local endpoints 8090–8093 returned 200. Existing 443 and 8443 Serve mappings were unchanged. The monitor has not completed; preserve the source logs.
+
+ORDER-03 unit coverage for exception, intercept, and correction actions passed in Quality #143; real iPhone end-to-end verification remains pending. For the 10/15 field showcase, use the manual checklist in `docs/testing/pr29-integration-closeout-2026-10-12.md`; do not mark ORDER-03 or Samsung installation/Passkey acceptance passed without real-device evidence. Current user-facing 8443 URL remains `https://acer-v5.tail4d8b5a.ts.net:8443` on the old 3bc3283 image until the new candidate clears the failed login gate.
+
+
+## 2026-10-12 field runbook and current PR head
+
+The 10/15 field showcase steps and safe 8443 switch/rollback proposal were appended to `docs/testing/pr29-integration-closeout-2026-10-12.md` in documentation commit `d19f1f52d3b0e5f971b4a4b8282c7449b9348042`. This is documentation only. Quality run #146 (38195069583) for that head was queued at checkpoint; the application/test/workflow source result remains #143 as documented above. PR #29 remains draft and unmerged.
+
+Current deployment gate is **blocked** by the new candidate's merchant login returning HTTP 403; do not change the :8443 Serve mapping. Existing 8443 continues to point to 8092 / image `pr29-8443-3bc3283`; 443 still points to 8090. The new `pr29-8443-9a53b34` candidate remains at localhost 8093 with independent test data. Health and preview Basic Auth checks passed; app-level session/cookie and full origin/CSRF/Passkey acceptance did not. Preserve the old route and investigate the login denial before any switch.
+
+Quality #143 passed all code and E2E checks but overall failed because of the one high/two moderate development dependency findings. Production audit passed. ORDER-03 CI action tests pass, but physical iPhone verification and Samsung install/Passkey remain pending. Five-day monitoring remains in progress through 2026-10-16; the original JSONL logs and monitor processes are preserved.
+
+
+## 2026-10-12 PR #29 Acer merchant-login 403 diagnostic
+
+Current PR #29 remains open/draft/unmerged at source commit `d55b29e3cf4278492c021af1f14dd76e21493eaf` (short `d55b29e`). This commit only adds secret-safe failure-stage diagnostics and corrects its JSON content-type matcher; it does not change password, CSRF, Origin, Host, or session authorization behavior. Diagnostic output is limited to stage/status/method and boolean header checks; it never records request body, credentials, authorization values, cookies, or tokens.
+
+Root cause of reproduced 403s:
+- Earlier PowerShell `curl.exe --data-binary` probes sent a body that failed JSON parsing. Acer logs showed `stage=body-parse`, status 403, with expected Host, Origin, forwarded HTTPS, Basic header, same-origin fetch metadata, and JSON content type checks true. These were malformed-probe 403s, not evidence of Origin/CSRF rejection or a failed configured password.
+- With correctly serialized `JSON.stringify({password})`, matching credentials returned 200 on both original isolated 8093 and diagnostic 8094. The provider intentionally rejects a second password verification within 1000 ms as false, and the route maps that to 403. Reproduction: correct password 200; immediate correct repeat 403; same correct password after 1.2 sec 200. Wrong password correctly returns 403. Wait at least one second before retrying; the five-failure lockout policy remains enabled.
+
+Acer validation performed only on the additional isolated diagnostic candidate `tea-nextjs-pr29-8443-diag` at localhost 8094, independent data directory `C:\\data\\tea-staging\\pr29-login-diagnostic-data`, image `tea-nextjs-staging:pr29-8443-d55b29e`. Image ID `sha256:bc2b1f2e6d6fabf1731e364527d64022d0c624c6009d6b21d57f1eac7db1c805`; revision label matches d55b29e and `NEXT_PUBLIC_DEMO_COMMERCE=enabled`.
+- Health returned 200 on 8090 through 8094.
+- Correct password login returned 200 and authenticated=true; session GET authenticated=true.
+- Issued cookie is `__Host-demo_merchant`; Secure, HttpOnly, SameSite=Strict, Path=/, no Domain; host prefix present.
+- DELETE logout returned 200 and emitted Max-Age=0 cookie clearing directive; a new GET with no Cookie is unauthenticated; a subsequent login after the provider throttle window returned 200.
+- Negative matrix: mismatched Host, Origin :8444, missing Origin, and `Sec-Fetch-Site: cross-site` each returned 401. Wrong password returned 403. No credentials or cookie values were emitted.
+- Passkey remains enabled and unregistered on isolated data. Source sets RP ID to `new URL(options.origin).hostname`, excluding :8443.
+- Residual session revocation risk: because this is a signed stateless 30-minute session cookie, manually replaying the pre-logout cookie remained authenticated after DELETE; logout clears the browser cookie but does not revoke a copied token server-side. This was not changed in the login diagnostic work and must be explicitly accepted or fixed before treating logout revocation as fully verified.
+
+Quality run #149 (run ID `38201073383`) tested d55b29e: container smoke passed; lint, typecheck, unit/component tests, production build, browser/accessibility, both synthetic mobile E2E configurations, private demo build, and private order loop passed. Full dependency audit failed with the same three existing development-tool findings (1 high, 2 moderate): `braces <=3.0.3` through `eslint-config-next > @next/eslint-plugin-next > fast-glob > micromatch > braces` (fix >=3.0.4); two `brace-expansion` moderate findings through ESLint/minimatch paths (patched versions >=1.1.21 and >=5.0.12). Production dependency audit passed. No package manifest or lockfile changes were made; full Quality remains red and the development findings are unresolved.
+
+The built image is not mapped to Tailscale Serve. Current Serve JSON remains tailnet-only 443→8090 and 8443→8092; Funnel is off. Original 8092, 8091, AUTH-02, Caddy remain running. Monitor supervisors 20756, 12000, 1932 remain alive; all three source JSONL logs have fresh UTC writes and remain in progress. No data or monitoring files were modified.
+
+Switch gate remains BLOCKED: although standard valid login and Host/Origin/CSRF negatives pass, the source branch has an unresolved high/two moderate development audit, and logout does not revoke a copied signed session token. Keep existing :8443→8092 and retain old candidate as fallback. Do not switch Serve until the residual logout-token risk is resolved/accepted and release gate is explicitly satisfied. No merge, Funnel, or public exposure.
+
+
+## 2026-10-12 persistent session revocation closeout
+
+PR #29 remains open/draft/unmerged at code commit `f3fefc1a0c9cda63d04cfa28ae2ba4a744367e85` (branch `feat/mobile-three-pwa-entries`). The changes add SQLite-backed Demo Session revocation records in the isolated `DEMO_DATA_DIR/merchant-auth.sqlite`: SHA-256 digest of the signed-cookie signature, expiry, primary key and expiry index only. Every valid-cookie verification checks the revocation store and fails closed on storage errors; logout must persist revocation before clearing the browser cookie or returning success. DemoPasswordProvider/AuthProvider interfaces and Passkey/WebAuthn behavior were not changed.
+
+Tests added for cross-connection lookup, persistence after database reopen, write failure, expiry cleanup, digest-only schema, logout/replay, and fail-closed logout. Acer clean-checkout verification: lint (0 errors, 10 warnings), typecheck, all 67 Vitest files / 340 tests, and production build passed. Quality run #151 (run ID `38206868851`) completed: lint, typecheck, unit/component, build, browser/accessibility, synthetic mobile E2E, private demo/order smoke, and container smoke passed. Overall Quality remains **failed only at full dependency audit**; production audit passed.
+
+Lockfile updates moved `brace-expansion` to compatible patched 1.1.21 / 5.0.12 and eliminated both Moderate findings. Full audit reports one High: `braces <=3.0.3` through `eslint-config-next > @next/eslint-plugin-next > fast-glob > micromatch > braces` (GHSA-vfj7-8cjw-p6xm). The configured registry has no patched `braces 3.0.4` release, and the advisory has no published fix; the existing same-major defensive patch plus `security-braces-depth.test.ts` remains. Production audit: no known vulnerabilities. Do not call the full audit clean; the remaining High blocks a safe route switch.
+
+Acer isolated candidate built from this commit:
+- Image `tea-nextjs-staging:pr29-session-rev-f3fefc1`, image ID `sha256:d92078d35e9a2a9373ce4e30c99b2b836657ce913489b5da5fae0217be0626da`; build explicitly injected `NEXT_PUBLIC_DEMO_COMMERCE=enabled` and production build succeeded.
+- Container `tea-nextjs-pr29-session-rev`, local bind `127.0.0.1:8095 → 3000`, new isolated host data directory `C:\\data\\tea-staging\\pr29-session-rev-f3fefc1-data`. Health returned HTTP 200. Preview auth credentials were read from the existing credential file in memory only. A live positive merchant-login POST returned HTTP 200 and a deliberately invalid password returned HTTP 403.
+- The complete live cookie attribute / logout replay / restart replay sequence did not yield reliable completion evidence through the remote PowerShell client; do not represent those as passed on the running container. Unit/route tests and Quality #151 cover database reopen/cross-connection and logout replay, but the Acer live restart replay remains unverified. No Tailscale Serve route was changed.
+
+Existing 8092 / 8443 candidate, 443 → 8090, AUTH-02, Caddy, original data and five-day monitor were left intact. Monitoring remains **IN PROGRESS**; source JSONL logs are preserved. The new 8095 candidate is local-only and is not a switch candidate while the High audit finding and live-cookie verification gap remain. Keep current 8443→8092 fallback. Do not change Serve, merge main, expose Funnel, or stop monitoring. Resume with a fresh authenticated HTTP client to verify cookie attributes, session GET, logout, same-cookie replay, and replay after restarting only `tea-nextjs-pr29-session-rev`; then recheck the full audit finding before proposing any route change.
+
+
+## 2026-10-12 live Session acceptance attempt (8095)
+
+PR #29 remains open, draft, and unmerged at `f4203b70aeb01d041d965fb4cb90d403c9492368`. A bounded HTTP probe was attempted against the isolated `tea-nextjs-pr29-session-rev` candidate at `127.0.0.1:8095`. It read the existing preview credential file only in the Acer-side process; no credential or cookie value was printed.
+
+The login POST to `/api/demo/admin/session` returned HTTP 401 in this probe. The client harness then exited with `ReferenceError: i is not defined` before protected-session GET, logout, replay, cookie-attribute inspection, or restart. The test process completed with exit code 1. It did not restart or otherwise alter the candidate. This is an inconclusive client/request-path probe, not evidence that credentials or server-side Session logic are broken. The live HTTP revocation/restart acceptance remains **NOT VERIFIED**; do not claim the Acer sequence passed. Reproduce with a short authenticated HTTP client that matches the known working preview-auth and HTTPS-forwarded headers, then keep the cookie only in memory and emit statuses/attribute booleans.
+
+Latest workflow run #152 (`38208120086`) completed: lint, typecheck, unit/component, production build, browser/accessibility, synthetic mobile/order/catalog tests, private demo build, private production order loop, and container build/health smoke all passed. Dependency audit failed; production dependency audit passed. This leaves the same unresolved High `braces <=3.0.3` finding in the development toolchain; the full dependency audit is not clean. No source code changed during this live probe.
+
+The candidate remains local-only. No `8092`, `443`, `8443`, AUTH-02, Caddy, data, or monitoring changes were made. Existing `8443→8092` remains the fallback; five-day monitoring remains **IN PROGRESS**. Do not propose or execute the Serve switch until live Session acceptance is complete and the remaining High audit finding has an explicit safe disposition.
+
+## 2026-10-12 SQLite 撤銷讀取故障與安全收斂（最新狀態）
+
+PR #29 仍為 open/draft/unmerged；本次驗收前 branch head 為 5fe904d12e28700f63da1f60a95a60737809b81f。本次僅作文件收斂，未改應用程式碼、未切換 Tailscale Serve、未合併 main。
+
+### SQLite fail-closed 實際 HTTP 驗收
+
+- 以目前候選映像 tea-nextjs-staging:pr29-session-rev-f3fefc1（image ID sha256:d92078d35e9a2a9373ce4e30c99b2b836657ce913489b5da5fae0217be0626da）另起短生命週期隔離容器，使用全新空資料目錄與臨時 localhost 8096；未掛載 8095、8092 或 AUTH-02 的可寫資料。
+- 隔離容器 health 200、Session GET preflight 200、既有憑證來源的正確登入 200、有效 Cookie 讀受保護 orders API 200。
+- 只在臨時 SQLite 中將 demo_session_revocations 改成缺少 signature_hash 欄位的錯誤 schema，並保留 expires_at 索引；直接 SELECT 預期欄位確實失敗。使用同一有效 Cookie 重讀受保護 API 得 HTTP 403，沒有授權放行。結論：SQLite 撤銷查詢讀取錯誤 fail-closed PASS。
+- 故障注入容器與其唯一臨時資料目錄均已刪除。綜合腳本第一次的收尾 health probe 誤仍連到已刪除的 8096，故曾回報該 probe unavailable；已用正確 8095 埠另行只讀確認：候選容器仍 running，image tag 如上，/api/health HTTP 200。這是驗收腳本收尾埠號錯誤，非候選失敗；8095 未被重啟或修改。
+
+### braces High 風險處置（仍未解除）
+
+- 最新已執行 Quality #152（run ID 38208120086）：lint/typecheck/unit/build/E2E/private demo/container smoke 通過；完整 dependency audit 因單一 High 失敗；production dependency audit PASS。此文件更新不宣稱重新執行 CI 或 audit。
+- 受影響鏈：eslint-config-next > @next/eslint-plugin-next > fast-glob > micromatch > braces@3.0.3；完整 audit 仍命中 GHSA-vfj7-8cjw-p6xm，因上游/registry 尚無可用 3.0.4 修正版，不能標示修復或 clean。
+- 已套用同主版本防禦性 patch：pnpm-workspace.yaml 將 braces@3.0.3 指向 patches/braces@3.0.3.patch；lockfile patch hash 為 ed8c4935ee64d2f1c75d8986b3f8263c739b486c35b28ad669529a286c0edf24。patch 在解析 nested braces/parentheses 時設 MAX_DEPTH = 100 並拒絕超深輸入；安裝目錄 hash 與 lockfile 對應，實際 lib/parse.js 可見該 guard。這是風險緩解，不是 audit 修復。
+- 實際執行範圍為開發／CI 工具依賴（lint、build/test 工具鏈）；對 8095 production-pruned 容器執行 require.resolve('braces') 得 not_resolvable，production audit 也 PASS。這降低執行期暴露，但無法消除開發工具處理惡意巢狀輸入的剩餘風險；完整 audit/Quality 保持 red，雲端正式發布阻塞仍在。
+
+### 候選與入口決策
+
+- 目前新版候選：tea-nextjs-pr29-session-rev，tea-nextjs-staging:pr29-session-rev-f3fefc1，image ID 如上，localhost 127.0.0.1:8095，health 200。使用者先前確認的登入、cookie 安全屬性、logout replay、重啟 replay、跨連線與寫入故障證據維持有效；本次補齊 SQLite SELECT 故障拒絕證據。
+- 建議暫不將 8095 切換到 :8443。阻塞是完整 dependency audit 的 braces High 尚未由上游修正版解除或取得明確風險接受；目前候選可留作隔離驗收候選，不能宣稱完整安全稽核通過。
+- 即時只讀狀態：Serve 仍為 tailnet-only 443→8090、8443→8092；8092 舊展示容器、8091 舊候選、AUTH-02、Caddy 均未動。五日監測程序 PID 20756、12000、1932 仍存活；三份原始 JSONL 仍存在，最近檔案長度分別 89,449、96,049、43,902 bytes（2026-10-12 約 08:18 UTC 記錄）。監測至 2026-10-16，仍為 IN PROGRESS。
+- 本次沒有切換，所以無需回退。未來只有在取得明確切換確認後才可改 :8443；若新入口健康、登入或驗收失敗，只回復 tailscale serve --https=8443 http://127.0.0.1:8092，確認 443→8090，保留兩候選容器與資料；不得停監測、移除資料或啟用 Funnel。
+
+## 2026-10-12 10/14 切換前檢查與授權風險界線
+
+游老師已核准：只有 2026-10-14 部署驗收階段、且當日所有前置檢查通過，才可將 tailnet-only :8443 從 8092 改指 8095。接受 braces 開發依賴 High 的殘餘風險僅限 Acer 私有展示，不代表完整 audit 通過；不得公開 Funnel、合併 main 或影響 443、AUTH-02、Caddy、舊候選/資料與監測。
+
+### 已完成的切換前檢查（2026-10-12）
+
+- PR #29 branch head 1d9f30960d176df0b37452ea5eaf95dffbd06498，PR open/draft/unmerged。Quality #154（run 38223091018）已完成：lint、typecheck、unit/component、production build、browser/accessibility、synthetic mobile E2E、private demo/order smoke 均通過；container build/health 通過；production audit 通過。唯一失敗為完整 dependency audit 的 braces High，屬已由使用者限縮接受的 Acer 私有展示風險；此結果不等於 audit clean。
+- 8095 候選 tea-nextjs-pr29-session-rev 運行 tea-nextjs-staging:pr29-session-rev-f3fefc1，image ID sha256:d92078d35e9a2a9373ce4e30c99b2b836657ce913489b5da5fae0217be0626da。Health 200；Basic Auth 無憑證時管理 Session 路徑回 401、正確 Basic Auth 回 200；商家正確密碼登入 200；Cookie 的 __Host、Secure、HttpOnly、SameSite=Strict、Path=/、無 Domain 均通過；登入後受保護 API 200。
+- 對 POST /api/demo/admin/session 的錯誤 Host、錯誤 Origin 埠 8444、跨站 Origin 測試均拒絕（HTTP 401）。預期 HTTPS origin 為 https://acer-v5.tail4d8b5a.ts.net:8443。Passkey enabled=true，RP ID hostname 與 acer-v5.tail4d8b5a.ts.net 相符；新候選 registered=false，舊版 Passkey/Session 不會自動移入。若展示要用 Passkey，須在新候選另行註冊並實機驗證；目前已備妥的登入方式是既有安全憑證來源的商家密碼。
+- 8095 使用獨立可寫資料目錄，與 8092、AUTH-02 路徑不同。只讀盤點：catalog API 有 8 個展示品項，orders.sqlite 的 demo_orders 為 0；不假設舊版訂單會移轉。切換後須建立新的、明確標記的合成測試訂單。
+- PR #29 Session 撤銷讀取故障已於隔離空白資料目錄驗證：SQLite 缺少 signature_hash 欄位造成 SELECT 失敗，受保護 API 回 403；臨時故障注入容器及資料夾已清除。8095 未重建、未改寫既有資料。
+- 2026-10-12 只讀 Serve baseline：tailnet-only 443 → 127.0.0.1:8090；8443 → 127.0.0.1:8092；Funnel off。8092 舊展示容器與 8095 候選均 running。
+- 五日監測仍 IN PROGRESS 至 2026-10-16。監督程序 PID 20756、12000、1932 存活；原始 JSONL 仍增長：soak-20261011.jsonl 90,087 bytes（2026-10-12T08:28:42Z），soak-20261011-demo-mode-fix.jsonl 96,777 bytes（08:28:35Z），auth02-20261011.jsonl 44,252 bytes（08:28:18Z）。來源檔案未改動。
+
+### 10/14 切換閘門與回退
+
+切換前須再確認 PR head/source revision、Quality #154 與其唯一已接受 audit 例外、8095 health/登入/資料目錄、8092 health、Serve baseline 及監測日誌仍符合上列條件。若 Quality 出現任何非 braces High 的新增失敗、登入/Host/Origin/Cookie 驗證失敗、Passkey RP ID 不符、資料目錄共享、舊入口或監測異常，停止，不切換並保留 8443→8092。
+
+條件全部滿足才於 10/14 只改 :8443：tailscale serve --https=8443 http://127.0.0.1:8095。接著從 tailnet HTTPS 網址驗證首頁、/install、三個入口、Basic Auth、管理員密碼登入、商品管理、建立並完成一筆合成訂單、登出；任何關鍵項目失敗，立即只回退 :8443：tailscale serve --https=8443 http://127.0.0.1:8092，並確認 443→8090 與舊版首頁/管理路徑恢復。切換與回退均保留容器和資料、不觸及 AUTH-02/Caddy/監測、不使用 Funnel。
+
+本節為 10/12 切換前證據，不代表 :8443 已切換。實際切換時間、外部驗收結果、Passkey 是否於新候選註冊、備援狀態須於 10/14 取得實際證據後追加。
+
+## 2026-10-12 PR #29 10/14 switch preparation recheck
+
+PR #29 remains open, draft, and unmerged. Current PR branch HEAD is `0cab394e9e1b1ece6fb12e46aeacab6e0cbf5d03`; the feature/runtime code in the 8095 candidate remains from `f3fefc1`. This is a read-only preparation checkpoint; no switch, container rebuild, data write, or mapping change was made.
+
+Quality #155 (run `38224247500`) completed against PR merge ref `842e4487e8ad932294b66dcde5ac6c4d2f51cf7f` / head `0cab394e9e1b1ece6fb12e46aeacab6e0cbf5d03`. Container build and smoke passed. Lint, typecheck, unit/component tests, production build, browser/accessibility, synthetic catalog/order E2E, private demo build, and order-loop smoke passed. Production audit passed with no known production vulnerabilities. Overall Quality remains **failure** because full dependency audit found exactly one High: `braces <=3.0.3`, via `eslint-config-next > @next/eslint-plugin-next > fast-glob > micromatch > braces`, advisory GHSA-vfj7-8cjw-p6xm; patched version is `>=3.0.4`. This remains the user-accepted, limited Acer tailnet showcase risk. Do not describe the full audit or Quality as green; stop on any new failure beyond this known exception.
+
+Acer read-only status at 2026-10-12 09:19 UTC:
+- Candidate container `tea-nextjs-pr29-session-rev`, image `tea-nextjs-staging:pr29-session-rev-f3fefc1`, is running on 127.0.0.1:8095; health is HTTP 200.
+- Rollback container `tea-nextjs-pr29-8443-accept`, image `tea-nextjs-staging:pr29-8443-3bc3283`, is running on 127.0.0.1:8092; health is HTTP 200.
+- Existing f95ba80 candidate, AUTH-02, and Caddy are running. Tailscale Serve is tailnet-only 443→8090 and 8443→8092; Funnel is off. No mappings changed.
+- Monitor supervisor PIDs 20756, 12000, and 1932 are alive. Original logs are still growing: `auth02-20261011.jsonl` 46,002 bytes at 09:18:33Z; `soak-20261011-demo-mode-fix.jsonl` 100,416 bytes at 09:18:59Z; `soak-20261011.jsonl` 93,274 bytes at 09:19:05Z. Five-day monitoring remains **IN PROGRESS** until 2026-10-16. Preserve these originals.
+
+8095 readiness evidence remains the previously recorded acceptance; it was not repeated in this recheck. Preview Basic Auth, merchant password login/session, protected API, secure Cookie flags, Origin/Host/CSRF rejection matrix, and SQLite session revocation failure-mode checks passed. The candidate has its own writable data directory, separate from 8092 and AUTH-02. Passkey is enabled and RP ID matches `acer-v5.tail4d8b5a.ts.net`, but the fresh candidate has no registered Passkey. Do not assume the old version's Passkey migrates. If Passkey is part of the live demonstration, register it on the new site after the 8443 switch using iPhone Safari/Face ID and verify logout/re-login; treat failure as a rollback trigger. Keep password login as the prepared fallback.
+
+### 10/14 switch gate and rollback
+
+Before changing Serve, recheck the current PR head and latest Quality result, 8095 and 8092 health, preview Basic Auth and merchant login readiness, candidate data isolation, Passkey enabled/RP ID, 443→8090 / 8443→8092 baseline, Funnel off, and monitor processes/log growth. Do not switch if any critical check is red, if the full audit gains findings beyond the accepted braces High, or if the monitor/original services are unhealthy.
+
+Only after the 10/14 gate passes, change only the private 8443 listener to 8095:
+`tailscale serve --https=8443 http://127.0.0.1:8095`.
+Verify from an authorized tailnet client: HTTPS homepage, /install and all three entry points, preview Basic Auth, merchant login, catalog management, one uniquely marked synthetic order through its loop, and logout/revoked-cookie rejection. Enroll and verify a new Passkey if needed for the planned demonstration. If any critical external check fails, immediately restore only 8443:
+`tailscale serve --https=8443 http://127.0.0.1:8092`.
+Confirm 443 still points to 8090 and the prior 3bc3283 route works. Keep both containers and data; do not alter AUTH-02, Caddy, logs, or monitors; never enable Funnel.
+
+### 10/15 Chen teacher field demonstration checklist
+
+1. Confirm tailnet connection and open `https://acer-v5.tail4d8b5a.ts.net:8443`; verify preview Basic Auth and merchant login.
+2. Show the storefront, product management, and order management entry points. Confirm the new candidate's catalog; do not expect old orders or Passkeys to be present.
+3. Register/use the new site's Passkey with iPhone Safari Face ID if enrollment was completed; demonstrate logout and re-login. If unavailable, use prepared merchant-password fallback and record Passkey as pending.
+4. Create one clearly synthetic order and demonstrate the accepted workflow without changing real customer or formal merchant data.
+5. ORDER-01 payment reversal and ORDER-02 reopen packing are previously accepted; do not repeat as new acceptance. ORDER-03 physical shipment exception/intercept/correction remains pending real-device verification; demonstrate only when explicitly labeled as pending/synthetic.
+6. Keep the 8092/3bc3283 rollback available; verify monitor remains active and leave 443/AUTH-02 unchanged.
+
+This checkpoint records preparation only; the 10/14 switch has **not** been performed. On 10/14 append actual switch time, external acceptance evidence, Passkey enrollment outcome, and rollback/backup status.
+
+## 2026-10-12 10/15 現場交付包交接
+
+本次只整理交付文件，沒有修改核心程式、重建容器、寫入/覆蓋部署資料、改 Serve、合併 main 或正式上雲。詳細切換表、每步通過/停止標準、回退指令、10/15 現場演示順序、Samsung 安裝/主畫面捷徑備案及正式資料確認欄，統一從 `docs/testing/pr29-field-showcase-pack-2026-10-15.md` 開始；歷史驗收證據仍見 `docs/testing/pr29-integration-closeout-2026-10-12.md`。
+
+### 最新狀態（2026-10-12 17:29 Taipei）
+
+- PR #29 以 `364d47c77d2e5f2bea8b19cf516b63fa6d81796b` 為本次文件基準，仍 open/draft/unmerged；候選程式為 `f3fefc1`。
+- Quality #156 / run `38229526027` completed failure：lint/typecheck/unit-component/build/browser-accessibility/synthetic mobile E2E/private demo/order smoke/container build+health 均通過，production audit pass；完整 dependency audit 仍只有已核准限縮範圍的 development-path `braces@3.0.3` High。不可稱 Quality 或完整 audit 全綠。10/14 必須再核最新 run；新增任何 finding/失敗即停止切換。
+- Acer：8095 `tea-nextjs-pr29-session-rev` / `pr29-session-rev-f3fefc1` running；8092 `tea-nextjs-pr29-8443-accept` / `pr29-8443-3bc3283` running；既有 f95ba80 候選、AUTH-02、Caddy (`tea-caddy-staging`) 也 running。
+- Serve 保持 tailnet-only 443→8090、8443→8092，Funnel off；本日未切換。8095/8092 健康、Basic Auth/商家登入/Session/Origin-CSRF/撤銷等已驗收證據沿用，不重跑。
+- 監測程序 20756/12000/1932 存活；三份原始 JSONL 於 2026-10-12 約 17:29 Taipei 仍增加；五日監測完成日 2026-10-16，仍 IN PROGRESS。
+- 新版 Passkey enabled/RP ID 正確但尚未註冊；需新站註冊後才可宣稱新版 Passkey 真機驗收。ORDER-03 實機驗收尚未完成。
+- 現場茶品檔僅有八筆樣品候選，另有黑茶/特殊茶名稱未提供，黃茶與老茶分類可能與樣品重疊；照片映射也有候選衝突。檔內價格/庫存不是已核定正式資料。正式匯款、電話、LINE QR、運費/免運條件待陳老師確認，機密值不得寫入 Git。
+- 10/14 才依現場包逐項執行切換前閘門；只有全數條件通過才改 :8443→8095。任一關鍵失敗，只回退 :8443→8092，保持 443→8090，保留容器/資料/監測。若不通過，維持舊版展示備援。
+- 10/15 現場順序：前台商品→購物車→下單→商家登入→訂單確認付款→包裝拍照→出貨→顧客查單。付款/訂單皆標示合成演示；ORDER-03 仍待實機驗收，不可標通過。Samsung 若無法安裝三個獨立 PWA，改建三個 Chrome 主畫面捷徑並記錄。

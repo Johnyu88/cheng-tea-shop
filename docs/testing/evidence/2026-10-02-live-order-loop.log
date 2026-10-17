@@ -1,0 +1,17 @@
+Acceptance checkpoint 1/12 passed
+Acceptance checkpoint 2/12 passed
+Acceptance checkpoint 3/12 passed
+Acceptance checkpoint 4/12 passed
+Acceptance checkpoint 5/12 passed
+Acceptance checkpoint 6/12 passed
+Acceptance checkpoint 7/12 passed
+Acceptance checkpoint 8/12 passed
+Acceptance checkpoint 9/12 passed
+Acceptance checkpoint 10/12 passed
+Acceptance checkpoint 11/12 passed
+Acceptance checkpoint 12/12 passed
+Live acceptance passed; test order retained: 261002-001
+
+Gate checks: valid=200; anonymous=401; wrong-token=401.
+Manual order creation and lookup: passed; retained 261002-002.
+Acceptance exit: 0.

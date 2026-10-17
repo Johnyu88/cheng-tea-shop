@@ -1,0 +1,60 @@
+"use client";
+
+import Link from "next/link";
+import { useEffect, useState, type JSX } from "react";
+
+export const demoCheckoutSuccessStorageKey = "demo.checkout.success";
+type SuccessStatus = "confirmed" | "packed" | "shipped" | "delivered";
+type SuccessData = { orderId: string; orderNumber?: string; accessSecret?: string; status: SuccessStatus };
+const statusLabels: Record<SuccessStatus, string> = { confirmed: "訂單成立，等待店家處理", packed: "已完成包裝，等待出貨", shipped: "已出貨", delivered: "已送達" };
+
+function readStoredSuccess(): SuccessData | undefined {
+  try {
+    const stored = window.sessionStorage.getItem(demoCheckoutSuccessStorageKey);
+    if (stored) {
+      const parsed = JSON.parse(stored) as Partial<SuccessData>;
+      if (typeof parsed.orderId === "string" && parsed.orderId.length > 0) {
+        const storedData: SuccessData = { orderId: parsed.orderId, status: parsed.status ?? "confirmed" };
+        if (typeof parsed.orderNumber === "string" && /^\d{6}-\d{3,}$/.test(parsed.orderNumber)) storedData.orderNumber = parsed.orderNumber;
+        if (typeof parsed.accessSecret === "string") storedData.accessSecret = parsed.accessSecret;
+        return storedData;
+      }
+    }
+  } catch { /* The page remains useful without storage; the token is never rendered. */ }
+  const orderId = new URLSearchParams(window.location.search).get("order");
+  return orderId ? { orderId, status: "confirmed" } : undefined;
+}
+
+export function DemoCheckoutSuccessPage(props: SuccessData): JSX.Element {
+  const [copyMessage, setCopyMessage] = useState("");
+  const [data, setData] = useState<SuccessData | undefined>(props.orderId ? props : undefined);
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      const stored = readStoredSuccess();
+      if (!stored) return;
+      if (props.orderId && stored.orderId !== props.orderId && stored.orderNumber !== props.orderId) return;
+      setData(previous => previous?.accessSecret ? previous : stored);
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [props.orderId]);
+  if (!data) return <main className="py-8"><section className="demo-panel"><h1>訂單成功頁</h1><p role="status">正在準備訂單資訊。</p><Link className="primary-action mt-6" href="/">返回首頁</Link></section></main>;
+  const copyNumber = async () => {
+    try { await navigator.clipboard.writeText(data.orderNumber ?? data.orderId); setCopyMessage("已複製訂單編號"); }
+    catch { setCopyMessage("無法自動複製，請長按訂單編號複製。"); }
+  };
+  const lookupHref = `/orders?order=${encodeURIComponent(data.orderNumber ?? data.orderId)}`;
+  return <main className="py-8"><section className="demo-panel" aria-labelledby="checkout-success-heading">
+    <p className="prototype-notice">這是本機 Demo 的合成訂單結果。付款方式為傳統人工確認，訂單目前是「待人工確認」，不代表已收款或出貨。</p>
+    <h1 id="checkout-success-heading">感謝您的購買</h1>
+    <p>已收到您的示範訂單，店家將依序處理。</p>
+    <p>訂單編號：{data.orderNumber ?? data.orderId}</p>
+    <button className="filter-button mt-4" type="button" onClick={() => void copyNumber()}>複製訂單編號</button>
+    {copyMessage && <p role="status">{copyMessage}</p>}
+    <p>訂單狀態：{statusLabels[data.status]}</p>
+    <p role="status" className="prototype-notice">在其他裝置查單，只需訂單編號、顧客姓名與手機末三碼，再完成驗證碼驗證。</p>
+    <div className="form-actions mt-6">
+      <Link className="filter-button" href="/">回到首頁</Link>
+      <Link className="primary-action" href={lookupHref}>主動查看訂單</Link>
+    </div>
+  </section></main>;
+}

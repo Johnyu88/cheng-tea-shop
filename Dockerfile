@@ -9,10 +9,18 @@ WORKDIR /app
 
 FROM base AS deps
 
-COPY package.json pnpm-lock.yaml ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY patches ./patches
 RUN pnpm install --frozen-lockfile
 
 FROM base AS builder
+
+ARG NEXT_PUBLIC_DEMO_COMMERCE=disabled
+ENV NEXT_PUBLIC_DEMO_COMMERCE=$NEXT_PUBLIC_DEMO_COMMERCE
+ARG NEXT_PUBLIC_MERCHANT_MANUAL_ORDER=disabled
+ENV NEXT_PUBLIC_MERCHANT_MANUAL_ORDER=$NEXT_PUBLIC_MERCHANT_MANUAL_ORDER
+ARG NEXT_PUBLIC_PUBLIC_STOREFRONT=disabled
+ENV NEXT_PUBLIC_PUBLIC_STOREFRONT=$NEXT_PUBLIC_PUBLIC_STOREFRONT
 
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .

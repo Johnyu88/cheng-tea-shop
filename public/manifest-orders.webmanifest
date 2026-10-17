@@ -1,0 +1,29 @@
+{
+  "id": "/tea-pwa/admin-orders",
+  "name": "陳老師茶行訂單管理",
+  "short_name": "茶行訂單",
+  "description": "商家訂單與出貨處理",
+  "start_url": "/admin/orders?pwa=orders",
+  "scope": "/admin/orders",
+  "display": "standalone",
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
+  "background_color": "#fff7e7",
+  "theme_color": "#315a86",
+  "icons": [
+    {
+      "src": "/icons/tea-orders-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/tea-orders-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

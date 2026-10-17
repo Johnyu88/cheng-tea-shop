@@ -20,7 +20,7 @@ const deliveryDraft = {
   phone: "0912000000",
   deliveryMethod: "home-delivery" as const,
   address: "茶行路 1 號",
-  paymentMethod: "credit-card" as const,
+  paymentMethod: "bank-transfer" as const,
 };
 
 test("requires a non-blank name and phone", async () => {
@@ -33,6 +33,18 @@ test("requires a non-blank name and phone", async () => {
   await expect(service.validate({ ...deliveryDraft, phone: "  " }, cart)).resolves.toMatchObject({
     ok: false,
     error: { code: "invalid-draft" },
+  });
+});
+
+test("rejects a malformed phone and normalizes a spaced Taiwan mobile number", async () => {
+  const service = createMockCheckoutService();
+  await expect(service.validate({ ...deliveryDraft, phone: "12345" }, cart)).resolves.toMatchObject({
+    ok: false,
+    error: { code: "invalid-draft", message: "請填寫正確的台灣手機號碼。" },
+  });
+  await expect(service.validate({ ...deliveryDraft, phone: "0912-000-000" }, cart)).resolves.toMatchObject({
+    ok: true,
+    value: { phone: "0912000000" },
   });
 });
 
@@ -61,13 +73,13 @@ test("requires an address for home delivery but not store pickup", async () => {
   }, cart)).resolves.toMatchObject({ ok: true });
 });
 
-test("accepts every approved payment choice for its delivery method", async () => {
+test("accepts every traditional payment choice for either delivery method", async () => {
   const service = createMockCheckoutService();
 
-  for (const paymentMethod of ["credit-card", "line-pay"] as const) {
+  for (const paymentMethod of ["bank-transfer", "cash", "phone-confirmation", "line-voice-confirmation"] as const) {
     await expect(service.validate({ ...deliveryDraft, paymentMethod }, cart)).resolves.toMatchObject({ ok: true });
   }
-  for (const paymentMethod of ["credit-card", "line-pay", "pay-at-store"] as const) {
+  for (const paymentMethod of ["bank-transfer", "cash", "phone-confirmation", "line-voice-confirmation"] as const) {
     await expect(service.validate({
       name: deliveryDraft.name,
       phone: deliveryDraft.phone,

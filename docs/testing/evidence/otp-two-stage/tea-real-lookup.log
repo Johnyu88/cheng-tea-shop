@@ -1,0 +1,3 @@
+Skipping host requirements validation logic because `PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS` env variable is set.
+PASS real HTTPS fresh iPhone WebKit: matching identity -> OTP stage visible/focused -> delivered result visible/focused; order261002-001, name手機查單, suffix000.
+PASS real HTTPS nonmatching name: receives same OTP stage then explicit generic no-match feedback in viewport.

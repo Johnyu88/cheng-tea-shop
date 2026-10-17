@@ -30,7 +30,7 @@ export const validatePaymentRequestDto = (value: unknown): ServiceResult<Payment
     !isRecord(value) ||
     typeof value.orderReference !== "string" ||
     value.orderReference.trim().length === 0 ||
-    (value.method !== "credit-card" && value.method !== "line-pay" && value.method !== "pay-at-store") ||
+    (value.method !== "bank-transfer" && value.method !== "cash" && value.method !== "phone-confirmation" && value.method !== "line-voice-confirmation") ||
     !isMoney(value.amount)
   ) {
     return invalid("invalid-payment-request", "付款資料無效。");

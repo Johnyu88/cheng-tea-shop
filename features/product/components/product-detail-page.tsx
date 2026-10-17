@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type JSX } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import type { Product, ProductVariant } from "@/lib/domain";
 import { useCommerce } from "@/features/commerce/components/commerce-provider";
 
@@ -25,6 +26,7 @@ const formatPrice = (variant: ProductVariant) => `${variant.price.currency === "
 
 export function ProductDetailPage({ slug }: ProductDetailPageProps): JSX.Element {
   const { catalogService, cartService } = useCommerce();
+  const router = useRouter();
   const [catalogState, setCatalogState] = useState<CatalogState>({ status: "loading" });
   const [quantity, setQuantity] = useState("1");
   const [addState, setAddState] = useState<AddState>({ status: "idle" });
@@ -85,6 +87,7 @@ export function ProductDetailPage({ slug }: ProductDetailPageProps): JSX.Element
       return;
     }
 
+    router.push("/cart");
     setAddState({ status: "success", message: "已加入購物車" });
   };
 
@@ -132,6 +135,7 @@ export function ProductDetailPage({ slug }: ProductDetailPageProps): JSX.Element
 
   return (
     <main>
+      <nav aria-label="茶品頁導覽"><Link href="/#catalog">← 返回首頁／繼續選茶</Link></nav>
       <article aria-labelledby="product-detail-heading">
         <div role="img" aria-label={readyProduct.image.alt}>
           {readyProduct.image.src === null ? readyProduct.image.alt : <img src={readyProduct.image.src} alt={readyProduct.image.alt} />}
@@ -178,6 +182,7 @@ export function ProductDetailPage({ slug }: ProductDetailPageProps): JSX.Element
         <button type="button" disabled={soldOut || addState.status === "adding"} onClick={addToCart}>
           加入購物車
         </button>
+        <p><Link href="/#catalog">返回首頁／繼續選茶</Link></p>
       </article>
     </main>
   );

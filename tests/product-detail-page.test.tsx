@@ -1,4 +1,8 @@
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { vi } from "vitest";
+
+const { push } = vi.hoisted(() => ({ push: vi.fn() }));
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
 import type { CartService, CatalogService, Product, ProductVariant } from "@/lib/domain";
 import { CommerceProvider } from "@/features/commerce/components/commerce-provider";
 import { ProductDetailPage } from "@/features/product/components/product-detail-page";
@@ -71,6 +75,13 @@ it("loads product details from the catalog service", async () => {
   expect(screen.getByText("一兩")).toBeInTheDocument();
   expect(screen.getByText("NT$800")).toBeInTheDocument();
   expect(screen.getByRole("img", { name: "商品照片準備中" })).toBeInTheDocument();
+});
+
+it("offers a direct way back to the storefront without entering the cart", async () => {
+  renderPage();
+  await waitFor(() => expect(screen.getByRole("heading", { name: product.name })).toBeInTheDocument());
+  expect(screen.getByRole("navigation", { name: "茶品頁導覽" }).getElementsByTagName("a")[0]).toHaveAttribute("href", "/#catalog");
+  expect(screen.getByRole("link", { name: "返回首頁／繼續選茶" })).toHaveAttribute("href", "/#catalog");
 });
 
 it("shows a not-found state for an unknown slug", async () => {
@@ -173,6 +184,7 @@ it("validates quantity and adds the selected product without resetting it", asyn
   fireEvent.click(screen.getByRole("button", { name: "加入購物車" }));
   await waitFor(() => expect(screen.getByRole("status")).toHaveTextContent("已加入購物車"));
   expect(added).toEqual(["tea-jade", "tea-jade-variant", 2]);
+  expect(push).toHaveBeenCalledWith("/cart");
   expect(quantity).toHaveValue(2);
 });
 

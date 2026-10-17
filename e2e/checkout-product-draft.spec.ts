@@ -3,8 +3,7 @@ import { expect, test, type Page } from "@playwright/test";
 async function addTeaAndOpenCheckout(page: Page) {
   await page.goto("/tea/mock-tea-001");
   await page.getByRole("button", { name: "加入購物車" }).click();
-  await expect(page.getByRole("status")).toContainText("已加入購物車");
-  await page.getByRole("link", { name: "查看購物車" }).click();
+  await expect(page).toHaveURL(/\/cart$/);
   await expect(page.getByRole("link", { name: "前往結帳" })).toHaveAttribute("href", "/checkout");
   await page.getByRole("link", { name: "前往結帳" }).click();
   await expect(page).toHaveURL(/\/checkout$/);
@@ -19,13 +18,13 @@ async function completeCheckout(page: Page) {
 }
 
 async function completeMinimumProductDraft(page: Page) {
-  await expect(page.getByRole("heading", { name: "新增一項茶品" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "新增商品" })).toBeVisible();
   await expect(page.locator("main[data-hydrated='true']")).toBeVisible();
   await page.getByLabel("茶名").fill("春茶");
-  await page.getByLabel("單一規格").fill("150g");
+  await page.getByLabel("規格", { exact: true }).fill("150g");
   await page.getByLabel("價格（TWD）").fill("1200");
   await page.getByLabel("茶類").selectOption("oolong");
-  await page.getByLabel("有貨").check();
+  await page.getByLabel("庫存").selectOption("available");
 }
 
 test("cart checkout link leads through a happy guest checkout", async ({ page }) => {
@@ -49,6 +48,9 @@ test("checkout recovers from step errors without losing entered values", async (
   await page.getByRole("button", { name: "下一步" }).click();
   await expect(page.getByRole("alert").filter({ hasText: "請填寫手機號碼" })).toContainText("請填寫手機號碼");
 
+  await page.getByLabel("手機號碼").fill("12345");
+  await page.getByRole("button", { name: "下一步" }).click();
+  await expect(page.getByRole("alert").filter({ hasText: "請填寫正確的台灣手機號碼" })).toContainText("請填寫正確的台灣手機號碼");
   await page.getByLabel("手機號碼").fill("0912000000");
   await page.getByRole("button", { name: "下一步" }).click();
   await page.getByRole("button", { name: "下一步" }).click();
@@ -85,39 +87,54 @@ test("checkout controls stay visible without horizontal overflow on a phone view
   await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(360);
 });
 
-test("operator can save, edit a grounded draft, preview, confirm, and publish on desktop", async ({ page }) => {
+test("operator can edit supplied facts and explicitly confirm publication on desktop", async ({ page }) => {
   await page.goto("/admin/products/new");
-  await expect(page.getByText("這是原型頁面：尚未實作真實管理員驗證。")).toBeVisible();
+  await expect(page.getByText("這是本機 Demo：沒有真實管理員驗證，不會連接正式 ERP 或外部影像服務。")).toBeVisible();
   await completeMinimumProductDraft(page);
+  await expect(page.getByRole("button", { name: "產生介紹草稿" })).toHaveCount(0);
+  await expect(page.getByLabel("商品介紹", { exact: true })).toBeVisible();
+  const summary = page.locator("#product-summary");
+  await summary.fill("由店家提供的春茶介紹");
 
-  await page.getByRole("button", { name: "儲存草稿" }).click();
-  await expect(page.getByRole("status")).toContainText("草稿已儲存");
+  const publish = page.getByRole("button", { name: "確認並上架" });
+  const confirmation = page.getByLabel("我已確認照片與商品資料");
+  await expect(publish).toBeDisabled();
+  await confirmation.check();
+  await expect(publish).toBeEnabled();
 
-  await page.getByRole("button", { name: "產生介紹草稿" }).click();
-  const summary = page.getByLabel("商品介紹草稿（可編輯）");
-  await expect(summary).toHaveValue(/茶名：春茶/);
   await summary.fill("由店家確認的介紹");
-  await page.getByRole("button", { name: "預覽電腦版" }).click();
-  await expect(page.getByLabel("商品預覽")).toHaveAttribute("data-preview-mode", "desktop");
-  await page.getByRole("button", { name: "預覽手機版" }).click();
-  await expect(page.getByLabel("商品預覽")).toHaveAttribute("data-preview-mode", "mobile");
-
-  await expect(page.getByRole("button", { name: "確認並上架" })).toBeDisabled();
-  await page.getByLabel("我已確認內容，將上架這項商品").check();
-  await page.getByRole("button", { name: "確認並上架" }).click();
+  await page.getByLabel("價格（TWD）").fill("1250");
+  await expect(confirmation).not.toBeChecked();
+  await expect(publish).toBeDisabled();
+  await expect(summary).toHaveValue("由店家確認的介紹");
+  await confirmation.check();
+  await publish.click();
   await expect(page.getByRole("heading", { name: "商品已上架" })).toBeVisible();
-  await expect(page.getByText("已建立 1 個規格")).toBeVisible();
+  await expect(page.getByText("已上架商品：春茶", { exact: true })).toBeVisible();
+  await expect(page.getByText("規格：150g／NT$1250", { exact: true })).toBeVisible();
 });
 
-test("operator can complete the minimum fields and save a draft on a phone viewport", async ({ page }) => {
+test("operator can save an unpublished product on desktop", async ({ page }) => {
+  await page.goto("/admin/products/new");
+  await completeMinimumProductDraft(page);
+  await page.getByRole("button", { name: "儲存商品" }).click();
+  await expect(page.getByRole("heading", { name: "儲存成功" })).toBeVisible();
+  await expect(page.getByRole("status")).toContainText("商品草稿已儲存，尚未上架。");
+  await expect(page.getByRole("link", { name: "返回商品管理", exact: true })).toHaveAttribute("href", "/admin/products");
+  await expect(page.getByRole("link", { name: "繼續新增商品" })).toHaveAttribute("href", "/admin/products/new");
+});
+
+test("operator can complete the minimum fields and save a product on a phone viewport", async ({ page }) => {
   await page.setViewportSize({ width: 360, height: 800 });
   await page.goto("/admin/products/new");
   await completeMinimumProductDraft(page);
 
-  const save = page.getByRole("button", { name: "儲存草稿" });
+  const save = page.getByRole("button", { name: "儲存商品" });
   await expect(save).toBeVisible();
   expect((await save.boundingBox())?.height).toBeGreaterThanOrEqual(48);
+  await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(360);
   await save.click();
-  await expect(page.getByRole("status")).toContainText("草稿已儲存");
+  await expect(page.getByRole("heading", { name: "儲存成功" })).toBeVisible();
+  await expect(page.getByRole("status")).toContainText("商品草稿已儲存，尚未上架。");
   await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(360);
 });

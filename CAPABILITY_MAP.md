@@ -332,3 +332,141 @@ The specification deliberately reserves fields not currently supported by the pr
 | Real data loaded | ⬜ | Waiting for store-provided package; current fixtures and placeholder remain unchanged |
 
 This is an offline validation toolchain only. It does not overwrite catalog data, upload images, call external services, or add business behavior.
+
+## S. Phase 10 ERP reuse & integration planning — planning complete, no integration — 2026-09-22
+
+| Area | Status | Boundary / evidence |
+|---|---:|---|
+| ERP capability inventory | ✅ | Product/PIM, inventory, orders, customer, payment ledger, logistics, permissions, audit, import/export mapped to current service boundaries |
+| Candidate comparison | ✅ | ERPNext, Odoo, Dolibarr compared as ERP candidates; Medusa, Saleor, Vendure recorded as commerce baselines in `docs/erp/phase-10-erp-reuse-integration-planning.md` |
+| Website ↔ ERP contract | ✅ draft | Versioned DTO, correlation/idempotency metadata, normalized error envelope, retry and reconciliation rules defined; no real endpoint exists |
+| Data mapping and sync direction | ✅ draft | Product/inventory ERP→Website, order/publish Website→ERP with explicit gates; payment/logistics remain provider adapters |
+| Capability ownership | ✅ | Direct ERP reuse vs adapter-owned translation vs website-owned UX/content/human validation is explicit |
+| Minimal PoC | ✅ planned | 10-B synthetic fixture mapping contract PoC; no ERP, database, external service, Docker, payment, logistics, or deployment |
+| Final ERP selection / integration | ⬜ | Waiting for license/security/backup review and explicit implementation authorization |
+
+Phase 10 is planning-only. No real customer/product data has been sent to an ERP, and no candidate has been adopted.
+
+## T. Mobile demo local closure — 2026-09-26
+
+| Capability | Status | Evidence / boundary |
+|---|---:|---|
+| Add to cart → `/cart` | ✅ | Existing product flow retained and Chromium-verified; not reimplemented |
+| Continue shopping / checkout | ✅ | Existing `/cart` links plus mobile loop smoke |
+| Synthetic OTP checkout | ✅ local demo | Two allowlisted synthetic phones, visible local code, expiry/rate/attempt contract; no SMS |
+| Address validation | ✅ local gate | Unverifiable home address remains manual-intervention; no false success |
+| Persistent synthetic order | ✅ local demo | SQLite under ignored `.demo-data/`; authoritative fixture pricing; no customer production data |
+| Secure order lookup | ✅ local demo | Order token + bound phone + last three + one-time OTP; generic failure response |
+| Simulated Email / merchant notifications | ✅ local demo | SQLite outbox with queued, simulated-delivered, failed, retry states; no provider |
+| Mobile push | ✅ contract preview only | Typed `simulated-mobile-push` payload with `preview-only`; no registration or delivery |
+| Merchant work queue | ✅ local demo | Independent merchant credential, short-lived cookie, `/admin/orders` |
+| Packing photo / shipment | ✅ local demo | Private local image store; packing means `packed`; explicit payment and manual ship gates |
+| Mobile Chromium closure | ✅ | Pixel 7 viewport customer → merchant → customer state loop |
+| Membership list | ⬜ deferred | Intentionally not allowed to delay the primary shopping/order loop |
+| Real payment / logistics / messaging / production | ⬜ prohibited | No provider, public binding, deployment, real credential, or customer data |
+
+## U. Same-LAN phone demo readiness — 2026-09-26
+
+| Check | Status | Evidence / limitation |
+|---|---:|---|
+| Explicit LAN opt-in | ✅ | `DEMO_COMMERCE_LAN=enabled`; RFC1918 private IPv4 only; loopback default unchanged |
+| Local server binding | ✅ prepared | `172.20.10.4:3013` started for this session; no `0.0.0.0`, no firewall change |
+| Required demo URLs | ✅ | `/`, `/cart`, `/checkout`, `/orders`, `/admin/orders` |
+| Synthetic-data boundary | ✅ | OTP `123456`, mock catalog, simulated payment／notifications, ignored `.demo-data` |
+| Real phone run | ⬜ pending | LAN URL synthetic Chromium 1/1 passed; Chen Tea Shop operator must still run the flow on a real phone; automation is not participant evidence |
+| Public／production access | ⬜ prohibited | No public binding, deployment, payment, logistics, ERP, or formal notification |
+
+## V. Real-phone acceptance repair — 2026-09-27
+
+## W. Fourth-round UI and product-flow repair — 2026-09-27
+
+| Capability | Status | Boundary |
+|---|---:|---|
+| Desktop/mobile homepage hero | ✅ candidate only | Uses generated desktop/mobile candidate files derived from the existing portrait; final store-approved composite remains pending |
+| Video replacement | ✅ | Homepage no longer renders the original video player; source file is preserved |
+| Order lookup navigation | ✅ | `/orders` is present in the primary responsive navigation |
+| Independent checkout success page | ✅ local Demo | `/checkout/success`; order id/status/navigation shown; token stays in same-browser storage and is absent from links |
+| Admin eight-product list | ✅ local Demo | Reads the same guarded file-backed catalog used by storefront; includes image, facts, price, inventory, publication and actions |
+| Product edit boundary | ✅ local Demo | Same Catalog API updates bounded editable facts without changing identity or history |
+| Ninth-product material workflow | ⚠️ Mock | Raw/check/Mock-identify/Mock-compose/human-confirm/save/publish states visible; actual AI service and raw/derived archival manifest are not present |
+| Publication synchronization | ✅ automated | Publish/reload/frontend display and unpublish/frontend hide are covered by Chromium evidence |
+| Real phone / human verification | ⬜ pending | Chromium and screenshots cannot replace physical phone or participant evidence |
+
+## P0 Catalog recovery evidence — 2026-09-27
+
+| Check | Status | Evidence / limitation |
+|---|---:|---|
+| Active 3013 process and worktree | ✅ verified | PID 36808 `node.exe` listens on `172.20.10.4:3013`; launch session is from this worktree; Windows command-line inspection is permission-limited |
+| `/api/demo/catalog` availability | ✅ verified | HTTP 200, 8 published products, same LAN origin used by browser evidence |
+| Storefront/admin data source | ✅ verified | Both use `/api/demo/catalog`; admin adds `includeUnpublished=true` over the same file-backed store |
+| Original eight products retained | ✅ verified | Eight published records remain in `.demo-data/lan-demo-third-round-final-2/catalog.json`; one existing ninth synthetic draft also remains |
+| Browser console/network/hydration | ✅ verified | 360×800 LAN inspection: no pageerror, requestfailed, catalog API failure, or hydration error |
+| Physical phone acceptance | ⬜ pending | Must reload the verified LAN URL after the P0 preflight; browser evidence is not real-phone evidence |
+
+| Capability | Status | Evidence / limitation |
+|---|---:|---|
+| Eight sample products and photos | ✅ local Demo | Confirmed sample fixture and preserved media; real-content approval remains separate |
+| Composite image / bird audio | ✅ resource check | HTTP 200 from active LAN server; audio requires explicit user click |
+| Admin publish persistence | ✅ local Demo | Guarded API writes/reloads ignored `.demo-data`; no external persistence |
+| Ninth product visibility and purchase | ✅ automated LAN | Publish → reload → detail → cart passed in clean isolated data |
+| Customer / merchant / shipment loop | ✅ automated LAN | Pixel 7 Chromium 2/2; not physical-phone evidence |
+| Real phone acceptance | ⬜ pending | Operator must execute at `http://172.20.10.4:3013` using synthetic data |
+| Production integrations | ⬜ prohibited | No real payment, messaging, logistics, ERP, deployment, or customer data |
+
+## W. 第三輪真人驗收修正 — 2026-09-27
+
+| Capability | Status | Evidence / limitation |
+|---|---:|---|
+| Formal homepage composite | ⬜ awaiting store asset | Synthetic composite is no longer presented as official; missing-material notice is explicit |
+| Cart / checkout exit paths | ✅ local Demo | Back and cancel links preserve cart and do not create an order |
+| OTP retry / wrong-code feedback | ✅ local Demo | Active challenge reuse during cooldown; server verification retained; wrong code is visible |
+| `/admin/products` and publication toggle | ✅ local Demo | File-backed ignored catalog; draft hidden from public catalog and rejected by order boundary |
+| Ninth-product material workflow | ⚠️ Mock boundary | Raw/check/identify/compose/confirm/save/publish states are visible; no AI claim or external service; separate raw archive/derived manifest remains pending |
+| Existing-product edit form | ⬜ pending | `/admin/products` has view and publication operations; no independent edit form yet |
+| LAN mobile regression | ✅ automated | Pixel 7 Chromium `catalog-persistence` + `mobile-order-loop` 2/2 on isolated data; not human-phone evidence |
+| Real phone acceptance | ⬜ pending | Re-run `http://172.20.10.4:3013` on a physical phone; no completion claimed |
+
+## 第五輪閉環狀態 — 2026-09-27
+
+| Capability | Status | Evidence / limitation |
+|---|---:|---|
+| Shared catalog price/publication mutation | ✅ local Demo | PATCH→GET verified for price and draft/published state; same file-backed store, no static duplicate |
+| Ninth product persistence | ✅ local Demo | `台灣野生紅茶` remains after server restart; public/admin totals are 9/10 |
+| Optional email checkout boundary | ✅ local Demo | Blank optional email is omitted before order API; non-empty email remains validated; focused tests cover both |
+| Checkout success navigation | ✅ LAN browser | OTP → order API 200 → `/checkout/success`; thanks, order id/status, home and lookup links visible |
+| P1 image recognition/composition | ⛔ blocked | No raw-data source or OCR/vision/composition provider in worktree; workflow remains explicitly Mock |
+| Real phone acceptance | ⬜ pending | Automated LAN browser evidence is not physical-phone evidence |
+
+## 第五輪補充驗收 — 2026-09-27
+
+| Capability | Status | Evidence / limitation |
+|---|---:|---|
+| Ninth test tea price 888→999 | ✅ local Demo | Same file-backed catalog; PATCH/GET and restart verified |
+| Ninth test tea unpublish / republish | ✅ local Demo | Public catalog hides draft, then exposes published record; historical record retained |
+| Mobile brand navigation order lookup | ✅ browser regression | 360×800 link visibility and viewport bounds pass; physical phone still requires operator evidence |
+| 3013 latest Wave 7 process | ✅ local evidence | Restarted from current worktree with explicit Demo flags; listener/API verified; full Windows command line unavailable |
+| Actual image recognition and composition | ⛔ blocked | No raw-data source, OCR/vision provider, or verifiable derived artifact; current UI remains explicit Mock |
+| Physical phone acceptance | ⬜ pending | Browser screenshots and automation do not replace real-device operation |
+
+## 2026-09-27 收尾修復
+
+| Capability | Status | Evidence / limitation |
+|---|---:|---|
+| Public brand consistency | ✅ | Metadata、首頁品牌導覽、aria-label 與 brand regression tests 使用「陳老師茶行」；歷史文件不改寫 |
+| Checkout success redirect | ✅ local Demo | API 200 後 server route 傳入 order id；LAN browser 顯示感謝、編號、狀態與導覽 |
+| Shared Catalog mutations | ✅ local Demo | 唯一 file-backed store；888→999、下架／上架、重啟持續已驗證 |
+| Admin product facts | ✅ local Demo | 中文茶類、價格、庫存、香氣、口感、產地、商品介紹可讀取／編輯 |
+| Mobile order lookup entry | ✅ browser / ⬜ physical phone | 360×800 與 1280×800 browser PASS；真人手機仍待重跑 |
+| Actual image recognition and composition | ⛔ blocked | No raw source/provider/derived manifest; Mock pipeline remains explicitly labelled |
+| Real payment / messaging / logistics / ERP | ⬜ prohibited | No production service or customer data enabled |
+
+## 2026-09-27 後台商品管理簡化決策
+
+| Capability | Status | Evidence / limitation |
+|---|---:|---|
+| Shared add/edit product form | ✅ local Demo | `/admin/products/new` and `/admin/products` use the same `ProductFields` and validation; edit loads the current Catalog record |
+| Admin catalog list and mutations | ✅ local Demo | Existing products are listed from `/api/demo/catalog`; add, edit, publish and unpublish use the same file-backed store |
+| Product fact fields | ✅ local Demo | Photo metadata, tea name, category, specification, price, inventory, aroma, taste, origin and summary remain editable |
+| Built-in image recognition / extraction / composition | ❌ cancelled / out of scope | External preparation is required before upload; no Mock flow or fake progress is part of the website contract |
+| Existing eight products and history | ✅ preserved | No fixture reset, catalog duplication or historical-order deletion in this change |
+| Physical phone acceptance | ⬜ pending | Browser tests do not replace tomorrow's real-device walkthrough |

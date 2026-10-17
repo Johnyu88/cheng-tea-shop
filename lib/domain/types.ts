@@ -8,7 +8,7 @@ export type Money = {
 };
 
 export type InventoryStatus = "available" | "sold-out";
-export type TeaCategory = "white" | "green" | "oolong" | "black" | "dark" | "other";
+export type TeaCategory = "wild-mountain" | "white" | "green" | "yellow" | "oolong" | "black" | "flower" | "dark" | "special" | "aged" | "other";
 export type TasteTag = "light" | "sweet" | "rich" | "roasted";
 
 export type ProductImage = {
@@ -35,6 +35,15 @@ export type Product = {
   image: ProductImage;
   variants: ProductVariant[];
   publication: "draft" | "published";
+  fermentation?: string;
+  roast?: string;
+  brewing?: string;
+  inventoryQuantity?: number;
+  inventoryUnit?: "包" | "兩";
+  packageWeight?: string;
+  teaRegion?: string;
+  aroma?: string;
+  taste?: string;
 };
 
 export type ProductDraft = {
@@ -47,6 +56,7 @@ export type ProductDraft = {
   summary?: string;
   photos?: ProductDraftPhoto[];
   origin?: string;
+  taste?: string;
   fermentation?: string;
   roast?: string;
   aroma?: string;
@@ -57,6 +67,8 @@ export type ProductDraftPhoto = {
   id: string;
   previewUrl: string;
   alt: string;
+  fileName?: string;
+  dataUrl?: string;
 };
 
 export type CartLine = {
@@ -81,7 +93,7 @@ export type CheckoutDraft = {
   email?: string;
   deliveryMethod: "home-delivery" | "store-pickup";
   address?: string;
-  paymentMethod: "credit-card" | "line-pay" | "pay-at-store";
+  paymentMethod: "bank-transfer" | "cash" | "phone-confirmation" | "line-voice-confirmation";
 };
 
 export type CheckoutReceipt = {

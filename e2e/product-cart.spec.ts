@@ -12,13 +12,15 @@ test("customer can add, update, remove, and empty a cart line", async ({ page })
   await page.getByRole("button", { name: "增加數量" }).click();
   await expect(page.getByRole("spinbutton", { name: "購買數量" })).toHaveValue("2");
   await page.getByRole("button", { name: "加入購物車" }).click();
-  await expect(page.getByRole("status")).toContainText("已加入購物車");
-  await page.getByRole("link", { name: "查看購物車" }).click();
-
   await expect(page).toHaveURL(/\/cart$/);
   await expect(page.getByRole("heading", { level: 1, name: "購物車" })).toBeVisible();
   await expect(page.getByRole("region", { name: "購物車摘要" })).toContainText("小計：NT$1,020");
   await expect(page.getByRole("link", { name: "前往結帳" })).toHaveAttribute("href", "/checkout");
+  await page.getByRole("link", { name: "繼續購買" }).click();
+  await expect(page).toHaveURL(/\/#catalog$/);
+  await page.goBack();
+  await expect(page).toHaveURL(/\/cart$/);
+  await expect(page.getByRole("region", { name: "購物車摘要" })).toContainText("小計：NT$1,020");
 
   const quantity = page.getByRole("spinbutton", { name: "合成茶品 001數量" });
   await quantity.fill("3");
@@ -64,7 +66,6 @@ test("detail and cart avoid horizontal overflow on a phone viewport", async ({ p
 
   await page.getByRole("button", { name: "增加數量" }).click();
   await page.getByRole("button", { name: "加入購物車" }).click();
-  await page.getByRole("link", { name: "查看購物車" }).click();
   await expect(page).toHaveURL(/\/cart$/);
   await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(360);
 });

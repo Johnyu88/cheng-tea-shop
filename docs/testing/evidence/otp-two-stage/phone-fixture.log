@@ -1,0 +1,12 @@
+Skipping host requirements validation logic because `PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS` env variable is set.
+WebKit launched
+Setup context created
+Catalog read
+API /api/demo/otp
+API /api/demo/orders
+API /api/demo/admin/session
+API /api/demo/admin/orders/DEMO-15828dee-dda6-4212-81c1-3a09a93ddea5
+API /api/demo/admin/orders/DEMO-15828dee-dda6-4212-81c1-3a09a93ddea5
+API /api/demo/admin/orders/DEMO-15828dee-dda6-4212-81c1-3a09a93ddea5
+Fixture ready: 261002-002
+Unused phone acceptance fixture: 261002-002; name手機查單; suffix001; statusdelivered; customer OTP never issued; quotas preserved.

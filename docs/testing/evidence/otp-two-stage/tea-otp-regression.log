@@ -1,0 +1,7 @@
+Skipping host requirements validation logic because `PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS` env variable is set.
+PASS explicit stage 2, OTP focus/in-viewport, query button in-viewport, 123456 hint, expiry, resend cooldown {"otp":{"x":37,"y":372.375,"width":316,"height":50},"viewport":{"width":390,"height":664}}
+PASS no-match text visible; OTP stage retained
+PASS failure explicit visible feedback
+PASS network explicit visible feedback
+PASS rate explicit visible feedback
+Mobile WebKit two-stage UI regression PASS (mocked failure responses; actual deployed frontend).

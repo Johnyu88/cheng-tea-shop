@@ -1,0 +1,29 @@
+{
+  "id": "/tea-pwa/admin-products",
+  "name": "陳老師茶行商品管理",
+  "short_name": "茶行商品",
+  "description": "商家商品與圖片管理",
+  "start_url": "/admin/products?pwa=products",
+  "scope": "/admin/products",
+  "display": "standalone",
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
+  "background_color": "#fff7e7",
+  "theme_color": "#8b5b22",
+  "icons": [
+    {
+      "src": "/icons/tea-products-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/tea-products-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

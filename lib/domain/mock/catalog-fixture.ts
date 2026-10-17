@@ -1,6 +1,6 @@
 import type { Product, TeaCategory, TasteTag } from "../types";
 
-const categories: TeaCategory[] = ["white", "green", "oolong", "black", "dark", "other"];
+const categories: TeaCategory[] = ["wild-mountain", "white", "green", "yellow", "oolong", "black", "flower", "dark", "special", "aged", "other"];
 const tastes: TasteTag[] = ["light", "sweet", "rich", "roasted"];
 
 export const mockCatalogFixture: Product[] = Array.from({ length: 48 }, (_, index) => {

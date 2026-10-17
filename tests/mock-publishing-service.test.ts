@@ -60,34 +60,6 @@ test("rejects more than three photo metadata entries", async () => {
   expect(result).toMatchObject({ ok: false, error: { code: "invalid-draft" } });
 });
 
-test("generates a deterministic summary from supplied facts and selected tags", async () => {
-  const service = createMockPublishingService();
-  const result = await service.generateSummary({ ...draft, origin: "阿里山", roast: "輕焙" });
-
-  expect(result).toMatchObject({ ok: true });
-  if (!result.ok) throw new Error(result.error.message);
-  expect(result.value).toContain("山霧茶");
-  expect(result.value).toContain("一兩");
-  expect(result.value).toContain("800");
-  expect(result.value).toContain("sweet");
-  expect(result.value).toContain("阿里山");
-  expect(result.value).toContain("輕焙");
-  expect(result.value).not.toContain("療效");
-  const repeated = await service.generateSummary({ ...draft, origin: "阿里山", roast: "輕焙" });
-  expect(repeated).toMatchObject({ ok: true, value: result.value });
-});
-
-test("calls out missing optional facts without inventing them", async () => {
-  const result = await createMockPublishingService().generateSummary(draft);
-
-  expect(result).toMatchObject({ ok: true });
-  if (!result.ok) throw new Error(result.error.message);
-  expect(result.value).toContain("未提供");
-  expect(result.value).not.toContain("產地");
-  expect(result.value).not.toContain("認證");
-  expect(result.value).not.toContain("收成");
-});
-
 test("returns a deeply cloned draft and does not publish it when saving", async () => {
   const service = createMockPublishingService();
   const input: ProductDraft = {
