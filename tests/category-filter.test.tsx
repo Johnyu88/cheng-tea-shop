@@ -52,4 +52,15 @@ describe("tea category filtering", () => {
     await waitFor(() => expect(screen.getByText("目前找不到符合茶類的茶品。")).toBeInTheDocument());
     expect(screen.queryAllByRole("article")).toHaveLength(0);
   });
+
+  it("shows edited tea facts on the public card", () => {
+    const edited = { ...confirmedTeaFixture[0]!, tasteTags: ["rich" as const, "sweet" as const], teaRegion: "屏東 霧台", aroma: "濃郁", taste: "香醇" };
+    render(<PublicTeaStorefront teas={[edited]} />);
+
+    const card = screen.getByRole("article");
+    expect(card).toHaveTextContent("產地屏東 霧台");
+    expect(card).toHaveTextContent("香氣濃郁");
+    expect(card).toHaveTextContent("口感香醇");
+    expect(card).not.toHaveTextContent(/rich|sweet|甘甜/);
+  });
 });
