@@ -42,7 +42,10 @@ test("mobile synthetic order closes customer and merchant status loop", async ({
   await expect(page.getByRole("link", { name: "主動查看訂單" })).toHaveCount(0);
 
   await page.goto("/admin/orders");
+  // Fill only after hydration has loaded the login state; an earlier fill is reset by React.
+  await expect(page.getByText("正在讀取登入設定…")).toHaveCount(0);
   await page.getByLabel("已綁定手機").fill("0912000000");
+  await expect(page.getByRole("button", { name: "傳送驗證碼" })).toBeEnabled();
   const challengeResponse = page.waitForResponse(r => r.url().endsWith("/api/demo/admin/otp") && r.request().method() === "POST");
   await page.getByRole("button", { name: "傳送驗證碼" }).click();
   const challenge = (await (await challengeResponse).json()).value;
