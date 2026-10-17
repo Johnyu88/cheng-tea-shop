@@ -137,10 +137,7 @@ export const createDemoCatalogStore = ({ filePath, mediaDirectory, seedProducts 
           await writeFile(join(mediaDirectory, fileName), decoded.bytes);
           product.image = { src: `/api/demo/catalog/media/${fileName}`, alt: `${product.name}商品照片`, isPlaceholder: false };
         }
-        if (changes.name?.trim()) {
-          product.name = changes.name.trim();
-          product.summary = product.summary || `茶名：${product.name}`;
-        }
+        if (changes.name?.trim()) product.name = changes.name.trim();
         if (changes.category) product.category = changes.category;
         if (changes.tasteTags !== undefined) product.tasteTags = [...changes.tasteTags];
         for (const key of ["fermentation", "roast", "brewing"] as const) {
@@ -152,7 +149,8 @@ export const createDemoCatalogStore = ({ filePath, mediaDirectory, seedProducts 
         if (changes.aroma !== undefined) { if (changes.aroma.trim()) product.aroma = changes.aroma.trim(); else delete product.aroma; }
         if (changes.taste !== undefined) { if (changes.taste.trim()) product.taste = changes.taste.trim(); else delete product.taste; }
         if (changes.teaRegion !== undefined) { if (changes.teaRegion.trim()) product.teaRegion = changes.teaRegion.trim(); else delete product.teaRegion; }
-        if (changes.summary !== undefined && changes.summary.trim()) product.summary = changes.summary.trim();
+        // A cleared 商品介紹 stays cleared; the storefront simply omits it.
+        if (changes.summary !== undefined) product.summary = changes.summary.trim();
         const variant = Array.isArray(product.variants) ? product.variants[0] : undefined;
         if (variant) {
           if (changes.specification?.trim()) variant.specification = changes.specification.trim();
@@ -183,7 +181,7 @@ export const createDemoCatalogStore = ({ filePath, mediaDirectory, seedProducts 
           name: draft.name.trim(),
           category: draft.category,
           tasteTags: [...draft.tasteTags],
-          summary: draft.summary?.trim() || `茶名：${draft.name.trim()}｜規格：${draft.specification.trim()}｜價格：TWD ${draft.price.amount}`,
+          summary: draft.summary?.trim() ?? "",
           image,
           variants: [{ id: `${id}-variant`, specification: draft.specification.trim(), price: { ...draft.price }, inventoryStatus: draft.inventoryStatus, maxQuantity: 5 }],
           publication,

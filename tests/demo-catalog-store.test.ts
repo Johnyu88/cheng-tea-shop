@@ -114,4 +114,30 @@ describe("demo catalog persistence", () => {
     const reloaded = await createDemoCatalogStore(options).list();
     expect(reloaded.map((item) => item.id)).toEqual([published.id]);
   });
+
+  test("keeps a cleared summary cleared after saving and reloading", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "cheng-tea-catalog-summary-"));
+    temporaryDirectories.push(directory);
+    const options = { filePath: join(directory, "catalog.json"), mediaDirectory: join(directory, "media"), seedProducts: [] };
+    const store = createDemoCatalogStore(options);
+    const product = await store.publish(draft);
+    expect(product.summary).toBe("僅供 LAN Demo 驗證。");
+
+    const cleared = await store.update(product.id, { name: product.name, summary: "   " });
+    expect(cleared?.summary).toBe("");
+    const reloaded = await createDemoCatalogStore(options).getBySlug(product.slug);
+    expect(reloaded?.summary).toBe("");
+
+    const untouched = await store.update(product.id, { aroma: "蘭花香" });
+    expect(untouched?.summary).toBe("");
+  });
+
+  test("does not invent a summary for a new product left blank", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "cheng-tea-catalog-blank-summary-"));
+    temporaryDirectories.push(directory);
+    const store = createDemoCatalogStore({ filePath: join(directory, "catalog.json"), mediaDirectory: join(directory, "media"), seedProducts: [] });
+    const { summary: _summary, ...withoutSummary } = draft;
+    void _summary;
+    await expect(store.publish(withoutSummary)).resolves.toMatchObject({ summary: "" });
+  });
 });
