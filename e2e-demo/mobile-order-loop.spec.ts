@@ -23,7 +23,11 @@ test("mobile synthetic order closes customer and merchant status loop", async ({
   await page.getByLabel("驗證碼").fill("123456");
   await page.getByRole("button", { name: "下一步" }).click();
   await expect(page.getByRole("heading", { name: "配送與付款" })).toBeVisible();
+  await page.getByRole("radio", { name: "銀行轉帳", exact: true }).check();
+  await expect(page.getByRole("radio", { name: "銀行轉帳", exact: true })).toBeChecked();
   await page.getByRole("button", { name: "下一步" }).click();
+  await expect(page.getByText("付款方式：銀行轉帳", { exact: true })).toBeVisible();
+  await expect(page.getByText("付款狀態：待人工確認（不會扣款）", { exact: true })).toBeVisible();
   await page.getByRole("button", { name: "建立示範訂單" }).click();
   await expect(page).toHaveURL(/\/checkout\/success\?order=DEMO-/);
   await expect(page.getByRole("heading", { name: "感謝您的購買" })).toBeVisible();
