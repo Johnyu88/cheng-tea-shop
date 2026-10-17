@@ -5,6 +5,7 @@ import { writePublicTeaPublication } from "@/lib/server/public-tea-publication";
 import { assertLocalDemoHttpRequest } from "@/lib/server/demo-http-guard";
 import { getDemoCatalogStore, type ProductUpdate } from "@/lib/server/demo-catalog-store";
 import { demoFailure, demoSuccess } from "@/lib/server/demo-route-response";
+import { logger, safeLog } from "@/lib/server/logger";
 import { validateProductDraftDto } from "@/lib/domain";
 import type { CatalogQuery, ProductDraft, TeaCategory, TasteTag } from "@/lib/domain";
 
@@ -18,7 +19,7 @@ const diagnosticHeaders = (requestId: string, extra: Record<string, string> = {}
 });
 
 const report = (event: Record<string, string>) => {
-  try { console.info(JSON.stringify({ scope: "demo-catalog", ...event })); } catch { /* Diagnostics must not change request behavior. */ }
+  safeLog(() => logger.info({ scope: "demo-catalog", ...event }, `Catalog ${event.method} ${event.event}`));
 };
 const beginDiagnostic = (request: Request, method: string) => {
   const inbound = request.headers.get("x-demo-request-id")?.trim() ?? "";

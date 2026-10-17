@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { logger } from "@/lib/server/logger";
 import { assertAcerDemoRequest, acerDemoRequested, assertCloudDemoRequest, cloudDemoRequested, hasCloudDemoAuthorization } from "@/lib/server/demo-cloud";
 
 // Global budget is deliberately single-instance and contains no addresses or credentials.
@@ -58,7 +59,7 @@ export function proxy(request: NextRequest) {
     else assertAcerDemoRequest(request);
   }
   catch (error) {
-    console.warn("Preview request denied:", error instanceof Error ? error.message : "Invalid request");
+    logger.warn({ scope: "preview-proxy", path: request.nextUrl.pathname, reason: error instanceof Error ? error.message : "Invalid request" }, "Preview request denied");
     failures += 1;
     return new NextResponse("Private test site", { status: 401, headers: {
       "www-authenticate": 'Basic realm="Chen Tea private preview", charset="UTF-8"',

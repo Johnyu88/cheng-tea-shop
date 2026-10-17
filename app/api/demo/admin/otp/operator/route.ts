@@ -14,5 +14,5 @@ export async function POST(request: Request) {
     const code = merchantPhoneAuth.takeForOperator(body.challengeId, request.headers.get("x-demo-merchant-operator") ?? "");
     if (!code) throw new Error("Access denied");
     return demoSuccess({ code, simulated: true }, { headers: { "cache-control": "no-store" } });
-  } catch { return demoFailure(new Error("操作員收件匣不可用"), 403); }
+  } catch (error) { return demoFailure(new Error("操作員收件匣不可用", { cause: error }), 403); }
 }

@@ -1,6 +1,7 @@
 import { createHmac, scryptSync, timingSafeEqual } from "node:crypto";
 import { acerDemoOrigin, acerDemoRequested, assertDemoEnabled, cloudDemoOrigin, cloudDemoRequested } from "./demo-cloud";
 import { merchantPhoneAuth, merchantPhoneStatus } from "./merchant-phone-auth";
+import { logger } from "./logger";
 
 export type MerchantAuthInput = { password?: unknown; phone?: unknown; challengeId?: unknown; code?: unknown };
 export type MerchantAuthStatus = { provider: "password" | "sms"; state: "ready" | "password-pending" | "binding-pending" | "sms-pending"; simulated: boolean };
@@ -54,7 +55,7 @@ export function createPasswordAuthProvider(options: { now?: () => number } = {})
       const valid = timingSafeEqual(configuration.hash, scryptSync(candidate, configuration.salt, 32));
       if (!valid) { failures++; if (failures >= 5) lockedUntil = at + lockMs; }
       else { failures = 0; firstFailure = at; }
-      console.info(JSON.stringify({ scope: "merchant-auth", provider: "password", event: valid ? "verify-success" : "verify-denied", at }));
+      logger.info({ scope: "merchant-auth", provider: "password", event: valid ? "verify-success" : "verify-denied", at }, valid ? "Merchant password accepted" : "Merchant password denied");
       return valid;
     },
     sessionContext() {

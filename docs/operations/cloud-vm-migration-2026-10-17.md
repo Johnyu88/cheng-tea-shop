@@ -99,10 +99,12 @@ docker build -t tea-nextjs:admin-$rev --label org.opencontainers.image.revision=
 
 ```bash
 docker run -d --name tea-front --restart unless-stopped -p 127.0.0.1:8131:3000 \
-  --env-file /srv/tea/front.env -v /srv/tea/catalog-sync:/app/catalog-sync:ro tea-nextjs:front-$rev
+  --env-file /srv/tea/front.env -e LOG_SERVICE=tea-front -v /srv/tea/catalog-sync:/app/catalog-sync:ro tea-nextjs:front-$rev
 docker run -d --name tea-admin --restart unless-stopped -p 127.0.0.1:8130:3000 \
-  --env-file /srv/tea/admin.env -v /srv/tea/data:/app/data -v /srv/tea/catalog-sync:/app/catalog-sync tea-nextjs:admin-$rev
+  --env-file /srv/tea/admin.env -e LOG_SERVICE=tea-admin -v /srv/tea/data:/app/data -v /srv/tea/catalog-sync:/app/catalog-sync tea-nextjs:admin-$rev
 ```
+
+（`LOG_SERVICE` 只用來標記 log 來源；log 的收集與查詢見 `docs/operations/logging.md`。）
 
 （前台只讀公開目錄；只有後台能寫資料，與 Acer 一致。）
 

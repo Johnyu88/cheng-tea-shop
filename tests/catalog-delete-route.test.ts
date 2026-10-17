@@ -27,7 +27,6 @@ async function setup() {
   vi.stubEnv("DEMO_DATA_DIR", directory);
   vi.stubEnv("PUBLIC_CATALOG_VISIBILITY_PATH", join(directory, "public.json"));
   vi.stubEnv("DEMO_MERCHANT_SECRET", "44".repeat(32));
-  vi.spyOn(console, "info").mockImplementation(() => undefined);
   const cookie = issueDemoMerchantCookie("44".repeat(32))!.split(";")[0]!;
   return { host: "127.0.0.1:3016", origin: "http://127.0.0.1:3016", "content-type": "application/json", cookie };
 }

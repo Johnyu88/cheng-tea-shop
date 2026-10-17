@@ -1,5 +1,28 @@
 # HANDOFF
 
+## Server logging and error codes — 2026-10-17
+
+- **Decision (user):** the site needs a log that maintainers and agents can query; 陳老師 does not use it. She only sends a screenshot that shows the error code.
+- **Code (branch `claude/server-logging`, not deployed):**
+  - `lib/server/logger.ts` uses pino and writes one JSON line per event to stdout, with Cloud Logging `severity`/`message` fields and a `service` tag (`LOG_SERVICE`).
+  - Credential and contact fields are redacted, and JSON-parse error text (which quotes the request body) is never logged.
+  - Every `demoFailure()` (all `/api/demo/*` failures, including 429) now creates a 6-character `errorCode`. JSON-parse errors are answered and logged as a generic「請求格式錯誤」, so body text never reaches the log. It is returned in the body and in `x-error-code`, logged with the real cause, and shown in the UI as「（錯誤代碼：XXXXXX）」.
+  - Routes that used to swallow errors now keep them as `cause`.
+  - `instrumentation.ts` logs uncaught server errors with Next's `digest`.
+  - All server `console.*` calls were moved to the logger.
+- **Where and how to query:** `docs/operations/logging.md` (Logs Explorer, `gcloud logging read`, and the `docker logs` fallback).
+- **Verified here:** typecheck clean, ESLint clean on the changed files, full Vitest 83 files passed + 1 skipped / 421 tests passed + 1 skipped, and a production build.
+  - The built standalone server logged a rejected login as JSON with a matching `errorCode`, without the typed password.
+  - Use Node 24.19.0: under Node 22, 22 test files fail on `node:sqlite`.
+- **VM setup done by the user on 2026-10-17** (`docs/operations/logging.md` §3.1–3.2):
+  - `/etc/docker/daemon.json` sets json-file rotation (10m × 5). Docker was restarted and all three containers came back up. Rotation applies once the containers are recreated at the next deploy.
+  - The VM service account `317896956437-compute@developer.gserviceaccount.com` had no log-write permission (`IAM_PERMISSION_DENIED`). It was granted `roles/logging.logWriter` and `roles/monitoring.metricWriter`, and `gcloud logging write` from the VM then succeeded.
+  - The Ops Agent is installed with the §3.2 config and is active. Logs Explorer shows the `tea_docker` log with parsed JSON fields from the currently deployed (pre-#47) code and from Caddy. Severity reads DEFAULT until #47 is deployed.
+- **Still open:**
+  - §3.3: add `LOG_SERVICE` when deploying #47.
+  - §3.4: verify an error code end to end after that deploy.
+  - §4: the read-only `tea-logs-reader` service account with `roles/logging.viewer`, its key stored as the Claude Code environment variable `GCP_LOGS_READER_KEY` (never in the repo or chat).
+
 ## Cloud VM live and phone acceptance passed — 2026-10-17
 
 - **Status:** the site now runs on the GCP VM. The user ran the iPhone acceptance on 2026-10-17 and reported that it passed. Acer is no longer the serving host.

@@ -5,6 +5,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createDemoCatalogStore } from "@/lib/server/demo-catalog-store";
 import { issueDemoMerchantCookie } from "@/lib/server/demo-access";
+import { logger } from "@/lib/server/logger";
 
 let directory = "";
 afterEach(async () => { vi.unstubAllEnvs(); if (directory) await rm(directory, { recursive: true, force: true }); directory = ""; });
@@ -54,7 +55,7 @@ it("propagates a safe inbound request ID and reports status and duration without
   vi.stubEnv("PUBLIC_CATALOG_VISIBILITY_PATH", join(directory, "public.json"));
   vi.stubEnv("DEMO_MERCHANT_SECRET", "44".repeat(32));
   const cookie = issueDemoMerchantCookie("44".repeat(32))!.split(";")[0]!;
-  const info = vi.spyOn(console, "info").mockImplementation(() => undefined);
+  const info = vi.spyOn(logger, "info").mockImplementation(() => undefined);
   const correlationId = "obs12-synthetic-001";
   const headers = { host: "127.0.0.1:3016", origin: "http://127.0.0.1:3016", "content-type": "application/json", cookie, "x-demo-request-id": correlationId };
   const response = await POST(new Request("http://127.0.0.1:3016/api/demo/catalog?publication=draft", {
@@ -65,12 +66,12 @@ it("propagates a safe inbound request ID and reports status and duration without
 
   expect(response.status).toBe(201);
   expect(response.headers.get("x-demo-request-id")).toBe(correlationId);
-  const entries = info.mock.calls.map(([line]) => JSON.parse(String(line)) as Record<string, string>);
+  const entries = info.mock.calls.map(([fields]) => fields as unknown as Record<string, string>);
   expect(entries).toEqual(expect.arrayContaining([
     expect.objectContaining({ scope: "demo-catalog", event: "received", requestId: correlationId, method: "POST" }),
     expect.objectContaining({ scope: "demo-catalog", event: "completed", requestId: correlationId, method: "POST", httpStatus: "201", writeStatus: "persisted", syncStatus: "completed", durationMs: expect.stringMatching(/^\d+$/) }),
   ]));
-  expect(info.mock.calls.flat().join(" ")).not.toContain("診斷合成商品");
+  expect(JSON.stringify(info.mock.calls)).not.toContain("診斷合成商品");
 });
 
 it("keeps a successful product write when the diagnostic sink throws", async () => {
@@ -80,7 +81,7 @@ it("keeps a successful product write when the diagnostic sink throws", async () 
   vi.stubEnv("PUBLIC_CATALOG_VISIBILITY_PATH", join(directory, "public.json"));
   vi.stubEnv("DEMO_MERCHANT_SECRET", "55".repeat(32));
   const cookie = issueDemoMerchantCookie("55".repeat(32))!.split(";")[0]!;
-  vi.spyOn(console, "info").mockImplementation(() => { throw new Error("synthetic diagnostic sink failure"); });
+  vi.spyOn(logger, "info").mockImplementation(() => { throw new Error("synthetic diagnostic sink failure"); });
   const headers = { host: "127.0.0.1:3017", origin: "http://127.0.0.1:3017", "content-type": "application/json", cookie };
   const response = await POST(new Request("http://127.0.0.1:3017/api/demo/catalog?publication=draft", {
     method: "POST",

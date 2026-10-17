@@ -2,6 +2,7 @@ import { readFile, writeFile, rename, mkdir, copyFile } from "node:fs/promises";
 import { basename, dirname, join, resolve } from "node:path";
 import { confirmedTeaFixture } from "@/lib/domain/mock/confirmed-tea-fixture";
 import type { Product } from "@/lib/domain/types";
+import { logger } from "@/lib/server/logger";
 
 type Snapshot = {
   version: 1;
@@ -21,7 +22,7 @@ export async function readPublicTeaCatalog(): Promise<Product[]> {
     const products = Array.isArray(snapshot.products) ? snapshot.products : confirmedTeaFixture;
     return products.filter(product => snapshot.publication[product.id] === "published");
   } catch (error) {
-    console.error("Public catalog unavailable:", error instanceof Error ? error.message : "read failed");
+    logger.error({ scope: "public-catalog", err: error }, "Public catalog unavailable");
     return [];
   }
 }
