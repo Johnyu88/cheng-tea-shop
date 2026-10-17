@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, type ReactNode, type ReactElement } from "react";
 import type { CartService, CatalogService, CheckoutService, PublishingService } from "@/lib/domain";
-import { createDemoCommerceServices, createInMemoryCommerceServices, createMockCartService } from "@/lib/domain";
+import { createDemoCommerceServices, createDemoPublishingService, createInMemoryCommerceServices, createMockCartService } from "@/lib/domain";
 import { publicTeaCatalogService } from "@/lib/domain/in-memory-adapters";
 
 export type CommerceContextValue = {
@@ -20,13 +20,20 @@ type CommerceProviderProps = {
 
 const CommerceContext = createContext<CommerceContextValue | null>(null);
 
+/** The admin image is built with both flags; its new-product page must persist through the demo catalog API, not the mock. */
+const createPublicStorefrontServices = (): CommerceContextValue => createInMemoryCommerceServices({
+  catalogService: publicTeaCatalogService,
+  cartService: createMockCartService({ catalog: publicTeaCatalogService, storageKey: "chen-tea-public-cart-v1" }),
+  ...(process.env.NEXT_PUBLIC_DEMO_COMMERCE === "enabled" ? { publishingService: createDemoPublishingService() } : {}),
+});
+
 const createDefaultServices = (): CommerceContextValue => {
-  if (process.env.NEXT_PUBLIC_PUBLIC_STOREFRONT === "enabled") return createInMemoryCommerceServices({ catalogService: publicTeaCatalogService, cartService: createMockCartService({ catalog: publicTeaCatalogService, storageKey: "chen-tea-public-cart-v1" }) });
+  if (process.env.NEXT_PUBLIC_PUBLIC_STOREFRONT === "enabled") return createPublicStorefrontServices();
   return process.env.NEXT_PUBLIC_DEMO_COMMERCE === "enabled" ? createDemoCommerceServices() : createInMemoryCommerceServices();
 };
 
 export function CommerceProvider({ children, services, publicStorefront = false }: CommerceProviderProps): ReactElement {
-  const [contextValue] = useState<CommerceContextValue>(() => ({ ...(publicStorefront ? createInMemoryCommerceServices({ catalogService: publicTeaCatalogService, cartService: createMockCartService({ catalog: publicTeaCatalogService, storageKey: "chen-tea-public-cart-v1" }) }) : createDefaultServices()), ...services }));
+  const [contextValue] = useState<CommerceContextValue>(() => ({ ...(publicStorefront ? createPublicStorefrontServices() : createDefaultServices()), ...services }));
 
   return <CommerceContext.Provider value={contextValue}>{children}</CommerceContext.Provider>;
 }
