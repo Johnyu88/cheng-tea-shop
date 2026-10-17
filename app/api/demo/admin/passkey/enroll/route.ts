@@ -14,5 +14,5 @@ export async function POST(request: Request) {
     const response = demoSuccess({ authenticated: true }, { headers: { "Cache-Control": "no-store" } });
     for (const cookie of vendor.headers.getSetCookie()) response.headers.append("set-cookie", cookie);
     return response;
-  } catch { return demoFailure(new Error("首次設定失敗，請確認後台密碼後再試"), 403); }
+  } catch (error) { return demoFailure(new Error("首次設定失敗，請確認後台密碼後再試", { cause: error }), 403); }
 }

@@ -23,6 +23,6 @@ export async function POST(request: Request) {
     return demoSuccess({ ...challenge, demoCode: "123456" });
   } catch (error) {
     if (error instanceof DemoRateLimitError) return Response.json({ ok: false, error: error.message }, { status: 429, headers: { "Retry-After": String(error.retryAfterSeconds) } });
-    return demoFailure(lookup ? new Error("無法發送驗證碼，請稍後再試") : error);
+    return demoFailure(lookup ? new Error("無法發送驗證碼，請稍後再試", { cause: error }) : error);
   }
 }

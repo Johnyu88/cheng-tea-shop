@@ -4,6 +4,7 @@ import { issueDemoMerchantCookie, issueDemoMerchantAuthCookie, revokeDemoMerchan
 import { merchantAuthStatus, providerSessionRequired } from "@/lib/server/merchant-auth-provider";
 import { assertLocalDemoHttpRequest } from "@/lib/server/demo-http-guard";
 import { demoFailure, demoSuccess } from "@/lib/server/demo-route-response";
+import { logger, safeLog } from "@/lib/server/logger";
 function safeSessionFailureDiagnostic(request: Request, stage: string) {
   let configured: URL | null = null;
   try {
@@ -34,7 +35,7 @@ export async function GET(request: Request) {
     const store = getMerchantPasskeyStore();
     const passkey = store ? await store.status() : { enabled: false, registered: false };
     return demoSuccess({ ...merchantAuthStatus(), passkey, authenticated: !!await merchantRequestCookie(request) }, { headers: { "cache-control": "no-store" } });
-  } catch { return demoFailure(new Error("商家登入尚未開放"), 403); }
+  } catch (error) { return demoFailure(new Error("商家登入尚未開放", { cause: error }), 403); }
 }
 export async function POST(request: Request) {
   let stage = "request-guard";
@@ -55,9 +56,9 @@ export async function POST(request: Request) {
       throw new Error("Invalid login");
     }
     return demoSuccess({ authenticated: true }, { headers: { "set-cookie": cookie, "cache-control": "no-store" } });
-  } catch {
-    console.warn(JSON.stringify(safeSessionFailureDiagnostic(request, stage)));
-    return demoFailure(new Error("登入失敗，請確認資料或稍後重試。"), 403);
+  } catch (error) {
+    safeLog(() => logger.warn(safeSessionFailureDiagnostic(request, stage), "Merchant login rejected"));
+    return demoFailure(new Error("登入失敗，請確認資料或稍後重試。", { cause: error }), 403);
   }
 }
 
@@ -71,5 +72,5 @@ export async function DELETE(request: Request) {
     if (vendor) for (const cookie of vendor.headers.getSetCookie()) response.headers.append("set-cookie", cookie);
     for (const name of ["__Host-demo_merchant", "demo_merchant"]) response.headers.append("set-cookie", name + "=; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=0");
     return response;
-  } catch { return demoFailure(new Error("登出失敗，請重新整理後再試"), 403); }
+  } catch (error) { return demoFailure(new Error("登出失敗，請重新整理後再試", { cause: error }), 403); }
 }

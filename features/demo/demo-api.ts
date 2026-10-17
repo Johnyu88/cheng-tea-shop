@@ -3,6 +3,7 @@ import type { DemoOrderSnapshot } from "@/lib/domain/demo-order-service";
 import type { DemoOutboxEntry } from "@/lib/server/demo-notification-outbox";
 import type { DemoMobilePushPreview } from "@/lib/domain/demo-notification-preview";
 import { reportAdminProductsApi, reportAdminProductsApiError } from "@/features/publishing/diagnostics/admin-products-diagnostic";
+import { withErrorCode } from "@/lib/client/error-code";
 
 type Envelope<T> = { ok: true; value: T } | { ok: false; error: string };
 export class DemoApiError extends Error {
@@ -22,7 +23,7 @@ async function request<T>(url: string, init: RequestInit, bounded = false): Prom
     if (!response.ok || !payload || payload.ok !== true) {
       const message = response.status === 429 ? "嘗試次數過多，請稍後再試。"
         : response.status === 401 ? "測試站登入已失效，請重新整理頁面後再試。"
-        : payload && payload.ok === false && typeof payload.error === "string" && payload.error.trim() ? payload.error : "服務暫時無法回應，請稍後再試。";
+        : payload && payload.ok === false && typeof payload.error === "string" && payload.error.trim() ? withErrorCode(payload.error, payload) : "服務暫時無法回應，請稍後再試。";
       throw new DemoApiError(message, response.status, retry);
     }
     return payload.value;

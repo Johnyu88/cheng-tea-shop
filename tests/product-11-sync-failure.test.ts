@@ -9,6 +9,7 @@ vi.mock("@/lib/server/public-tea-publication", () => ({ writePublicTeaPublicatio
 import { POST } from "@/app/api/demo/catalog/route";
 import { issueDemoMerchantCookie } from "@/lib/server/demo-access";
 import { getDemoCatalogStore } from "@/lib/server/demo-catalog-store";
+import { logger } from "@/lib/server/logger";
 
 let directory = "";
 
@@ -29,7 +30,7 @@ it("reports persisted-but-unsynced instead of inviting a duplicate POST", async 
   writePublicTeaPublication.mockRejectedValueOnce(new Error("synthetic sync failure"));
   const cookie = issueDemoMerchantCookie("33".repeat(32))!.split(";")[0]!;
   const headers = { host: "127.0.0.1:3015", origin: "http://127.0.0.1:3015", "content-type": "application/json", cookie };
-  const info = vi.spyOn(console, "info").mockImplementation(() => undefined);
+  const info = vi.spyOn(logger, "info").mockImplementation(() => undefined);
 
   const response = await POST(new Request("http://127.0.0.1:3015/api/demo/catalog?publication=draft", {
     method: "POST",
@@ -49,10 +50,10 @@ it("reports persisted-but-unsynced instead of inviting a duplicate POST", async 
   await writePublicTeaPublication(afterPost);
   expect((await getDemoCatalogStore().list()).filter((item) => item.name === "合成同步失敗")).toHaveLength(1);
   expect(writePublicTeaPublication).toHaveBeenLastCalledWith(expect.arrayContaining([expect.objectContaining({ name: "合成同步失敗" })]));
-  const diagnostics = info.mock.calls.flat().join(" ");
+  const diagnostics = JSON.stringify(info.mock.calls);
   expect(diagnostics).not.toContain("合成同步失敗");
   expect(diagnostics).not.toContain("33".repeat(32));
-  const entries = info.mock.calls.map(([line]) => JSON.parse(String(line)) as Record<string, string>);
+  const entries = info.mock.calls.map(([fields]) => fields as unknown as Record<string, string>);
   expect(entries).toEqual(expect.arrayContaining([
     expect.objectContaining({ event: "received", requestId: expect.any(String), method: "POST" }),
     expect.objectContaining({ event: "completed", method: "POST", httpStatus: "503", writeStatus: "persisted", syncStatus: "failed", durationMs: expect.stringMatching(/^\d+$/) }),

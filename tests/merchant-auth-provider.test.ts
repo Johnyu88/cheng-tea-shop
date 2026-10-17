@@ -88,7 +88,7 @@ test("password selection disables both SMS issuance and operator inbox routes", 
     method: "POST", headers, body: JSON.stringify({ phone: "0912000000" }),
   }));
   expect(response.status).toBe(403);
-  expect(await response.json()).toEqual({ ok: false, error: "無法傳送驗證碼。請確認本人綁定、簡訊設定，並稍後重試。" });
+  expect(await response.json()).toEqual({ ok: false, error: "無法傳送驗證碼。請確認本人綁定、簡訊設定，並稍後重試。", errorCode: expect.stringMatching(/^[2-9A-Z]{6}$/) });
   const inbox = await operatorInbox(new Request(origin + "/api/demo/admin/otp/operator", {
     method: "POST", headers, body: JSON.stringify({ challengeId: "a".repeat(32) }),
   }));

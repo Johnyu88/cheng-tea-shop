@@ -1,6 +1,7 @@
 import { createHmac, randomBytes, randomInt, timingSafeEqual } from "node:crypto";
 import { assertDemoEnabled } from "./demo-cloud";
 import { merchantSmsConfigured, sendMerchantSms } from "./merchant-sms";
+import { logger } from "./logger";
 
 type AuditEvent = { event: "issue" | "issue-denied" | "verify-success" | "verify-denied"; identity: string; at: number };
 type Entry = { digest: Buffer; identity: string; expires: number; attempts: number; provisioning: string; code?: string };
@@ -107,5 +108,5 @@ export function createMerchantPhoneAuth(options: { now?: () => number; audit?: (
 type MerchantPhoneAuth = ReturnType<typeof createMerchantPhoneAuth>;
 const globalAuth = globalThis as typeof globalThis & { merchantPhoneAuth?: MerchantPhoneAuth };
 export const merchantPhoneAuth = globalAuth.merchantPhoneAuth ??= createMerchantPhoneAuth({
-  audit: event => console.info(JSON.stringify({ scope: "merchant-auth", ...event })),
+  audit: event => logger.info({ scope: "merchant-auth", ...event }, "Merchant phone auth event"),
 });

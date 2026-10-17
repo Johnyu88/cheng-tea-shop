@@ -1,5 +1,21 @@
 # HANDOFF
 
+## Server logging and error codes — 2026-10-17
+
+- **Decision (user):** the site needs a log that maintainers and agents can query; 陳老師 does not use it. She only sends a screenshot that shows the error code.
+- **Code (branch `claude/server-logging`, not deployed):**
+  - `lib/server/logger.ts` uses pino and writes one JSON line per event to stdout, with Cloud Logging `severity`/`message` fields and a `service` tag (`LOG_SERVICE`).
+  - Credential and contact fields are redacted, and JSON-parse error text (which quotes the request body) is never logged.
+  - Every `demoFailure()` now creates a 6-character `errorCode`. It is returned in the body and in `x-error-code`, logged with the real cause, and shown in the UI as「（錯誤代碼：XXXXXX）」.
+  - Routes that used to swallow errors now keep them as `cause`.
+  - `instrumentation.ts` logs uncaught server errors with Next's `digest`.
+  - All server `console.*` calls were moved to the logger.
+- **Where and how to query:** `docs/operations/logging.md` (Logs Explorer, `gcloud logging read`, and the `docker logs` fallback).
+- **Verified here:** typecheck clean, ESLint clean on the changed files, full Vitest 83 files passed + 1 skipped / 421 tests passed + 1 skipped, and a production build.
+  - The built standalone server logged a rejected login as JSON with a matching `errorCode`, without the typed password.
+  - Use Node 24.19.0: under Node 22, 22 test files fail on `node:sqlite`.
+- **Not done yet (needs VM access or the user):** `docs/operations/logging.md` §3 (Docker log rotation, Ops Agent → Cloud Logging, `LOG_SERVICE` in both env files) and §4 (a read-only `tea-logs-reader` service account with `roles/logging.viewer`, with its key stored as the Claude Code environment variable `GCP_LOGS_READER_KEY`, never in the repo or chat). The Ops Agent config has not been run on the VM yet, so check it with §3.4 after deploying.
+
 ## Cloud VM live and phone acceptance passed — 2026-10-17
 
 - **Status:** the site now runs on the GCP VM. The user ran the iPhone acceptance on 2026-10-17 and reported that it passed. Acer is no longer the serving host.

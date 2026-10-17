@@ -4,6 +4,7 @@ import type { PublishingService, SavedProductDraft } from "./publishing-service"
 import type { CatalogQuery, Page, Product, ProductDraft, ProductSlug } from "./types";
 import type { ServiceResult } from "./result";
 import { createMockPublishingService } from "./mock/mock-publishing-service";
+import { withErrorCode } from "@/lib/client/error-code";
 
 const failure = <T>(message: string): ServiceResult<T> => ({ ok: false, error: domainError("catalog-unavailable", message, true) });
 
@@ -12,10 +13,10 @@ type DemoJsonResult<T> = ServiceResult<T> & { rejectedBeforeWrite?: boolean };
 async function demoJson<T>(input: RequestInfo | URL, init?: RequestInit): Promise<DemoJsonResult<T>> {
   try {
     const response = await fetch(input, { credentials: "same-origin", ...init, headers: { "content-type": "application/json", ...(init?.headers ?? {}) } });
-    const payload = await response.json() as { ok?: boolean; value?: T; error?: string };
+    const payload = await response.json() as { ok?: boolean; value?: T; error?: string; errorCode?: string };
     if (!response.ok || !payload.ok || payload.value === undefined) {
       const rejectedBeforeWrite = response.status === 400 && response.headers.get("x-demo-write-status") === "not-started";
-      return { ...failure<T>(payload.error ?? "Demo 資料目前無法取得，請稍後再試。"), rejectedBeforeWrite };
+      return { ...failure<T>(payload.error ? withErrorCode(payload.error, payload) : "Demo 資料目前無法取得，請稍後再試。"), rejectedBeforeWrite };
     }
     return { ok: true, value: payload.value };
   } catch {
