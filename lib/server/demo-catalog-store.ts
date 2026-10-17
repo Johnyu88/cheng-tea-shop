@@ -199,6 +199,19 @@ export const createDemoCatalogStore = ({ filePath, mediaDirectory, seedProducts 
         return clone(product);
       }));
     },
+    /** Only unpublished products can be removed, so a tea customers can still see is never deleted by mistake. */
+    async remove(id: string): Promise<{ status: "deleted"; product: Product } | { status: "not-found" } | { status: "published" }> {
+      return serialized(() => withFileLock(async () => {
+        const catalog = await read();
+        const index = catalog.products.findIndex((item) => item.id === id);
+        if (index < 0) return { status: "not-found" as const };
+        const product = catalog.products[index]!;
+        if (product.publication !== "draft") return { status: "published" as const };
+        catalog.products.splice(index, 1);
+        await write(catalog);
+        return { status: "deleted" as const, product: clone(product) };
+      }));
+    },
     async readMedia(fileName: string): Promise<Buffer> {
       const safeName = basename(fileName);
       if (safeName !== fileName || safeName.includes("..")) throw new Error("Invalid media path");
