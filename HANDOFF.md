@@ -1,5 +1,56 @@
 # HANDOFF
 
+## Cloud VM live and phone acceptance passed — 2026-10-17
+
+- **Status:** the site now runs on the GCP VM. The user ran the iPhone acceptance on 2026-10-17 and reported that it passed. Acer is no longer the serving host.
+- **Host:**
+  - GCP project `cheng-tea-shop`, zone `asia-east1-c` (Changhua), instance `instance-20261017-093827`, external IP `104.199.148.195`.
+  - Billing runs on the GCP free-trial credit, which ends around **2026-11-14**. The user must upgrade billing before then or the VM stops.
+- **URLs:** no domain yet; Caddy issues certificates for sslip.io names.
+  - Storefront: `https://shop-104-199-148-195.sslip.io`
+  - Admin: `https://admin-104-199-148-195.sslip.io/admin/products` (the admin root `/` returns 404 by design)
+- **Deployed source:** `main` at `93c417a` (merge of PR #45), deployed following the instructions given in this session.
+  - Images: `tea-nextjs:front-<rev>` and `tea-nextjs:admin-<rev>`, labelled `org.opencontainers.image.revision` plus `tea.build.NEXT_PUBLIC_*`.
+  - Image IDs and digests are not recorded here yet. The VM operator should add them from `docker image inspect`.
+- **Build arguments** (compiled in at build time; Docker does not keep them, which is why the images now carry `tea.build.*` labels):
+
+  | Image | `NEXT_PUBLIC_MERCHANT_MANUAL_ORDER` | `NEXT_PUBLIC_DEMO_COMMERCE` | `NEXT_PUBLIC_PUBLIC_STOREFRONT` |
+  |---|---|---|---|
+  | front | `enabled` | `disabled` | `enabled` |
+  | admin | `enabled` | `enabled` | `enabled` |
+
+- **Containers:**
+  - `tea-front`: `127.0.0.1:8131`, `--env-file /srv/tea/front.env`, `/srv/tea/catalog-sync` mounted read-only at `/app/catalog-sync`.
+  - `tea-admin`: `127.0.0.1:8130`, `--env-file /srv/tea/admin.env`, `/srv/tea/data` mounted at `/app/data` and `/srv/tea/catalog-sync` at `/app/catalog-sync`.
+  - `caddy`: host network.
+  - The previous containers are kept, stopped, as `tea-front-prev` and `tea-admin-prev` for rollback.
+  - Both env files are root-only (mode 600). Secrets were regenerated on the VM and are not in the repo.
+  - The admin env sets `DEMO_ACER_ORIGIN` and `DEMO_ACER_PUBLIC_HOST` to the admin sslip.io host (PR #41).
+- **Fixes made during acceptance:**
+  - **#42:** the admin new-product page had been wired to the mock publishing service, because the admin image enables both `NEXT_PUBLIC_PUBLIC_STOREFRONT` and `NEXT_PUBLIC_DEMO_COMMERCE`. New products were never saved and could show a fake `mock-draft-…` ID. The page now persists through `/api/demo/catalog`. Phone photos are re-encoded in the browser to a JPEG of at most 1600px, and a save rejected before writing shows its real reason.
+  - **#43:** the storefront card and tea page show 產地／香氣／口感／發酵／焙火／沖泡方式. The English taste-tag line (`rich・sweet`) is no longer shown; tags stay in the data as filter keys.
+  - **#44:** the merchant can delete a tea, but only an unpublished one, after a confirmation dialog. The server refuses to delete a published tea, and photo files are kept.
+  - **#45:** clearing 商品介紹 and saving keeps it empty. New products no longer get an auto-generated `茶名：…｜規格：…` summary.
+- **Acceptance checked by the user on iPhone:**
+  - admin login;
+  - publish and unpublish;
+  - adding the 11th and 12th teas, with and without a photo;
+  - edits reaching the storefront;
+  - photo replacement;
+  - clearing 商品介紹;
+  - deleting an unpublished tea (cancel keeps it, confirm removes it);
+  - no 「訂單查詢」 link on the storefront.
+- **Deploy check lesson:** grepping the raw HTML for a word also matches the embedded page data. Check visible text with scripts removed.
+- **Open items:**
+  1. Run `sudo shred -u /root/tea-admin-password.txt` on the VM once the password has been handed to 陳老師.
+  2. Set up daily backups of `/srv/tea/data` and `/srv/tea/catalog-sync`, plus GCP disk snapshots (runbook §2.8).
+  3. Before resetting Acer, confirm the Acer backup zip and `manifest.txt` are in the user's Google Drive.
+  4. Upgrade GCP billing before about 2026-11-14.
+  5. PR #40 (Acer pre-test and backup records) still awaits the user's merge decision. PR #26 (payment/contact details, LINE QR) is still pending.
+  6. The user still needs to delete the stale branches listed below, plus `claude/revert-08c0bef`.
+  7. The historical WebCrypto key security follow-up is still open (see below).
+  8. Buy a domain before real customer traffic. Then update Caddy, `DEMO_ACER_ORIGIN` and `DEMO_ACER_PUBLIC_HOST`.
+
 ## Hosting decision: move from Acer to a cloud VM — 2026-10-17
 
 - **Decision (user):**
