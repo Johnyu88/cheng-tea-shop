@@ -58,10 +58,9 @@ describe("tea category filtering", () => {
     render(<PublicTeaStorefront teas={[edited]} />);
 
     const card = screen.getByRole("article");
-    expect(card).toHaveTextContent("濃郁・甘甜");
     expect(card).toHaveTextContent("產地屏東 霧台");
     expect(card).toHaveTextContent("香氣濃郁");
     expect(card).toHaveTextContent("口感香醇");
-    expect(card).not.toHaveTextContent("rich");
+    expect(card).not.toHaveTextContent(/rich|sweet|甘甜/);
   });
 });

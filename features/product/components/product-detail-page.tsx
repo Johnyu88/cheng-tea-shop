@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { Product, ProductVariant } from "@/lib/domain";
 import { useCommerce } from "@/features/commerce/components/commerce-provider";
-import { TeaFacts, tasteTagText } from "./tea-facts";
+import { TeaFacts } from "./tea-facts";
 
 type ProductDetailPageProps = {
   slug: string;
@@ -141,7 +141,6 @@ export function ProductDetailPage({ slug }: ProductDetailPageProps): JSX.Element
         <div role="img" aria-label={readyProduct.image.alt}>
           {readyProduct.image.src === null ? readyProduct.image.alt : <img src={readyProduct.image.src} alt={readyProduct.image.alt} />}
         </div>
-        {readyProduct.tasteTags.length > 0 && <p>{tasteTagText(readyProduct.tasteTags)}</p>}
         <h1 id="product-detail-heading">{readyProduct.name}</h1>
         <p>{readyProduct.summary}</p>
         <TeaFacts product={readyProduct} />
