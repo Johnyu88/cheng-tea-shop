@@ -1,5 +1,21 @@
 # HANDOFF
 
+## Acer 重置前備份（2026-10-17）
+
+依 `docs/operations/cloud-vm-migration-2026-10-17.md` 第一部分（main `db4217a`）執行。正式容器沒有停止、重啟或修改；正式資料只有讀取。
+
+- 檔案：`C:\data\tea-backup-20261017\tea-acer-backup-20261017.zip`（**不在 git**）
+- 建立時間 (UTC)：`2026-10-17T10:44:47Z`
+- 大小：`18347520` bytes
+- SHA-256：`32c337c22c949d14f05175eb981ee41df0a2d9aa5eb2a8abbbf4f097f4af290d`
+- 內容（24 個檔案）：`private-accounting-v1-data/`、`public-visibility-live/`、`Caddyfile`。Caddyfile 是 `C:\data\tea-staging\Caddyfile`，與 `tea-caddy-staging` 容器內 `/etc/caddy/Caddyfile` 的 SHA-256 相同。
+- 同目錄的 `manifest.txt` 記錄商品 ID／狀態，以及兩個正式容器的環境變數**名稱**（不含值）。
+- 商品：`catalog.json` 共 **10** 件。上架 6 件：`cheng-tea-9600,9602,9604,9606,9607,9608`；草稿 4 件：`cheng-tea-9605`、`cheng-tea-9609`、`demo-published-04a1b33a-f40a-439e-ac00-f4dd0a437811`、`demo-published-e9f3924d-7a47-42d0-bbcd-fb1586a8399a`。`publication.json` 公開 **6** 件，與正式前台 `:10000` 一致。
+- 備份前確認後台閒置：正式後台前 2 小時沒有 log、前 24 小時沒有 POST/PATCH/DELETE；資料最後寫入 `2026-10-16T07:35:45Z`。
+- 驗證：解壓到暫存位置後，24/24 檔案與來源 SHA-256 相同；`catalog.json` 可讀，ID 與正式相同；12 張照片都能開啟；5 個 SQLite 檔頭正常。暫存位置已刪除。
+- 做法備註：`tar` 會因 SQLite 被執行中的容器開啟而讀取失敗，所以改用 .NET ZipArchive 以共用讀取方式建立（路徑使用 `/`，可在 Ubuntu 直接解壓）。解壓路徑需要夠短，否則會超過 Windows 260 字元限制。
+- **未完成（重置前必做）**：備份目前只在 Acer 本機，須另存至少一份到 Acer 以外並驗證 SHA-256。`C:\data\tea-staging\recovery\` 未納入。重置需使用者確認。
+
 ## 部署前測試 main `605e806`（Acer，2026-10-17）
 
 依 `docs/operations/deploy-main-605e806-2026-10-17.md` 只執行第 2、3.1、3.2、4.2 節。**未做任何正式切換**：正式容器 `tea-public-adbe430-live`、`tea-private-v5-prod-admin-24-live` 未停止、未重啟、未改名（admin RestartCount 0，StartedAt 2026-10-15T16:02:32Z）；Caddy／Tailscale／DNS 未改；未對正式後台寫入；未執行 `production-switch`。未印出任何環境變數值、密碼、cookie 或 token。
