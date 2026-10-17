@@ -14,7 +14,14 @@
 - **Verified here:** typecheck clean, ESLint clean on the changed files, full Vitest 83 files passed + 1 skipped / 421 tests passed + 1 skipped, and a production build.
   - The built standalone server logged a rejected login as JSON with a matching `errorCode`, without the typed password.
   - Use Node 24.19.0: under Node 22, 22 test files fail on `node:sqlite`.
-- **Not done yet (needs VM access or the user):** `docs/operations/logging.md` §3 (Docker log rotation, Ops Agent → Cloud Logging, `LOG_SERVICE` in both env files) and §4 (a read-only `tea-logs-reader` service account with `roles/logging.viewer`, with its key stored as the Claude Code environment variable `GCP_LOGS_READER_KEY`, never in the repo or chat). The Ops Agent config has not been run on the VM yet, so check it with §3.4 after deploying.
+- **VM setup done by the user on 2026-10-17** (`docs/operations/logging.md` §3.1–3.2):
+  - `/etc/docker/daemon.json` sets json-file rotation (10m × 5). Docker was restarted and all three containers came back up. Rotation applies once the containers are recreated at the next deploy.
+  - The VM service account `317896956437-compute@developer.gserviceaccount.com` had no log-write permission (`IAM_PERMISSION_DENIED`). It was granted `roles/logging.logWriter` and `roles/monitoring.metricWriter`, and `gcloud logging write` from the VM then succeeded.
+  - The Ops Agent is installed with the §3.2 config and is active. Logs Explorer shows the `tea_docker` log with parsed JSON fields from the currently deployed (pre-#47) code and from Caddy. Severity reads DEFAULT until #47 is deployed.
+- **Still open:**
+  - §3.3: add `LOG_SERVICE` when deploying #47.
+  - §3.4: verify an error code end to end after that deploy.
+  - §4: the read-only `tea-logs-reader` service account with `roles/logging.viewer`, its key stored as the Claude Code environment variable `GCP_LOGS_READER_KEY` (never in the repo or chat).
 
 ## Cloud VM live and phone acceptance passed — 2026-10-17
 

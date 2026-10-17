@@ -1,7 +1,7 @@
 # 網站 log：記什麼、在哪裡、怎麼查
 
 > 對象：維護的人和 AI agent。陳老師不需要操作任何東西，畫面出錯時截圖（含錯誤代碼）用 LINE 傳給維護的人即可。
-> 狀態（2026-10-17）：程式端已完成並有測試（本文件同一個 PR）。VM 端的 Ops Agent、log 輪替、唯讀帳號**尚未設定**，照第 3、4 節做完後，把結果記進 `HANDOFF.md`。
+> 狀態（2026-10-17）：程式端已完成並有測試（PR #47）。VM 端 3.1 log 輪替、3.2 Ops Agent 已完成，Cloud Logging 已收到 `tea_docker` log。3.3、3.4 要等部署 PR #47 時做；第 4 節唯讀帳號尚未建立。做完後把結果記進 `HANDOFF.md`。
 
 ## 1. 程式會記什麼
 
@@ -119,7 +119,7 @@ sudo bash add-google-cloud-ops-agent-repo.sh --also-install
 
 VM 要能寫 log，需要兩個條件：
 
-- VM 的服務帳號有 `roles/logging.logWriter`。較新的專案不會自動給預設服務帳號 Editor 權限，請到 IAM 確認，沒有就加上。
+- VM 的服務帳號有 `roles/logging.logWriter`。較新的專案不會自動給預設服務帳號 Editor 權限；本專案就是這種情況，2026-10-17 已在 Cloud Shell 用 `gcloud projects add-iam-policy-binding` 補上 `roles/logging.logWriter` 和 `roles/monitoring.metricWriter`。檢查方法：在 VM 上執行 `gcloud logging write tea-permission-test hello --project=cheng-tea-shop`，不出錯就表示有權限。
 - VM 的存取範圍（access scopes）包含 Cloud Logging 寫入。在 VM 詳細資料的「API 和身分識別管理」查看，要改的話得先停止 VM。
 
 `/etc/google-cloud-ops-agent/config.yaml`：
