@@ -40,9 +40,7 @@ test("mobile synthetic order closes customer and merchant status loop", async ({
   await expect(orderCard).toContainText("待人工確認");
   await orderCard.getByRole("button", { name: "人工確認付款" }).click();
   const png = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=", "base64");
-  await orderCard.getByLabel("選擇相簿").setInputFiles({ name: "packing.png", mimeType: "image/png", buffer: png });
-  await expect(orderCard.getByRole("button", { name: "確認包裝" })).toBeVisible();
-  await orderCard.getByRole("button", { name: "確認包裝" }).click();
+  await orderCard.getByLabel("打包照片").setInputFiles({ name: "packing.png", mimeType: "image/png", buffer: png });
   await expect(orderCard).toContainText("已打包");
   await orderCard.getByRole("button", { name: "人工確認出貨" }).click();
   await expect(orderCard).toContainText("已出貨");
