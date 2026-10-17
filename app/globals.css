@@ -535,6 +535,33 @@ h1 {
   font-weight: var(--font-weight-bold);
 }
 
+.tea-facts {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0.75rem 0;
+  font-size: var(--font-size-caption);
+  line-height: var(--line-height-body);
+}
+
+.tea-facts > div {
+  display: grid;
+  grid-template-columns: 4.5em minmax(0, 1fr);
+  gap: 0.5rem;
+}
+
+.tea-facts dt {
+  color: var(--muted-ink);
+}
+
+.tea-facts dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.tea-facts-compact {
+  margin: 0 0 0.75rem;
+}
+
 .product-card-summary {
   color: var(--muted-ink);
 }

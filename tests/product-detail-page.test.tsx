@@ -208,3 +208,16 @@ it("can adjust quantity with accessible controls and retries a cart error", asyn
   await waitFor(() => expect(screen.getByRole("status")).toHaveTextContent("已加入購物車"));
   expect(screen.getByRole("spinbutton", { name: "購買數量" })).toHaveValue(2);
 });
+
+it("shows merchant-entered tea facts and Chinese taste labels on the product page", async () => {
+  const detailed: Product = { ...product, tasteTags: ["rich", "sweet"], teaRegion: "屏東 霧台", aroma: "濃郁", taste: "香醇", brewing: "95°C 沖泡" };
+  renderPage(product.slug, makeServices({ getProductBySlug: async () => ({ ok: true, value: detailed }) }));
+
+  await waitFor(() => expect(screen.getByRole("heading", { name: "玉露清香" })).toBeInTheDocument());
+  expect(screen.getByText("濃郁・甘甜")).toBeInTheDocument();
+  expect(screen.queryByText(/rich/)).not.toBeInTheDocument();
+  for (const [label, value] of [["產地", "屏東 霧台"], ["香氣", "濃郁"], ["口感", "香醇"], ["沖泡方式", "95°C 沖泡"]]) {
+    expect(screen.getByText(label!).nextElementSibling).toHaveTextContent(value!);
+  }
+  expect(screen.queryByText("發酵")).not.toBeInTheDocument();
+});

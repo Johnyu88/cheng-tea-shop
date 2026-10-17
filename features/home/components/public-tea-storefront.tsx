@@ -5,6 +5,7 @@ import Link from "next/link";
 import type { Product, TeaCategory } from "@/lib/domain/types";
 import { CategoryFilter } from "@/features/catalog/components/category-filter";
 import { StorefrontShell } from "@/features/storefront/components/storefront-shell";
+import { TeaFacts, tasteTagText } from "@/features/product/components/tea-facts";
 
 const line = "https://line.me/ti/p/TT6TRQyMF6";
 export function PublicTeaStorefront({ teas }: { teas: Product[] }) {
@@ -54,9 +55,10 @@ export function PublicTeaStorefront({ teas }: { teas: Product[] }) {
               {tea.image.src ? <img src={tea.image.src} alt={tea.image.alt} loading="lazy"/> : <p>請洽陳老師確認照片</p>}
             </div>
             <div className="product-card-content">
-              <p className="product-taste">{tea.tasteTags.join("・")}</p>
+              {tea.tasteTags.length > 0 && <p className="product-taste">{tasteTagText(tea.tasteTags)}</p>}
               <h3>{tea.name}</h3>
               <p className="product-summary">{tea.summary}</p>
+              <TeaFacts product={tea} className="tea-facts tea-facts-compact" />
               <p className="product-meta">{variant?.specification ?? "未設定"}／參考價 NT${variant?.price?.amount?.toLocaleString("zh-TW") ?? "—"}</p>
               <Link className="product-link" href={`/tea/${tea.slug}`}>查看茶品／加入購物車</Link>
             </div>
