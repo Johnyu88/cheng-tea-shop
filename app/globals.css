@@ -535,6 +535,12 @@ h1 {
   font-weight: var(--font-weight-bold);
 }
 
+.product-delete-button {
+  border-color: var(--color-action-danger);
+  color: var(--color-action-danger);
+  background: var(--white);
+}
+
 .tea-facts {
   display: grid;
   gap: 0.35rem;

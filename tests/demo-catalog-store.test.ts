@@ -98,4 +98,20 @@ describe("demo catalog persistence", () => {
     expect((await createDemoCatalogStore({ filePath: join(directory, "catalog.json"), mediaDirectory: join(directory, "media"), seedProducts: [] }).getBySlug(product.slug))).toMatchObject({ fermentation: "輕發酵", roast: "微", brewing: "建議90度水", tasteTags: ["light", "sweet"] });
     expect(updated).toMatchObject({ aroma: "桂花香", taste: "清甜回甘", teaRegion: "宜蘭", summary: "人工確認後的商品介紹。" });
   });
+
+  test("deletes only unpublished products and keeps published ones", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "cheng-tea-catalog-delete-"));
+    temporaryDirectories.push(directory);
+    const options = { filePath: join(directory, "catalog.json"), mediaDirectory: join(directory, "media"), seedProducts: [] };
+    const store = createDemoCatalogStore(options);
+    const published = await store.publish({ ...draft, name: "上架中茶" }, "published");
+    const unpublished = await store.publish({ ...draft, name: "草稿茶" }, "draft");
+
+    await expect(store.remove(published.id)).resolves.toEqual({ status: "published" });
+    await expect(store.remove("missing-id")).resolves.toEqual({ status: "not-found" });
+    await expect(store.remove(unpublished.id)).resolves.toMatchObject({ status: "deleted", product: { id: unpublished.id, name: "草稿茶" } });
+
+    const reloaded = await createDemoCatalogStore(options).list();
+    expect(reloaded.map((item) => item.id)).toEqual([published.id]);
+  });
 });

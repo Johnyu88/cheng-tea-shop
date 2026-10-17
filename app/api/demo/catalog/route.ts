@@ -137,3 +137,31 @@ export async function POST(request: Request) {
   } catch (error) { httpStatus = 400; return demoFailure(error, httpStatus, { headers: diagnosticHeaders(diagnostic.requestId, { "x-demo-write-status": writeStatus, "x-demo-sync-status": syncStatus }) }); }
   finally { finishDiagnostic(diagnostic, "POST", httpStatus, writeStatus, syncStatus); }
 }
+
+export async function DELETE(request: Request) {
+  const diagnostic = beginDiagnostic(request, "DELETE");
+  let httpStatus = 200;
+  let writeStatus = "not-started";
+  let syncStatus = "not-started";
+  try {
+    assertLocalDemoHttpRequest(request, "DELETE", "json");
+    if (!await merchantRequestCookie(request)) throw new Error("Merchant access required");
+    const body = await request.json() as { id?: unknown };
+    if (typeof body.id !== "string" || body.id.length === 0 || body.id.length > 200) throw new Error("商品刪除資料無效");
+    const result = await getDemoCatalogStore().remove(body.id);
+    if (result.status === "not-found") throw new Error("找不到商品，可能已經刪除；請重新整理商品清單");
+    if (result.status === "published") throw new Error("上架中的商品不能刪除，請先下架");
+    writeStatus = "persisted";
+    syncStatus = "started";
+    try {
+      await writePublicTeaPublication(await getDemoCatalogStore().list());
+    } catch {
+      httpStatus = 503;
+      syncStatus = "failed";
+      return demoFailure(new Error("商品已刪除，但公開同步尚未完成；請重新整理商品清單確認，勿重複刪除。"), httpStatus, { headers: diagnosticHeaders(diagnostic.requestId, { "x-demo-write-status": writeStatus, "x-demo-sync-status": syncStatus }) });
+    }
+    syncStatus = "completed";
+    return demoSuccess({ id: result.product.id, name: result.product.name }, { headers: diagnosticHeaders(diagnostic.requestId, { "x-demo-write-status": writeStatus, "x-demo-sync-status": syncStatus }) });
+  } catch (error) { httpStatus = 400; return demoFailure(error, httpStatus, { headers: diagnosticHeaders(diagnostic.requestId, { "x-demo-write-status": writeStatus, "x-demo-sync-status": syncStatus }) }); }
+  finally { finishDiagnostic(diagnostic, "DELETE", httpStatus, writeStatus, syncStatus); }
+}

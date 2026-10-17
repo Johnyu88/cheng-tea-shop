@@ -126,3 +126,29 @@ test("shows a visible message when the browser has no FileReader", async () => {
   fireEvent.change(screen.getByLabelText(/選擇新照片以更換/), { target: { files: [new File(["photo"], "sample.jpg", { type: "image/jpeg" })] } });
   expect(await screen.findByText("這張照片無法讀取，請改選其他照片；iPhone 可到「設定 → 相機 → 格式」選「最相容」。原照片未更動。", { exact: true })).toBeInTheDocument();
 });
+
+test("offers delete only for unpublished products and asks for confirmation first", async () => {
+  const draftProduct: Product = { ...product, id: "tea-draft", slug: "tea-draft", name: "測試草稿茶", publication: "draft" };
+  const confirm = vi.spyOn(window, "confirm").mockReturnValueOnce(false).mockReturnValueOnce(true);
+  const fetchMock = vi.fn()
+    .mockResolvedValueOnce(new Response(JSON.stringify({ ok: true, value: { items: [product, draftProduct] } }), { status: 200 }))
+    .mockResolvedValueOnce(new Response(JSON.stringify({ ok: true, value: { id: "tea-draft", name: "測試草稿茶" } }), { status: 200 }));
+  vi.stubGlobal("fetch", fetchMock);
+
+  render(<ProductManagementPage />);
+  await screen.findByText("測試草稿茶");
+  expect(screen.getAllByRole("button", { name: "刪除" })).toHaveLength(1);
+
+  fireEvent.click(screen.getByRole("button", { name: "刪除" }));
+  expect(confirm).toHaveBeenCalledWith(expect.stringContaining("確定要刪除「測試草稿茶」"));
+  expect(fetchMock).toHaveBeenCalledTimes(1);
+
+  fireEvent.click(screen.getByRole("button", { name: "刪除" }));
+  await waitFor(() => expect(screen.getByText("「測試草稿茶」已刪除。")).toBeInTheDocument());
+  const deleteCall = fetchMock.mock.calls[1]!;
+  expect(deleteCall[0]).toBe("/api/demo/catalog");
+  expect(deleteCall[1]).toMatchObject({ method: "DELETE", body: JSON.stringify({ id: "tea-draft" }) });
+  expect(screen.queryByRole("heading", { name: "測試草稿茶" })).not.toBeInTheDocument();
+  expect(screen.getByRole("heading", { name: "台灣佛手茶" })).toBeInTheDocument();
+});
+
