@@ -1,5 +1,24 @@
 # HANDOFF
 
+## Deployed `main` at `359b03e` (PR #47, server logging) — 2026-10-17
+
+- **Deployed by the user** on the GCP VM, following the steps given in this session.
+- **Backup:** `/srv/tea/data` and `/srv/tea/catalog-sync` were backed up first to `/srv/tea/backups/before-logging-<timestamp>.tgz`.
+- **Images:**
+  - `tea-nextjs:front-359b03e` and `tea-nextjs:admin-359b03e`.
+  - Same build arguments as the previous deploy (see the table below), recorded as `tea.build.*` labels.
+  - Image IDs are not recorded here.
+- **Containers:**
+  - `tea-front` and `tea-admin` were recreated with `-e LOG_SERVICE=tea-front` / `tea-admin`, so Docker log rotation (10m × 5) now applies to them.
+  - The previous containers (`93c417a`) are kept, stopped, as `tea-front-prev` and `tea-admin-prev` for rollback. Rollback commands are in this session's deploy steps: stop and remove the new containers, rename the `-prev` ones back, start them.
+- **Verified by the user:**
+  - storefront home page on iPhone;
+  - admin login page on desktop Chrome;
+  - one wrong admin password showed「登入失敗，請確認資料或稍後重試。（錯誤代碼：XDAVT3）」;
+  - Logs Explorer query `jsonPayload.errorCode="XDAVT3"` on the `tea_docker` log returned exactly one entry with severity WARNING.
+- **Lesson:** when copying a URL from a chat message, trailing text can stick to it. The admin proxy then answers a plain `Not found`, which looks like an outage. Put URLs on their own line or in a code block.
+- **Still open:** `docs/operations/logging.md` §4, the read-only `tea-logs-reader` service account for agents.
+
 ## Server logging and error codes — 2026-10-17
 
 - **Decision (user):** the site needs a log that maintainers and agents can query; 陳老師 does not use it. She only sends a screenshot that shows the error code.
