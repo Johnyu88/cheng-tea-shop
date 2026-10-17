@@ -1,5 +1,16 @@
 # HANDOFF
 
+## Hosting decision: move from Acer to a cloud VM — 2026-10-17
+
+- **Decision (user):**
+  - The Acer machine will be fully reset after the current pre-deploy test, so Acer-hosted production (`:10000`/`:10001` via Tailscale) is being retired.
+  - The site moves to a **cloud VM** running the same Docker images behind Caddy with automatic HTTPS, so customers and the shop can test on ordinary phones without Tailscale.
+  - The full cloud-02 architecture (PostgreSQL + object storage) is deferred.
+- Runbook: `docs/operations/cloud-vm-migration-2026-10-17.md`. It covers the Acer backup that is required before the reset, VM setup, data restore, regenerating secrets, Caddy, daily backups and phone acceptance.
+- **Before the Acer reset:** back up `C:\data\tea-staging\private-accounting-v1-data`, `public-visibility-live`, the Caddyfile and the environment-variable *names*, then verify the backup outside Acer. Secret values are not exported; they are regenerated on the VM.
+- Acer free disk is about 17 GB. Watch space during image builds and the data-copy test.
+- The user creates the cloud account, VM, domain and passwords. Agents never handle payment or store secrets in the repo.
+
 ## PRODUCT-11 fix ported to main — 2026-10-17
 
 - Problem: adding a product in the admin could show success while the product was never actually saved.
