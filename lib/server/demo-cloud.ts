@@ -15,17 +15,23 @@ export function cloudDemoOrigin(): URL {
   return url;
 }
 
-/** Acer staging requires one operator-configured private origin; only HTTPS :8443 may be non-default. */
+/**
+ * Acer staging requires one operator-configured private origin; only HTTPS :8443 may be non-default.
+ * A public host (e.g. the cloud VM) is accepted only when DEMO_ACER_PUBLIC_HOST names it exactly.
+ */
 export function acerDemoOrigin(): URL {
   const raw = process.env.DEMO_ACER_ORIGIN;
   if (!raw) throw new Error("Acer demo origin is not configured");
   const url = new URL(raw);
   const tailnetHost = /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.){2}ts\.net$/.test(url.hostname);
   const homeArpaHost = /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.home\.arpa$/.test(url.hostname);
+  const publicHost = process.env.DEMO_ACER_PUBLIC_HOST ?? "";
+  const allowedPublicHost = url.hostname === publicHost
+    && /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/.test(publicHost);
   if (url.origin !== raw || url.protocol !== "https:" || url.username || url.password
     || (url.port && (url.port !== "8443" || !tailnetHost))
     || url.pathname !== "/" || url.search || url.hash
-    || !(homeArpaHost || tailnetHost)) {
+    || !(homeArpaHost || tailnetHost || allowedPublicHost)) {
     throw new Error("Acer demo origin is invalid");
   }
   return url;
