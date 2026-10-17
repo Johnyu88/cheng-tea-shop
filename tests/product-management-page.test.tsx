@@ -124,5 +124,5 @@ test("shows a visible message when the browser has no FileReader", async () => {
   await screen.findByText(product.name);
   fireEvent.click(screen.getByRole("button", { name: "編輯" }));
   fireEvent.change(screen.getByLabelText(/選擇新照片以更換/), { target: { files: [new File(["photo"], "sample.jpg", { type: "image/jpeg" })] } });
-  expect(await screen.findByText("此瀏覽器不支援照片讀取，原照片未更動。請改用其他瀏覽器。", { exact: true })).toBeInTheDocument();
+  expect(await screen.findByText("這張照片無法讀取，請改選其他照片；iPhone 可到「設定 → 相機 → 格式」選「最相容」。原照片未更動。", { exact: true })).toBeInTheDocument();
 });
