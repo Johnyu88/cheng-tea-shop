@@ -3,13 +3,15 @@
 import { useCallback, useEffect, useState, type JSX } from "react";
 import Link from "next/link";
 import type { Cart, CheckoutDraft, CheckoutReceipt, DomainError } from "@/lib/domain";
+import { normalizeTaiwanMobile } from "@/lib/domain/phone";
+import { assessDemoAddress } from "@/lib/domain/demo-address";
 import { useCommerce } from "@/features/commerce/components/commerce-provider";
 
 type Step = "contact" | "delivery" | "review";
 type Submission = "idle" | "processing" | "failure" | "success";
 type CartState = { status: "loading" } | { status: "ready"; cart: Cart } | { status: "failure"; message: string };
 
-const initialDraft: CheckoutDraft = { name: "", phone: "", deliveryMethod: "home-delivery", address: "", paymentMethod: "credit-card" };
+const initialDraft: CheckoutDraft = { name: "", phone: "", deliveryMethod: "home-delivery", address: "", paymentMethod: "bank-transfer" };
 const formatMoney = (amount: number) => `NT$${amount.toLocaleString("zh-TW")}`;
 const SHOP_LINE_CONTACT_URL = "https://line.me/R/ti/p/@longying-tea-shop";
 
@@ -44,11 +46,16 @@ export function CheckoutPage(): JSX.Element {
   const localError = (message: string) => { setSubmission("failure"); setError({ code: "invalid-draft", message, retryable: false }); };
   const nextContact = () => {
     if (!draft.phone.trim()) return localError("請填寫手機號碼。");
+    const phone = normalizeTaiwanMobile(draft.phone);
+    if (phone === null) return localError("請填寫正確的台灣手機號碼。");
     if (!draft.name.trim()) return localError("請填寫姓名。");
+    setDraft((current) => ({ ...current, phone }));
     setError(undefined); setSubmission("idle"); setStep("delivery");
   };
   const nextDelivery = () => {
-    if (draft.deliveryMethod === "home-delivery" && !draft.address?.trim()) return localError("宅配請填寫地址。");
+    const address = assessDemoAddress(draft.deliveryMethod, draft.address);
+    if (address.status === "invalid") return localError(address.reason);
+    if (address.status === "needs-review") setDraft((current) => ({ ...current, address: address.normalized }));
     setError(undefined); setSubmission("idle"); setStep("review");
   };
   const submit = useCallback(async () => {
@@ -80,14 +87,14 @@ function Contact({ draft, change, next }: { draft: CheckoutDraft; change: Change
 }
 
 function Delivery({ draft, change, back, next }: { draft: CheckoutDraft; change: Change; back: () => void; next: () => void }): JSX.Element {
-  const options = draft.deliveryMethod === "home-delivery" ? [["credit-card", "信用卡"], ["line-pay", "LINE Pay"]] : [["credit-card", "信用卡"], ["line-pay", "LINE Pay"], ["pay-at-store", "到店付款"]];
-  const delivery = (method: CheckoutDraft["deliveryMethod"]) => { change("deliveryMethod", method); if (method === "home-delivery" && draft.paymentMethod === "pay-at-store") change("paymentMethod", "credit-card"); };
+  const options: [CheckoutDraft["paymentMethod"], string][] = [["bank-transfer", "銀行轉帳"], ["cash", "現金"], ["phone-confirmation", "電話確認"], ["line-voice-confirmation", "LINE 語音確認"]];
+  const delivery = (method: CheckoutDraft["deliveryMethod"]) => change("deliveryMethod", method);
   return <><p className="eyebrow">步驟 2／3</p><h1 id="checkout-delivery-heading" tabIndex={-1}>配送方式</h1><fieldset className="form-fieldset mt-6"><legend>選擇配送方式</legend><label className="form-option"><input type="radio" name="delivery" checked={draft.deliveryMethod === "home-delivery"} onChange={() => delivery("home-delivery")} />宅配</label><label className="form-option"><input type="radio" name="delivery" checked={draft.deliveryMethod === "store-pickup"} onChange={() => delivery("store-pickup")} />到店取貨</label></fieldset>{draft.deliveryMethod === "home-delivery" && <label className="form-field mt-4">宅配地址<textarea className="form-textarea" required value={draft.address ?? ""} onChange={(event) => change("address", event.target.value)} autoComplete="street-address" /></label>}<fieldset className="form-fieldset mt-6"><legend>付款方式</legend>{options.map(([value, label]) => <label className="form-option" key={value}><input type="radio" name="payment" checked={draft.paymentMethod === value} onChange={() => change("paymentMethod", value as CheckoutDraft["paymentMethod"])} />{label}</label>)}</fieldset><div className="form-actions mt-8"><button className="filter-button" type="button" onClick={back}>上一步</button><button className="primary-action" type="button" onClick={next}>下一步</button></div></>;
 }
 
 function Review({ draft, processing, back, submit }: { draft: CheckoutDraft; processing: boolean; back: () => void; submit: () => void }): JSX.Element {
-  const payment = draft.paymentMethod === "credit-card" ? "信用卡" : draft.paymentMethod === "line-pay" ? "LINE Pay" : "到店付款";
-  return <><p className="eyebrow">步驟 3／3</p><h1 id="checkout-review-heading" tabIndex={-1}>確認訂單</h1><dl className="mt-6 grid gap-3"><div><dt>配送</dt><dd>{draft.deliveryMethod === "home-delivery" ? `宅配至 ${draft.address}` : "到店取貨"}</dd></div><div><dt>付款</dt><dd>{payment}</dd></div></dl><p className="mt-6 rounded-lg bg-[var(--mist)] p-4">部分茶品數量有限；若庫存不足，我們會優先以電話與您聯絡後續安排。</p><div className="form-actions mt-8"><button className="filter-button" type="button" disabled={processing} onClick={back}>返回配送方式</button><button className="primary-action" type="button" disabled={processing} onClick={submit}>{processing ? "處理中" : "送出訂單"}</button></div></>;
+  const payment = { "bank-transfer": "銀行轉帳", cash: "現金", "phone-confirmation": "電話確認", "line-voice-confirmation": "LINE 語音確認" }[draft.paymentMethod];
+  return <><p className="eyebrow">步驟 3／3</p><h1 id="checkout-review-heading" tabIndex={-1}>確認訂單</h1><dl className="mt-6 grid gap-3"><div><dt>配送</dt><dd>{draft.deliveryMethod === "home-delivery" ? `宅配至 ${draft.address}` : "到店取貨"}</dd></div><div><dt>付款</dt><dd>{payment}</dd></div></dl>{draft.deliveryMethod === "home-delivery" && <p className="mt-6 rounded-lg bg-[var(--mist)] p-4">宅配地址格式已檢查，仍須由店家人工覆核後才能安排配送。</p>}<p className="mt-6 rounded-lg bg-[var(--mist)] p-4">部分茶品數量有限；若庫存不足，我們會優先以電話與您聯絡後續安排。</p><div className="form-actions mt-8"><button className="filter-button" type="button" disabled={processing} onClick={back}>返回配送方式</button><button className="primary-action" type="button" disabled={processing} onClick={submit}>{processing ? "處理中" : "送出訂單"}</button></div></>;
 }
 
 function Summary({ cart, expanded, toggle }: { cart: Cart; expanded: boolean; toggle: () => void }): JSX.Element {

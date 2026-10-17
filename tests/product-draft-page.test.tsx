@@ -18,7 +18,6 @@ const publishedProduct: Product = {
 
 function createPublishingService(overrides: Partial<PublishingService> = {}): PublishingService {
   return {
-    generateSummary: async (draft) => ({ ok: true, value: `茶名：${draft.name}｜產地：${draft.origin ?? "未提供"}` }),
     saveDraft: async (draft) => ({ ok: true, value: draft }),
     publishDraft: async () => ({ ok: true, value: publishedProduct }),
     ...overrides,
@@ -35,31 +34,33 @@ function renderPage(service = createPublishingService()) {
 
 function fillMinimumFields() {
   fireEvent.change(screen.getByLabelText("茶名"), { target: { value: "春茶" } });
-  fireEvent.change(screen.getByLabelText("單一規格"), { target: { value: "150g" } });
+  fireEvent.change(screen.getByLabelText("規格"), { target: { value: "150g" } });
   fireEvent.change(screen.getByLabelText("價格（TWD）"), { target: { value: "1200" } });
   fireEvent.change(screen.getByLabelText("茶類"), { target: { value: "oolong" } });
-  fireEvent.click(screen.getByLabelText("有貨"));
+  fireEvent.change(screen.getByLabelText("庫存"), { target: { value: "available" } });
 }
 
 it("labels the prototype and presents the five minimum fields", () => {
   renderPage();
 
-  expect(screen.getByText("這是原型頁面：尚未實作真實管理員驗證。")).toBeInTheDocument();
+  expect(screen.getByText("這是本機 Demo：沒有真實管理員驗證，不會連接正式 ERP 或外部影像服務。")).toBeInTheDocument();
   expect(screen.getByLabelText("茶名")).toBeInTheDocument();
-  expect(screen.getByLabelText("單一規格")).toBeInTheDocument();
+  expect(screen.getByLabelText("規格")).toBeInTheDocument();
   expect(screen.getByLabelText("價格（TWD）")).toBeInTheDocument();
   expect(screen.getByLabelText("茶類")).toBeInTheDocument();
-  expect(screen.getByLabelText("有貨")).toBeInTheDocument();
-  expect(screen.getByLabelText("售完")).toBeInTheDocument();
+  expect(screen.getByLabelText("庫存")).toBeInTheDocument();
+  expect(screen.getByLabelText("口感")).toBeInTheDocument();
+  expect(screen.getByLabelText("香氣")).toBeInTheDocument();
+  expect(screen.getByLabelText("產地")).toBeInTheDocument();
 });
 
 it("shows a linked required-field summary before a draft can be saved", () => {
   renderPage();
 
-  fireEvent.click(screen.getByRole("button", { name: "儲存草稿" }));
+  fireEvent.click(screen.getByRole("button", { name: "儲存商品" }));
 
   expect(screen.getByRole("alert")).toHaveTextContent("請先完成必填欄位");
-  expect(screen.getByRole("link", { name: "茶名" })).toHaveAttribute("href", "#product-name");
+  expect(screen.getByRole("alert")).toHaveTextContent("茶名：請填寫茶名");
   expect(screen.getByRole("button", { name: "確認並上架" })).toBeDisabled();
 });
 
@@ -68,7 +69,7 @@ it("rejects a non-integer TWD price without losing the entered name", () => {
   fillMinimumFields();
   fireEvent.change(screen.getByLabelText("價格（TWD）"), { target: { value: "1200.5" } });
 
-  fireEvent.click(screen.getByRole("button", { name: "儲存草稿" }));
+  fireEvent.click(screen.getByRole("button", { name: "儲存商品" }));
 
   expect(screen.getByRole("alert")).toHaveTextContent("請輸入整數 TWD 價格");
   expect(screen.getByLabelText("茶名")).toHaveValue("春茶");
@@ -113,29 +114,36 @@ it("revokes a removed photo preview immediately and remaining previews when unmo
   expect(revokeObjectURL).toHaveBeenCalledWith("blob:second.jpg");
 });
 
-it("generates grounded copy that the operator can edit", async () => {
-  const generateSummary = vi.fn(async (draft: ProductDraft) => ({ ok: true as const, value: `茶名：${draft.name}｜產地：阿里山` }));
-  renderPage(createPublishingService({ generateSummary }));
+it("does not expose retired image AI or fake progress controls", () => {
+  renderPage();
+  expect(screen.queryByText(/Mock|辨識|合成預覽|產生介紹/)).not.toBeInTheDocument();
+  expect(screen.queryByRole("button", { name: "產生介紹草稿" })).not.toBeInTheDocument();
+  expect(screen.getByText(/照片由店家自行拍攝/)).toBeInTheDocument();
+});
+
+it("shows a persistent save confirmation, navigation and a cancel link without a second save", async () => {
+  const saveDraft = vi.fn(async (draft: ProductDraft) => ({ ok: true as const, value: draft }));
+  renderPage(createPublishingService({ saveDraft }));
+  expect(screen.getByRole("link", { name: "取消新增／返回商品管理" })).toHaveAttribute("href", "/admin/products");
   fillMinimumFields();
-  fireEvent.change(screen.getByLabelText("產地（選填）"), { target: { value: "阿里山" } });
-
-  fireEvent.click(screen.getByRole("button", { name: "產生介紹草稿" }));
-
-  await waitFor(() => expect(screen.getByLabelText("商品介紹草稿（可編輯）")).toHaveValue("茶名：春茶｜產地：阿里山"));
-  fireEvent.change(screen.getByLabelText("商品介紹草稿（可編輯）"), { target: { value: "由店家確認的介紹" } });
-  expect(screen.getByLabelText("商品介紹草稿（可編輯）")).toHaveValue("由店家確認的介紹");
-  expect(generateSummary).toHaveBeenCalledWith(expect.objectContaining({ name: "春茶", origin: "阿里山" }));
+  fireEvent.click(screen.getByRole("button", { name: "儲存商品" }));
+  expect(await screen.findByRole("heading", { name: "儲存成功" })).toBeInTheDocument();
+  expect(screen.getByRole("status")).toHaveTextContent("尚未上架");
+  expect(screen.getByRole("link", { name: "返回商品管理" })).toHaveAttribute("href", "/admin/products");
+  expect(screen.getByRole("link", { name: "繼續新增商品" })).toHaveAttribute("href", "/admin/products/new");
+  expect(screen.queryByRole("button", { name: "儲存商品" })).not.toBeInTheDocument();
+  expect(saveDraft).toHaveBeenCalledTimes(1);
 });
 
 it("preserves the draft after a save failure", async () => {
   renderPage(createPublishingService({ saveDraft: async () => ({ ok: false, error: { code: "publishing-unavailable", message: "暫時無法儲存。", retryable: true } }) }));
   fillMinimumFields();
 
-  fireEvent.click(screen.getByRole("button", { name: "儲存草稿" }));
+  fireEvent.click(screen.getByRole("button", { name: "儲存商品" }));
 
   await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent("暫時無法儲存"));
   expect(screen.getByLabelText("茶名")).toHaveValue("春茶");
-  expect(screen.getByLabelText("單一規格")).toHaveValue("150g");
+  expect(screen.getByLabelText("規格")).toHaveValue("150g");
 });
 
 it("prevents duplicate save mutations and announces that saving is in progress", async () => {
@@ -143,53 +151,16 @@ it("prevents duplicate save mutations and announces that saving is in progress",
   const saveDraft = vi.fn(() => new Promise<Awaited<ReturnType<PublishingService["saveDraft"]>>>((resolve) => { resolveSave = resolve; }));
   renderPage(createPublishingService({ saveDraft }));
   fillMinimumFields();
-  const save = screen.getByRole("button", { name: "儲存草稿" });
+  const save = screen.getByRole("button", { name: "儲存商品" });
 
   fireEvent.click(save);
   fireEvent.click(save);
 
   await waitFor(() => expect(saveDraft).toHaveBeenCalledTimes(1));
-  expect(screen.getByRole("status")).toHaveTextContent("正在儲存草稿");
+  expect(screen.getByRole("status")).toHaveTextContent("正在儲存商品");
   await act(async () => { resolveSave?.({ ok: true, value: { name: "春茶", specification: "150g", price: { currency: "TWD", amount: 1200 }, category: "oolong", inventoryStatus: "available", tasteTags: [] } }); });
 });
 
-it("prevents duplicate summary mutations and announces that generation is in progress", async () => {
-  let resolveSummary: ((result: Awaited<ReturnType<PublishingService["generateSummary"]>>) => void) | undefined;
-  const generateSummary = vi.fn(() => new Promise<Awaited<ReturnType<PublishingService["generateSummary"]>>>((resolve) => { resolveSummary = resolve; }));
-  renderPage(createPublishingService({ generateSummary }));
-  fillMinimumFields();
-  const generate = screen.getByRole("button", { name: "產生介紹草稿" });
-
-  fireEvent.click(generate);
-  fireEvent.click(generate);
-
-  await waitFor(() => expect(generateSummary).toHaveBeenCalledTimes(1));
-  expect(screen.getByRole("status")).toHaveTextContent("正在產生介紹草稿");
-  await act(async () => { resolveSummary?.({ ok: true, value: "由店家確認的介紹" }); });
-});
-
-it("preserves editable data after summary generation fails", async () => {
-  renderPage(createPublishingService({ generateSummary: async () => ({ ok: false, error: { code: "publishing-unavailable", message: "暫時無法產生介紹。", retryable: true } }) }));
-  fillMinimumFields();
-  fireEvent.change(screen.getByLabelText("商品介紹草稿（可編輯）"), { target: { value: "原有介紹" } });
-
-  fireEvent.click(screen.getByRole("button", { name: "產生介紹草稿" }));
-
-  await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent("暫時無法產生介紹"));
-  expect(screen.getByLabelText("茶名")).toHaveValue("春茶");
-  expect(screen.getByLabelText("商品介紹草稿（可編輯）")).toHaveValue("原有介紹");
-  expect(screen.getByRole("status")).toHaveTextContent("暫時無法產生介紹");
-});
-
-it("toggles between phone and desktop previews", () => {
-  renderPage();
-  fillMinimumFields();
-
-  fireEvent.click(screen.getByRole("button", { name: "預覽手機版" }));
-  expect(screen.getByLabelText("商品預覽")).toHaveAttribute("data-preview-mode", "mobile");
-  fireEvent.click(screen.getByRole("button", { name: "預覽電腦版" }));
-  expect(screen.getByLabelText("商品預覽")).toHaveAttribute("data-preview-mode", "desktop");
-});
 
 it("requires minimum validation and an explicit confirmation before publishing", () => {
   renderPage();
@@ -197,7 +168,7 @@ it("requires minimum validation and an explicit confirmation before publishing",
   fillMinimumFields();
   expect(screen.getByRole("button", { name: "確認並上架" })).toBeDisabled();
 
-  fireEvent.click(screen.getByLabelText("我已確認內容，將上架這項商品"));
+  fireEvent.click(screen.getByLabelText("我已確認照片與商品資料"));
   expect(screen.getByRole("button", { name: "確認並上架" })).toBeEnabled();
 });
 
@@ -206,18 +177,18 @@ it("requires a new confirmation whenever publishable content changes", () => {
   vi.stubGlobal("URL", { createObjectURL, revokeObjectURL: vi.fn() });
   renderPage();
   fillMinimumFields();
-  const confirmation = screen.getByLabelText("我已確認內容，將上架這項商品");
+  const confirmation = screen.getByLabelText("我已確認照片與商品資料");
 
   fireEvent.click(confirmation);
   fireEvent.change(screen.getByLabelText("茶名"), { target: { value: "新春茶" } });
   expect(confirmation).not.toBeChecked();
 
   fireEvent.click(confirmation);
-  fireEvent.change(screen.getByLabelText("產地（選填）"), { target: { value: "阿里山" } });
+  fireEvent.change(screen.getByLabelText("產地"), { target: { value: "阿里山" } });
   expect(confirmation).not.toBeChecked();
 
   fireEvent.click(confirmation);
-  fireEvent.change(screen.getByLabelText("商品介紹草稿（可編輯）"), { target: { value: "店家確認介紹" } });
+  fireEvent.change(screen.getByLabelText("商品介紹"), { target: { value: "店家確認介紹" } });
   expect(confirmation).not.toBeChecked();
 
   fireEvent.click(confirmation);
@@ -238,7 +209,7 @@ it("prevents duplicate publish mutations while publication is processing", async
   const publishDraft = vi.fn(() => new Promise<Awaited<ReturnType<PublishingService["publishDraft"]>>>((resolve) => { resolvePublish = resolve; }));
   renderPage(createPublishingService({ publishDraft }));
   fillMinimumFields();
-  fireEvent.click(screen.getByLabelText("我已確認內容，將上架這項商品"));
+  fireEvent.click(screen.getByLabelText("我已確認照片與商品資料"));
   const publish = screen.getByRole("button", { name: "確認並上架" });
 
   fireEvent.click(publish);
@@ -252,27 +223,26 @@ it("prevents duplicate publish mutations while publication is processing", async
 it("preserves the draft after publication fails", async () => {
   renderPage(createPublishingService({ publishDraft: async () => ({ ok: false, error: { code: "publishing-unavailable", message: "暫時無法上架。", retryable: true } }) }));
   fillMinimumFields();
-  fireEvent.change(screen.getByLabelText("商品介紹草稿（可編輯）"), { target: { value: "店家確認介紹" } });
-  fireEvent.click(screen.getByLabelText("我已確認內容，將上架這項商品"));
+  fireEvent.change(screen.getByLabelText("商品介紹"), { target: { value: "店家確認介紹" } });
+  fireEvent.click(screen.getByLabelText("我已確認照片與商品資料"));
 
   fireEvent.click(screen.getByRole("button", { name: "確認並上架" }));
 
   await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent("暫時無法上架"));
   expect(screen.getByLabelText("茶名")).toHaveValue("春茶");
-  expect(screen.getByLabelText("商品介紹草稿（可編輯）")).toHaveValue("店家確認介紹");
-  expect(screen.getByLabelText("我已確認內容，將上架這項商品")).toBeChecked();
+  expect(screen.getByLabelText("商品介紹")).toHaveValue("店家確認介紹");
+  expect(screen.getByLabelText("我已確認照片與商品資料")).toBeChecked();
   expect(screen.getByRole("status")).toHaveTextContent("暫時無法上架");
 });
 
 it("shows a distinct published success state with one synthetic variant", async () => {
   renderPage();
   fillMinimumFields();
-  fireEvent.click(screen.getByLabelText("我已確認內容，將上架這項商品"));
+  fireEvent.click(screen.getByLabelText("我已確認照片與商品資料"));
   fireEvent.click(screen.getByRole("button", { name: "確認並上架" }));
 
   await waitFor(() => expect(screen.getByRole("heading", { name: "商品已上架" })).toBeInTheDocument());
-  expect(screen.getByText("合成商品編號：mock-published-1")).toBeInTheDocument();
+  expect(screen.getByText("商品編號：mock-published-1")).toBeInTheDocument();
   expect(screen.getByText("已上架商品：春茶")).toBeInTheDocument();
   expect(screen.getByText("規格：150g／NT$1200")).toBeInTheDocument();
-  expect(screen.getByText("已建立 1 個規格" )).toBeInTheDocument();
 });

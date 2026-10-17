@@ -26,7 +26,7 @@ function ProductCard({ product }: { product: Product }): JSX.Element {
   return (
     <article className="product-card">
       <div className="product-placeholder" role="img" aria-label={product.image.alt}>
-        {product.image.alt}
+        {product.image.src ? <img src={product.image.src} alt={product.image.alt} /> : product.image.alt}
       </div>
       <div className="product-card-content">
         <p className="product-taste">{product.tasteTags.join("・")}</p>

@@ -35,7 +35,7 @@ describe("Phase 8 integration contracts", () => {
   it("defines DTOs without accepting raw payment credentials", () => {
     const paymentRequest: PaymentRequestDto = {
       orderReference: "ORDER-MOCK-001",
-      method: "pay-at-store",
+      method: "cash",
       amount: { currency: "TWD", amount: 680 },
     };
     const catalogProduct: CatalogProductDto = {
@@ -98,7 +98,7 @@ describe("Phase 8 integration contracts", () => {
   it("provides local fake payment, logistics, and ERP adapters", async () => {
     const paymentRequest: PaymentRequestDto = {
       orderReference: "ORDER-MOCK-002",
-      method: "pay-at-store",
+      method: "cash",
       amount: { currency: "TWD", amount: 420 },
     };
     const shippingRequest: ShippingQuoteRequestDto = {
@@ -173,7 +173,7 @@ describe("Phase 8 integration contracts", () => {
     expect(
       validatePaymentRequestDto({
         orderReference: "ORDER-MOCK-003",
-        method: "pay-at-store",
+        method: "cash",
         amount: { currency: "USD", amount: 100 },
       }),
     ).toEqual({
@@ -236,7 +236,6 @@ describe("Phase 8 integration contracts", () => {
 
   it("swaps Publishing and ERP adapters independently", () => {
     const alternatePublishing: PublishingService = {
-      generateSummary: async () => ({ ok: true, value: "替換摘要" }),
       saveDraft: async (draft) => ({ ok: true, value: draft }),
       publishDraft: async (draft) => ({
         ok: true,

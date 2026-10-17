@@ -40,7 +40,7 @@ describe("Phase 8 integration smoke", () => {
       name: "陳小姐",
       phone: "0912000000",
       deliveryMethod: "store-pickup" as const,
-      paymentMethod: "pay-at-store" as const,
+      paymentMethod: "cash" as const,
     };
     const checkoutResult = await commerce.checkoutService.validate(draft, cartResult.value);
     expect(checkoutResult).toMatchObject({ ok: true });
@@ -49,7 +49,7 @@ describe("Phase 8 integration smoke", () => {
 
     const paymentResult = await integrations.paymentService.authorize({
       orderReference: "MOCK-SMOKE-001",
-      method: "pay-at-store",
+      method: "cash",
       amount: cartResult.value.subtotal,
     });
     const shippingResult = await integrations.logisticsService.quote({
@@ -96,7 +96,6 @@ describe("Phase 8 integration smoke", () => {
       authorize: async (request) => ({ ok: true, value: { status: "simulated", reference: "ALT", amount: request.amount } }),
     };
     const alternatePublishing: PublishingService = {
-      generateSummary: async () => ({ ok: true, value: "替換摘要" }),
       saveDraft: async (draft) => ({ ok: true, value: draft }),
       publishDraft: async () => ({ ok: false, error: { code: "publishing-unavailable", message: "暫時無法發布。", retryable: true } }),
     };

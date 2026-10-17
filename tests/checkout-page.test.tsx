@@ -30,7 +30,7 @@ const validDraft = {
   email: "tea@example.tw",
   deliveryMethod: "home-delivery" as const,
   address: "茶行路 1 號",
-  paymentMethod: "credit-card" as const,
+  paymentMethod: "bank-transfer" as const,
 };
 
 function createCartService(currentCart: Cart = cart): CartService {
@@ -72,7 +72,7 @@ async function reachReview(email: string | null = validDraft.email) {
   await waitFor(() => expect(screen.getByRole("heading", { name: "配送方式" })).toBeInTheDocument());
   fireEvent.click(screen.getByLabelText("宅配"));
   fireEvent.change(screen.getByLabelText("宅配地址"), { target: { value: validDraft.address } });
-  fireEvent.click(screen.getByLabelText("信用卡"));
+  fireEvent.click(screen.getByLabelText("銀行轉帳"));
   fireEvent.click(screen.getByRole("button", { name: "下一步" }));
   await waitFor(() => expect(screen.getByRole("heading", { name: "確認訂單" })).toBeInTheDocument());
 }
@@ -134,6 +134,15 @@ it("requires a phone number before contact can advance", async () => {
   expect(screen.getByRole("heading", { name: "聯絡資料" })).toBeInTheDocument();
 });
 
+it("keeps an invalid phone on the contact step", async () => {
+  renderCheckout();
+  await waitFor(() => expect(screen.getByRole("heading", { name: "聯絡資料" })).toBeInTheDocument());
+  fireEvent.change(screen.getByLabelText("手機號碼"), { target: { value: "12345" } });
+  fireEvent.click(screen.getByRole("button", { name: "下一步" }));
+  expect(screen.getByRole("alert")).toHaveTextContent("請填寫正確的台灣手機號碼");
+  expect(screen.getByRole("heading", { name: "聯絡資料" })).toBeInTheDocument();
+});
+
 it("requires a name before contact can advance", async () => {
   renderCheckout();
 
@@ -152,6 +161,7 @@ it("moves through contact, delivery, and review steps", async () => {
 
   expect(screen.getByText("玉露清香")).toBeInTheDocument();
   expect(screen.getByText("小計：NT$1,600")).toBeInTheDocument();
+  expect(screen.getByText("宅配地址格式已檢查，仍須由店家人工覆核後才能安排配送。")).toBeInTheDocument();
 });
 
 it("requires an address for home delivery", async () => {
@@ -167,7 +177,7 @@ it("requires an address for home delivery", async () => {
   expect(screen.getByRole("alert")).toHaveTextContent("宅配請填寫地址");
 });
 
-it("shows payment choices that match the selected delivery", async () => {
+it("shows every traditional payment choice for the selected delivery", async () => {
   renderCheckout();
   await waitFor(() => expect(screen.getByRole("heading", { name: "聯絡資料" })).toBeInTheDocument());
   fireEvent.change(screen.getByLabelText("姓名"), { target: { value: validDraft.name } });
@@ -175,11 +185,13 @@ it("shows payment choices that match the selected delivery", async () => {
   fireEvent.click(screen.getByRole("button", { name: "下一步" }));
   await waitFor(() => expect(screen.getByRole("heading", { name: "配送方式" })).toBeInTheDocument());
 
-  expect(screen.getByLabelText("信用卡")).toBeInTheDocument();
-  expect(screen.getByLabelText("LINE Pay")).toBeInTheDocument();
-  expect(screen.queryByLabelText("到店付款")).toBeNull();
+  expect(screen.getByLabelText("銀行轉帳")).toBeInTheDocument();
+  expect(screen.getByLabelText("LINE 語音確認")).toBeInTheDocument();
+  expect(screen.getByLabelText("現金")).toBeInTheDocument();
+  expect(screen.getByLabelText("電話確認")).toBeInTheDocument();
+  expect(screen.queryByLabelText(/信用卡|LINE Pay/i)).not.toBeInTheDocument();
   fireEvent.click(screen.getByLabelText("到店取貨"));
-  expect(screen.getByLabelText("到店付款")).toBeInTheDocument();
+  expect(screen.getByLabelText("現金")).toBeInTheDocument();
 });
 
 it("retains valid values when checkout validation fails", async () => {
@@ -194,7 +206,7 @@ it("retains valid values when checkout validation fails", async () => {
   await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent("暫時無法確認訂單"));
   fireEvent.click(screen.getByRole("button", { name: "返回配送方式" }));
   expect(screen.getByLabelText("宅配地址")).toHaveValue(validDraft.address);
-  expect(screen.getByLabelText("信用卡")).toBeChecked();
+  expect(screen.getByLabelText("銀行轉帳")).toBeChecked();
   fireEvent.click(screen.getByRole("button", { name: "上一步" }));
   expect(screen.getByLabelText("姓名")).toHaveValue(validDraft.name);
   expect(screen.getByLabelText("手機號碼")).toHaveValue(validDraft.phone);

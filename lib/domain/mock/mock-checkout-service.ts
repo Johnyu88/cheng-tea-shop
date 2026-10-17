@@ -2,6 +2,8 @@ import { domainError } from "../errors";
 import type { CheckoutService } from "../checkout-service";
 import type { Cart, CheckoutDraft, CheckoutReceipt } from "../types";
 import type { ServiceResult } from "../result";
+import { normalizeTaiwanMobile } from "../phone";
+import { assessDemoAddress } from "../demo-address";
 
 const invalid = <T>(message: string): ServiceResult<T> => ({
   ok: false,
@@ -24,21 +26,17 @@ export const createMockCheckoutService = (
     if (cart.lines.length === 0) return cartEmpty();
     if (draft.name.trim().length === 0) return invalid("請填寫姓名。");
     if (draft.phone.trim().length === 0) return invalid("請填寫手機號碼。");
+    const phone = normalizeTaiwanMobile(draft.phone);
+    if (phone === null) return invalid("請填寫正確的台灣手機號碼。");
     if (draft.email !== undefined && !isValidEmail(draft.email)) {
       return invalid("Email 格式不正確。");
     }
-    if (draft.deliveryMethod === "home-delivery") {
-      if (draft.address?.trim().length === 0 || draft.address === undefined) {
-        return invalid("宅配請填寫地址。");
-      }
-      if (draft.paymentMethod !== "credit-card" && draft.paymentMethod !== "line-pay") {
-        return invalid("宅配請選擇信用卡或 LINE Pay。");
-      }
+    const address = assessDemoAddress(draft.deliveryMethod, draft.address);
+    if (address.status === "invalid") return invalid(address.reason);
+    if (!["bank-transfer", "cash", "phone-confirmation", "line-voice-confirmation"].includes(draft.paymentMethod)) {
+      return invalid("請選擇銀行轉帳、現金、電話確認或 LINE 語音確認。");
     }
-    if (draft.deliveryMethod === "store-pickup" && !["credit-card", "line-pay", "pay-at-store"].includes(draft.paymentMethod)) {
-      return invalid("到店取貨請選擇信用卡、LINE Pay 或到店付款。");
-    }
-    return { ok: true, value: { ...draft } };
+    return { ok: true, value: { ...draft, phone, ...(address.status === "needs-review" ? { address: address.normalized } : {}) } };
   },
 
   async submit(draft: CheckoutDraft, cart: Cart): Promise<ServiceResult<CheckoutReceipt>> {

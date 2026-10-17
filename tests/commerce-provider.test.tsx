@@ -69,7 +69,6 @@ it("returns injected services unchanged", () => {
   const cartService = {} as CartService;
   const checkoutService: CheckoutService = { validate: vi.fn(), submit: vi.fn() };
   const publishingService: PublishingService = {
-    generateSummary: vi.fn(),
     saveDraft: vi.fn(),
     publishDraft: vi.fn(),
   };

@@ -17,8 +17,8 @@ The implementation remains Website First → Mock API → ERP Reuse → API Inte
 - The catalog remains synthetic and local to the Mock Adapter.
 - Guest checkout is allowed; phone is required and email is optional.
 - Home delivery and store pickup are supported.
-- Payment choices are constrained by delivery method: home delivery supports credit card and LINE Pay; store pickup supports credit card, LINE Pay, and pay at store. The Mock happy path exposes all approved choices, while tests cover an invalid combination rather than inventing a provider-specific restriction.
-- No real credit-card fields, LINE Pay credentials, payment tokens, customer persistence, authentication, ERP integration, or order backend are added.
+- Payment choices are traditional/manual only: bank transfer, cash, phone confirmation, or LINE voice confirmation. All delivery methods expose these choices; the order remains pending manual verification until a merchant confirms it.
+- No credit-card or LINE Pay integration, credentials, payment tokens, customer persistence, authentication, ERP integration, or real order backend are added.
 - Contact and address values stay in React state for the current flow only. They are never written to localStorage, sessionStorage, fixtures, logs, or committed files.
 - Product publishing is one item at a time with one specification, available / sold-out status, zero to three optional photos, explicit draft save, preview, and human-confirmed publication.
 - AI copy is a deterministic Mock draft derived only from entered facts and selected tags. It never publishes automatically and never invents origin, health, certification, harvest, or production claims.
@@ -85,7 +85,7 @@ type CheckoutDraft = {
   email?: string;
   deliveryMethod: "home-delivery" | "store-pickup";
   address?: string;
-  paymentMethod: "credit-card" | "line-pay" | "pay-at-store";
+  paymentMethod: "bank-transfer" | "cash" | "phone-confirmation" | "line-voice-confirmation";
 };
 
 type CheckoutReceipt = {

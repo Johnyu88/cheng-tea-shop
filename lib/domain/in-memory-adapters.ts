@@ -21,6 +21,7 @@ import { createMockCartService } from "./mock/mock-cart-service";
 import { createMockCatalogService } from "./mock/mock-catalog-service";
 import { createMockCheckoutService } from "./mock/mock-checkout-service";
 import { createMockPublishingService } from "./mock/mock-publishing-service";
+import { createDemoCatalogService, createDemoPublishingService } from "./demo-catalog-service";
 
 export type InMemoryCommerceServices = {
   catalogService: CatalogService;
@@ -47,6 +48,16 @@ export const createInMemoryCommerceServices = (
     cartService: overrides.cartService ?? createMockCartService({ catalog: catalogService }),
     checkoutService: overrides.checkoutService ?? createMockCheckoutService(),
     publishingService: overrides.publishingService ?? createMockPublishingService(),
+  };
+};
+
+export const createDemoCommerceServices = (): InMemoryCommerceServices => {
+  const catalogService = createDemoCatalogService();
+  return {
+    catalogService,
+    cartService: createMockCartService({ catalog: catalogService }),
+    checkoutService: createMockCheckoutService(),
+    publishingService: createDemoPublishingService(),
   };
 };
 

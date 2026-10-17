@@ -35,7 +35,7 @@ const isCheckoutDraft = (value: unknown): value is CheckoutDraft =>
   value.phone.trim().length > 0 &&
   (value.email === undefined || typeof value.email === "string") &&
   (value.deliveryMethod === "home-delivery" || value.deliveryMethod === "store-pickup") &&
-  (value.paymentMethod === "credit-card" || value.paymentMethod === "line-pay" || value.paymentMethod === "pay-at-store") &&
+  (value.paymentMethod === "bank-transfer" || value.paymentMethod === "cash" || value.paymentMethod === "phone-confirmation" || value.paymentMethod === "line-voice-confirmation") &&
   (value.deliveryMethod === "store-pickup" || (typeof value.address === "string" && value.address.trim().length > 0));
 
 export const validateCatalogQuery = (value: unknown = {}): ServiceResult<CatalogQuery> => {

@@ -78,7 +78,7 @@ it("renders populated lines and the service-provided subtotal", async () => {
   expect(within(item).getByRole("paragraph", { name: "玉露清香單價 NT$800" })).toBeTruthy();
   expect(within(item).getByRole("paragraph", { name: "玉露清香單項小計 NT$1,600" })).toBeTruthy();
   expect(within(screen.getByRole("region", { name: "購物車摘要" })).getByRole("paragraph", { name: "購物車總小計 NT$1,600" })).toBeTruthy();
-  expect(screen.getByRole("link", { name: "繼續選茶" }).getAttribute("href")).toBe("/#catalog");
+  expect(screen.getByRole("link", { name: "繼續購買" }).getAttribute("href")).toBe("/#catalog");
   expect(screen.getByRole("link", { name: "前往結帳" }).getAttribute("href")).toBe("/checkout");
 });
 

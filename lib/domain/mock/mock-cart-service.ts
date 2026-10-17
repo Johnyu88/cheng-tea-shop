@@ -44,12 +44,14 @@ export const createMockCartService = (options: MockCartOptions = {}): CartServic
   const cart = emptyCart();
 
   const resolveLine = async (productId: string, variantId: string): Promise<ServiceResult<{ product: Product; variant: ProductVariant }>> => {
-    const productResult = await catalog.getProductBySlug(productId);
-    if (!productResult.ok) return productResult;
-    const variant = findVariant(productResult.value, variantId);
+    const pageResult = await catalog.listProducts({ limit: 50 });
+    if (!pageResult.ok) return pageResult;
+    const product = pageResult.value.items.find((item) => item.id === productId || item.slug === productId);
+    if (!product) return errorResult("cart-empty", "購物車中找不到這項茶品。 ");
+    const variant = findVariant(product, variantId);
     return variant === undefined
       ? errorResult("invalid-draft", "找不到指定規格。")
-      : { ok: true, value: { product: productResult.value, variant } };
+      : { ok: true, value: { product, variant } };
   };
 
   const effectiveStatus = (variant: ProductVariant): ProductVariant["inventoryStatus"] =>

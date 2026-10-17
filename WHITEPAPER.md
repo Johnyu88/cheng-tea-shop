@@ -533,3 +533,156 @@ GitHub 是正式文件與程式來源。聊天中的新指令若尚未寫入 Git
 - 工具預設為 dry-run，輸出含 row／field／code／message 的清楚 JSON error report、warnings、accepted IDs 與 `wouldWrite: false`；`--apply` 明確拒絕，不會覆蓋既有 fixture、圖片或 placeholder。
 - `phase-9a-product-import.test.ts` focused 5/5 通過；preflight 會檢查模板、對照表、工具與關鍵安全 marker。此工具鏈不接外部服務、不上傳圖片、不新增業務功能。
 - 等待店家提供符合匯入規格的真實資料與證據後，才可另行審查 staging；目前 synthetic catalog 與 placeholder 完全不變。
+
+## 46. Phase 10 ERP reuse & integration planning — 2026-09-22
+
+- 建立 `docs/erp/phase-10-erp-reuse-integration-planning.md`，把目前 Catalog、Cart、Checkout、Payment、Logistics、Publishing、ERP boundary 對照 ERP 必要模組、功能歸屬、API contract、資料 mapping、同步方向與錯誤處理。
+- 候選只做研究比較，不導入：ERPNext（首選 ERP fixture 候選）、Odoo、Dolibarr；Medusa、Saleor、Vendure 作為 headless commerce 技術基準。授權與商用適用性仍需依實際版本與部署方式正式審查。
+- 明確分出 ERP 可直接沿用的商品／庫存／訂單／營運稽核能力、必須由 adapter 處理的 DTO／狀態／付款／物流／重試 mapping，以及網站保留的品牌內容、UX、SEO、真人驗證與發布閘門。
+- 定義未來 server-side adapter 的 schema version、correlation ID、idempotency key、normalized error、retry／reconciliation 規則；不保存 raw payment credential，不讓 ERP provider field 洩漏到 UI。
+- Phase 10 下一個最小候選為 10-B：只用 synthetic fixture 做 ERP-shaped payload mapping contract PoC；本次不啟動外部服務、不新增 service type、不接資料庫、付款、物流、ERP 或正式部署。
+
+## 47. 手機 Demo 購物主線檢查點（2026-09-24）
+
+- 商品加入成功後直接前往購物車，保留繼續購買與前往結帳；測試須檢查畫面導向，不能依賴商品頁轉場前的成功訊息。
+- 目前仍是前端合成原型：固定訂單編號、無 OTP、無後端持久化或權限，不具備安全查單、店家營運處理與通知送達的條件。PR #15 中關於完整手機 Demo 的目標維持待實作，不能以現有 build 通過替代實機與流程驗收。
+
+## 48. 手機驗證與合成訂單服務邊界（2026-09-24）
+
+- 前台及 Mock Checkout 將台灣手機號碼做格式檢查與正規化；這只排除顯然錯誤的輸入，沒有發送或驗證 SMS OTP。
+- 新增獨立的伺服端 Demo 訂單記憶體假服務契約：唯一不可猜的編號、高熵查單密鑰、只存茶品快照、模擬通知去重、包裝照片 metadata、模擬付款確認及出貨轉移。未暴露 API，未接入現有結帳或管理頁；沒有持久化、授權、真實照片或訊息送達，不能宣稱符合 PR #15 的手機 Demo 驗收門檻。
+
+## 49. 手機購物與店家訂單的 local-only 閉環（2026-09-26）
+
+- 將既有 SQLite 訂單、通知 outbox、合成 OTP、地址評估、店家 cookie、包裝照片與狀態機組成單一 local runtime；沒有新增第二套訂單模型。HTTP boundary 限制為明確啟用、非 production、loopback、同埠同源與受控 Next 內部 loopback headers。
+- Demo checkout 以 feature flag 接入現有 `/checkout`，完成合成手機 OTP、聯絡資料、配送／地址與合成付款選項，再由服務端以 authoritative catalog 重算購物車。未啟用 flag 時，既有前台 prototype 行為不變。
+- 查單必須同時持有不可猜 token、下單手機、手機後三碼與一次性 OTP；手機以摘要綁定訂單，不保存真實客戶資料。後三碼不能單獨當作驗證因素。
+- 店家端使用與顧客 token 分離的高熵憑證及短效 HttpOnly cookie。付款僅為模擬確認；包裝照片寫入 Git 排除的私有本機目錄；`packed → shipped → delivered` 皆維持明確狀態門檻，包裝不等於出貨。
+- Email／店家通知只進入可觀察、可失敗及重試的本機 outbox。手機推送只提供 `preview-only` DTO 與畫面預覽，沒有 service worker、provider、裝置註冊或送達宣稱。
+- 會員名單仍延後；真實付款、物流、SMS、Email、Push、production、公開部署與正式資料均不在本階段。此結果只能稱為本機合成 Demo 閉環，不是 production readiness 或真人驗收。
+
+## 50. 同一區域網路手機驗收準備（2026-09-26）
+
+- 新增 `DEMO_COMMERCE_LAN=enabled` opt-in；僅允許 RFC1918 私有 IPv4、非 production、HTTP 同源請求，預設 loopback 模式仍不變。伺服器應綁定明確私有 IP，不使用 `0.0.0.0`，不修改 Windows 防火牆。
+- LAN 驗收使用 `172.20.10.4:3013`（實際 IP 以當日 `ipconfig` 為準），手機與電腦需在同一可信私有網路。必要頁面為 `/`、`/cart`、`/checkout`、`/orders`、`/admin/orders`。
+- 為相容純 HTTP 手機測試，LAN 店家 cookie 為 HttpOnly／SameSite=Strict 的合成 cookie，loopback 預設仍為 Secure `__Host-` cookie。此差異只允許假資料 Demo，不能複製到 production。
+- 目前已啟動主機端 Demo 並完成可達性準備；真實手機由陳老師執行完整流程後，才可記錄真人／店家驗收結果。Pixel 7 Chromium 1/1 仍只代表自動化腳本證據。
+- 已以同一 LAN URL `http://172.20.10.4:3013` 執行 Pixel 7 Chromium synthetic flow，1/1 通過；此為 LAN host/origin 的自動化證據，不替代真實手機或真人走查。
+- 已以同一 LAN URL `http://172.20.10.4:3013` 執行 Pixel 7 Chromium synthetic flow，1/1 通過；此為 LAN host/origin 的自動化證據，不替代真實手機或真人走查。
+
+## V. Real-phone acceptance repair — 2026-09-27
+
+Wave 7 的修復只補本機 Demo 的資料與素材邊界：八款 2026-09-23 sample fixture、保留商品照片、首頁合成圖與鳥鳴 WAV 均可由 LAN server 讀取。音效改為明確點擊播放，不假設手機允許 autoplay。
+
+管理端新增商品透過 guarded Catalog API 寫入被 Git 忽略的 `.demo-data`，重新整理或重啟後可讀回；UI 仍只依 Catalog／Cart／Publishing service boundary，不接 ERP、付款、物流、Email、SMS、Push 或外部 API。此資料夾與既有 synthetic data 均不提交。
+
+本次證據為 Vitest 30 files／173 tests、TypeScript、ESLint（4 個既有 image warning）、webpack build，以及乾淨資料目錄上的 LAN Pixel 7 Chromium 2/2。真實手機與真人走查仍待執行，不能宣稱真人驗收或 production readiness。
+
+## W. 第三輪真人驗收修正 — 2026-09-27
+
+## X. 第四輪實際 UI 與完整商品流程修正 — 2026-09-27
+
+| Capability | Status | Evidence / limitation |
+|---|---:|---|
+| Homepage desktop/mobile candidate composite | ✅ browser-rendered candidate | `teacher-hero-desktop-candidate.png`／`teacher-hero-mobile-candidate.png` are generated from the existing portrait for layout validation; store approval and final source evidence are still pending |
+| Homepage video removal | ✅ | No `<video>` is rendered; original MP4 remains in the repository only as preserved source material |
+| Bird-call interaction | ✅ local UI | WAV remains an explicit controls-based click-to-play resource; no autoplay claim |
+| Primary order lookup entry | ✅ | Desktop/mobile responsive header links to `/orders` |
+| Checkout success boundary | ✅ local Demo | Independent `/checkout/success` shows order receipt/status and navigation; access secret is not rendered or placed in the lookup href |
+| Existing eight-product admin list | ✅ local Demo | Same file-backed Demo Catalog as storefront; evidence screenshot shows eight initial products |
+| Existing-product edit entry | ✅ local Demo | Bounded edit updates name/category/specification/price/inventory through guarded Catalog API; no ERP or database |
+| Ninth-product publication sync | ✅ automated local Demo | Synthetic publish/reload/frontend visibility and unpublish/foreground hiding are covered; historical data is retained |
+| Ninth-product image recognition/composition | ⚠️ explicit Mock | Workflow labels identify/compose as Mock; no actual vision or composition service is connected |
+| Screenshot evidence | ✅ browser evidence | Stored under `docs/testing/evidence/fourth-round-2026-09-27/`; not real-phone or participant evidence |
+| Physical phone / human acceptance | ⬜ pending | Final decision remains with Chen Tea Shop operator on a real phone |
+
+The generated hero images are not a substitute for store-approved photography. The implementation intentionally keeps the approval boundary visible: generated layout candidates can validate UI composition, while final publication still requires the owner’s source, permission, identity, and copy confirmation. No payment, logistics, ERP, public deployment, or external notification service was added.
+
+本輪只修正前台與本機 Demo 驗收阻塞：不再把 synthetic `tea-sample-composite.png` 當店家正式合成照；首頁在正式素材缺失時顯示待提供提示。原始人物照、影片及鳥鳴 WAV 維持，鳥鳴由使用者點擊播放。
+
+購物車／checkout 已提供返回與取消路徑；Demo OTP 仍由服務端驗證，cooldown 重用有效 challenge，錯誤碼有明確提示。`/admin/products` 提供本機商品清單與上下架，publication 變更不刪資料，前台與 authoritative order boundary 同步拒絕下架商品。
+
+第九種茶的素材處理以明確標示的 Mock pipeline 呈現原始、檢查、辨識／拆解、合成預覽、人工確認、儲存與上架狀態；沒有影像 AI、付款、簡訊、物流、ERP 或正式服務串接。原始檔目前只在瀏覽器草稿預覽，publish 會保存首張 catalog media；raw archive 與 derived manifest 仍是未完成項。LAN Pixel 7 Chromium 2/2 與 webpack build 通過，但不等同真人手機驗收；正式合成照與真人操作仍待店家提供／執行。
+
+## 52. P0 Catalog data recovery diagnosis — 2026-09-27
+
+- The active LAN server at `172.20.10.4:3013` returned HTTP 200 for `/api/demo/catalog?limit=50` with 8 published products. Its file-backed data directory contains those 8 published products and one pre-existing synthetic ninth draft; no catalog reset or fixture rebuild was performed.
+- Storefront and `/admin/products` both consume the same guarded `/api/demo/catalog` endpoint and `getDemoCatalogStore()` file boundary. Current 360×800 browser evidence found all 8 storefront products and all 9 admin records, with no console, page, request, hydration, or API failures. The active server log also records 200 responses for both public and unpublished-inclusive catalog reads.
+- The reported empty phone screen is therefore not reproduced as an application/data-loss failure in the verified process. The operational risk is stale server/worktree, wrong phone origin, disabled LAN/demo flags, or a different `DEMO_DATA_DIR`. `docs/testing/mobile-demo-local-runbook.md` now requires PID, explicit data-directory, API 200, and catalog-count checks before physical-phone use.
+- This remains a local synthetic Demo boundary. The screenshots under `docs/testing/evidence/p0-catalog-recovery-2026-09-27/` are browser evidence only; real-phone acceptance is still pending. No payment, ERP, logistics, external notification, or production change was made.
+- Verification note: focused Vitest 31 files／175 tests、TypeScript、ESLint 0 errors、Webpack production build and Chromium e2e 14/14 passed. WebKit locally reached 8/14 and hung in the managed Windows environment, so it was stopped and remains an environment limitation rather than a claimed pass. The P0 API and browser catalog checks themselves remained 200／clean.
+
+## 53. 第五輪 P0 前後台閉環修正 — 2026-09-27
+
+- Catalog mutation was verified against the single file-backed boundary: price `1500 → 1555 → 1500`, publication `published → draft → published`, public GET hid the draft, admin GET retained it, and the existing ninth product remained present after server restart.
+- The active restarted LAN server returned HTTP 200. Public catalog total is 9 (original 8 plus synthetic `台灣野生紅茶`); admin-inclusive total is 10 because one synthetic ninth draft is retained. Both surfaces read the same `/api/demo/catalog` store.
+- The checkout P0 root cause was an empty optional Email string serialized from the Demo UI. The server correctly rejects malformed non-empty email; the UI now removes blank optional Email before `placeOrder`, preserves non-empty Email, and retains OTP／address／server validation.
+- Current LAN browser evidence completed homepage → product → cart → checkout → OTP → order → `/checkout/success`: order creation returned 200; the success page showed thanks, received order, status, home link, and explicit lookup link. It remains synthetic browser evidence and does not replace real-phone acceptance.
+- P1 image processing remains blocked and explicitly unclaimed: no `raw-data/` source photos or OCR／vision／composition provider exists in this worktree. The available built-in image generation tool is not a tea-fact recognition system; no generated image was substituted for real material.
+- Verification: Vitest 32 files／177 tests, TypeScript, Webpack build, ESLint 0 errors with 5 existing warnings, and Chromium 14/14. WebKit remains locally limited by the previously recorded hang／Avast environment constraint. No real payment, logistics, ERP, SMS, external notification, or production deployment was added.
+
+## 54. 第五輪補充驗收 — 2026-09-27
+
+- 以同一份 file-backed Demo Catalog 驗證第九種測試茶 `台灣野生紅茶`：價格 `888 → 999`、下架後公開 GET 隱藏、重新上架後恢復；重啟目前 Wave 7 3013 server 後仍為 `999`／`published`。這是本機合成資料證據，不是真人手機驗收。
+- 首頁導覽新增固定 360×800 viewport regression：`訂單查詢` link 可見，且整個 bounding box 在 viewport 內。現行 3013 LAN 瀏覽器截圖顯示品牌導覽列實際包含「訂單查詢」；手機若仍看不到，需在實體機重新載入 `http://172.20.10.4:3013/` 並回傳截圖，以排除舊 server、瀏覽器快取或連到錯誤工作樹。
+- 本輪未任意修改 CSS，因目前 Wave 7 版本已能重現並通過實際瀏覽器渲染；避免用無證據的版面變更掩蓋實體機環境問題。
+- 第九種茶的完整「原圖上傳→實際影像辨識→資料提取→合成主圖」仍未完成；只有可替換、清楚標示的 Mock pipeline。缺少店家 raw-data、授權 OCR／vision／composition 工具與人工確認產物前，不可宣稱 PASS。
+
+## 55. 2026-09-27 收尾修復
+
+- 公開品牌決策以最新需求為準：「陳老師茶行」是唯一對外品牌；metadata、首頁 header、aria-label 與測試已同步。歷史設計規格與舊證據不回寫，避免改變歷史紀錄。
+- Checkout success 的跨邊界修復：訂單 API 建立成功後，server route 從 query 取得 order id，直接交給 success component；只把查單所需 secret 留在同一瀏覽器 sessionStorage，不把 secret 放進 URL、DOM 或連結。這不是繞過 OTP，也沒有製造假成功。
+- Catalog 與 admin fields 仍沿用單一 file-backed Demo Catalog；商品編輯新增 aroma、taste、teaRegion、summary 的受控欄位，分類以中文顯示。未接 ERP、資料庫、付款、物流或外部服務。
+- 真實影像辨識／資訊提取／主體合成仍是 BLOCKED，而非 prototype PASS。需要店家原始照片、授權、可調用的 OCR／vision／image-processing 工具、輸出 schema 與人工確認流程。
+- 明日驗收邊界：先用同一 3013 URL 在實體手機重跑首頁查單入口與購物→OTP→建立訂單→感謝頁；自動化瀏覽器只能作工程證據，不能取代真人手機結果。
+
+## 56. 後台商品管理簡化決策 — 2026-09-27
+
+- 產品策略正式取消網站內建影像辨識、資訊自動提取、主體拆解、圖片合成、Mock 辨識與假進度流程；店家可在外部完成照片處理後再上傳。這是範圍決策，不是待修復的 P1 blocker。
+- 新增／編輯商品共用 `ProductFields` 與 `minimumProblems`，欄位順序固定為茶名、規格、價格、茶類、庫存、香氣、口感、產地、商品介紹；新增為空白表單，編輯從同一 Catalog Store 載入。
+- `/admin/products` 的清單、編輯、上下架與 `/admin/products/new` 的新增均透過 `/api/demo/catalog`；不建立第二份前台商品陣列。Catalog Store 的 file-backed persistence、歷史訂單保留與既有八種茶不變。
+- `PublishingService` contract 不再包含 `generateSummary`，service adapter 只負責驗證、保存與發布店家已確認的資料。
+- 驗證結果：Vitest 35 files／176 tests、TypeScript、ESLint（0 errors／5 個既有 warning）與 Webpack production build 通過；未啟動正式服務，真人手機仍需另行驗收。
+
+## 57. 2026-09-27 真人手機完整購物查單與按鈕視覺驗收
+
+- 游老師手機使用同一 3013 LAN Demo 建立新合成訂單：結帳三步（姓名與合成 OTP、配送資料、總額確認）、感謝購買與訂單編號、主動查看訂單均依序通過。查單自動帶入同分頁憑證、顧客 Yu 和手機末三碼 000；再次取得本機 OTP 後成功查到「訂單成立／待模擬付款確認」。此為使用者提供截圖的真人手機驗收，不只是自動化測試。
+- 同分頁憑證不放入 URL／DOM；缺少憑證時先停用取得 OTP。姓名及手機末三碼不能取代查單憑證，也未完成失憑證補發機制。
+- 查單頁頂端固定有返回首頁，成功結果卡片底部也增設返回首頁，以免使用者捲到下方看不到出口。全站共用按鈕已改深綠色實心、白色粗體字，保留焦點、選中及停用視覺差異；游老師手機回饋「舒服多了」。底部新增入口通過程式測試，但尚待真人另行點擊確認。
+- 實際 Email／手機推送、金流及物流均未接入；queued／preview-only 為合成通知。內建影像辨識與合成依第 56 節決策取消，圖片由外部處理後上傳。紅色 Next.js 開發 Issues 尚未取得完整詳細錯誤，不宣稱已修復。
+- 主要提交：9b6de1f、b93fe0f、cd3d447、2870803。最後修正 focused Vitest 3 files／6 tests 及 TypeScript 通過。下一輪檢查 dev Issues、資料目錄及導覽，逐步測店家包裝／出貨與顧客狀態；勿要求重做已通過的顧客新訂單。
+
+## 2026-09-28 查單導覽安全補強（待實機驗收）
+- 成功頁若缺少同分頁 sessionStorage 查單憑證，顯示補填及聯絡店家說明，入口改為「前往安全的訂單查詢」；不將秘密放入 URL、公開 DOM 或 localStorage，也不繞過 OTP、姓名、末三碼與限流。
+- 查單錯誤提供明確重試、成功後可查另一筆；結帳離開導覽加強深色按鈕及手機寬度排列。只改 UI／提示及其測試，沒有清理 Demo 資料。
+- 先前 Codex 執行 Vitest 遇 spawn EPERM；重新以現有 vitest.cmd 啟動後完成 41 files / 196 tests，TypeScript 與 focused ESLint 均通過，git diff --check 通過。新分頁缺憑證的提示與安全查單入口已增加回歸斷言。
+- edea 3013 LAN dev server 已恢復並讀到既有 catalog 8 件 published；沿用 .demo-data/lan-demo-third-round-final-2，不重建 catalog、orders 或 outbox；非正式對外部署。
+- 待游老師實體手機確認：同分頁下單查詢、新分頁缺憑證復原、查詢另一筆、返回首頁、店家包裝及出貨。正式付款、簡訊、Email/Web Push、ERP 仍未啟用。
+- AGENTS.md 和 next-env.d.ts 是進場前未提交的環境變更，本階段不修改、不 stage、不 commit。
+
+
+## 58. 2026-09-28 查單憑證遺失時的 Demo 店家人工補發
+
+- 原始查單密語僅存雜湊，無法找回明文；採單筆隨機密語輪替，舊密語失效、持久化失敗回滾，不變更訂單狀態與通知。
+- 補發只接受通過現有 HttpOnly 店家 session 驗證且明確勾選「已透過店外方式確認顧客身分」的操作。密語只在當次授權 API 回應／店家介面顯示，禁止 URL、public list、日誌、localStorage 或通知；回應 Cache-Control: no-store。顧客後續仍須完整身份資料、密語及 OTP。
+- 這是合成資料／LAN Demo；正式上線前須另設可稽核的核身、交付方式、權限、撤銷/重放與資安審核，不能直接沿用勾選框作為真實身分驗證。
+- 2026-09-28 程式驗證：41 files / 205 tests、tsc passed；實機補發與顧客已出貨同步仍待驗收。原有茶行資料未重建。
+
+## 59. 2026-09-28 訂單進度燈號
+- 顧客與店家共用唯讀五階段進度燈號，完成綠色／未完成紅色，另有明確文字與無障礙標籤。以後端狀態及包裝照片為準；本機 Demo 不代表真實付款、物流或通知送達。顧客須先通過既有密語、OTP。全套 42 files / 208 tests 通過，實機視覺驗收待確認。
+
+## 60. 2026-09-30 Wave 7 shopping quality gate / issue #17
+
+The storefront payment boundary is explicitly traditional and manual: bank transfer, cash, phone confirmation, or LINE voice confirmation. Credit-card and LINE Pay integration are outside the confirmed product scope. Every synthetic order begins in `pending-manual-verification`; an authenticated merchant explicitly moves it to `manual-confirmed` before shipment, while `packed`, `shipped`, and `delivered` remain distinct states.
+
+The mobile demo path is product → cart → three-step checkout → thank-you page → secure order lookup. The selected traditional payment method is persisted in the local synthetic order record and shown on lookup. File-backed image replacement remains the single catalog boundary and is covered by persistence tests. Navigation links used as primary mobile exits use dark, high-contrast controls.
+
+This remains a local synthetic Demo. No AI image composition, image-recognition provider, ERP expansion, external payment service, real notification service, or production deployment was added. TypeScript, focused lint, and diff checks passed for this change; Vitest/build environment failures are documented in `HANDOFF.md` and are not represented as product passes.
+
+## 61. 2026-09-30 手機 Demo 包裝照片確認收斂
+
+手機店家訂單流程現在把包裝照片分成「開啟相機／選擇相簿 → 預覽 → 確認包裝」三個可見步驟；選取或拍照只建立暫存預覽，不會直接上傳、完成包裝或允許出貨。預覽可取消、重選，確認成功後才由既有 Mock API 記錄照片並進入已打包狀態；出貨與已送達仍是後續獨立狀態。
+
+本輪同步保留並回歸檢查銀行轉帳、現金、電話確認、LINE 語音確認四種傳統人工結帳、訂單查詢、返回首頁與已送達顯示。新匯款流程尚未經游老師人工驗收，不標示為驗收通過；自動化瀏覽器證據也不取代真人手機驗收。
+
+本輪沒有加入信用卡、LINE Pay、ERP、正式通知、正式物流或生產部署。Vitest 受目前 Windows worktree 的 Vite `spawn EPERM`／runner CommonJS 啟動限制，未將失敗環境誤記為測試通過；TypeScript、focused ESLint 與 diff check 的實際結果記錄於 `HANDOFF.md`。

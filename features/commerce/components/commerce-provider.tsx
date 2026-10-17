@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, type ReactNode, type ReactElement } from "react";
 import type { CartService, CatalogService, CheckoutService, PublishingService } from "@/lib/domain";
-import { createInMemoryCommerceServices } from "@/lib/domain";
+import { createDemoCommerceServices, createInMemoryCommerceServices } from "@/lib/domain";
 
 export type CommerceContextValue = {
   catalogService: CatalogService;
@@ -19,7 +19,7 @@ type CommerceProviderProps = {
 const CommerceContext = createContext<CommerceContextValue | null>(null);
 
 const createDefaultServices = (): CommerceContextValue => {
-  return createInMemoryCommerceServices();
+  return process.env.NEXT_PUBLIC_DEMO_COMMERCE === "enabled" ? createDemoCommerceServices() : createInMemoryCommerceServices();
 };
 
 export function CommerceProvider({ children, services }: CommerceProviderProps): ReactElement {

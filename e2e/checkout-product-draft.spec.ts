@@ -3,8 +3,7 @@ import { expect, test, type Page } from "@playwright/test";
 async function addTeaAndOpenCheckout(page: Page) {
   await page.goto("/tea/mock-tea-001");
   await page.getByRole("button", { name: "加入購物車" }).click();
-  await expect(page.getByRole("status")).toContainText("已加入購物車");
-  await page.getByRole("link", { name: "查看購物車" }).click();
+  await expect(page).toHaveURL(/\/cart$/);
   await expect(page.getByRole("link", { name: "前往結帳" })).toHaveAttribute("href", "/checkout");
   await page.getByRole("link", { name: "前往結帳" }).click();
   await expect(page).toHaveURL(/\/checkout$/);
@@ -49,6 +48,9 @@ test("checkout recovers from step errors without losing entered values", async (
   await page.getByRole("button", { name: "下一步" }).click();
   await expect(page.getByRole("alert").filter({ hasText: "請填寫手機號碼" })).toContainText("請填寫手機號碼");
 
+  await page.getByLabel("手機號碼").fill("12345");
+  await page.getByRole("button", { name: "下一步" }).click();
+  await expect(page.getByRole("alert").filter({ hasText: "請填寫正確的台灣手機號碼" })).toContainText("請填寫正確的台灣手機號碼");
   await page.getByLabel("手機號碼").fill("0912000000");
   await page.getByRole("button", { name: "下一步" }).click();
   await page.getByRole("button", { name: "下一步" }).click();
@@ -87,7 +89,7 @@ test("checkout controls stay visible without horizontal overflow on a phone view
 
 test("operator can save, edit a grounded draft, preview, confirm, and publish on desktop", async ({ page }) => {
   await page.goto("/admin/products/new");
-  await expect(page.getByText("這是原型頁面：尚未實作真實管理員驗證。")).toBeVisible();
+  await expect(page.getByText("這是本機 Demo：沒有真實管理員驗證，不會連接正式 ERP。")).toBeVisible();
   await completeMinimumProductDraft(page);
 
   await page.getByRole("button", { name: "儲存草稿" }).click();

@@ -1,0 +1,25 @@
+import { defineConfig, devices } from "@playwright/test";
+import { resolve } from "node:path";
+
+const port = 3013;
+const merchantSecret = "11".repeat(32);
+const baseURL = process.env.DEMO_BASE_URL ?? `http://127.0.0.1:${port}`;
+
+export default defineConfig({
+  testDir: "./e2e-demo",
+  workers: 1,
+  reporter: "line",
+  use: { baseURL, trace: "on-first-retry" },
+  webServer: {
+    command: `corepack pnpm --config.verifyDepsBeforeRun=false dev --webpack --hostname 127.0.0.1 --port ${port}`,
+    env: {
+      DEMO_COMMERCE_LOCAL: "enabled",
+      DEMO_MERCHANT_SECRET: merchantSecret,
+      DEMO_DATA_DIR: resolve(`.demo-data/playwright-${process.pid}`),
+      NEXT_PUBLIC_DEMO_COMMERCE: "enabled",
+    },
+    url: `${baseURL}/api/health`,
+    reuseExistingServer: Boolean(process.env.DEMO_BASE_URL),
+  },
+  projects: [{ name: "mobile-chromium", use: { ...devices["Pixel 7"] } }],
+});

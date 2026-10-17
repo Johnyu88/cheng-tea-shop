@@ -25,7 +25,7 @@ export const validateProductDraftDto = (value: unknown): ServiceResult<ProductDr
     typeof value.specification !== "string" ||
     value.specification.trim().length === 0 ||
     !isMoney(value.price) ||
-    !["white", "green", "oolong", "black", "dark", "other"].includes(value.category as string) ||
+    !["wild-mountain", "white", "green", "yellow", "oolong", "black", "flower", "dark", "special", "aged", "other"].includes(value.category as string) ||
     !["available", "sold-out"].includes(value.inventoryStatus as string) ||
     !Array.isArray(value.tasteTags) ||
     !value.tasteTags.every((tag) => ["light", "sweet", "rich", "roasted"].includes(tag as string)) ||
