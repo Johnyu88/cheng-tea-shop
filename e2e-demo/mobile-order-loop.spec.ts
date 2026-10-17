@@ -37,9 +37,9 @@ test("mobile synthetic order closes customer and merchant status loop", async ({
   await expect(page).toHaveURL(/\/checkout\/success\?order=\d{6}-/);
   await expect(page.getByRole("heading", { name: "感謝您的購買" })).toBeVisible();
   await expect(page.getByText("已收到您的示範訂單，店家將依序處理。", { exact: true })).toBeVisible();
-  const lookupHref = await page.getByRole("link", { name: "主動查看訂單" }).getAttribute("href");
-  expect(lookupHref).toMatch(/^\/orders\?order=\d{6}-/);
-  expect(lookupHref).not.toContain("token=");
+  const orderNumber = new URL(page.url()).searchParams.get("order")!;
+  expect(orderNumber).toMatch(/^\d{6}-\d{3,}$/);
+  await expect(page.getByRole("link", { name: "主動查看訂單" })).toHaveCount(0);
 
   await page.goto("/admin/orders");
   await page.getByLabel("已綁定手機").fill("0912000000");
@@ -51,7 +51,7 @@ test("mobile synthetic order closes customer and merchant status loop", async ({
   const inbox = (await operator.json()).value;
   await page.getByLabel("六位數驗證碼").fill(inbox.code);
   await page.getByRole("button", { name: "驗證並登入" }).click();
-  const orderCard = page.locator(".demo-order-card").filter({ hasText: lookupHref!.match(/\d{6}-\d{3,}/)?.[0] ?? "" }).first();
+  const orderCard = page.locator(".demo-order-card").filter({ hasText: orderNumber }).first();
   await expect(orderCard).toBeVisible();
   await expect(orderCard).toContainText("待人工確認");
   const confirmPayment = orderCard.getByRole("button", { name: "人工確認付款" });
@@ -113,23 +113,11 @@ test("mobile synthetic order closes customer and merchant status loop", async ({
   await expect(orderCard).toContainText("已送達");
   await page.getByRole("button", { name: "模擬成功" }).first().click();
 
-  await page.goto(lookupHref!);
-  await expect(page.getByText("已帶入這個分頁剛才的訂單資料，請取得驗證碼。", { exact: true })).toBeVisible();
-  await page.getByLabel("顧客姓名").fill("合成顧客");
-  await page.getByLabel("手機末三碼").fill("001");
-  await page.getByRole("button", { name: "取得查單驗證碼" }).click();
-  await expect(page.getByText(/沙盒測試 OTP/)).toContainText("123456");
-  await page.getByLabel("驗證碼").fill("123456");
-  await page.getByRole("button", { name: "查詢訂單" }).click();
-  await expect(page.getByRole("heading", { name: "已送達" })).toBeVisible();
-  await expect(page.getByText("包裝照片：已由店家上傳")).toBeVisible();
-  await expect(page.getByRole("alert").filter({ hasText: "提出攔件" })).toBeVisible();
-  await expect(page.getByRole("alert").filter({ hasText: "顧客提出攔件申請" })).toBeVisible();
   await page.goto("/admin/products?pwa=products");
   await expect(page.getByRole("heading", { name: "商品管理", exact: true })).toBeVisible();
   await expect(page.getByLabel("已綁定手機")).toHaveCount(0);
   await page.goto("/admin/orders?pwa=orders");
-  await expect(page.locator(".demo-order-card").filter({ hasText: lookupHref!.match(/\\d{6}-\\d{3,}/)?.[0] ?? "" }).first()).toBeVisible();
+  await expect(page.locator(".demo-order-card").filter({ hasText: orderNumber }).first()).toBeVisible();
   await page.goBack();
   await expect(page).toHaveURL(/pwa=products$/);
   await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(412);

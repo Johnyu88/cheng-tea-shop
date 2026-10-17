@@ -90,7 +90,6 @@ export function HomePage({ catalogService = defaultCatalogService }: HomePagePro
         </a>
         <nav aria-label="主要導覽">
           <a href="#baseline">茶品導覽</a>
-          <a href="/orders">訂單查詢</a>
         </nav>
       </header>
 

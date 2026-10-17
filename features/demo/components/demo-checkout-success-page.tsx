@@ -42,7 +42,6 @@ export function DemoCheckoutSuccessPage(props: SuccessData): JSX.Element {
     try { await navigator.clipboard.writeText(data.orderNumber ?? data.orderId); setCopyMessage("已複製訂單編號"); }
     catch { setCopyMessage("無法自動複製，請長按訂單編號複製。"); }
   };
-  const lookupHref = `/orders?order=${encodeURIComponent(data.orderNumber ?? data.orderId)}`;
   return <main className="py-8"><section className="demo-panel" aria-labelledby="checkout-success-heading">
     <p className="prototype-notice">這是本機 Demo 的合成訂單結果。付款方式為傳統人工確認，訂單目前是「待人工確認」，不代表已收款或出貨。</p>
     <h1 id="checkout-success-heading">感謝您的購買</h1>
@@ -51,10 +50,8 @@ export function DemoCheckoutSuccessPage(props: SuccessData): JSX.Element {
     <button className="filter-button mt-4" type="button" onClick={() => void copyNumber()}>複製訂單編號</button>
     {copyMessage && <p role="status">{copyMessage}</p>}
     <p>訂單狀態：{statusLabels[data.status]}</p>
-    <p role="status" className="prototype-notice">在其他裝置查單，只需訂單編號、顧客姓名與手機末三碼，再完成驗證碼驗證。</p>
     <div className="form-actions mt-6">
       <Link className="filter-button" href="/">回到首頁</Link>
-      <Link className="primary-action" href={lookupHref}>主動查看訂單</Link>
     </div>
   </section></main>;
 }

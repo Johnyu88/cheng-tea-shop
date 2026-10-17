@@ -68,9 +68,9 @@ it("uses approved desktop/mobile composite candidates instead of a video", () =>
   expect(screen.queryByLabelText("陳老師茶行介紹影片")).toBeNull();
 });
 
-it("exposes order lookup from the primary navigation", () => {
+it("does not link to the retired customer order lookup", () => {
   render(<HomePage catalogService={createMockCatalogService()} />);
-  expect(screen.getByRole("link", { name: "訂單查詢" })).toHaveAttribute("href", "/orders");
+  expect(screen.queryByRole("link", { name: "訂單查詢" })).toBeNull();
 });
 
 it("does not expose the retired brand name in the public storefront shell", () => {
