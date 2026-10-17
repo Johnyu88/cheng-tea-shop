@@ -102,4 +102,37 @@ describe("private Acer HTTPS demo", () => {
   });
   it.each(["http://tea-staging.home.arpa", "https://attacker.example", "https://x.tea-staging.home.arpa", "https://tea-staging.home.arpa:8443", "https://tea-staging.home.arpa/path"])("rejects unsafe Acer origin configuration %s", origin => { vi.stubEnv("DEMO_ACER_ORIGIN", origin); expect(() => acerDemoOrigin()).toThrow(); });
   it("accepts only authenticated same-origin HTTPS traffic", () => { expect(() => assertAcerDemoRequest(acerRequest())).not.toThrow(); expect(() => assertAcerDemoRequest(acerRequest("POST", { origin: "https://attacker.example" }))).toThrow(); expect(() => assertAcerDemoRequest(acerRequest("POST", { host: "attacker.example" }))).toThrow(); expect(() => assertAcerDemoRequest(acerRequest("POST", { "x-forwarded-proto": "http" }))).toThrow(); expect(() => assertAcerDemoRequest(acerRequest("POST", { authorization: "" }))).toThrow(); expect(() => assertAcerDemoRequest(acerRequest("POST", { forwarded: "proto=https" }))).toThrow(); });
+  it("accepts explicitly configured private HTTPS :8443 with exact Host and Origin", () => {
+    const origin = "https://acer-v5.tail4d8b5a.ts.net:8443";
+    vi.stubEnv("DEMO_ACER_ORIGIN", origin);
+    expect(acerDemoOrigin().origin).toBe(origin);
+    const request = new Request("http://acer-v5.tail4d8b5a.ts.net:8443/api/demo/otp", {
+      method: "POST",
+      headers: { host: "acer-v5.tail4d8b5a.ts.net:8443", origin,
+        authorization: auth, "content-type": "application/json",
+        "x-forwarded-proto": "https", "sec-fetch-site": "same-origin" },
+    });
+    expect(() => assertAcerDemoRequest(request)).not.toThrow();
+  });
+  it.each([
+    "https://acer-v5.tail4d8b5a.ts.net:8444",
+    "https://acer-v5.tail4d8b5a.ts.net:9443",
+    "https://attacker.example:8443",
+  ])("rejects unsafe configured custom origin %s", origin => {
+    vi.stubEnv("DEMO_ACER_ORIGIN", origin);
+    expect(() => acerDemoOrigin()).toThrow();
+  });
+  it("rejects :8443 requests with a mismatched port, Origin, or cross-site metadata", () => {
+    const origin = "https://acer-v5.tail4d8b5a.ts.net:8443";
+    vi.stubEnv("DEMO_ACER_ORIGIN", origin);
+    const make = (overrides: Record<string, string> = {}) => new Request("http://acer-v5.tail4d8b5a.ts.net:8443/api/demo/otp", {
+      method: "POST", headers: { host: "acer-v5.tail4d8b5a.ts.net:8443", origin,
+        authorization: auth, "content-type": "application/json",
+        "x-forwarded-proto": "https", "sec-fetch-site": "same-origin", ...overrides },
+    });
+    expect(() => assertAcerDemoRequest(make({ host: "acer-v5.tail4d8b5a.ts.net" }))).toThrow();
+    expect(() => assertAcerDemoRequest(make({ origin: "https://acer-v5.tail4d8b5a.ts.net" }))).toThrow();
+    expect(() => assertAcerDemoRequest(make({ origin: "https://attacker.example:8443" }))).toThrow();
+    expect(() => assertAcerDemoRequest(make({ "sec-fetch-site": "cross-site" }))).toThrow();
+  });
 });

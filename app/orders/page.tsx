@@ -1,6 +1,5 @@
-import { Suspense } from "react";
-import { OrderLookupPage } from "@/features/demo/components/order-lookup-page";
+import { notFound } from "next/navigation";
 
 export default function Page() {
-  return <Suspense fallback={<main><p>正在準備查單</p></main>}><OrderLookupPage /></Suspense>;
+  notFound();
 }

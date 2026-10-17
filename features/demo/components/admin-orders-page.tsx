@@ -24,6 +24,8 @@ export function AdminOrdersPage() {
   const [rotation, setRotation] = useState<{ orderId: string; accessSecret: string }>();
   const [copyMessage, setCopyMessage] = useState("");
   const [pendingPhoto, setPendingPhoto] = useState<{ orderId: string; file: File; previewUrl: string }>();
+  const [pendingAudit, setPendingAudit] = useState<{ orderId: string; action: string; label: string }>();
+  const [auditReason, setAuditReason] = useState("");
   useEffect(() => {
     let alive = true;
     void demoApi.merchantStatus().then(async status => {
@@ -110,6 +112,19 @@ export function AdminOrdersPage() {
       setError(e instanceof Error ? e.message : "操作失敗");
     } finally { setBusy(false); }
   };
+  const auditAct = (orderId: string, action: string, label: string) => {
+    setPendingAudit({ orderId, action, label });
+    setAuditReason("");
+  };
+  const submitAuditAction = async () => {
+    if (!pendingAudit) return;
+    const reason = auditReason.trim();
+    if (!reason || reason.length > 500) return;
+    const action = pendingAudit;
+    setPendingAudit(undefined);
+    setAuditReason("");
+    await act(action.orderId, action.action, { reason });
+  };
   const selectPhoto = (orderId: string, file?: File) => {
     if (!file) return;
     setError("");
@@ -159,8 +174,19 @@ export function AdminOrdersPage() {
       <h1>商家訂單 Demo</h1>
       <Link className="filter-button mt-4 inline-flex" href="/">回到首頁</Link>
       {error && <div role="alert" className="product-draft-alert">{error}</div>}
+      {pendingAudit && <section className="demo-panel mt-4" role="dialog" aria-modal="true" aria-labelledby="audit-reason-title">
+        <h2 id="audit-reason-title">{pendingAudit.label}</h2>
+        <label className="form-field mt-3">更正原因
+          <textarea className="form-input" rows={3} maxLength={500} required aria-describedby="audit-reason-help" value={auditReason} onChange={event => setAuditReason(event.target.value)} />
+        </label>
+        <p id="audit-reason-help" className="muted mt-2">必填，最多 500 字。請簡述更正原因；原因、商家 Session 操作者與操作時間會保留在訂單紀錄。</p>
+        <div className="form-actions mt-3">
+          <button className="filter-button" type="button" disabled={busy} onClick={() => { setPendingAudit(undefined); setAuditReason(""); }}>取消更正</button>
+          <button className="primary-action" type="button" disabled={busy || !auditReason.trim()} onClick={() => void submitAuditAction()}>確認更正</button>
+        </div>
+      </section>}
       {!authenticated ? <>
-        {loginStatus?.passkey?.enabled ? <AdminPasskeyLogin registered={loginStatus.passkey.registered} onAuthenticated={resumePasskey} /> : loginStatus?.provider === "password" ? <>
+        {loginStatus?.passkey?.enabled && loginStatus.passkey.registered ? <AdminPasskeyLogin registered={loginStatus.passkey.registered} onAuthenticated={resumePasskey} /> : loginStatus?.provider === "password" ? <>
           <h2 className="mt-6">Demo 密碼登入</h2>
           <p className="muted mt-3">請輸入授權驗收人員取得的 Demo 密碼。</p>
           {loginStatus.state !== "ready" && <p role="status">Demo 密碼登入尚未設定，請聯絡管理員。</p>}
@@ -200,7 +226,8 @@ export function AdminOrdersPage() {
             <h2>{statusLabel[order.status]}</h2><p>訂單編號：{order.orderNumber ?? order.orderId}</p>
             <DemoOrderProgress order={order} />
             <p>付款：{order.paymentStatus === "manual-confirmed" ? "已人工確認" : "待人工確認"}</p>
-            {order.paymentStatus === "pending-manual-verification" && <button className="filter-button" disabled={busy} onClick={() => void act(order.orderId, "confirm-payment")}>人工確認付款</button>}
+            {order.paymentStatus === "pending-manual-verification" && <button className="filter-button" disabled={busy} onClick={() => auditAct(order.orderId, "confirm-payment", "人工確認付款")}>人工確認付款</button>}
+            {order.paymentStatus === "manual-confirmed" && order.status !== "shipped" && order.status !== "delivered" && <button className="filter-button" disabled={busy} onClick={() => auditAct(order.orderId, "revoke-payment", "撤銷付款確認")}>撤銷付款確認</button>}
             {order.status === "confirmed" && <section className="mt-4" aria-labelledby={`packing-photo-${order.orderId}`}>
               <h3 id={`packing-photo-${order.orderId}`}>包裝照片</h3>
               <p className="muted">請先選擇拍照或相簿照片，檢查預覽後再按「確認包裝」。</p>
@@ -222,7 +249,8 @@ export function AdminOrdersPage() {
                 </div>
               </div>}
             </section>}
-            {order.status === "packed" && <button className="primary-action mt-4" disabled={busy || order.paymentStatus !== "manual-confirmed"} onClick={() => void act(order.orderId, "ship")}>人工確認出貨</button>}
+            {order.status === "packed" && <div className="form-actions mt-4"><button className="primary-action" disabled={busy || order.paymentStatus !== "manual-confirmed"} onClick={() => void act(order.orderId, "ship")}>人工確認出貨</button><button className="filter-button" disabled={busy} onClick={() => auditAct(order.orderId, "reopen-packing", "重新開啟包裝")}>重新開啟包裝</button></div>}
+            {(order.status === "shipped" || order.status === "delivered") && <section className="mt-4"><h3>出貨更正流程</h3><p className="muted">出貨狀態不會直接倒退；填寫原因後，顧客查單會看到異常紀錄。這不代表物流已撤回。</p><div className="form-actions"><button className="filter-button" disabled={busy} onClick={() => auditAct(order.orderId, "shipping-exception", "出貨異常")}>記錄出貨異常</button><button className="filter-button" disabled={busy} onClick={() => auditAct(order.orderId, "intercept-requested", "攔件申請")}>記錄攔件申請</button><button className="filter-button" disabled={busy} onClick={() => auditAct(order.orderId, "shipping-correction", "出貨紀錄更正")}>更正出貨紀錄</button></div></section>}
             {order.status === "shipped" && <button className="primary-action mt-4" disabled={busy} onClick={() => void act(order.orderId, "deliver")}>模擬送達</button>}
             <section className="mt-6" aria-labelledby={`recovery-${order.orderId}`}>
               <h3 id={`recovery-${order.orderId}`}>遺失查詢憑證</h3>

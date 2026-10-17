@@ -22,7 +22,7 @@ if (!gate || !password) throw new Error('Missing private acceptance configuratio
     const placed = await post('/api/demo/orders', { phone: '0912000000', challengeId: otp.challengeId, code: otp.demoCode, draft: { name: '手機查單', phone: '0912000000', deliveryMethod: 'store-pickup', paymentMethod: 'bank-transfer' }, lines: [{ productId: item.id, variantId: variant.id, quantity: 1 }] });
     await post('/api/demo/admin/session', { password });
     const path = '/api/demo/admin/orders/' + placed.orderId;
-    await post(path, { action: 'confirm-payment' });
+    await post(path, { action: 'confirm-payment', reason: 'synthetic receipt checked' });
     const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=', 'base64');
     await value(await setup.request.post(path + '/packing-photo', { headers, multipart: { photo: { name: 'packing.png', mimeType: 'image/png', buffer: png } } }));
     await post(path, { action: 'ship' }); await post(path, { action: 'deliver' });

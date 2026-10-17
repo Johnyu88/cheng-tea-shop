@@ -2,11 +2,17 @@ import { expect, test } from "@playwright/test";
 
 const merchantSecret = process.env.DEMO_MERCHANT_SECRET ?? "11".repeat(32);
 
+test.setTimeout(120_000);
+
 test("mobile synthetic order closes customer and merchant status loop", async ({ page }) => {
   await page.goto("/tea/taiwan-mi-xiang-wild-mountain-tea");
   await page.getByRole("button", { name: "加入購物車" }).click();
   await expect(page).toHaveURL(/\/cart$/);
   await expect(page.getByRole("button", { name: "返回上一頁" })).toBeVisible();
+  await page.getByRole("button", { name: "返回上一頁" }).click();
+  await expect(page).toHaveURL(/\/tea\/taiwan-mi-xiang-wild-mountain-tea$/);
+  await page.goForward();
+  await expect(page).toHaveURL(/\/cart$/);
   await expect(page.getByRole("link", { name: "繼續購買" })).toHaveAttribute("href", "/#catalog");
   await page.getByRole("link", { name: "前往結帳" }).click();
   await expect(page.getByRole("link", { name: "返回購物車" })).toHaveAttribute("href", "/cart");
@@ -48,7 +54,25 @@ test("mobile synthetic order closes customer and merchant status loop", async ({
   const orderCard = page.locator(".demo-order-card").filter({ hasText: lookupHref!.match(/\d{6}-\d{3,}/)?.[0] ?? "" }).first();
   await expect(orderCard).toBeVisible();
   await expect(orderCard).toContainText("待人工確認");
+  const confirmPayment = orderCard.getByRole("button", { name: "人工確認付款" });
+  await expect(confirmPayment).toBeEnabled();
+  const submitCorrection = async (reason: string) => {
+    const dialog = page.getByRole("dialog");
+    await expect(dialog).toBeVisible();
+    await dialog.getByLabel("更正原因").fill(reason);
+    await dialog.getByRole("button", { name: "確認更正" }).click();
+  };
+  await confirmPayment.click();
+  const paymentResponsePromise = page.waitForResponse(response => response.url().includes("/api/demo/admin/orders/") && response.request().method() === "POST");
+  await submitCorrection("合成手機回歸測試原因：確認付款");
+  const paymentResponse = await paymentResponsePromise;
+  expect(paymentResponse.ok()).toBe(true);
+  await expect(orderCard).toContainText("付款：已人工確認");
+  await orderCard.getByRole("button", { name: "撤銷付款確認" }).click();
+  await submitCorrection("合成手機回歸測試原因：撤銷付款");
+  await expect(orderCard).toContainText("付款：待人工確認");
   await orderCard.getByRole("button", { name: "人工確認付款" }).click();
+  await submitCorrection("合成手機回歸測試原因：重新確認付款");
   const png = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=", "base64");
   let photoWrites = 0;
   page.on("request", request => { if (request.method() === "POST" && request.url().endsWith("/packing-photo")) photoWrites += 1; });
@@ -72,8 +96,19 @@ test("mobile synthetic order closes customer and merchant status loop", async ({
   await orderCard.getByRole("button", { name: "確認包裝" }).click();
   await expect(orderCard).toContainText("已打包");
   expect(photoWrites).toBe(1);
+  await orderCard.getByRole("button", { name: "重新開啟包裝" }).click();
+  await submitCorrection("合成手機回歸測試原因：照片重拍");
+  await expect(orderCard.getByLabel("選擇相簿")).toBeVisible();
+  await orderCard.getByLabel("選擇相簿").setInputFiles({ name: "replacement.png", mimeType: "image/png", buffer: png });
+  await orderCard.getByRole("button", { name: "確認包裝" }).click();
+  await expect(orderCard).toContainText("已打包");
+  expect(photoWrites).toBe(2);
   await orderCard.getByRole("button", { name: "人工確認出貨" }).click();
   await expect(orderCard).toContainText("已出貨");
+  await orderCard.getByRole("button", { name: "記錄攔件申請" }).click();
+  await submitCorrection("顧客提出攔件申請");
+  await expect(orderCard).toContainText("攔件申請");
+  await expect(orderCard).toContainText("此紀錄不表示物流已撤回");
   await orderCard.getByRole("button", { name: "模擬送達" }).click();
   await expect(orderCard).toContainText("已送達");
   await page.getByRole("button", { name: "模擬成功" }).first().click();
@@ -88,5 +123,14 @@ test("mobile synthetic order closes customer and merchant status loop", async ({
   await page.getByRole("button", { name: "查詢訂單" }).click();
   await expect(page.getByRole("heading", { name: "已送達" })).toBeVisible();
   await expect(page.getByText("包裝照片：已由店家上傳")).toBeVisible();
+  await expect(page.getByRole("alert").filter({ hasText: "提出攔件" })).toBeVisible();
+  await expect(page.getByRole("alert").filter({ hasText: "顧客提出攔件申請" })).toBeVisible();
+  await page.goto("/admin/products?pwa=products");
+  await expect(page.getByRole("heading", { name: "商品管理", exact: true })).toBeVisible();
+  await expect(page.getByLabel("已綁定手機")).toHaveCount(0);
+  await page.goto("/admin/orders?pwa=orders");
+  await expect(page.locator(".demo-order-card").filter({ hasText: lookupHref!.match(/\\d{6}-\\d{3,}/)?.[0] ?? "" }).first()).toBeVisible();
+  await page.goBack();
+  await expect(page).toHaveURL(/pwa=products$/);
   await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(412);
 });

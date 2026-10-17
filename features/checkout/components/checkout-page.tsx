@@ -13,7 +13,7 @@ type CartState = { status: "loading" } | { status: "ready"; cart: Cart } | { sta
 
 const initialDraft: CheckoutDraft = { name: "", phone: "", deliveryMethod: "home-delivery", address: "", paymentMethod: "bank-transfer" };
 const formatMoney = (amount: number) => `NT$${amount.toLocaleString("zh-TW")}`;
-const SHOP_LINE_CONTACT_URL = "https://line.me/R/ti/p/@longying-tea-shop";
+const SHOP_LINE_CONTACT_URL = "https://line.me/ti/p/TT6TRQyMF6";
 
 export function CheckoutPage(): JSX.Element {
   const { cartService, checkoutService } = useCommerce();
@@ -103,5 +103,5 @@ function Summary({ cart, expanded, toggle }: { cart: Cart; expanded: boolean; to
 }
 
 function Success({ receipt }: { receipt: CheckoutReceipt }): JSX.Element {
-  return <section className="rounded-2xl border border-black/10 bg-white p-6" aria-labelledby="checkout-success-heading"><p className="mb-6 rounded-lg border border-[var(--tea-brown)] bg-[var(--mist)] p-4"><strong>結帳原型提醒：</strong>此頁為合成展示／原型，不會送出真實付款，也不會保存付款資料。</p><h1 id="checkout-success-heading">訂單已成立</h1><p>訂單編號：{receipt.orderReference}</p><p>訂單小計：{formatMoney(receipt.total.amount)}</p><p>若有任何問題，請優先電話聯絡，我們也會透過 LINE 協助您。</p><div className="form-actions mt-6"><a className="primary-action" href="tel:0800000000">電話聯絡我們</a><a className="text-button" href={SHOP_LINE_CONTACT_URL}>LINE 聯絡我們</a></div><Link className="mt-6 inline-block" href="/#catalog">繼續選茶</Link></section>;
+  return <section className="rounded-2xl border border-black/10 bg-white p-6" aria-labelledby="checkout-success-heading"><p className="mb-6 rounded-lg border border-[var(--tea-brown)] bg-[var(--mist)] p-4"><strong>結帳原型提醒：</strong>此頁為合成展示／原型，不會送出真實付款，也不會保存付款資料。</p><h1 id="checkout-success-heading">訂單已成立</h1><p>訂單編號：{receipt.orderReference}</p><p>訂單小計：{formatMoney(receipt.total.amount)}</p><p>若有任何問題，請優先電話聯絡，我們也會透過 LINE 協助您。</p><div className="form-actions mt-6"><a className="primary-action" href="tel:0919086099">電話聯絡我們</a><a className="text-button" href={SHOP_LINE_CONTACT_URL}>LINE 聯絡我們</a></div><Link className="mt-6 inline-block" href="/#catalog">繼續選茶</Link></section>;
 }

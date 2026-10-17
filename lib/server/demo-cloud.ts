@@ -15,15 +15,17 @@ export function cloudDemoOrigin(): URL {
   return url;
 }
 
-/** Acer staging uses one operator-configured private DNS name, never an Origin wildcard. */
+/** Acer staging requires one operator-configured private origin; only HTTPS :8443 may be non-default. */
 export function acerDemoOrigin(): URL {
   const raw = process.env.DEMO_ACER_ORIGIN;
   if (!raw) throw new Error("Acer demo origin is not configured");
   const url = new URL(raw);
-  if (url.origin !== raw || url.protocol !== "https:" || url.username || url.password || url.port
+  const tailnetHost = /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.){2}ts\.net$/.test(url.hostname);
+  const homeArpaHost = /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.home\.arpa$/.test(url.hostname);
+  if (url.origin !== raw || url.protocol !== "https:" || url.username || url.password
+    || (url.port && (url.port !== "8443" || !tailnetHost))
     || url.pathname !== "/" || url.search || url.hash
-    || !(/^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.home\.arpa$/.test(url.hostname)
-      || /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.){2}ts\.net$/.test(url.hostname))) {
+    || !(homeArpaHost || tailnetHost)) {
     throw new Error("Acer demo origin is invalid");
   }
   return url;
@@ -94,7 +96,7 @@ export function assertCloudDemoRequest(request: Request): void {
 
 export function assertAcerDemoRequest(request: Request): void {
   assertDemoEnabled();
-  if (!acerDemoRequested() || !hasCloudDemoAuthorization(request)) throw new Error("Acer demo access denied");
+  if (!acerDemoRequested() || (process.env.DEMO_ACER_MERCHANT_LOGIN_DIRECT !== "enabled" && !hasCloudDemoAuthorization(request))) throw new Error("Acer demo access denied");
   const origin = acerDemoOrigin();
   const url = new URL(request.url);
   const proto = request.headers.get("x-forwarded-proto");

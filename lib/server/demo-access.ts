@@ -1,6 +1,8 @@
 import { acerDemoRequested, assertDemoEnabled, cloudDemoRequested } from "./demo-cloud";
 import { getMerchantAuthProvider, merchantAuthSessionContext, merchantAuthStatus, providerSessionRequired, type MerchantAuthInput } from "./merchant-auth-provider";
-import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
+import { createHash, createHmac, randomBytes, timingSafeEqual } from "node:crypto";
+import { join, resolve } from "node:path";
+import { createDemoSessionRevocationStore } from "./demo-session-revocation";
 
 const loopbackCookieName = "__Host-demo_merchant";
 const lanCookieName = "demo_merchant";
@@ -68,22 +70,56 @@ function signCookie(now: number): string {
     + "; HttpOnly;" + secure + " SameSite=Strict; Path=/; Max-Age=1800";
 }
 
-/** Pass Cookie header only. Duplicate names and altered signatures fail closed. */
-export function verifyDemoMerchantCookie(cookieHeader: string | null, now = Date.now()): boolean {
+type ParsedDemoCookie = { signatureHash: string; expiresAt: number };
+function withDemoSessionRevocationStore<T>(operation: (store: ReturnType<typeof createDemoSessionRevocationStore>) => T): T {
+  const databasePath = join(resolve(/*turbopackIgnore: true*/ process.env.DEMO_DATA_DIR || ".demo-data/local"), "merchant-auth.sqlite");
+  const store = createDemoSessionRevocationStore(databasePath);
+  try {
+    return operation(store);
+  } finally {
+    store.close();
+  }
+}
+
+function parseValidDemoCookie(cookieHeader: string | null, now = Date.now()): ParsedDemoCookie | null {
   const key = secret();
-  if (providerSessionRequired() && merchantAuthStatus().state !== "ready") return false;
-  if (!cookieHeader || cookieHeader.length > 4096) return false;
+  if (providerSessionRequired() && merchantAuthStatus().state !== "ready") return null;
+  if (!cookieHeader || cookieHeader.length > 4096) return null;
   const expectedName = cookieName();
   const matches = cookieHeader.split(";").map(part => part.trim())
     .filter(part => part.startsWith(expectedName + "="));
-  if (matches.length !== 1) return false;
+  if (matches.length !== 1) return null;
   const token = matches[0]!.slice(expectedName.length + 1);
   const match = /^(\d{1,16})\.([0-9a-f]{32})\.([0-9a-f]{64})$/.exec(token);
-  if (!match) return false;
+  if (!match) return null;
   const issued = Number(match[1]);
-  if (!Number.isSafeInteger(issued) || issued > now || now - issued >= durationMs) return false;
+  if (!Number.isSafeInteger(issued) || issued > now || now - issued >= durationMs) return null;
   const expected = Buffer.from(mac(key, match[1] + "." + match[2]), "hex");
-  return timingSafeEqual(expected, Buffer.from(match[3]!, "hex"));
+  const signature = Buffer.from(match[3]!, "hex");
+  if (!timingSafeEqual(expected, signature)) return null;
+  return {
+    signatureHash: createHash("sha256").update(match[3]!).digest("hex"),
+    expiresAt: issued + durationMs,
+  };
+}
+
+/** Pass Cookie header only. Duplicate names, altered signatures, storage errors, and revoked sessions fail closed. */
+export function verifyDemoMerchantCookie(cookieHeader: string | null, now = Date.now()): boolean {
+  const parsed = parseValidDemoCookie(cookieHeader, now);
+  if (!parsed) return false;
+  try {
+    return withDemoSessionRevocationStore(store => !store.isRevoked(parsed.signatureHash, now));
+  } catch {
+    return false;
+  }
+}
+
+/** Persist revocation before returning success from logout; storage errors propagate to the route. */
+export function revokeDemoMerchantCookie(cookieHeader: string | null, now = Date.now()): boolean {
+  const parsed = parseValidDemoCookie(cookieHeader, now);
+  if (!parsed) return false;
+  withDemoSessionRevocationStore(store => store.revoke(parsed.signatureHash, parsed.expiresAt, now));
+  return true;
 }
 
 /** Server-only transient adapter, used only after live vendor authorization. Never return it to a client. */

@@ -4,6 +4,7 @@ import { useEffect, useState, type JSX } from "react";
 import Link from "next/link";
 import type { CatalogService, Product } from "@/lib/domain";
 import { createDemoCatalogService, createMockCatalogService } from "@/lib/domain";
+import { publicTeaCatalogService } from "@/lib/domain/in-memory-adapters";
 import { CatalogBrowser } from "@/features/catalog/components/catalog-browser";
 
 type HomePageProps = {
@@ -89,7 +90,6 @@ export function HomePage({ catalogService = defaultCatalogService }: HomePagePro
         </a>
         <nav aria-label="主要導覽">
           <a href="#baseline">茶品導覽</a>
-          <Link href="/orders">訂單查詢</Link>
         </nav>
       </header>
 
@@ -106,7 +106,7 @@ export function HomePage({ catalogService = defaultCatalogService }: HomePagePro
             <p className="eyebrow">坐下來，聽陳老師說茶</p>
             <h2 id="teacher-story-heading">先認識泡茶的人，再慢慢找到喜歡的茶。</h2>
             <p>
-              這裡用陳老師與茶席的合成照，讓第一次來的客人先感受到這間茶行的溫度。
+              認識陳老師茶行的茶席風景，歡迎透過電話或 LINE 詢問茶品。
             </p>
           </div>
           <div className="teacher-story-media">
@@ -127,6 +127,17 @@ export function HomePage({ catalogService = defaultCatalogService }: HomePagePro
 
         <CatalogPreview catalogService={catalogService} />
         <CatalogBrowser catalogService={catalogService} />
+        <section className="demo-panel mt-8" aria-labelledby="merchant-contact-title">
+          <h2 id="merchant-contact-title">聯絡陳老師</h2>
+          <p>選茶、匯款確認或訂購諮詢，歡迎直接聯絡。</p>
+          <div className="form-actions mt-4">
+            <a className="primary-action" href="tel:0919086099">電話 0919-086-099</a>
+            <a className="filter-button" href="https://line.me/ti/p/TT6TRQyMF6" target="_blank" rel="noopener noreferrer">LINE 聯絡陳老師</a>
+          </div>
+          <a href="https://line.me/ti/p/TT6TRQyMF6" target="_blank" rel="noopener noreferrer" aria-label="掃描 LINE QR Code 聯絡陳老師">
+            <img src="/media/chen-teacher-line-qr.svg" width={160} height={160} alt="陳老師 LINE QR Code" />
+          </a>
+        </section>
       </main>
     </div>
   );

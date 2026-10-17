@@ -1,6 +1,5 @@
 import { merchantRequestCookie } from "@/lib/server/merchant-request-access";
-import { cloudDemoRequested } from "@/lib/server/demo-cloud";
-import { verifyDemoMerchantCookie } from "@/lib/server/demo-access";
+import { writePublicTeaPublication } from "@/lib/server/public-tea-publication";
 
 import { assertLocalDemoHttpRequest } from "@/lib/server/demo-http-guard";
 import { getDemoCatalogStore, type ProductUpdate } from "@/lib/server/demo-catalog-store";
@@ -19,7 +18,7 @@ export async function GET(request: Request) {
     if (taste) query.taste = taste as TasteTag;
     const all = await getDemoCatalogStore().list();
     const includeUnpublished = url.searchParams.get("includeUnpublished") === "true";
-    if (cloudDemoRequested() && includeUnpublished && !verifyDemoMerchantCookie(await merchantRequestCookie(request))) throw new Error("Merchant access required");
+    if (includeUnpublished && !await merchantRequestCookie(request)) throw new Error("Merchant access required");
     const filtered = all.filter((product) => (includeUnpublished || product.publication === "published") && (query.category === undefined || product.category === query.category) && (query.taste === undefined || product.tasteTags.includes(query.taste)));
     const start = Number.parseInt(url.searchParams.get("cursor") ?? "0", 10);
     const limit = Math.min(Math.max(Number.parseInt(url.searchParams.get("limit") ?? "12", 10) || 12, 1), 50);
@@ -32,12 +31,13 @@ export async function GET(request: Request) {
 export async function PATCH(request: Request) {
   try {
     assertLocalDemoHttpRequest(request, "PATCH", "json");
-    if (cloudDemoRequested() && !verifyDemoMerchantCookie(await merchantRequestCookie(request))) throw new Error("Merchant access required");
+    if (!await merchantRequestCookie(request)) throw new Error("Merchant access required");
     const body = await request.json() as { id?: unknown; publication?: unknown; name?: unknown; category?: unknown; specification?: unknown; price?: unknown; inventoryStatus?: unknown; aroma?: unknown; taste?: unknown; teaRegion?: unknown; summary?: unknown; fermentation?: unknown; roast?: unknown; brewing?: unknown; tasteTags?: unknown; imageDataUrl?: unknown };
     if (typeof body.id !== "string") throw new Error("商品更新資料無效");
     if (body.publication === "draft" || body.publication === "published") {
       const product = await getDemoCatalogStore().setPublication(body.id, body.publication);
       if (!product) throw new Error("找不到商品");
+      await writePublicTeaPublication(await getDemoCatalogStore().list());
       return demoSuccess(product);
     }
     const changes: ProductUpdate = {};
@@ -65,6 +65,7 @@ export async function PATCH(request: Request) {
     if (Object.keys(changes).length === 0) throw new Error("商品編輯資料無效");
     const product = await getDemoCatalogStore().update(body.id, changes);
     if (!product) throw new Error("找不到商品");
+    await writePublicTeaPublication(await getDemoCatalogStore().list());
     return demoSuccess(product);
   } catch (error) { return demoFailure(error); }
 }
@@ -72,11 +73,12 @@ export async function PATCH(request: Request) {
 export async function POST(request: Request) {
   try {
     assertLocalDemoHttpRequest(request, "POST", "json");
-    if (cloudDemoRequested() && !verifyDemoMerchantCookie(await merchantRequestCookie(request))) throw new Error("Merchant access required");
+    if (!await merchantRequestCookie(request)) throw new Error("Merchant access required");
     const publication = new URL(request.url).searchParams.get("publication") === "draft" ? "draft" : "published";
     const validated = validateProductDraftDto(await request.json());
     if (!validated.ok) return demoFailure(new Error(validated.error.message));
     const product = await getDemoCatalogStore().publish(validated.value as ProductDraft, publication);
+    await writePublicTeaPublication(await getDemoCatalogStore().list());
     return demoSuccess(product, { status: 201 });
   } catch (error) { return demoFailure(error); }
 }

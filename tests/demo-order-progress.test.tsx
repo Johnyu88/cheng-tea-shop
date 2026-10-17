@@ -2,7 +2,7 @@ import { render, screen, within } from "@testing-library/react";
 import { DemoOrderProgress } from "@/features/demo/components/demo-order-progress";
 import type { DemoOrderSnapshot } from "@/lib/domain/demo-order-service";
 const order = (status: DemoOrderSnapshot["status"], paymentStatus: DemoOrderSnapshot["paymentStatus"], photo: string | null) =>
-  ({ status, paymentStatus, packingPhotoId: photo });
+  ({ status, paymentStatus, packingPhotoId: photo, events: [], shippingAttention: null });
 it("does not mark future steps complete for a newly confirmed order", () => {
   render(<DemoOrderProgress order={order("confirmed", "pending-manual-verification", null)} />);
   const progress = screen.getByRole("region", { name: "訂單處理進度" });

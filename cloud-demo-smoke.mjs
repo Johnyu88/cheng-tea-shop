@@ -14,7 +14,7 @@ assert.ok(["password", "sms"].includes(authProvider));
 const password = process.env.DEMO_SMOKE_PASSWORD ?? randomBytes(24).toString("hex");
 const origin = "https://cheng-tea-password-demo.onrender.com";
 const base = "http://127.0.0.1:3138";
-const child = spawn(process.execPath, ["start-cloud-demo.mjs"], {
+const child = spawn(process.execPath, ["scripts/start-playwright-standalone.mjs"], {
   stdio: ["ignore", "inherit", "inherit"],
   env: { ...process.env, PORT: "3138", HOSTNAME: "127.0.0.1", NODE_ENV: "production",
     NEXT_PUBLIC_DEMO_COMMERCE: "enabled", DEMO_COMMERCE_CLOUD: "enabled",
@@ -102,16 +102,33 @@ try {
   const session = cookie.split(";")[0];
   const orders = await value(await call("/api/demo/admin/orders", { headers: { cookie: session } }));
   assert.ok(orders.some(entry => entry.order.orderId === order.orderId));
-  await value(await json("/api/demo/admin/orders/" + order.orderId, { action: "confirm-payment" }, session));
+  const orderRoute = "/api/demo/admin/orders/" + order.orderId;
+  const paid = await value(await json(orderRoute, { action: "confirm-payment", reason: "synthetic receipt checked" }, session));
+  assert.equal(paid.paymentStatus, "manual-confirmed");
+  const revoked = await value(await json(orderRoute, { action: "revoke-payment", reason: "synthetic reversal check" }, session));
+  assert.equal(revoked.paymentStatus, "pending-manual-verification");
+  assert.equal(revoked.events.at(-1).action, "payment-revoked");
+  await value(await json(orderRoute, { action: "confirm-payment", reason: "synthetic receipt rechecked" }, session));
   const png = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=", "base64");
-  const form = new FormData(); form.append("photo", new Blob([png], { type: "image/png" }), "packing.png");
-  await value(await call("/api/demo/admin/orders/" + order.orderId + "/packing-photo", { method: "POST", headers: { origin, cookie: session }, body: form }));
-  await value(await json("/api/demo/admin/orders/" + order.orderId, { action: "ship" }, session));
-  await value(await json("/api/demo/admin/orders/" + order.orderId, { action: "deliver" }, session));
+  const uploadPhoto = async name => {
+    const form = new FormData(); form.append("photo", new Blob([png], { type: "image/png" }), name);
+    return value(await call(orderRoute + "/packing-photo", { method: "POST", headers: { origin, cookie: session }, body: form }));
+  };
+  await uploadPhoto("packing-original.png");
+  const reopened = await value(await json(orderRoute, { action: "reopen-packing", reason: "synthetic photo replacement check" }, session));
+  assert.equal(reopened.status, "confirmed");
+  await uploadPhoto("packing-replacement.png");
+  await value(await json(orderRoute, { action: "ship" }, session));
+  const intercept = await value(await json(orderRoute, { action: "intercept-requested", reason: "synthetic logistics hold request" }, session));
+  assert.equal(intercept.status, "shipped");
+  assert.equal(intercept.shippingAttention.action, "intercept-requested");
+  await value(await json(orderRoute, { action: "deliver" }, session));
   const lookupOtp = await value(await json("/api/demo/otp", { phone: draft.phone, purpose: "lookup" }));
   const lookup = await value(await json("/api/demo/orders/lookup", { orderId: order.orderNumber, accessSecret: order.accessSecret, phone: draft.phone,
     phoneLastThree: "001", customerName: draft.name, challengeId: lookupOtp.challengeId, code: lookupOtp.demoCode }));
   assert.equal(lookup.order.status, "delivered");
+  assert.equal(lookup.order.shippingAttention.action, "intercept-requested");
+  assert.deepEqual(lookup.order.events.filter(event => event.action).map(event => event.action), ["payment-confirmed", "payment-revoked", "payment-confirmed", "packed", "packing-reopened", "packed", "intercept-requested"]);
   // A test-only local edge emulates Render. Browser auth/cookies are unchanged.
   // Host/Origin rewriting happens at this edge, never in product guards.
   const browserBase = "http://127.0.0.1:3139";
@@ -176,6 +193,9 @@ try {
     const orderCard = page.locator(".demo-order-card").filter({ hasText: shortNumber }).first();
     await expect(orderCard).toBeVisible();
     await orderCard.getByRole("button", { name: "人工確認付款" }).click();
+    const auditDialog = page.getByRole("dialog", { name: "人工確認付款" });
+    await auditDialog.getByLabel("更正原因").fill("合成收款紀錄已核對");
+    await auditDialog.getByRole("button", { name: "確認更正" }).click();
     await expect(orderCard).toContainText("已人工確認");
     let photoWrites = 0;
     page.on("request", request => { if (request.method() === "POST" && request.url().endsWith("/packing-photo")) photoWrites += 1; });

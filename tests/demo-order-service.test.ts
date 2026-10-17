@@ -88,7 +88,7 @@ describe("demo order service", () => {
     service.markShipped(order.orderId);
     expect(service.lookup(order.orderId, order.accessSecret)?.status).toBe("shipped");
     service.markDelivered(order.orderId);
-    expect(service.lookup(order.orderId, order.accessSecret)?.events.map(e => e.status))
+    expect(service.lookup(order.orderId, order.accessSecret)?.events.filter(e => e.action !== "payment-confirmed").map(e => e.status))
       .toEqual(["confirmed", "packed", "shipped", "delivered"]);
   });
   test("rejects invalid photo references and repeated or regressive transitions", () => {

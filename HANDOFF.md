@@ -748,3 +748,223 @@ Source/verification work continues on the same feature/issue-24-mobile-login bra
 - Candidate `tea-nextjs-regression` serves through private Tailnet/Caddy; original `tea-nextjs-staging` remains running for rollback. Candidate data restored from synthetic snapshot after E2E. Caddy is bound to localhost port 8090; public exposure is off.
 - Five-day soak began `2026-10-11T10:13:06Z`, due `2026-10-16T10:13:06Z`; log at `C:\\data\\tea-staging\\soak\\soak-20261011-demo-mode-fix.jsonl`. In progress only.
 - Teacher bank/contact data in PR #26 remains unverified; no import. PR #28 is draft/unmerged; main was not changed.
+
+## 2026-10-12 PR #29 integration closeout
+
+- PR #29 remains open/draft on `feat/mobile-three-pwa-entries`; source head before closeout edits `3bc328337c23a7fac95e26bcfe5b036c7d64fd2f`; no main merge.
+- User-reported iPhone Safari acceptance 2026-10-11: Passkey logout/re-login, synthetic order loop, product publish/unpublish/edit, ORDER-01 payment reversal, ORDER-02 reopen packing accepted. ORDER-03 remains **not fully physically verified**.
+- Correction dialog is clarified as required, max 500 chars, with native required metadata; order behavior unchanged. Acer keeps its existing pre-copy 3bc build; this closeout does not rebuild it.
+- Quality run #133: lint/typecheck, 65 files/334 tests, build, browser/accessibility, default Playwright 32/32, and container smoke pass. Demo mobile E2E 3 pass / 1 fail / 1 skip; unchanged catalog persistence assertion fails at heading 商品已上架 and also failed on ancestor dce323c. Dependency audits skipped; security is not clean.
+- Acer :8443: isolated `tea-nextjs-pr29-8443-accept`, image `tea-nextjs-staging:pr29-8443-3bc3283`, ID `sha256:e6d7cfe92a7ef59b01547e2522c1a0747a42b941cad356ecd58bced0fffb8c33`, localhost 8092, independent path `C:\\data\\tea-staging\\pr29-8443-accept-v2-data`; exact Origin `https://acer-v5.tail4d8b5a.ts.net:8443`. Security checks passed. 443 → 8090 unchanged; both Serve ports tailnet-only; Funnel off.
+- Latest soak UTC 2026-10-11T23:49:56Z: local/Tailnet API 200, app/Caddy running, 0 errors. AUTH-02 UTC 2026-10-11T23:45:30Z: HTTPS 200, running, 0 errors. Five-day monitor is still **IN PROGRESS**, due 2026-10-16; original JSONL retained.
+- Full matrix, asset source gaps, Samsung instructions, deployment rollback and cloud gate: `docs/testing/pr29-integration-closeout-2026-10-12.md`.
+- Listener-only rollback: `tailscale serve --https=8443 off`; verify 443 still points to 8090. Do not remove containers or data.
+
+
+## 2026-10-12 Quality run #134 final result
+
+Run #134 tested closeout commit `a521b3732edf8c5db8f20248c993564f9f9c934a` and completed with Quality = failure; container job passed. Lint, typecheck, 65 files / 334 tests, production build, browser/accessibility all passed. Demo mobile E2E: 3 passed, 1 failed, 1 skipped. The failure is still the unchanged `e2e-demo/catalog-persistence.spec.ts:23` assertion for the 商品已上架 heading, matching the same failure on ancestor dce323c. Dependency audit and production dependency audit were skipped, so security remains unverified. No code behavior changed after run #134; subsequent handoff-only commit updates these findings.
+
+
+
+## 2026-10-12 deployment-preparation evidence (PR #29)
+
+PR #29 is still draft and unmerged. Current branch head: `ce888befb5f87614190e9171d44b3f2759cc8d36`; base `fix/acer-demo-build-flag-regression` remains at `dce7db10524dee93d35b04571c93e411b13d1ca9`. No merge or cloud deployment occurred.
+
+Quality #135's dependency and production audits were skipped by the workflow's implicit success condition after the catalog E2E step failed. The workflow now explicitly runs both audits after earlier failures (`always() && !cancelled()`). New run #138 is pending at handoff update time.
+
+Catalog E2E root-cause evidence: demo Playwright config selects simulated SMS auth; the catalog persistence spec previously opened `/admin/products/new` and submitted without creating a merchant Session. The product management page gates its form on authenticated Session and otherwise shows its login state. The original success heading assertion remains intact. Commit `c41d978f16d09442fea2a3db4d1c0c7aa8a3541a` adds the missing OTP/operator login setup; follow-up `b9d5f9bbaf6e58984e76583be6cc56f0fb4af2f7` preserves the original cart URL assertion syntax. Run #138 will verify the corrected flow; until then, root cause is evidence-based but remediation is not yet confirmed.
+
+Acer read-only checkpoint: existing 8443 candidate remains image `tea-nextjs-staging:pr29-8443-3bc3283`, localhost 8092; old PR #29 f95ba80 remains 8091; AUTH-02 and Caddy remain running. Tailscale Serve is still tailnet-only 443→8090 and 8443→8092. Health returned 200 for 8090, 8091, 8092 and both HTTPS URLs. Monitoring supervisors 20756, 12000 and 1932 were alive; original JSONL files were retained and still receiving updates. Five-day monitoring remains in progress. No candidate build, data write, Serve change or service replacement has occurred in this preparation phase.
+
+
+## 2026-10-12 follow-up: catalog test isolation and audit evidence
+
+Current code/workflow branch head before this handoff update: `5b996e8444c37641854f2bb4aaca490e55e8188b`; the handoff update commit will supersede it. PR #29 remains draft/unmerged.
+
+Quality #138 verifies the original catalog failure was fixed: catalog persistence passed after explicit SMS/operator merchant login. The same run then exposed a separate suite-isolation failure in `mobile-order-loop.spec.ts:49`: catalog and order tests shared one dev-server process and merchant OTP singleton; the simulated merchant OTP service enforces a 60-second resend cooldown, so the next test received a 403 without `value.challengeId`. The production cooldown is correct and remains unchanged. New config `playwright.demo.catalog.config.ts` runs catalog E2E on an isolated port/data/server; the main config excludes only that spec, and Quality runs both configs sequentially. Run #143 will verify the latest combined test harness.
+
+ORDER-03 automatic coverage was extended in `tests/order-corrections.test.ts` to cover all three actions (shipping exception, intercept request, shipping record correction), verify actor/reason/audit event, and prove shipment status remains shipped after a repeated ship attempt. This is automated synthetic coverage only; iPhone physical acceptance stays pending.
+
+Security audit was actually run on the PR lockfile in Quality #138 and independently against the clean Acer clone using pnpm 11.19.0: total 3 findings (2 moderate, 1 high), all in development tooling paths. The high advisory is `braces <=3.0.3` via `eslint-config-next > @next/eslint-plugin-next > fast-glob > micromatch > braces`, patched at `>=3.0.4`. The two moderate advisories are `brace-expansion` findings through ESLint/minimatch paths (patched versions reported by the audit are `>=1.1.21` and `>=5.0.12`). Production dependency audit reported no known vulnerabilities. Full dependency audit therefore remains red; do not label security completely clear. PR changes do not modify package manifests or lockfile, so these are existing dependency-tree findings.
+
+A fresh, clean Git clone of the PR branch exists at `C:\\data\\tea-staging\\pr29-1014-build` for isolated build work. It has not been installed, built, or used to change any running service/data. Existing Acer containers, both Serve routes, monitoring processes and original JSONL logs remain as recorded above.
+
+
+## 2026-10-12 PR #29 deployment acceptance checkpoint
+
+PR #29 remains open, draft, and unmerged. The feature branch head before this HANDOFF-only commit is `9a53b34a35b497ff6d95913d87aea305c573c866`; base remains `dce7db10524dee93d35b04571c93e411b13d1ca9`. No main merge, cloud deployment, or Tailscale Serve change occurred.
+
+Quality run #143 (run ID `38193685121`) tested application/workflow source commit `5b996e8444c37641854f2bb4aaca490e55e8188b`; intervening branch commits are handoff-only. Container job passed. Lint, typecheck, unit/component tests, production build, browser/accessibility, both isolated synthetic mobile E2E configurations, private cloud demo build, and private cloud order-loop smoke all passed. Both dependency audits executed. Production audit passed with no known production dependency vulnerabilities. Full dependency audit failed with 3 pre-existing development-tooling findings (1 high, 2 moderate): high `braces <=3.0.3` in the eslint-config-next / fast-glob / micromatch path; moderate `brace-expansion` findings through ESLint/minimatch paths. No manifest or lockfile change in PR #29. Quality is therefore red; the audit findings remain a cloud release blocker and must not be described as a clean security audit. Catalog persistence root cause is addressed by explicit simulated SMS/operator login and its own isolated Playwright server/data; ORDER-03 action coverage passes in CI but is synthetic, not physical acceptance.
+
+A new isolated Acer candidate was built from clean PR head `9a53b34a35b497ff6d95913d87aea305c573c866`:
+- Image: `tea-nextjs-staging:pr29-8443-9a53b34`; image ID `sha256:772bd29ad25e6e22c1cf160364c4f0dabfd5c436425a99273316c56d1619a82d`; image label confirms `NEXT_PUBLIC_DEMO_COMMERCE=enabled`.
+- Container: `tea-nextjs-pr29-8443-1014`, bind `127.0.0.1:8093 → 3000`; separate data directory `C:\\data\\tea-staging\\pr29-1014-accept-data`. No existing app data path was reused.
+- Credential-file values were compared in memory with the candidate's configured preview token hash and merchant password; both comparisons matched. No credential values were logged or copied.
+- Local health `/api/health` returned 200. Basic preview auth returned 401 without credentials and 200 with the file-matched credentials. Auth status returned provider=password/state=ready, Passkey enabled=true/registered=false on the fresh isolated data. A wrong :8444 Origin request was rejected with 401.
+- The valid merchant password POST to `/api/demo/admin/session` returned 403 despite matching the configured value. Therefore merchant login, session cookie flags/session replay, and full CSRF/Host negative matrix are **not accepted** on this candidate; investigate this before exposing it. The new candidate remains local-only and must not receive the 8443 mapping yet.
+- Existing `tea-nextjs-pr29-8443-accept` image `pr29-8443-3bc3283` remains running on 8092 and is still the current 8443 destination. Existing f95ba80 candidate, AUTH-02, and Caddy also remain running. Read-only health checks returned 200 on local 8090–8093; AUTH-02 is internal and had no direct 127.0.0.1:3000 listener.
+- Tailscale Serve remains tailnet-only 443 → 8090 and 8443 → 8092; Funnel remains off. No route was changed.
+- Roll-forward only after login/session/cookie, Host/Origin/CSRF/port rejection, Passkey RP ID, and regression gates pass: confirm both 8092 and 8093 health plus Serve JSON and monitor health, then change only `tailscale serve --https=8443 http://127.0.0.1:8093`; verify 443→8090 and 8443→8093. Rollback only that mapping with `tailscale serve --https=8443 http://127.0.0.1:8092`; recheck 443→8090. Keep both candidate containers/data; do not use Funnel.
+
+Five-day monitoring remains **IN PROGRESS**, due 2026-10-16. At the 2026-10-12 Acer checkpoint, all three known monitor supervisor PIDs (20756, 12000, 1932) were alive, original JSONL files remained present, and local endpoints 8090–8093 returned 200. Existing 443 and 8443 Serve mappings were unchanged. The monitor has not completed; preserve the source logs.
+
+ORDER-03 unit coverage for exception, intercept, and correction actions passed in Quality #143; real iPhone end-to-end verification remains pending. For the 10/15 field showcase, use the manual checklist in `docs/testing/pr29-integration-closeout-2026-10-12.md`; do not mark ORDER-03 or Samsung installation/Passkey acceptance passed without real-device evidence. Current user-facing 8443 URL remains `https://acer-v5.tail4d8b5a.ts.net:8443` on the old 3bc3283 image until the new candidate clears the failed login gate.
+
+
+## 2026-10-12 field runbook and current PR head
+
+The 10/15 field showcase steps and safe 8443 switch/rollback proposal were appended to `docs/testing/pr29-integration-closeout-2026-10-12.md` in documentation commit `d19f1f52d3b0e5f971b4a4b8282c7449b9348042`. This is documentation only. Quality run #146 (38195069583) for that head was queued at checkpoint; the application/test/workflow source result remains #143 as documented above. PR #29 remains draft and unmerged.
+
+Current deployment gate is **blocked** by the new candidate's merchant login returning HTTP 403; do not change the :8443 Serve mapping. Existing 8443 continues to point to 8092 / image `pr29-8443-3bc3283`; 443 still points to 8090. The new `pr29-8443-9a53b34` candidate remains at localhost 8093 with independent test data. Health and preview Basic Auth checks passed; app-level session/cookie and full origin/CSRF/Passkey acceptance did not. Preserve the old route and investigate the login denial before any switch.
+
+Quality #143 passed all code and E2E checks but overall failed because of the one high/two moderate development dependency findings. Production audit passed. ORDER-03 CI action tests pass, but physical iPhone verification and Samsung install/Passkey remain pending. Five-day monitoring remains in progress through 2026-10-16; the original JSONL logs and monitor processes are preserved.
+
+
+## 2026-10-12 PR #29 Acer merchant-login 403 diagnostic
+
+Current PR #29 remains open/draft/unmerged at source commit `d55b29e3cf4278492c021af1f14dd76e21493eaf` (short `d55b29e`). This commit only adds secret-safe failure-stage diagnostics and corrects its JSON content-type matcher; it does not change password, CSRF, Origin, Host, or session authorization behavior. Diagnostic output is limited to stage/status/method and boolean header checks; it never records request body, credentials, authorization values, cookies, or tokens.
+
+Root cause of reproduced 403s:
+- Earlier PowerShell `curl.exe --data-binary` probes sent a body that failed JSON parsing. Acer logs showed `stage=body-parse`, status 403, with expected Host, Origin, forwarded HTTPS, Basic header, same-origin fetch metadata, and JSON content type checks true. These were malformed-probe 403s, not evidence of Origin/CSRF rejection or a failed configured password.
+- With correctly serialized `JSON.stringify({password})`, matching credentials returned 200 on both original isolated 8093 and diagnostic 8094. The provider intentionally rejects a second password verification within 1000 ms as false, and the route maps that to 403. Reproduction: correct password 200; immediate correct repeat 403; same correct password after 1.2 sec 200. Wrong password correctly returns 403. Wait at least one second before retrying; the five-failure lockout policy remains enabled.
+
+Acer validation performed only on the additional isolated diagnostic candidate `tea-nextjs-pr29-8443-diag` at localhost 8094, independent data directory `C:\\data\\tea-staging\\pr29-login-diagnostic-data`, image `tea-nextjs-staging:pr29-8443-d55b29e`. Image ID `sha256:bc2b1f2e6d6fabf1731e364527d64022d0c624c6009d6b21d57f1eac7db1c805`; revision label matches d55b29e and `NEXT_PUBLIC_DEMO_COMMERCE=enabled`.
+- Health returned 200 on 8090 through 8094.
+- Correct password login returned 200 and authenticated=true; session GET authenticated=true.
+- Issued cookie is `__Host-demo_merchant`; Secure, HttpOnly, SameSite=Strict, Path=/, no Domain; host prefix present.
+- DELETE logout returned 200 and emitted Max-Age=0 cookie clearing directive; a new GET with no Cookie is unauthenticated; a subsequent login after the provider throttle window returned 200.
+- Negative matrix: mismatched Host, Origin :8444, missing Origin, and `Sec-Fetch-Site: cross-site` each returned 401. Wrong password returned 403. No credentials or cookie values were emitted.
+- Passkey remains enabled and unregistered on isolated data. Source sets RP ID to `new URL(options.origin).hostname`, excluding :8443.
+- Residual session revocation risk: because this is a signed stateless 30-minute session cookie, manually replaying the pre-logout cookie remained authenticated after DELETE; logout clears the browser cookie but does not revoke a copied token server-side. This was not changed in the login diagnostic work and must be explicitly accepted or fixed before treating logout revocation as fully verified.
+
+Quality run #149 (run ID `38201073383`) tested d55b29e: container smoke passed; lint, typecheck, unit/component tests, production build, browser/accessibility, both synthetic mobile E2E configurations, private demo build, and private order loop passed. Full dependency audit failed with the same three existing development-tool findings (1 high, 2 moderate): `braces <=3.0.3` through `eslint-config-next > @next/eslint-plugin-next > fast-glob > micromatch > braces` (fix >=3.0.4); two `brace-expansion` moderate findings through ESLint/minimatch paths (patched versions >=1.1.21 and >=5.0.12). Production dependency audit passed. No package manifest or lockfile changes were made; full Quality remains red and the development findings are unresolved.
+
+The built image is not mapped to Tailscale Serve. Current Serve JSON remains tailnet-only 443→8090 and 8443→8092; Funnel is off. Original 8092, 8091, AUTH-02, Caddy remain running. Monitor supervisors 20756, 12000, 1932 remain alive; all three source JSONL logs have fresh UTC writes and remain in progress. No data or monitoring files were modified.
+
+Switch gate remains BLOCKED: although standard valid login and Host/Origin/CSRF negatives pass, the source branch has an unresolved high/two moderate development audit, and logout does not revoke a copied signed session token. Keep existing :8443→8092 and retain old candidate as fallback. Do not switch Serve until the residual logout-token risk is resolved/accepted and release gate is explicitly satisfied. No merge, Funnel, or public exposure.
+
+
+## 2026-10-12 persistent session revocation closeout
+
+PR #29 remains open/draft/unmerged at code commit `f3fefc1a0c9cda63d04cfa28ae2ba4a744367e85` (branch `feat/mobile-three-pwa-entries`). The changes add SQLite-backed Demo Session revocation records in the isolated `DEMO_DATA_DIR/merchant-auth.sqlite`: SHA-256 digest of the signed-cookie signature, expiry, primary key and expiry index only. Every valid-cookie verification checks the revocation store and fails closed on storage errors; logout must persist revocation before clearing the browser cookie or returning success. DemoPasswordProvider/AuthProvider interfaces and Passkey/WebAuthn behavior were not changed.
+
+Tests added for cross-connection lookup, persistence after database reopen, write failure, expiry cleanup, digest-only schema, logout/replay, and fail-closed logout. Acer clean-checkout verification: lint (0 errors, 10 warnings), typecheck, all 67 Vitest files / 340 tests, and production build passed. Quality run #151 (run ID `38206868851`) completed: lint, typecheck, unit/component, build, browser/accessibility, synthetic mobile E2E, private demo/order smoke, and container smoke passed. Overall Quality remains **failed only at full dependency audit**; production audit passed.
+
+Lockfile updates moved `brace-expansion` to compatible patched 1.1.21 / 5.0.12 and eliminated both Moderate findings. Full audit reports one High: `braces <=3.0.3` through `eslint-config-next > @next/eslint-plugin-next > fast-glob > micromatch > braces` (GHSA-vfj7-8cjw-p6xm). The configured registry has no patched `braces 3.0.4` release, and the advisory has no published fix; the existing same-major defensive patch plus `security-braces-depth.test.ts` remains. Production audit: no known vulnerabilities. Do not call the full audit clean; the remaining High blocks a safe route switch.
+
+Acer isolated candidate built from this commit:
+- Image `tea-nextjs-staging:pr29-session-rev-f3fefc1`, image ID `sha256:d92078d35e9a2a9373ce4e30c99b2b836657ce913489b5da5fae0217be0626da`; build explicitly injected `NEXT_PUBLIC_DEMO_COMMERCE=enabled` and production build succeeded.
+- Container `tea-nextjs-pr29-session-rev`, local bind `127.0.0.1:8095 → 3000`, new isolated host data directory `C:\\data\\tea-staging\\pr29-session-rev-f3fefc1-data`. Health returned HTTP 200. Preview auth credentials were read from the existing credential file in memory only. A live positive merchant-login POST returned HTTP 200 and a deliberately invalid password returned HTTP 403.
+- The complete live cookie attribute / logout replay / restart replay sequence did not yield reliable completion evidence through the remote PowerShell client; do not represent those as passed on the running container. Unit/route tests and Quality #151 cover database reopen/cross-connection and logout replay, but the Acer live restart replay remains unverified. No Tailscale Serve route was changed.
+
+Existing 8092 / 8443 candidate, 443 → 8090, AUTH-02, Caddy, original data and five-day monitor were left intact. Monitoring remains **IN PROGRESS**; source JSONL logs are preserved. The new 8095 candidate is local-only and is not a switch candidate while the High audit finding and live-cookie verification gap remain. Keep current 8443→8092 fallback. Do not change Serve, merge main, expose Funnel, or stop monitoring. Resume with a fresh authenticated HTTP client to verify cookie attributes, session GET, logout, same-cookie replay, and replay after restarting only `tea-nextjs-pr29-session-rev`; then recheck the full audit finding before proposing any route change.
+
+
+## 2026-10-12 live Session acceptance attempt (8095)
+
+PR #29 remains open, draft, and unmerged at `f4203b70aeb01d041d965fb4cb90d403c9492368`. A bounded HTTP probe was attempted against the isolated `tea-nextjs-pr29-session-rev` candidate at `127.0.0.1:8095`. It read the existing preview credential file only in the Acer-side process; no credential or cookie value was printed.
+
+The login POST to `/api/demo/admin/session` returned HTTP 401 in this probe. The client harness then exited with `ReferenceError: i is not defined` before protected-session GET, logout, replay, cookie-attribute inspection, or restart. The test process completed with exit code 1. It did not restart or otherwise alter the candidate. This is an inconclusive client/request-path probe, not evidence that credentials or server-side Session logic are broken. The live HTTP revocation/restart acceptance remains **NOT VERIFIED**; do not claim the Acer sequence passed. Reproduce with a short authenticated HTTP client that matches the known working preview-auth and HTTPS-forwarded headers, then keep the cookie only in memory and emit statuses/attribute booleans.
+
+Latest workflow run #152 (`38208120086`) completed: lint, typecheck, unit/component, production build, browser/accessibility, synthetic mobile/order/catalog tests, private demo build, private production order loop, and container build/health smoke all passed. Dependency audit failed; production dependency audit passed. This leaves the same unresolved High `braces <=3.0.3` finding in the development toolchain; the full dependency audit is not clean. No source code changed during this live probe.
+
+The candidate remains local-only. No `8092`, `443`, `8443`, AUTH-02, Caddy, data, or monitoring changes were made. Existing `8443→8092` remains the fallback; five-day monitoring remains **IN PROGRESS**. Do not propose or execute the Serve switch until live Session acceptance is complete and the remaining High audit finding has an explicit safe disposition.
+
+## 2026-10-12 SQLite 撤銷讀取故障與安全收斂（最新狀態）
+
+PR #29 仍為 open/draft/unmerged；本次驗收前 branch head 為 5fe904d12e28700f63da1f60a95a60737809b81f。本次僅作文件收斂，未改應用程式碼、未切換 Tailscale Serve、未合併 main。
+
+### SQLite fail-closed 實際 HTTP 驗收
+
+- 以目前候選映像 tea-nextjs-staging:pr29-session-rev-f3fefc1（image ID sha256:d92078d35e9a2a9373ce4e30c99b2b836657ce913489b5da5fae0217be0626da）另起短生命週期隔離容器，使用全新空資料目錄與臨時 localhost 8096；未掛載 8095、8092 或 AUTH-02 的可寫資料。
+- 隔離容器 health 200、Session GET preflight 200、既有憑證來源的正確登入 200、有效 Cookie 讀受保護 orders API 200。
+- 只在臨時 SQLite 中將 demo_session_revocations 改成缺少 signature_hash 欄位的錯誤 schema，並保留 expires_at 索引；直接 SELECT 預期欄位確實失敗。使用同一有效 Cookie 重讀受保護 API 得 HTTP 403，沒有授權放行。結論：SQLite 撤銷查詢讀取錯誤 fail-closed PASS。
+- 故障注入容器與其唯一臨時資料目錄均已刪除。綜合腳本第一次的收尾 health probe 誤仍連到已刪除的 8096，故曾回報該 probe unavailable；已用正確 8095 埠另行只讀確認：候選容器仍 running，image tag 如上，/api/health HTTP 200。這是驗收腳本收尾埠號錯誤，非候選失敗；8095 未被重啟或修改。
+
+### braces High 風險處置（仍未解除）
+
+- 最新已執行 Quality #152（run ID 38208120086）：lint/typecheck/unit/build/E2E/private demo/container smoke 通過；完整 dependency audit 因單一 High 失敗；production dependency audit PASS。此文件更新不宣稱重新執行 CI 或 audit。
+- 受影響鏈：eslint-config-next > @next/eslint-plugin-next > fast-glob > micromatch > braces@3.0.3；完整 audit 仍命中 GHSA-vfj7-8cjw-p6xm，因上游/registry 尚無可用 3.0.4 修正版，不能標示修復或 clean。
+- 已套用同主版本防禦性 patch：pnpm-workspace.yaml 將 braces@3.0.3 指向 patches/braces@3.0.3.patch；lockfile patch hash 為 ed8c4935ee64d2f1c75d8986b3f8263c739b486c35b28ad669529a286c0edf24。patch 在解析 nested braces/parentheses 時設 MAX_DEPTH = 100 並拒絕超深輸入；安裝目錄 hash 與 lockfile 對應，實際 lib/parse.js 可見該 guard。這是風險緩解，不是 audit 修復。
+- 實際執行範圍為開發／CI 工具依賴（lint、build/test 工具鏈）；對 8095 production-pruned 容器執行 require.resolve('braces') 得 not_resolvable，production audit 也 PASS。這降低執行期暴露，但無法消除開發工具處理惡意巢狀輸入的剩餘風險；完整 audit/Quality 保持 red，雲端正式發布阻塞仍在。
+
+### 候選與入口決策
+
+- 目前新版候選：tea-nextjs-pr29-session-rev，tea-nextjs-staging:pr29-session-rev-f3fefc1，image ID 如上，localhost 127.0.0.1:8095，health 200。使用者先前確認的登入、cookie 安全屬性、logout replay、重啟 replay、跨連線與寫入故障證據維持有效；本次補齊 SQLite SELECT 故障拒絕證據。
+- 建議暫不將 8095 切換到 :8443。阻塞是完整 dependency audit 的 braces High 尚未由上游修正版解除或取得明確風險接受；目前候選可留作隔離驗收候選，不能宣稱完整安全稽核通過。
+- 即時只讀狀態：Serve 仍為 tailnet-only 443→8090、8443→8092；8092 舊展示容器、8091 舊候選、AUTH-02、Caddy 均未動。五日監測程序 PID 20756、12000、1932 仍存活；三份原始 JSONL 仍存在，最近檔案長度分別 89,449、96,049、43,902 bytes（2026-10-12 約 08:18 UTC 記錄）。監測至 2026-10-16，仍為 IN PROGRESS。
+- 本次沒有切換，所以無需回退。未來只有在取得明確切換確認後才可改 :8443；若新入口健康、登入或驗收失敗，只回復 tailscale serve --https=8443 http://127.0.0.1:8092，確認 443→8090，保留兩候選容器與資料；不得停監測、移除資料或啟用 Funnel。
+
+## 2026-10-12 10/14 切換前檢查與授權風險界線
+
+游老師已核准：只有 2026-10-14 部署驗收階段、且當日所有前置檢查通過，才可將 tailnet-only :8443 從 8092 改指 8095。接受 braces 開發依賴 High 的殘餘風險僅限 Acer 私有展示，不代表完整 audit 通過；不得公開 Funnel、合併 main 或影響 443、AUTH-02、Caddy、舊候選/資料與監測。
+
+### 已完成的切換前檢查（2026-10-12）
+
+- PR #29 branch head 1d9f30960d176df0b37452ea5eaf95dffbd06498，PR open/draft/unmerged。Quality #154（run 38223091018）已完成：lint、typecheck、unit/component、production build、browser/accessibility、synthetic mobile E2E、private demo/order smoke 均通過；container build/health 通過；production audit 通過。唯一失敗為完整 dependency audit 的 braces High，屬已由使用者限縮接受的 Acer 私有展示風險；此結果不等於 audit clean。
+- 8095 候選 tea-nextjs-pr29-session-rev 運行 tea-nextjs-staging:pr29-session-rev-f3fefc1，image ID sha256:d92078d35e9a2a9373ce4e30c99b2b836657ce913489b5da5fae0217be0626da。Health 200；Basic Auth 無憑證時管理 Session 路徑回 401、正確 Basic Auth 回 200；商家正確密碼登入 200；Cookie 的 __Host、Secure、HttpOnly、SameSite=Strict、Path=/、無 Domain 均通過；登入後受保護 API 200。
+- 對 POST /api/demo/admin/session 的錯誤 Host、錯誤 Origin 埠 8444、跨站 Origin 測試均拒絕（HTTP 401）。預期 HTTPS origin 為 https://acer-v5.tail4d8b5a.ts.net:8443。Passkey enabled=true，RP ID hostname 與 acer-v5.tail4d8b5a.ts.net 相符；新候選 registered=false，舊版 Passkey/Session 不會自動移入。若展示要用 Passkey，須在新候選另行註冊並實機驗證；目前已備妥的登入方式是既有安全憑證來源的商家密碼。
+- 8095 使用獨立可寫資料目錄，與 8092、AUTH-02 路徑不同。只讀盤點：catalog API 有 8 個展示品項，orders.sqlite 的 demo_orders 為 0；不假設舊版訂單會移轉。切換後須建立新的、明確標記的合成測試訂單。
+- PR #29 Session 撤銷讀取故障已於隔離空白資料目錄驗證：SQLite 缺少 signature_hash 欄位造成 SELECT 失敗，受保護 API 回 403；臨時故障注入容器及資料夾已清除。8095 未重建、未改寫既有資料。
+- 2026-10-12 只讀 Serve baseline：tailnet-only 443 → 127.0.0.1:8090；8443 → 127.0.0.1:8092；Funnel off。8092 舊展示容器與 8095 候選均 running。
+- 五日監測仍 IN PROGRESS 至 2026-10-16。監督程序 PID 20756、12000、1932 存活；原始 JSONL 仍增長：soak-20261011.jsonl 90,087 bytes（2026-10-12T08:28:42Z），soak-20261011-demo-mode-fix.jsonl 96,777 bytes（08:28:35Z），auth02-20261011.jsonl 44,252 bytes（08:28:18Z）。來源檔案未改動。
+
+### 10/14 切換閘門與回退
+
+切換前須再確認 PR head/source revision、Quality #154 與其唯一已接受 audit 例外、8095 health/登入/資料目錄、8092 health、Serve baseline 及監測日誌仍符合上列條件。若 Quality 出現任何非 braces High 的新增失敗、登入/Host/Origin/Cookie 驗證失敗、Passkey RP ID 不符、資料目錄共享、舊入口或監測異常，停止，不切換並保留 8443→8092。
+
+條件全部滿足才於 10/14 只改 :8443：tailscale serve --https=8443 http://127.0.0.1:8095。接著從 tailnet HTTPS 網址驗證首頁、/install、三個入口、Basic Auth、管理員密碼登入、商品管理、建立並完成一筆合成訂單、登出；任何關鍵項目失敗，立即只回退 :8443：tailscale serve --https=8443 http://127.0.0.1:8092，並確認 443→8090 與舊版首頁/管理路徑恢復。切換與回退均保留容器和資料、不觸及 AUTH-02/Caddy/監測、不使用 Funnel。
+
+本節為 10/12 切換前證據，不代表 :8443 已切換。實際切換時間、外部驗收結果、Passkey 是否於新候選註冊、備援狀態須於 10/14 取得實際證據後追加。
+
+## 2026-10-12 PR #29 10/14 switch preparation recheck
+
+PR #29 remains open, draft, and unmerged. Current PR branch HEAD is `0cab394e9e1b1ece6fb12e46aeacab6e0cbf5d03`; the feature/runtime code in the 8095 candidate remains from `f3fefc1`. This is a read-only preparation checkpoint; no switch, container rebuild, data write, or mapping change was made.
+
+Quality #155 (run `38224247500`) completed against PR merge ref `842e4487e8ad932294b66dcde5ac6c4d2f51cf7f` / head `0cab394e9e1b1ece6fb12e46aeacab6e0cbf5d03`. Container build and smoke passed. Lint, typecheck, unit/component tests, production build, browser/accessibility, synthetic catalog/order E2E, private demo build, and order-loop smoke passed. Production audit passed with no known production vulnerabilities. Overall Quality remains **failure** because full dependency audit found exactly one High: `braces <=3.0.3`, via `eslint-config-next > @next/eslint-plugin-next > fast-glob > micromatch > braces`, advisory GHSA-vfj7-8cjw-p6xm; patched version is `>=3.0.4`. This remains the user-accepted, limited Acer tailnet showcase risk. Do not describe the full audit or Quality as green; stop on any new failure beyond this known exception.
+
+Acer read-only status at 2026-10-12 09:19 UTC:
+- Candidate container `tea-nextjs-pr29-session-rev`, image `tea-nextjs-staging:pr29-session-rev-f3fefc1`, is running on 127.0.0.1:8095; health is HTTP 200.
+- Rollback container `tea-nextjs-pr29-8443-accept`, image `tea-nextjs-staging:pr29-8443-3bc3283`, is running on 127.0.0.1:8092; health is HTTP 200.
+- Existing f95ba80 candidate, AUTH-02, and Caddy are running. Tailscale Serve is tailnet-only 443→8090 and 8443→8092; Funnel is off. No mappings changed.
+- Monitor supervisor PIDs 20756, 12000, and 1932 are alive. Original logs are still growing: `auth02-20261011.jsonl` 46,002 bytes at 09:18:33Z; `soak-20261011-demo-mode-fix.jsonl` 100,416 bytes at 09:18:59Z; `soak-20261011.jsonl` 93,274 bytes at 09:19:05Z. Five-day monitoring remains **IN PROGRESS** until 2026-10-16. Preserve these originals.
+
+8095 readiness evidence remains the previously recorded acceptance; it was not repeated in this recheck. Preview Basic Auth, merchant password login/session, protected API, secure Cookie flags, Origin/Host/CSRF rejection matrix, and SQLite session revocation failure-mode checks passed. The candidate has its own writable data directory, separate from 8092 and AUTH-02. Passkey is enabled and RP ID matches `acer-v5.tail4d8b5a.ts.net`, but the fresh candidate has no registered Passkey. Do not assume the old version's Passkey migrates. If Passkey is part of the live demonstration, register it on the new site after the 8443 switch using iPhone Safari/Face ID and verify logout/re-login; treat failure as a rollback trigger. Keep password login as the prepared fallback.
+
+### 10/14 switch gate and rollback
+
+Before changing Serve, recheck the current PR head and latest Quality result, 8095 and 8092 health, preview Basic Auth and merchant login readiness, candidate data isolation, Passkey enabled/RP ID, 443→8090 / 8443→8092 baseline, Funnel off, and monitor processes/log growth. Do not switch if any critical check is red, if the full audit gains findings beyond the accepted braces High, or if the monitor/original services are unhealthy.
+
+Only after the 10/14 gate passes, change only the private 8443 listener to 8095:
+`tailscale serve --https=8443 http://127.0.0.1:8095`.
+Verify from an authorized tailnet client: HTTPS homepage, /install and all three entry points, preview Basic Auth, merchant login, catalog management, one uniquely marked synthetic order through its loop, and logout/revoked-cookie rejection. Enroll and verify a new Passkey if needed for the planned demonstration. If any critical external check fails, immediately restore only 8443:
+`tailscale serve --https=8443 http://127.0.0.1:8092`.
+Confirm 443 still points to 8090 and the prior 3bc3283 route works. Keep both containers and data; do not alter AUTH-02, Caddy, logs, or monitors; never enable Funnel.
+
+### 10/15 Chen teacher field demonstration checklist
+
+1. Confirm tailnet connection and open `https://acer-v5.tail4d8b5a.ts.net:8443`; verify preview Basic Auth and merchant login.
+2. Show the storefront, product management, and order management entry points. Confirm the new candidate's catalog; do not expect old orders or Passkeys to be present.
+3. Register/use the new site's Passkey with iPhone Safari Face ID if enrollment was completed; demonstrate logout and re-login. If unavailable, use prepared merchant-password fallback and record Passkey as pending.
+4. Create one clearly synthetic order and demonstrate the accepted workflow without changing real customer or formal merchant data.
+5. ORDER-01 payment reversal and ORDER-02 reopen packing are previously accepted; do not repeat as new acceptance. ORDER-03 physical shipment exception/intercept/correction remains pending real-device verification; demonstrate only when explicitly labeled as pending/synthetic.
+6. Keep the 8092/3bc3283 rollback available; verify monitor remains active and leave 443/AUTH-02 unchanged.
+
+This checkpoint records preparation only; the 10/14 switch has **not** been performed. On 10/14 append actual switch time, external acceptance evidence, Passkey enrollment outcome, and rollback/backup status.
+
+## 2026-10-12 10/15 現場交付包交接
+
+本次只整理交付文件，沒有修改核心程式、重建容器、寫入/覆蓋部署資料、改 Serve、合併 main 或正式上雲。詳細切換表、每步通過/停止標準、回退指令、10/15 現場演示順序、Samsung 安裝/主畫面捷徑備案及正式資料確認欄，統一從 `docs/testing/pr29-field-showcase-pack-2026-10-15.md` 開始；歷史驗收證據仍見 `docs/testing/pr29-integration-closeout-2026-10-12.md`。
+
+### 最新狀態（2026-10-12 17:29 Taipei）
+
+- PR #29 以 `364d47c77d2e5f2bea8b19cf516b63fa6d81796b` 為本次文件基準，仍 open/draft/unmerged；候選程式為 `f3fefc1`。
+- Quality #156 / run `38229526027` completed failure：lint/typecheck/unit-component/build/browser-accessibility/synthetic mobile E2E/private demo/order smoke/container build+health 均通過，production audit pass；完整 dependency audit 仍只有已核准限縮範圍的 development-path `braces@3.0.3` High。不可稱 Quality 或完整 audit 全綠。10/14 必須再核最新 run；新增任何 finding/失敗即停止切換。
+- Acer：8095 `tea-nextjs-pr29-session-rev` / `pr29-session-rev-f3fefc1` running；8092 `tea-nextjs-pr29-8443-accept` / `pr29-8443-3bc3283` running；既有 f95ba80 候選、AUTH-02、Caddy (`tea-caddy-staging`) 也 running。
+- Serve 保持 tailnet-only 443→8090、8443→8092，Funnel off；本日未切換。8095/8092 健康、Basic Auth/商家登入/Session/Origin-CSRF/撤銷等已驗收證據沿用，不重跑。
+- 監測程序 20756/12000/1932 存活；三份原始 JSONL 於 2026-10-12 約 17:29 Taipei 仍增加；五日監測完成日 2026-10-16，仍 IN PROGRESS。
+- 新版 Passkey enabled/RP ID 正確但尚未註冊；需新站註冊後才可宣稱新版 Passkey 真機驗收。ORDER-03 實機驗收尚未完成。
+- 現場茶品檔僅有八筆樣品候選，另有黑茶/特殊茶名稱未提供，黃茶與老茶分類可能與樣品重疊；照片映射也有候選衝突。檔內價格/庫存不是已核定正式資料。正式匯款、電話、LINE QR、運費/免運條件待陳老師確認，機密值不得寫入 Git。
+- 10/14 才依現場包逐項執行切換前閘門；只有全數條件通過才改 :8443→8095。任一關鍵失敗，只回退 :8443→8092，保持 443→8090，保留容器/資料/監測。若不通過，維持舊版展示備援。
+- 10/15 現場順序：前台商品→購物車→下單→商家登入→訂單確認付款→包裝拍照→出貨→顧客查單。付款/訂單皆標示合成演示；ORDER-03 仍待實機驗收，不可標通過。Samsung 若無法安裝三個獨立 PWA，改建三個 Chrome 主畫面捷徑並記錄。

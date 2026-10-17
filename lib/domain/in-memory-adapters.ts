@@ -22,6 +22,33 @@ import { createMockCatalogService } from "./mock/mock-catalog-service";
 import { createMockCheckoutService } from "./mock/mock-checkout-service";
 import { createMockPublishingService } from "./mock/mock-publishing-service";
 import { createDemoCatalogService, createDemoPublishingService } from "./demo-catalog-service";
+import { confirmedTeaFixture } from "./mock/confirmed-tea-fixture";
+import { domainError } from "./errors";
+import type { CatalogQuery, Product } from "./types";
+
+const publicCatalog: CatalogService = {
+  async listProducts(query: CatalogQuery = {}) {
+    try {
+      const response = await fetch("/api/public/catalog", { cache: "no-store" });
+      if (!response.ok) throw new Error("Public catalog unavailable");
+      const payload = await response.json() as { ok: boolean; value: { items: Product[] } };
+      if (!payload.ok || !Array.isArray(payload.value?.items)) throw new Error("Invalid public catalog");
+      const items = payload.value.items.filter(p => p.publication === "published" && (!query.taste || p.tasteTags.includes(query.taste)) && (!query.category || p.category === query.category));
+      const start = query.cursor && /^\\d+$/.test(query.cursor) ? Number(query.cursor) : 0;
+      const size = Math.max(1, Math.min(50, query.limit ?? 12));
+      return { ok: true as const, value: { items: items.slice(start, start + size), total: items.length, nextCursor: start + size < items.length ? String(start + size) : null } };
+    } catch {
+      return { ok: false as const, error: domainError("catalog-unavailable", "目前無法確認茶品上架狀態，請稍後再試。", true) };
+    }
+  },
+  async getProductBySlug(slug) {
+    const result = await this.listProducts({ limit: 50 });
+    if (!result.ok) return result;
+    const product = result.value.items.find(p => p.slug === slug);
+    return product ? { ok: true as const, value: product } : { ok: false as const, error: domainError("product-not-found", "這項茶品目前未上架。", false) };
+  },
+};
+
 
 export type InMemoryCommerceServices = {
   catalogService: CatalogService;
@@ -102,3 +129,5 @@ export const createInMemoryIntegrationAdapters = (
   logisticsService: overrides.logisticsService ?? createInMemoryLogisticsService(),
   erpService: overrides.erpService ?? createInMemoryErpService(),
 });
+
+export const publicTeaCatalogService: CatalogService = publicCatalog;
