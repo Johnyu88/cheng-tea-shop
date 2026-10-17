@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
-import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
+import { mkdir, open, readFile, rename, unlink, writeFile } from "node:fs/promises";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { basename, dirname, join, resolve } from "node:path";
 import type { Product, ProductDraft } from "@/lib/domain";
@@ -43,6 +43,7 @@ const decodePhoto = (dataUrl: string): { extension: string; bytes: Buffer } | un
 
 export const createDemoCatalogStore = ({ filePath, mediaDirectory, seedProducts = confirmedTeaFixture }: StoreOptions) => {
   let queue = Promise.resolve();
+  const lockPath = `${filePath}.lock`;
 
   const read = async (): Promise<CatalogFile> => {
     await mkdir(dirname(filePath), { recursive: true });
@@ -63,8 +64,14 @@ export const createDemoCatalogStore = ({ filePath, mediaDirectory, seedProducts 
     await runFileReplace("powershell.exe", ["-NoProfile", "-NonInteractive", "-Command", command], { windowsHide: true, timeout: 15000 });
   };
   const write = async (catalog: CatalogFile): Promise<void> => {
-    const temporaryPath = `${filePath}.${process.pid}.tmp`;
-    await writeFile(temporaryPath, JSON.stringify(catalog, null, 2), "utf8");
+    const temporaryPath = `${filePath}.${process.pid}.${randomUUID()}.tmp`;
+    const temporary = await open(temporaryPath, "w");
+    try {
+      await temporary.writeFile(JSON.stringify(catalog, null, 2), "utf8");
+      await temporary.sync();
+    } finally {
+      await temporary.close();
+    }
     for (let attempt = 0; attempt < 12; attempt += 1) {
       try { await rename(temporaryPath, filePath); return; }
       catch (error) {
@@ -75,6 +82,21 @@ export const createDemoCatalogStore = ({ filePath, mediaDirectory, seedProducts 
         await new Promise((done) => setTimeout(done, 75 * (attempt + 1)));
       }
     }
+  };
+
+  const withFileLock = async <T>(operation: () => Promise<T>): Promise<T> => {
+    await mkdir(dirname(lockPath), { recursive: true });
+    for (let attempt = 0; attempt < 120; attempt += 1) {
+      try {
+        const lock = await open(lockPath, "wx");
+        try { return await operation(); }
+        finally { await lock.close(); await unlink(lockPath).catch(() => undefined); }
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
+        await new Promise((done) => setTimeout(done, 10));
+      }
+    }
+    throw new Error("商品資料暫時忙碌，尚未確認儲存，請先查詢商品清單，勿重複新增");
   };
 
   const serialized = async <T>(operation: () => Promise<T>): Promise<T> => {
@@ -93,17 +115,17 @@ export const createDemoCatalogStore = ({ filePath, mediaDirectory, seedProducts 
       return products.find((product) => product.slug === slug);
     },
     async setPublication(id: string, publication: Product["publication"]): Promise<Product | undefined> {
-      return serialized(async () => {
+      return serialized(() => withFileLock(async () => {
         const catalog = await read();
         const product = catalog.products.find((item) => item.id === id);
         if (!product) return undefined;
         product.publication = publication;
         await write(catalog);
         return clone(product);
-      });
+      }));
     },
     async update(id: string, changes: ProductUpdate): Promise<Product | undefined> {
-      return serialized(async () => {
+      return serialized(() => withFileLock(async () => {
         const catalog = await read();
         const product = catalog.products.find((item) => item.id === id);
         if (!product) return undefined;
@@ -139,10 +161,10 @@ export const createDemoCatalogStore = ({ filePath, mediaDirectory, seedProducts 
         }
         await write(catalog);
         return clone(product);
-      });
+      }));
     },
     async publish(draft: ProductDraft, publication: Product["publication"] = "published"): Promise<Product> {
-      return serialized(async () => {
+      return serialized(() => withFileLock(async () => {
         const catalog = await read();
         const id = `demo-published-${randomUUID()}`;
         const firstPhoto = draft.photos?.find((photo) => photo.dataUrl);
@@ -175,7 +197,7 @@ export const createDemoCatalogStore = ({ filePath, mediaDirectory, seedProducts 
         catalog.products.push(product);
         await write(catalog);
         return clone(product);
-      });
+      }));
     },
     async readMedia(fileName: string): Promise<Buffer> {
       const safeName = basename(fileName);
