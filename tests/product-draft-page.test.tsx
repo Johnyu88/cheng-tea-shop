@@ -18,7 +18,7 @@ const publishedProduct: Product = {
 
 function createPublishingService(overrides: Partial<PublishingService> = {}): PublishingService {
   return {
-    saveDraft: async (draft) => ({ ok: true, value: draft }),
+    saveDraft: async (draft) => ({ ok: true, value: { ...draft, id: "mock-draft-1" } }),
     publishDraft: async () => ({ ok: true, value: publishedProduct }),
     ...overrides,
   };
@@ -122,7 +122,7 @@ it("does not expose retired image AI or fake progress controls", () => {
 });
 
 it("shows a persistent save confirmation, navigation and a cancel link without a second save", async () => {
-  const saveDraft = vi.fn(async (draft: ProductDraft) => ({ ok: true as const, value: draft }));
+  const saveDraft = vi.fn(async (draft: ProductDraft) => ({ ok: true as const, value: { ...draft, id: "mock-draft-1" } }));
   renderPage(createPublishingService({ saveDraft }));
   expect(screen.getByRole("link", { name: "取消新增／返回商品管理" })).toHaveAttribute("href", "/admin/products");
   fillMinimumFields();
@@ -132,6 +132,30 @@ it("shows a persistent save confirmation, navigation and a cancel link without a
   expect(screen.getByRole("link", { name: "返回商品管理" })).toHaveAttribute("href", "/admin/products");
   expect(screen.getByRole("link", { name: "繼續新增商品" })).toHaveAttribute("href", "/admin/products/new");
   expect(screen.queryByRole("button", { name: "儲存商品" })).not.toBeInTheDocument();
+  expect(saveDraft).toHaveBeenCalledTimes(1);
+});
+
+it("does not show save success without a persisted product ID", async () => {
+  const saveDraft = vi.fn(async (draft: ProductDraft) => ({ ok: true as const, value: draft }));
+  renderPage(createPublishingService({ saveDraft }));
+  fillMinimumFields();
+
+  fireEvent.click(screen.getByRole("button", { name: "儲存商品" }));
+
+  await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent("尚未確認儲存"));
+  expect(screen.queryByRole("heading", { name: "儲存成功" })).not.toBeInTheDocument();
+  expect(saveDraft).toHaveBeenCalledTimes(1);
+});
+
+it("keeps an uncertain save from being retried automatically", async () => {
+  const saveDraft = vi.fn(async () => ({ ok: false as const, error: { code: "publishing-unavailable" as const, message: "商品可能已寫入，但尚未完成查詢確認；請先查詢商品清單，勿重複新增。", retryable: false } }));
+  renderPage(createPublishingService({ saveDraft }));
+  fillMinimumFields();
+
+  fireEvent.click(screen.getByRole("button", { name: "儲存商品" }));
+
+  await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent("勿重複新增"));
+  expect(screen.queryByRole("heading", { name: "儲存成功" })).not.toBeInTheDocument();
   expect(saveDraft).toHaveBeenCalledTimes(1);
 });
 
@@ -158,7 +182,7 @@ it("prevents duplicate save mutations and announces that saving is in progress",
 
   await waitFor(() => expect(saveDraft).toHaveBeenCalledTimes(1));
   expect(screen.getByRole("status")).toHaveTextContent("正在儲存商品");
-  await act(async () => { resolveSave?.({ ok: true, value: { name: "春茶", specification: "150g", price: { currency: "TWD", amount: 1200 }, category: "oolong", inventoryStatus: "available", tasteTags: [] } }); });
+  await act(async () => { resolveSave?.({ ok: true, value: { name: "春茶", specification: "150g", price: { currency: "TWD", amount: 1200 }, category: "oolong", inventoryStatus: "available", tasteTags: [], id: "mock-draft-1" } }); });
 });
 
 

@@ -1,5 +1,5 @@
 import { domainError } from "../errors";
-import type { PublishingService } from "../publishing-service";
+import type { PublishingService, SavedProductDraft } from "../publishing-service";
 import type { Product, ProductDraft, ProductDraftPhoto, TeaCategory } from "../types";
 import type { ServiceResult } from "../result";
 import { assertValidMoney } from "../validation";
@@ -50,8 +50,11 @@ export const createMockPublishingService = (): PublishingService => {
   let sequence = 0;
 
   return {
-    async saveDraft(draft): Promise<ServiceResult<ProductDraft>> {
-      return validateDraft(draft);
+    async saveDraft(draft): Promise<ServiceResult<SavedProductDraft>> {
+      const validated = validateDraft(draft);
+      if (!validated.ok) return validated;
+      sequence += 1;
+      return { ok: true, value: { ...validated.value, id: `mock-draft-${sequence}` } };
     },
 
     async publishDraft(draft, confirmation): Promise<ServiceResult<Product>> {
