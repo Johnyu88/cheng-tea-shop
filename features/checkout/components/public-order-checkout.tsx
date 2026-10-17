@@ -13,10 +13,12 @@ export function PublicOrderCheckout() {
   const [address, setAddress] = useState("");
   const [message, setMessage] = useState("");
   useEffect(() => {
-    try {
-      const saved: unknown = JSON.parse(localStorage.getItem(PUBLIC_CART_KEY) ?? "[]");
-      if (Array.isArray(saved)) setLines(saved.filter((x): x is PublicCartLine => x && typeof x.id === "string" && typeof x.name === "string" && Number.isInteger(x.quantity) && x.quantity > 0 && x.quantity <= 30 && Number.isSafeInteger(x.price) && x.price >= 0));
-    } catch { setFeedback("購物車資料無法讀取，請重新選購。"); }
+    void Promise.resolve().then(() => {
+      try {
+        const saved: unknown = JSON.parse(localStorage.getItem(PUBLIC_CART_KEY) ?? "[]");
+        if (Array.isArray(saved)) setLines(saved.filter((x): x is PublicCartLine => x && typeof x.id === "string" && typeof x.name === "string" && Number.isInteger(x.quantity) && x.quantity > 0 && x.quantity <= 30 && Number.isSafeInteger(x.price) && x.price >= 0));
+      } catch { setFeedback("購物車資料無法讀取，請重新選購。"); }
+    });
   }, []);
   const total = useMemo(() => lines.reduce((n, x) => n + x.price * x.quantity, 0), [lines]);
   const orderText = useMemo(() => [
