@@ -8,6 +8,22 @@
   --paper: #faf8f2;
   --tea-brown: #8b6446;
   --white: #ffffff;
+  --font-size-display: clamp(3rem, 9vw, 6.5rem);
+  --font-size-title: clamp(2rem, 5vw, 4rem);
+  --font-size-body: 1rem;
+  --font-size-caption: 0.875rem;
+  --font-weight-regular: 400;
+  --font-weight-semibold: 650;
+  --font-weight-bold: 750;
+  --line-height-body: 1.7;
+  --line-height-tight: 1.2;
+  --space-section: clamp(3rem, 8vw, 7rem);
+  --space-card: 1.25rem;
+  --space-control: 0.75rem;
+  --color-action-primary: #20352e;
+  --color-action-secondary: #dbe6dc;
+  --color-action-quiet: #faf8f2;
+  --color-action-danger: #8b6446;
 }
 
 * {
@@ -23,6 +39,8 @@ body {
   color: var(--ink);
   background: var(--paper);
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-body);
 }
 
 .site-shell {
@@ -63,6 +81,47 @@ main {
   text-decoration: none;
 }
 
+.abandon-action {
+  min-height: 3rem;
+  border: 2px solid var(--tea-brown);
+  border-radius: 999px;
+  padding: 0.75rem 1rem;
+  color: var(--tea-brown);
+  background: var(--white);
+  font: inherit;
+  font-weight: 750;
+  text-decoration: none;
+  text-align: center;
+  cursor: pointer;
+}
+
+.abandon-action:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.abandon-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: color-mix(in srgb, var(--ink) 48%, transparent);
+}
+
+.abandon-dialog {
+  width: min(100%, 32rem);
+  padding: clamp(1.25rem, 4vw, 2rem);
+  border-radius: 1rem;
+  background: var(--white);
+  box-shadow: 0 1rem 3rem color-mix(in srgb, var(--ink) 25%, transparent);
+}
+
+.abandon-dialog h2 {
+  margin-top: 0;
+}
+
 .site-header nav a {
   padding: 0.75rem 1rem;
   border: 2px solid var(--ink);
@@ -86,6 +145,47 @@ main {
   flex-wrap: wrap;
   gap: 0.75rem;
   margin: 2rem 0;
+}
+
+.category-filter {
+  margin: 1.25rem 0 2rem;
+}
+
+.category-filter-row {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.75rem;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  padding: 0.25rem 0.25rem 0.75rem;
+  scrollbar-width: thin;
+}
+
+.category-filter-row .filter-button {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.category-filter-fallback {
+  margin-top: 0.75rem;
+}
+
+.category-filter-fallback summary {
+  color: var(--tea-brown);
+  cursor: pointer;
+  font-weight: 750;
+}
+
+.category-filter-fallback select {
+  min-height: 3rem;
+  width: 100%;
+  margin-top: 0.5rem;
+  border: 2px solid var(--ink);
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  color: var(--ink);
+  background: var(--paper);
+  font: inherit;
 }
 
 .filter-button,
@@ -172,22 +272,59 @@ main {
   display: grid;
   grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
   gap: 1rem;
-  align-items: stretch;
+  align-items: start;
+}
+
+.teacher-story-media picture {
+  display: block;
+  min-width: 0;
 }
 
 .teacher-story-media img,
 .teacher-story-media video {
   display: block;
   width: 100%;
-  height: 100%;
-  min-height: 22rem;
+  height: auto;
+  min-height: 0;
   border-radius: 1.25rem;
-  object-fit: cover;
+  object-fit: contain;
+  object-position: center;
   background: var(--mist);
 }
 
 .teacher-story-media video {
   aspect-ratio: 9 / 16;
+}
+
+.teacher-story-audio {
+  min-width: 0;
+}
+
+.teacher-story-audio audio {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+}
+
+/* Foldable inner screens are wide enough to trigger desktop CSS, but still need
+   a single reading column so the portrait and its audio controls are not
+   squeezed into a three-column composition. */
+@media (max-width: 72rem) {
+  .teacher-story {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+
+  .teacher-story-copy h2 {
+    max-width: 30ch;
+  }
+
+  .teacher-story-media {
+    width: min(100%, 42rem);
+    margin-inline: auto;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
 }
 
 .eyebrow {
@@ -202,12 +339,12 @@ h1,
 h2 {
   margin: 0;
   font-family: Georgia, "Noto Serif TC", serif;
-  line-height: 1.2;
+  line-height: var(--line-height-tight);
 }
 
 h1 {
   max-width: 12ch;
-  font-size: clamp(3rem, 9vw, 6.5rem);
+  font-size: var(--font-size-display);
   letter-spacing: -0.04em;
 }
 
@@ -221,6 +358,60 @@ h1 {
 
 .hero-copy {
   margin: 1.5rem 0 2rem;
+}
+
+.button-primary,
+.button-secondary,
+.button-quiet,
+.button-danger {
+  min-height: 3rem;
+  border-radius: 999px;
+  padding: var(--space-control) 1.4rem;
+  font: inherit;
+  font-weight: var(--font-weight-bold);
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.button-primary {
+  border: 2px solid var(--color-action-primary);
+  color: var(--white);
+  background: var(--color-action-primary);
+}
+
+.button-secondary {
+  border: 2px solid var(--color-action-primary);
+  color: var(--color-action-primary);
+  background: var(--color-action-secondary);
+}
+
+.button-quiet {
+  border: 2px solid color-mix(in srgb, var(--ink) 24%, transparent);
+  color: var(--color-action-primary);
+  background: var(--color-action-quiet);
+}
+
+.button-danger {
+  border: 2px solid var(--color-action-danger);
+  color: var(--color-action-danger);
+  background: var(--color-action-quiet);
+}
+
+.button-primary:focus-visible,
+.button-secondary:focus-visible,
+.button-quiet:focus-visible,
+.button-danger:focus-visible {
+  outline: 3px solid var(--color-action-danger);
+  outline-offset: 4px;
+}
+
+.button-primary:disabled,
+.button-secondary:disabled,
+.button-quiet:disabled,
+.button-danger:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
 }
 
 .primary-action {
@@ -310,7 +501,7 @@ h1 {
 }
 
 .product-card-content {
-  padding: 1.25rem;
+  padding: var(--space-card);
 }
 
 .product-card h3,
@@ -324,6 +515,11 @@ h1 {
   font-size: 1.35rem;
 }
 
+.product-card-title {
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
+}
+
 .product-taste {
   margin-bottom: 0.6rem;
 }
@@ -331,11 +527,22 @@ h1 {
 .product-summary {
   min-height: 3.5rem;
   color: var(--muted-ink);
-  line-height: 1.6;
+  font-size: var(--font-size-caption);
+  line-height: var(--line-height-body);
 }
 
 .product-meta {
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
+}
+
+.product-card-summary {
+  color: var(--muted-ink);
+}
+
+.product-card-price {
+  color: var(--ink);
+  font-size: 1.05rem;
+  letter-spacing: 0.02em;
 }
 
 .product-link {
@@ -565,6 +772,29 @@ a:focus-visible {
   padding: 0.75rem 1rem;
 }
 
+.checkout-primary-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.checkout-primary-actions > button {
+  flex: 1 1 12rem;
+}
+
+.manual-order-primary-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.manual-order-primary-actions > a,
+.manual-order-primary-actions > button {
+  width: 100%;
+  min-height: 3rem;
+  padding: 0.75rem 1rem;
+}
+
 .checkout-exit-nav {
   align-items: center;
 }
@@ -617,6 +847,30 @@ a:focus-visible {
 .demo-panel > h1 {
   max-width: none;
   font-size: clamp(2.25rem, 7vw, 4rem);
+}
+
+.tea-invitation-heading {
+  margin-block: 0.5rem 0;
+  font-size: clamp(1.625rem, 4vw, 2.25rem);
+  line-height: 1.3;
+}
+
+.tea-invitation-copy {
+  max-width: 42rem;
+  font-size: clamp(1.125rem, 2vw, 1.25rem);
+  line-height: 1.8;
+}
+
+.tea-invitation-address {
+  margin-block: 0.5rem;
+  font-size: clamp(1rem, 1.7vw, 1.125rem);
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+}
+
+.tea-invitation-actions > a,
+.tea-invitation-location > a {
+  min-height: 3rem;
 }
 
 .demo-result,
@@ -766,6 +1020,22 @@ a:focus-visible {
 }
 
 @media (max-width: 40rem) {
+  .checkout-primary-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .checkout-primary-actions > button {
+    min-width: 0;
+    padding-inline: 0.55rem;
+  }
+
+  .manual-order-primary-actions > a,
+  .manual-order-primary-actions > button {
+    min-width: 0;
+    padding-inline: 0.55rem;
+  }
+
   .checkout-exit-nav {
     display: grid;
     grid-template-columns: 1fr;
@@ -834,6 +1104,10 @@ a:focus-visible {
     width: 100%;
   }
 
+  .category-filter-row .filter-button {
+    width: auto;
+  }
+
   .teacher-story,
   .teacher-story-media {
     grid-template-columns: 1fr;
@@ -865,17 +1139,18 @@ a:focus-visible {
   }
 }
 
-/* Published product imagery: fixed proportions on mobile; do not let original image dimensions stretch cards. */
+/* Published product imagery: keep every source photo visible at its natural ratio. */
 .product-placeholder {
   padding: 0;
-  overflow: hidden;
-  aspect-ratio: 4 / 5;
+  min-height: 9rem;
 }
 .product-placeholder img {
   display: block;
   width: 100%;
-  height: 100%;
+  height: auto;
+  max-height: none;
   object-fit: contain;
+  object-position: center;
 }
 .product-admin-list {
   display: grid;
@@ -906,7 +1181,6 @@ a:focus-visible {
 .product-admin-edit textarea,
 .product-admin-edit select { max-width: 100%; min-width: 0; }
 @media (max-width: 640px) {
-  .product-placeholder { aspect-ratio: 4 / 5; }
   .product-draft-card { padding: 1rem; }
   .product-admin-item > [role="img"] { width: min(100%, 220px); max-height: 240px; }
   .product-admin-item > [role="img"] img { max-height: 240px; }

@@ -716,6 +716,24 @@ This remains a local synthetic Demo. No AI image composition, image-recognition 
 最新策略停止擴寫自行開發認證，採維護中的 Better Auth 與官方 @better-auth/passkey 1.7.6。先在 sandboxes/passkey-lock 獨立 Next.js 應用、套件安裝與資料庫測試，驗證成功後才透過既有 AuthProvider 對接，不修改訂單／付款／照片／出貨 API。獨立 Demo 密碼 Provider 保留作備援，實際密碼只由私密環境注入。
 供應商 native handler/client 負責 WebAuthn 驗證及 Session；受驗證 Session 與店家權限分開，沙盒帳號不自動取得茶行店家權限。虛擬驗證器測試不等於手機 Face ID／指紋通過，實機驗收需另列結果。
 
+## 66. 2026-10-16 正式部署完成，轉入前台設計主線
+
+- PROD-ADMIN-24 已完成正式後台切換；部署交接基準為 commit `541e245`，正式後台容器為 `tea-private-v5-prod-admin-24-live`。
+- 正式資料、照片、訂單、Caddy、Funnel 與前台 10000 的保護邊界維持不變；原正式容器保留作為回退基準。
+- 後台的一般手機密碼登入與實機操作仍列為人工驗收事項，不能以自動化 HTTP 或 Playwright 證據取代。
+- 產品主線正式回到前台視覺與使用體驗：保留已通過的商品照片、茶湯、人物與購物流程，先處理購物車並列按鈕、放棄購買與手機排版，再整理品牌視覺系統。
+- 在設計提案獲確認前，不修改前台程式、不覆蓋正式 10000、不裁切或替換人物、茶湯與商品原始素材；所有後續實作使用獨立分支與候選環境。
+
+## 67. 2026-10-16 前台設計第一階段候選施工
+
+- 從 `8365372` 建立候選分支 `codex/frontend-design-phase1-20261016` 與獨立 worktree；正式前台、後台、訂單、商品資料、照片原檔、音訊與正式部署均未修改。
+- 建立可重用 `StorefrontShell`／Header，統一首頁、購物車、結帳與 public storefront 的品牌與導覽；首頁既有人物、茶席、茶湯、商品照片與 opt-in 音訊保持原路徑與內容。
+- 購物車主要行動為「前往結帳」，「繼續購買」為次要入口；空購物車仍提供完整前台導覽。數量、移除、金額與既有 CartService 持久化行為未改寫。
+- 結帳新增放棄購買二次確認。取消確認保留目前 draft 與 cart；確認放棄使用既有 `clearCart()` 清除本次未送出購物車，並清除元件內 draft，再顯示空購物車狀態；已成立訂單不經過此清除路徑。
+- 390px 實測兩個主要操作並列，各約 55px 高，文字完整且無水平捲動；五種驗收寬度為 390／412／768／1080／1440px。
+- 驗證矩陣：TypeScript PASS；production build PASS；修改檔案 ESLint 0 errors／5 existing warnings；前台定向測試 37/37 PASS；完整 Vitest 因既有 SQLite 測試長時間未完成而 BLOCKED/TIMEOUT；完整 ESLint 因基準既有 3 errors FAIL，未因本階段新增錯誤。
+- 此候選版停在人工驗收閘門，不代表正式部署或品牌美術第二階段已核准。
+
 ## 2026-10-12 PR #29 integration closeout (supersedes older runtime notes)
 
 PR #29 remains draft/unmerged. User-reported iPhone Safari acceptance on 2026-10-11: Passkey logout/re-login, synthetic order completion, product publish/unpublish/edit, ORDER-01 reversal, and ORDER-02 package reopening passed. ORDER-03 shipment correction and Samsung's three Android Chrome entries remain pending.
@@ -730,4 +748,108 @@ Acer's 8443 listener is tailnet-only on isolated localhost 8092; 443 → 8090, o
 ## 2026-10-12 Quality run #134 result
 
 The closeout source/UI commit `a521b3732edf8c5db8f20248c993564f9f9c934a` completed Quality as failure: lint, typecheck, 65 files / 334 tests, build, browser/accessibility, and container smoke passed; synthetic mobile E2E was 3/1/1. The sole failure is the same unchanged catalog-persistence 商品已上架 heading assertion reproduced on dce323c. Both dependency audit steps were skipped; no fresh security clearance. Following changes are handoff-only.
+
+## 68. 2026-10-16 PHASE1-VERIFY-02 驗收補強
+
+本次僅做候選版與正式前台的唯讀驗證。正式公開容器的安全組態顯示 `/checkout` 優先選用 `MerchantManualCheckoutPage`，因此候選 `CheckoutPage` 的「放棄本次購買」沒有覆蓋正式顧客流程；正式站未修改、未部署。共用 `StorefrontShell` 的可重用程式仍只存在候選 HEAD `1421ed1`，正式 `:10000` 不得以本次候選自動化證據宣稱通過。
+
+完整 Vitest 以單 worker、無檔案並行方式完成 73 個檔案／363 個測試，exit 0，Vitest duration 275.45 秒；前次兩分鐘未完成是觀察窗不足，不是已證實的單檔無限等待。主要耗時為 jsdom 73 次建立共 152.66 秒。完整 ESLint 的 3 個 error 在 `8365372` 與 `1421ed1` 完全相同，且相關檔案未被候選修改；本階段不處理無關 lint 基準問題。PHASE1 維持 PENDING，等待正式前台路由修正核准及人工手機驗收。
+
+## 69. 2026-10-16 PHASE1-CHECKOUT-03 正式結帳模式補修
+
+本輪沿用候選分支 `codex/frontend-design-phase1-20261016` 與 worktree `phase1-candidate`，施工前恢復點為 `6caaded`。正式組態仍是 `PUBLIC_STOREFRONT_SERVER=enabled`、`NEXT_PUBLIC_MERCHANT_MANUAL_ORDER=enabled`、`NEXT_PUBLIC_DEMO_COMMERCE=disabled`；因此補修目標是 `MerchantManualCheckoutPage`，不碰正式 `:10000`。
+
+正式 manual checkout 的未送出資料只有頁面內 draft 與既有 public cart。cart 的瀏覽器持久化 key 是 `chen-tea-public-cart-v1`；本輪確認放棄只透過既有 CartService 清除該次 cart，清除失敗回報錯誤並保留資料，不觸及已成立訂單、商品、庫存或其他使用者資料。
+
+測試先行證據為實作前定向測試 4 failed／2 passed；最終正式模式測試 6／6 PASS。完整 Vitest 74 files／369 tests PASS，exit 0，283.71 秒；TypeScript PASS；修改檔案 ESLint 0 errors／1 existing image warning；以非敏感正式旗標建置的 production build PASS，20/20 static pages，保留既有六個 dynamic filesystem tracing warnings。
+
+候選服務 `http://127.0.0.1:3111` 使用隔離 synthetic browser cart，不連接正式可寫入資料源。Chromium 驗證 390、412、768、1080、1440px 全數無水平捲動；正式模式顯示放棄購買，取消二次確認保留 textarea/cart，確認後回到空購物車；390px 放棄與確認下單操作並列且各 76px 高。截圖保存於 `phase1-checkout-03-screenshots`。這些是候選證據，不是正式站人工驗收。
+
+PHASE1 維持 **PENDING**，等待總管與使用者人工手機驗收；未合併 main、未切換正式站、未進入第二階段品牌美術。
+
+## 70. 2026-10-16 PHASE1-ACCEPT-05 第一階段驗收結案
+
+使用者已親自以一般手機驗收候選版，確認三項 PASS：購物車／結帳主要按鈕並列；放棄購買二次確認在取消後保留資料；確認放棄後清空購物車且手機版無跑版。人工驗收網址為 `https://acer-v5.tail4d8b5a.ts.net:10002/`；驗收完成後已關閉本輪新增的 10002 Funnel，既有正式 10000／10001 與 8443–8445 未修改。
+
+PHASE1 恢復基準為候選分支 `codex/frontend-design-phase1-20261016`、commit `b104163`。候選程式與 `phase1-checkout-03-screenshots/` 保留；正式站、正式資料與素材均未變動。PHASE1 工程與人工驗收結案，但狀態依交接要求仍標記 **PENDING**，不代表正式部署核准。
+
+## 71. 2026-10-16 PHASE2 設計盤點（待核准，不施工）
+
+已建立 `docs/phase2-design-inventory-20261016.md`，提交現況截圖索引、差異清單與設計建議。盤點範圍包含字體與文字層級、色彩與品牌一致性、按鈕／商品卡片、首頁視覺構圖、陳老師人物／茶湯／茶葉照片完整呈現、手機與桌面 RWD，以及現有素材庫缺口。
+
+目前建議先核准 typography／spacing／semantic color 與 button/card hierarchy，再進行任何 CSS 或元件施工；人物、茶湯、商品照片與鳥鳴音訊維持原檔與原路徑，不在本次盤點中替換、裁切或生成。PHASE2 尚未開始施工，等待總管確認。
+
+## 72. 2026-10-16 PHASE1-RECORD-06／PHASE2-DESIGN-01
+
+PHASE1 狀態已拆分記錄：人工手機驗收為 **PASS**，使用者確認購物車／結帳按鈕並列、放棄購買取消保留資料、確認放棄清空購物車且手機無跑版；正式部署為 **NOT DEPLOYED**。候選人工驗收恢復基準保留為 `b104163`，正式前台 10000 與後台 10001 未改動，10002 未重新開啟。
+
+PHASE2-DESIGN-01 候選施工已完成但不進入下一小階段：建立 typography、weight、line-height、spacing、semantic color tokens，統一 primary／secondary／quiet／danger 按鈕層級，並改善商品卡標題／摘要／價格閱讀層級。原有 `#faf8f2`、`#20352e`、`#dbe6dc`、`#8b6446`、照片、音訊、首頁段落順序、商品／訂單資料與 PHASE1 行為均保留。
+
+修改前截圖為 `phase1-checkout-03-screenshots/`，修改後截圖為 `phase2-design-01-screenshots/`；五種寬度均無水平捲動，390px 與 412px 按鈕維持並列，768px 過渡仍保持雙欄。完整 Vitest 75 files／371 tests PASS，Exit 0；TypeScript PASS；修改檔案 ESLint 0 errors／6 warnings；production build PASS，20/20 static pages。等待人工確認，不進入 PHASE2 下一小階段。
+
+## 73. 2026-10-16 PHASE2-CATEGORY-02 十大茶類手機分類
+
+本輪只施工茶類分類，不改首頁段落、品牌素材、商品內容、價格、庫存、訂單或正式環境。候選前台加入「全部」及十類固定順序：台灣野生山茶、綠茶、白茶、黃茶、青茶、紅茶、黑茶、花茶、特殊茶、老茶。手機以單排橫向滑動列呈現，選取狀態使用 `aria-pressed`，下拉選單為預設收合的備用方案。
+
+分類只使用既有 category 值篩選，公開頁面只渲染已上架商品。確認公開 fixture 有 8 類已上架：台灣野生山茶、青茶、綠茶、花茶、黃茶、白茶、紅茶、老茶；黑茶與特殊茶目前無已上架資料，因此顯示空狀態。歷史／管理欄位另有「其他茶類」，本輪不猜測映射，也沒有寫回商品資料。
+
+TDD 新增測試施工前為 `4 failed / 0 passed`，施工後定向分類測試為 `7/7 PASS`。完整 Vitest 為 `76 files / 375 tests PASS`、exit 0、235.69 秒；TypeScript PASS；修改檔案 ESLint `0 errors / 3 existing no-img warnings`；production build PASS，20/20 static pages，保留既有 6 個 dynamic filesystem tracing warnings。完整 ESLint 仍為 `3 errors / 17 warnings`，三個 error 均為既有基準問題，本輪未修改。五寬度瀏覽器驗證為 PASS：390／412／768／1080／1440 均無水平頁面捲動，分類列為單排橫向滑動，`/cart`／`/checkout` HTTP 200；特殊茶空狀態與恢復全部商品均通過。截圖保存於 `phase2-category-02-screenshots/`。PHASE1 結帳／放棄購買程式未改動；正式 `10000`、後台 `10001`、10002 入口與正式資料未變動。停在人工視覺驗收閘門，不進入下一個 PHASE2 小階段。
+
+## 74. 2026-10-16 PHASE2-REGRESSION-03 前台非授權變更回歸
+
+比對 `b104163`、`f6c9da9` 與 `897e319` 後確認：分類 commit 沒有修改首頁邀請文案、地址或購物車元件；`b104163` 與 `f6c9da9` 本身已缺少「來喝茶」與地址，缺口可追溯至更早的 `1421ed1` 共用 Shell 抽取。歷史 commit `4837371` 保留最後可核對的原文案、地址與 Google 地圖連結，因此本輪採最小恢復，不自行編造內容。
+
+恢復後保留十大茶類、共用 Header、銀行資訊與購物車／結帳／放棄購買行為；未修改正式資料、商品、價格、訂單、照片或音訊。定向回歸／分類測試 `5/5 PASS`；完整 Vitest `77 files / 376 tests PASS`、exit 0、246.52 秒；TypeScript PASS；production build PASS；完整 ESLint 仍為既有 `3 errors / 17 warnings`。首頁五寬度、購物車與結帳截圖保存於 `phase2-regression-03-screenshots/`，等待人工手機驗收。
+
+## 75. 2026-10-16 PHASE2-CHECKOUT-RECOVERY-04 恢復人工接單流程
+
+正式前台唯讀實測 `10000/checkout` 確認目前旗標路由實際使用 `MerchantManualCheckoutPage`，電話、LINE、匯款均可見；正式頁仍沒有放棄購買，未對正式服務做任何修改。候選 `f87e693` 與歷史人工接單確認版本 `f4bc5c0` 的來源差異確認為：候選移除了 LINE 三步驟與直接 LINE 聯絡入口，不是商品或訂單資料差異。
+
+本輪以最小修改恢復：訂購清單複製、開啟陳老師 LINE、貼上傳送說明，以及「透過 LINE 聯絡訂購」。保留 PHASE1 的放棄二次確認、取消保留資料、確認只清除未送出 cart、清除失敗保留資料與已成立訂單不受影響；未新增信用卡／LINE Pay，未改電話、匯款、庫存、訂單成立或出貨 API。新增正式模式人工接單回歸測試；施工前 `1 failed / 6 passed`，施工後定向 `8/8 PASS`。
+
+驗證結果：完整 Vitest `77 files / 377 tests PASS`、exit 0；TypeScript PASS；修改檔案 ESLint 0 errors、1 個既有圖片 warning；production build 以人工接單非敏感旗標 PASS。候選 HTTPS `https://acer-v5.tail4d8b5a.ts.net:10002/` 僅轉送 `127.0.0.1:3111`，五寬度首頁／購物車／結帳截圖保存於 `phase2-checkout-recovery-04-*.png`。瀏覽器使用 synthetic localStorage cart，未建立真實訂單或改寫正式資料；正式 `10000`、`10001` 與既有 8443–8445 映射未改變。
+
+本輪完成後停止於人工手機驗收閘門；不合併 main、不部署正式站、不進入下一階段。驗收完成的入口關閉指令為 `tailscale funnel --https=10002 off`。
+
+## 77. 2026-10-16 PHASE2-TEA-INVITATION-06 來喝茶區塊字體優化
+
+本輪以 `phase2-checkout-accept-05-aff7262`／`aff7262` 為基準，只為首頁「來喝茶」區塊加入專用排版 hooks 與響應式 CSS。標題、邀請文字、地址的文案與原始內容未改；電話、LINE、Google 地圖、匯款與其他購物流程未改。
+
+排版設定為手機標題約 26px、邀請文字約 18px、地址至少 16px，桌面隨寬度放大至標題 36px、邀請文字 20px、地址 18px；連結保留至少 48px 觸控高度。390／412／768／1080／1440px 實測均無水平溢出。
+
+測試先行紅燈為 `1 failed / 1 passed`，修復後定向 `2/2 PASS`；完整 Vitest `77 files / 378 tests PASS`，TypeScript PASS，修改檔案 ESLint 無 errors，production build PASS。修改前截圖使用 `phase2-regression-03-screenshots/home-*.png`，修改後截圖使用 `phase2-tea-invitation-06-after-*.png`。候選 10002 未重新開啟，正式服務未修改，等待人工手機驗收。
+
+## 76. 2026-10-16 PHASE2-CHECKOUT-ACCEPT-05 人工驗收封存
+
+使用者以手機驗收候選 `aff7262`，確認三項人工接單流程 **PASS**：LINE 三步驟訂購、電話聯絡及匯款資訊、放棄購買二次確認。十大茶類橫向分類與操作沿用先前使用者人工驗收 **PASS**。
+
+「來喝茶」文案與茶行地址目前只具備候選版歷史內容恢復及工程核對證據，沒有本次使用者人工 PASS，因此狀態保留為「人工未確認」。結帳流程只將本次明確確認的三項標為 PASS；其他購物車與訂單相關行為維持既有測試／歷史紀錄，不擴大解讀為本次人工驗收。
+
+建立恢復標記 `phase2-checkout-accept-05-aff7262`，精確指向 `aff7262`，並保留所有既有標記。候選 10002 HTTPS 入口在文件提交後關閉；正式 10000／10001 未修改、未停止、未部署。PHASE2 本小階段封存完成，等待後續核准，不合併 main。
+
+## 78. 2026-10-16 PHASE2-TEA-INVITATION-08 手機驗收封存
+
+使用者已完成 PHASE2-TEA-INVITATION-07 手機人工驗收，基準 commit 為 `adbe4309707c1919eb2fc1738d0d373add9f39f1`，三項均 **PASS**：標題／邀請文字大小適中、地址清楚自然換行、字體／間距／色調協調。
+
+十大茶類橫向分類與操作仍保留既有人工驗收 **PASS**；人工訂購流程的 LINE 三步驟、電話與匯款資訊、放棄購買二次確認也保留既有人工驗收 **PASS**。本輪未重新修改或驗證網站功能。
+
+建立恢復標記 `phase2-tea-invitation-08-adbe430` 指向 `adbe430`，並保留 `phase2-checkout-accept-05-aff7262`。候選 10002 已關閉；正式 10000／10001 未修改、未停止、未部署。
+
+## 79. 2026-10-16 PHASE3-PROD-FRONTEND-DEPLOY-01 正式前台部署
+
+本次依使用者明確授權，將已完成人工手機驗收的 `adbe4309707c1919eb2fc1738d0d373add9f39f1` 部署至正式前台 10000。來源驗收標記 `phase2-tea-invitation-08-adbe430` 與文件基準 `396d27066e19c626ff116594b4e774d2bd8a3c4f` 保留不變，沒有合併 `main`。
+
+正式 10000 的既有 Funnel 映射仍為 `127.0.0.1:8131`，只替換該 loopback port 背後的前台容器。新容器 `tea-public-adbe430-live` 使用 image `tea-nextjs:prod-frontend-adbe430`，digest `sha256:463107219334b60d6e9dd9555ceba9a6b81e0dc12c771f32dd9937b5e39cd148`；原 `tea-public-contact-4837371` 與 image `sha256:a3ade5517c5b90a09b693ae69c023882d6b38b3e40d57ed8b1fed44bd9f3c8fa` 保留為可立即回退備援。正式 10001／8090 與其 Funnel 未變。
+
+新容器只讀取公開 catalog 掛載，不掛載正式私有資料或可寫入資料庫；切換前後公開 catalog hash 未變，且本次驗證未送出寫入請求、未建立真實訂單。Docker build、TypeScript、5 檔／21 項關鍵回歸測試通過；正式 `/`、`/cart`、`/checkout`、公開 catalog 與 10001 `/` 均 HTTP 200；390px 首頁／購物車／結帳無水平溢出，放棄購買保留／清除流程通過。
+
+正式前台目前等待使用者手機驗收。若需回退，先執行 `docker stop tea-public-adbe430-live; docker start tea-public-contact-4837371`，再檢查 10000 HTTP 200；不需改動 Funnel。`/api/health` 由正式 storefront proxy 安全封鎖為 404，與切換前一致，不能作為此正式前台的健康判準。
+
+## 80. 2026-10-16 PHASE3-PROD-FRONTEND-ACCEPT-02 正式部署驗收封存
+
+使用者已完成正式前台 10000 手機人工驗收，三項均 PASS：首頁／十大茶類／商品照片；購物車／LINE／電話／匯款／放棄購買；來喝茶文字／地址／地圖連結。正式部署基準為 `adbe4309707c1919eb2fc1738d0d373add9f39f1`，容器 `tea-public-adbe430-live`，image digest `sha256:463107219334b60d6e9dd9555ceba9a6b81e0dc12c771f32dd9937b5e39cd148`，部署時間 `2026-10-16T03:02:51+08:00`。
+
+驗收封存前唯讀核對 10000／10001 均 HTTP 200，正式公開 catalog 仍為 7 件商品；10000 Funnel 維持 `127.0.0.1:8131`，10001 維持 `127.0.0.1:8090`。`/api/health` 的 404 是既有 storefront proxy 安全行為，不是健康檢查 PASS 或 FAIL 的替代宣稱。
+
+舊正式前台容器與 image 保留為回退備援：`tea-public-contact-4837371`／`sha256:a3ade5517c5b90a09b693ae69c023882d6b38b3e40d57ed8b1fed44bd9f3c8fa`。回退時執行 `docker stop tea-public-adbe430-live; docker start tea-public-contact-4837371`，不需修改 Funnel。建立恢復標記 `phase3-prod-frontend-accept-02-adbe430` 指向 `adbe430`，既有標記均保留。
 

@@ -131,7 +131,7 @@ export const createDemoCatalogStore = ({ filePath, mediaDirectory, seedProducts 
         if (changes.taste !== undefined) { if (changes.taste.trim()) product.taste = changes.taste.trim(); else delete product.taste; }
         if (changes.teaRegion !== undefined) { if (changes.teaRegion.trim()) product.teaRegion = changes.teaRegion.trim(); else delete product.teaRegion; }
         if (changes.summary !== undefined && changes.summary.trim()) product.summary = changes.summary.trim();
-        const variant = product.variants[0];
+        const variant = Array.isArray(product.variants) ? product.variants[0] : undefined;
         if (variant) {
           if (changes.specification?.trim()) variant.specification = changes.specification.trim();
           if (changes.price) variant.price = { ...changes.price };

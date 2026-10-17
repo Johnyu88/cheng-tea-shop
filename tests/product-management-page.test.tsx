@@ -94,3 +94,35 @@ test("loads optional tea facts back into the editor and includes them on save", 
   const saved = JSON.parse(String((fetchMock.mock.calls[1]?.[1] as RequestInit).body));
   expect(saved).toMatchObject({ id: product.id, tasteTags: ["sweet"], fermentation: "輕發酵", roast: "微", brewing: "建議90度水" });
 });
+
+test("keeps the product list visible when one product has no variants", async () => {
+  const malformed = { ...product, id: "broken", name: "資料不完整商品", variants: undefined };
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ ok: true, value: { items: [product, malformed] } }), { status: 200 })));
+
+  render(<ProductManagementPage />);
+
+  expect(await screen.findByText("資料不完整商品")).toBeInTheDocument();
+  expect(screen.getByText(product.name)).toBeInTheDocument();
+  expect(screen.getByText("規格：未設定／NT$—")).toBeInTheDocument();
+  expect(screen.queryByText("商品管理暫時無法顯示")).not.toBeInTheDocument();
+});
+
+test("shows a recoverable error instead of a blank page for an unexpected render error", async () => {
+  const malformed = { ...product, image: null };
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ ok: true, value: { items: [malformed] } }), { status: 200 })));
+
+  render(<ProductManagementPage />);
+
+  expect(await screen.findByRole("alert")).toHaveTextContent("商品管理暫時無法顯示");
+  expect(screen.getByRole("button", { name: "重新整理商品管理" })).toBeInTheDocument();
+});
+
+test("shows a visible message when the browser has no FileReader", async () => {
+  vi.stubGlobal("FileReader", undefined);
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ ok: true, value: { items: [product] } }), { status: 200 })));
+  render(<ProductManagementPage />);
+  await screen.findByText(product.name);
+  fireEvent.click(screen.getByRole("button", { name: "編輯" }));
+  fireEvent.change(screen.getByLabelText(/選擇新照片以更換/), { target: { files: [new File(["photo"], "sample.jpg", { type: "image/jpeg" })] } });
+  expect(await screen.findByText("此瀏覽器不支援照片讀取，原照片未更動。請改用其他瀏覽器。", { exact: true })).toBeInTheDocument();
+});

@@ -25,6 +25,8 @@ export function CheckoutPage(): JSX.Element {
   const [error, setError] = useState<DomainError>();
   const [receipt, setReceipt] = useState<CheckoutReceipt>();
   const [summaryExpanded, setSummaryExpanded] = useState(false);
+  const [abandonDialogOpen, setAbandonDialogOpen] = useState(false);
+  const [abandonStatus, setAbandonStatus] = useState<"idle" | "done">("idle");
 
   useEffect(() => {
     let active = true;
@@ -73,12 +75,34 @@ export function CheckoutPage(): JSX.Element {
     setReceipt(result.value); setSubmission("success");
   }, [cartState, checkoutService, draft, submission]);
 
+  const abandonPurchase = async () => {
+    if (cartState.status !== "ready") return;
+    const result = cartService.clearCart
+      ? await cartService.clearCart()
+      : await Promise.all(cartState.cart.lines.map((line) => cartService.removeItem(line.productId, line.variantId))).then(() => ({ ok: true as const, value: { lines: [], subtotal: { currency: "TWD" as const, amount: 0 } } }));
+    if (!result.ok) {
+      setError(result.error);
+      setSubmission("failure");
+      setAbandonDialogOpen(false);
+      return;
+    }
+    setDraft(initialDraft);
+    setStep("contact");
+    setSubmission("idle");
+    setError(undefined);
+    setReceipt(undefined);
+    setSummaryExpanded(false);
+    setCartState({ status: "ready", cart: result.value });
+    setAbandonDialogOpen(false);
+    setAbandonStatus("done");
+  };
+
   if (cartState.status === "loading") return <main><p role="status" aria-live="polite">正在準備結帳資料</p></main>;
   if (cartState.status === "failure") return <main><div role="alert">{cartState.message}</div></main>;
-  if (cartState.cart.lines.length === 0) return <main><section aria-labelledby="empty-checkout-heading"><h1 id="empty-checkout-heading">購物車是空的</h1><p>請先回到購物車確認想購買的茶品。</p><Link href="/cart">查看購物車</Link><Link href="/#catalog">開始選茶</Link></section></main>;
+  if (cartState.cart.lines.length === 0) return <main><section aria-labelledby="empty-checkout-heading">{abandonStatus === "done" && <p role="status">已放棄本次購買</p>}<h1 id="empty-checkout-heading">購物車是空的</h1><p>請先回到購物車確認想購買的茶品。</p><Link href="/cart">查看購物車</Link><Link href="/#catalog">開始選茶</Link></section></main>;
 
   const message = submission === "processing" ? "正在處理訂單" : submission === "success" ? "訂單已成立" : "";
-  return <main className="py-8 md:py-12"><p role="status" aria-live="polite" className="sr-only">{message}</p>{error && submission === "failure" && <div role="alert" className="mb-6 rounded-lg border-l-4 border-[var(--tea-brown)] bg-white p-4"><strong>請確認以下資料：</strong><p>{error.message}</p>{error.retryable && step === "review" && <button className="text-button" type="button" onClick={() => void submit()}>再試一次</button>}</div>}{submission === "success" && receipt ? <Success receipt={receipt} /> : <><p className="mb-6 rounded-lg border border-[var(--tea-brown)] bg-[var(--mist)] p-4"><strong>結帳原型提醒：</strong>此頁為合成展示／原型，不會送出真實付款，也不會保存付款資料。</p><div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start"><section className="rounded-2xl border border-black/10 bg-white p-5 md:p-8" aria-label="結帳步驟">{step === "contact" && <Contact draft={draft} change={change} next={nextContact} />}{step === "delivery" && <Delivery draft={draft} change={change} back={() => { setError(undefined); setSubmission("idle"); setStep("contact"); }} next={nextDelivery} />}{step === "review" && <Review draft={draft} processing={submission === "processing"} back={() => { setError(undefined); setSubmission("idle"); setStep("delivery"); }} submit={() => void submit()} />}</section><Summary cart={cartState.cart} expanded={summaryExpanded} toggle={() => setSummaryExpanded((current) => !current)} /></div></>}</main>;
+  return <main className="py-8 md:py-12"><p role="status" aria-live="polite" className="sr-only">{message}</p>{error && submission === "failure" && <div role="alert" className="mb-6 rounded-lg border-l-4 border-[var(--tea-brown)] bg-white p-4"><strong>請確認以下資料：</strong><p>{error.message}</p>{error.retryable && step === "review" && <button className="text-button" type="button" onClick={() => void submit()}>再試一次</button>}</div>}{submission === "success" && receipt ? <Success receipt={receipt} /> : <><p className="mb-6 rounded-lg border border-[var(--tea-brown)] bg-[var(--mist)] p-4"><strong>結帳原型提醒：</strong>此頁為合成展示／原型，不會送出真實付款，也不會保存付款資料。</p><div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start"><section className="rounded-2xl border border-black/10 bg-white p-5 md:p-8" aria-label="結帳步驟">{step === "contact" && <Contact draft={draft} change={change} next={nextContact} />}{step === "delivery" && <Delivery draft={draft} change={change} back={() => { setError(undefined); setSubmission("idle"); setStep("contact"); }} next={nextDelivery} />}{step === "review" && <Review draft={draft} processing={submission === "processing"} back={() => { setError(undefined); setSubmission("idle"); setStep("delivery"); }} submit={() => void submit()} abandon={() => setAbandonDialogOpen(true)} />}</section><Summary cart={cartState.cart} expanded={summaryExpanded} toggle={() => setSummaryExpanded((current) => !current)} /></div></>}{abandonDialogOpen && <AbandonDialog cancel={() => setAbandonDialogOpen(false)} confirm={() => void abandonPurchase()} />}</main>;
 }
 
 type Change = <Key extends keyof CheckoutDraft>(key: Key, value: CheckoutDraft[Key]) => void;
@@ -93,9 +117,13 @@ function Delivery({ draft, change, back, next }: { draft: CheckoutDraft; change:
   return <><p className="eyebrow">步驟 2／3</p><h1 id="checkout-delivery-heading" tabIndex={-1}>配送方式</h1><fieldset className="form-fieldset mt-6"><legend>選擇配送方式</legend><label className="form-option"><input type="radio" name="delivery" checked={draft.deliveryMethod === "home-delivery"} onChange={() => delivery("home-delivery")} />宅配</label><label className="form-option"><input type="radio" name="delivery" checked={draft.deliveryMethod === "store-pickup"} onChange={() => delivery("store-pickup")} />到店取貨</label></fieldset>{draft.deliveryMethod === "home-delivery" && <label className="form-field mt-4">宅配地址<textarea className="form-textarea" required value={draft.address ?? ""} onChange={(event) => change("address", event.target.value)} autoComplete="street-address" /></label>}<fieldset className="form-fieldset mt-6"><legend>付款方式</legend>{options.map(([value, label]) => <label className="form-option" key={value}><input type="radio" name="payment" checked={draft.paymentMethod === value} onChange={() => change("paymentMethod", value as CheckoutDraft["paymentMethod"])} />{label}</label>)}</fieldset><div className="form-actions mt-8"><button className="filter-button" type="button" onClick={back}>上一步</button><button className="primary-action" type="button" onClick={next}>下一步</button></div></>;
 }
 
-function Review({ draft, processing, back, submit }: { draft: CheckoutDraft; processing: boolean; back: () => void; submit: () => void }): JSX.Element {
+function Review({ draft, processing, back, submit, abandon }: { draft: CheckoutDraft; processing: boolean; back: () => void; submit: () => void; abandon: () => void }): JSX.Element {
   const payment = { "bank-transfer": "銀行轉帳", cash: "現金", "phone-confirmation": "電話確認", "line-voice-confirmation": "LINE 語音確認" }[draft.paymentMethod];
-  return <><p className="eyebrow">步驟 3／3</p><h1 id="checkout-review-heading" tabIndex={-1}>確認訂單</h1><dl className="mt-6 grid gap-3"><div><dt>配送</dt><dd>{draft.deliveryMethod === "home-delivery" ? `宅配至 ${draft.address}` : "到店取貨"}</dd></div><div><dt>付款</dt><dd>{payment}</dd></div></dl>{draft.deliveryMethod === "home-delivery" && <p className="mt-6 rounded-lg bg-[var(--mist)] p-4">宅配地址格式已檢查，仍須由店家人工覆核後才能安排配送。</p>}<p className="mt-6 rounded-lg bg-[var(--mist)] p-4">部分茶品數量有限；若庫存不足，我們會優先以電話與您聯絡後續安排。</p><div className="form-actions mt-8"><button className="filter-button" type="button" disabled={processing} onClick={back}>返回配送方式</button><button className="primary-action" type="button" disabled={processing} onClick={submit}>{processing ? "處理中" : "送出訂單"}</button></div></>;
+  return <><p className="eyebrow">步驟 3／3</p><h1 id="checkout-review-heading" tabIndex={-1}>確認訂單</h1><dl className="mt-6 grid gap-3"><div><dt>配送</dt><dd>{draft.deliveryMethod === "home-delivery" ? `宅配至 ${draft.address}` : "到店取貨"}</dd></div><div><dt>付款</dt><dd>{payment}</dd></div></dl>{draft.deliveryMethod === "home-delivery" && <p className="mt-6 rounded-lg bg-[var(--mist)] p-4">宅配地址格式已檢查，仍須由店家人工覆核後才能安排配送。</p>}<p className="mt-6 rounded-lg bg-[var(--mist)] p-4">部分茶品數量有限；若庫存不足，我們會優先以電話與您聯絡後續安排。</p><div className="form-actions checkout-review-actions mt-8"><button className="filter-button" type="button" disabled={processing} onClick={back}>返回配送方式</button><div className="checkout-primary-actions"><button className="abandon-action" type="button" disabled={processing} onClick={abandon}>放棄本次購買</button><button className="primary-action" type="button" disabled={processing} onClick={submit}>{processing ? "處理中" : "送出訂單"}</button></div></div></>;
+}
+
+function AbandonDialog({ cancel, confirm }: { cancel: () => void; confirm: () => void }): JSX.Element {
+  return <div className="abandon-dialog-backdrop"><div className="abandon-dialog" role="dialog" aria-modal="true" aria-labelledby="abandon-dialog-heading"><h2 id="abandon-dialog-heading">要放棄本次購買嗎？</h2><p>確認後將清除尚未送出的購物車與結帳草稿；已成立的訂單不會受到影響。</p><div className="form-actions"><button className="filter-button" type="button" onClick={cancel}>繼續購買／返回填寫</button><button className="abandon-action" type="button" onClick={confirm}>確認放棄</button></div></div></div>;
 }
 
 function Summary({ cart, expanded, toggle }: { cart: Cart; expanded: boolean; toggle: () => void }): JSX.Element {

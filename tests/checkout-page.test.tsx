@@ -1,4 +1,5 @@
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { vi } from "vitest";
 import type { Cart, CartService, CheckoutService } from "@/lib/domain";
 import { CommerceProvider } from "@/features/commerce/components/commerce-provider";
 import { CheckoutPage } from "@/features/checkout/components/checkout-page";
@@ -50,9 +51,9 @@ function createCheckoutService(overrides: Partial<CheckoutService> = {}): Checko
   };
 }
 
-function renderCheckout(options: { currentCart?: Cart; checkoutService?: CheckoutService } = {}) {
+function renderCheckout(options: { currentCart?: Cart; checkoutService?: CheckoutService; cartService?: CartService } = {}) {
   const services = {
-    cartService: createCartService(options.currentCart),
+    cartService: options.cartService ?? createCartService(options.currentCart),
     ...(options.checkoutService === undefined ? {} : { checkoutService: options.checkoutService }),
   };
 
@@ -62,6 +63,37 @@ function renderCheckout(options: { currentCart?: Cart; checkoutService?: Checkou
     </CommerceProvider>,
   );
 }
+
+it("keeps the checkout draft and cart when abandoning is cancelled", async () => {
+  const cartService = createCartService();
+  const clearCart = vi.fn(async () => ({ ok: true as const, value: emptyCart }));
+  cartService.clearCart = clearCart;
+  renderCheckout({ cartService });
+
+  await reachReview();
+  fireEvent.click(screen.getByRole("button", { name: "放棄本次購買" }));
+  expect(screen.getByRole("dialog")).toHaveTextContent("清除尚未送出的購物車與結帳草稿");
+  fireEvent.click(screen.getByRole("button", { name: "繼續購買／返回填寫" }));
+
+  expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  expect(screen.getByRole("heading", { name: "確認訂單" })).toBeInTheDocument();
+  expect(clearCart).not.toHaveBeenCalled();
+});
+
+it("clears the unsent cart when abandoning is confirmed", async () => {
+  const cartService = createCartService();
+  const clearCart = vi.fn(async () => ({ ok: true as const, value: emptyCart }));
+  cartService.clearCart = clearCart;
+  renderCheckout({ cartService });
+
+  await reachReview();
+  fireEvent.click(screen.getByRole("button", { name: "放棄本次購買" }));
+  fireEvent.click(screen.getByRole("button", { name: "確認放棄" }));
+
+  await waitFor(() => expect(clearCart).toHaveBeenCalledTimes(1));
+  expect(screen.getByText("已放棄本次購買")).toBeInTheDocument();
+  expect(screen.getByRole("link", { name: "查看購物車" })).toHaveAttribute("href", "/cart");
+});
 
 async function reachReview(email: string | null = validDraft.email) {
   await waitFor(() => expect(screen.getByRole("heading", { name: "聯絡資料" })).toBeInTheDocument());

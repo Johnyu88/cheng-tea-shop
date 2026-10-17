@@ -991,3 +991,258 @@ This checkpoint records preparation only; the 10/14 switch has **not** been perf
 - 修正：草稿測試配置公開目錄同步路徑；首頁主要導覽補回訂單查詢；結帳電話改為目前核定的 0800 聯絡號碼；後台改為既有管理員密碼登入介面，移除前台 Passkey/SMS 登入入口與 Demo 文案。
 - 回歸測試：`69` files、`343/343` tests PASS；`typecheck` PASS；`production build` PASS。Build 仍報告既有 Demo 檔案路徑的動態 filesystem tracing 警告。
 - 未完成：正式 PostgreSQL、物件儲存、資料遷移、Render 付費 Web Service、正式 HTTPS 與真實環境 E2E 尚未執行；不得以本階段測試結果宣稱正式部署完成。
+
+## 2026-10-15 PROD-ADMIN-03 Acer Caddy checkpoint
+
+- Caddy `tea-caddy-staging` was changed only after saving `C:\data\tea-staging\recovery\prod-admin-03-caddy-before`. The active route is `:80 -> host.docker.internal:8130`; `/healthz`, `/api/health`, `/admin/orders`, and `/admin/products` were verified through `https://acer-v5.tail4d8b5a.ts.net`.
+- The active backend is still the existing `tea-private-v5-reauth` image `tea-nextjs:reauth-05f058e`, mounted to `C:\data\tea-staging\private-accounting-v1-data`. Its live UI still shows phone login, so it is not the current worktree commit and cannot be called the completed password-login deployment.
+- No container was rebuilt, no existing SQLite/media data was deleted, and no other Caddy route was modified.
+- Stop point: deploy/activate the verified worktree revision under the user's container restriction, then obtain the original admin password through a secure channel for authenticated E2E. Do not claim completion before that evidence exists.
+
+## 2026-10-15 PROD-ADMIN-03 minimal reversible update — latest
+
+- Fixed the verified Acer direct-mode 404 root cause with the smallest allowlist change in `proxy.ts`; regression test is in `tests/cloud-demo.test.ts`.
+- Built and activated `tea-nextjs:prod-admin-03-0b36c71-r1` (`sha256:e247f2eb70688627e7b75a7d23ca230f2d4dc59bef3fdf58a30b09deb6f402cc`). Live container is `tea-private-v5-prod-admin-03-live` (`9c17dd26d8d42e4c4168fa22893830cc7ba0e11a7ebde9278d772b9742f7ef62`) on 8130.
+- `tea-private-v5-reauth` remains preserved/exited as rollback with the old image. Existing SQLite, catalog, and media mounts are unchanged.
+- Caddy now proxies `host.docker.internal:8130`; validate/reload succeeded and HTTPS health/admin routes returned 200.
+- Fresh live acceptance passed: existing password login, catalog, marked order creation, admin query, payment confirmation, packing photo, ship, deliver, cross-device lookup, and restart persistence. No secret values were printed.
+- Recovery summaries are at `C:\data\tea-staging\recovery\prod-admin-03-8130-before` and `...\prod-admin-03-8130-after`; Caddy pre-change rollback is `...\prod-admin-03-caddy-before`.
+- External mobile result is **BLOCKED**: the Caddy 443/8443 URLs are Tailscale `tailnet only`. The existing `:10000` Funnel targets unrelated 8131 and was not changed or used.
+- Local Git commit `47b6d26` is pushed to `origin/codex/prod-restore-20261015` (`SYNCED`).
+- Rollback: stop the live replacement, start `tea-private-v5-reauth`, restore the saved Caddyfile, and verify `/api/health` before any further action.
+
+## 2026-10-15 PROD-ADMIN-04 mobile external ingress — latest
+
+- Added only `https://acer-v5.tail4d8b5a.ts.net:10001` Funnel to the existing Caddy/8130 path. Existing 10000→8131, 443→8090, and 8443→8130 were not overwritten.
+- Caddy now uses the tracked `Caddyfile.prod-admin-04`; the 10001-only matcher normalizes the public port's forwarded origin to the already configured Acer origin. Caddy validate/reload passed.
+- Public checks: health 200; unauthenticated admin API 403; existing password login 200; authenticated admin API 200. No secrets/cookies were logged.
+- `tea-public-contact-4837371` remains the 10000 service (`127.0.0.1:8131`) and was not changed.
+- Mobile delivery remains **BLOCKED / NOT VERIFIED**: no physical phone without Tailscale was available, and the independent web probe could not resolve this Tailscale hostname. Do not claim Safari or LINE acceptance.
+- Recovery: `C:\data\tea-staging\recovery\prod-admin-04-before-funnel`, `C:\data\tea-staging\recovery\prod-admin-04-before-caddy-origin-fix`. Disable with `tailscale funnel --https=10001 off`; restore the saved Caddyfile only if needed.
+
+## 2026-10-15 UI-RWD-01 formal frontend release gate
+
+- UI-RWD-01 changes are isolated to the public storefront CSS/components and the new RWD integrity test; no admin, Caddy, order, payment, product data, or original-photo changes.
+- Evidence before deployment: Vitest 344/344 PASS; typecheck PASS; production build PASS; Chromium RWD 5/5 PASS at 390, 412, 768, 1080, and 1440px. WebKit/Safari automation is unavailable and remains unclaimed.
+- Current production frontend is Funnel `10000 -> 127.0.0.1:8131`, container `tea-public-contact-4837371`, image `tea-nextjs:contact-4837371`; 10001 remains the independent admin path.
+- Recovery backup: `C:\data\tea-staging\recovery\ui-rwd-01-before-10000`. Preserve the old container/image and the read-only catalog mount for immediate rollback.
+- Next action: commit/push, smoke-test the new image, then replace only 10000 and run HTTPS regression. Wait for the user's foldable-phone visual confirmation before calling the UI task fully accepted.
+
+## 2026-10-15 UI-RWD-01 10000 formal deployment
+
+- Commit pushed: `f2a2a78d0351f6f0f650a2e511ce79b83d954191` on `codex/prod-restore-20261015`.
+- 10000 now runs `tea-public-contact-4837371` from `tea-nextjs:ui-rwd-01-f2a2a78` (image `sha256:a3ade5517c5b...`); Funnel and proxy target remain `10000 -> 127.0.0.1:8131`.
+- Cutover was 10000-only. 10001 admin, Caddy 8090, backend 8130, 443, 8443, SQLite/files, and read-only catalog mount were not changed.
+- Official HTTPS route checks passed for home, catalog, cart, checkout, and tea detail. Playwright official viewport checks passed at 390/412/768/1080/1440px with no horizontal overflow, intact natural image ratios, `contain`, full-width audio, and single-column story/media at widths through 1080px.
+- Evidence files: `test-results/ui-rwd-01-official-phone-390.png`, `...fold-outer.png`, `...tablet-768.png`, `...fold-inner-1080.png`, `...desktop-1440.png`.
+- Rollback: stop/remove only the new `tea-public-contact-4837371`, rename `tea-public-contact-4837371-ui-rwd-01-rollback` back to `tea-public-contact-4837371`, start it; the old image and backup at `C:\data\tea-staging\recovery\ui-rwd-01-before-10000` remain intact. Do not delete either image/data mount.
+- Waiting for the user's real foldable-phone opened/closed visual confirmation; no physical-device PASS is claimed.
+
+## 2026-10-15 PROD-ADMIN-07 formal admin deployment consistency audit
+
+- Live backend: `tea-private-v5-prod-admin-03-live`, image `tea-nextjs:prod-admin-03-0b36c71-r1`, digest `sha256:e247f2eb70688627e7b75a7d23ca230f2d4dc59bef3fdf58a30b09deb6f402cc`.
+- Current Git HEAD `2e1dbec`; relevant admin products/order/auth/catalog source has no drift after `0b36c71`. Live `.next` route manifest contains both admin pages.
+- Active Caddy file is mounted from `C:\data\tea-staging\Caddyfile`; Funnel and Caddy target remain `10001 -> 8090 -> host.docker.internal:8130`. Product and order HTML routes are 200 at both public and forwarded-local paths.
+- Product page's route-specific static JS/CSS assets all returned 200. The consistency audit found no evidence that 10001 serves a wrong commit, wrong image, or wrong Caddy target.
+- Acceptance remains **FAIL / UNRESOLVED** on the user's foldable phone. Playwright/browser evidence cannot substitute for it; the missing artifact is the first real-device Console exception or failed Network request.
+- No code, container, Caddy route, SQLite, photo, order, or frontend change was made. Next action requires a redacted real-device capture, not another browser retest.
+
+## 2026-10-15 PROD-ADMIN-06B foldable product-management blank screen diagnosis
+
+- Real foldable-phone acceptance: FAIL reported on both the original browser and Chrome. No real-device PASS is claimed.
+- Live backend remains `tea-private-v5-prod-admin-03-live` / `tea-nextjs:prod-admin-03-0b36c71-r1`; no deployment or rollback state changed.
+- 10001 and forwarded-local 8130 product HTML matched by byte count/hash; public page JS assets all returned 200. Authenticated browser at 412px and 1080px rendered the product page and 10 products with visible geometry.
+- Authenticated cookie metadata: `__Host-demo_merchant`, Secure, HttpOnly, SameSite=Strict, Path=/; values were never printed. Session/catalog APIs returned 200. Console/pageerror count was zero. The only request failures were aborted Next RSC prefetches from normal link prefetch, not the page or API.
+- Current result is **BLOCKED / UNRESOLVED**, not repaired: the first real-device exception/request is still missing, so no code change is justified.
+- Required diagnostic handoff: from the failing phone, provide a redacted capture containing viewport/UA, first console exception, failed request URL path + status for `/_next/static/*` or `/api/*`, redirect chain, and cookie names/attributes only. Do not provide cookie values, passwords, or customer data.
+
+## 2026-10-15 PROD-ADMIN-05 public entry Not found fix — latest
+
+- Confirmed actual login path is `/admin/orders`; `/admin/login` does not exist. Before repair, `/`, `/admin/orders`, and `/admin/login` were measured independently at 8130, Caddy 8090, and Funnel 10001.
+- Fixed only the public 10001 root: `/` now redirects 302 to `/admin/orders`. The existing 443/8443/10000 routes remain unchanged.
+- Public DOM evidence now shows `茶行訂單管理` → `密碼登入` → `管理員密碼` field → `登入` button. Public unauthenticated admin API remains 403.
+- Caddy config remains `Caddyfile.prod-admin-04`; the public Host/Origin normalization is scoped to `Host *:10001`.
+- Recovery remains `C:\data\tea-staging\recovery\prod-admin-04-before-caddy-origin-fix\Caddyfile.before`; disable only the new ingress with `tailscale funnel --https=10001 off`.
+
+## 2026-10-15 PROD-ADMIN-09C diagnostic candidate
+
+- Added query-gated diagnostics only for `/admin/products?diagnostics=1`. The server HTML emits the panel before the product React tree; `/admin/products` without the query does not request the diagnostic script.
+- Added independent same-origin Vanilla JS error/resource listeners and a read-only bridge for React mount, Session API, and Catalog API status metadata. No request body, response body, cookie, token, password, product, or customer data is recorded.
+- Candidate verification: TypeScript PASS; production build PASS with the existing six dynamic filesystem tracing warnings; Vitest `70 files / 347 tests PASS`; Chromium Playwright `26/26 PASS`, including blocked Next chunks, Session 401, Catalog 503, and normal-mode no-diagnostic-request checks.
+- Full Playwright was `27/52 PASS` with `25` WebKit tests blocked because the local `webkit-2359` executable is absent; no browser download was performed. This is an environment limitation, not a WebKit PASS.
+- No formal 10001 deployment, container change, Caddy/Funnel change, SQLite/photo/order change, or frontend 10000 change was made. Candidate service used local port `3109` only.
+- Stop point: await ChatGPT review before any formal-site diagnostic deployment. Rollback is one commit revert; existing formal backend/container/image remain untouched.
+
+## 2026-10-15 PROD-ADMIN-23 reusable safe deployment tool
+
+- Added `tools/prod-admin-23/` with a Node named-pipe Docker Engine API client, isolation path checks, explicit synthetic source allowlist, redacted dry-run output, candidate health-check lifecycle, and failure cleanup.
+- Absolute Acer path: `C:\Users\alluser\Documents\Codex\2026-10-15\ui-rwd-01-johnyu88-cheng-tea\tools\prod-admin-23\cli.mjs`.
+- Isolation mode rejects normalized paths under `C:\data\tea-staging\private-accounting-v1-data` and `C:\data\tea-staging\public-visibility-live`; no formal source, Secret, SQLite, photo, Caddy, Funnel, or 8130 operation was used.
+- Verification: focused Vitest `6/6 PASS`; full Vitest `71 files / 356 tests PASS`; TypeScript and ESLint PASS; production build PASS with the existing six dynamic filesystem tracing warnings; synthetic Docker Engine API dry-run + candidate start/health/cleanup `PASS`; synthetic Secret did not appear in output.
+- The E2E source and candidate containers and isolation directories were removed after verification. Formal service remained running and unchanged.
+- Commit/push status: pending this checkpoint. Next action: inspect diff, run lint/full relevant verification, commit and push this branch. No formal deployment is authorized by this handoff.
+
+## 2026-10-15 PROD-ADMIN-24 formal switch capability
+
+- Extended the same tool with explicitly gated `production-switch` mode. It requires the exact verified source container/image IDs, candidate image ID, PROD-ADMIN-21 backup manifest, and known RW writer freeze list before any stop.
+- Failure path stops/removes only the new candidate and restores the original `tea-private-v5-prod-admin-03-live` plus previously frozen writers. The original container is never deleted and `tea-private-v5-reauth` is not used.
+- Tests: production guard/failure rollback `10/10 PASS` across the two tool suites; synthetic production-flow rehearsal PASS with zero temporary containers left; full Vitest `72 files / 360 tests PASS`; TypeScript and ESLint PASS; production build PASS with the existing six tracing warnings.
+- Read-only formal preflight PASS: source/container image IDs, candidate image ID, PROD-ADMIN-21 backup marker, and all four known RW writers matched; no formal Secret was emitted.
+- First formal switch attempt was automatically rolled back because the immediate post-start public health check did not allow for Caddy/Funnel reconnection. Read-only verification afterward showed the original container and all three other RW writers running, with 8130/10001/10000 all HTTP 200; no data or route change was left behind.
+- CLI health verification now has a bounded 60-second retry window for that transient proxy condition. The second formal switch succeeded: candidate `tea-private-v5-prod-admin-24-live` ID `3caf092c025f7a0f50a2298af18a00a8a944463c9b2255b30f1ec53c1d36326e` is running on 8130 with the candidate image; the original container remains preserved and stopped as rollback target. All three other RW writers were restored.
+- Post-switch read-only checks: local 8130 health 200, public 10001 health 200, public `/admin/products` 200, public `/admin/orders` 200, frontend 10000 200, catalog endpoint 200 with 7 items, unauthenticated admin-orders API 403. Tailscale Funnel remains 10000->8131 and 10001->8090. No Caddy/Funnel/data content change was made.
+- Focused tool tests after the retry fix are `10/10 PASS`; commit/push: `fd4d7f5`. Real password login and ordinary-phone product/order操作 remain manual acceptance items; no mock login was used.
+
+## 2026-10-16 前台設計主線恢復基準
+
+- PROD-ADMIN-24 已部署完成；最終交接 commit：`541e245`。
+- 正式後台目前為 `tea-private-v5-prod-admin-24-live`；原正式容器仍保留作為回退基準。
+- 明日待陳老師以一般手機實機驗收後台登入與操作；本階段不修改後台、訂單、資料庫或前台正式 10000。
+- 角色切換：Acer Codex 由部署工程師切換為前台網頁設計師。
+- 新主線：先讀取前台原始碼、設計文件、素材與既有驗收紀錄，盤點未完成 UX 問題；優先處理購物車按鈕並列、放棄購買與手機排版，再提出字體、色調、留白、按鈕、商品卡片與品牌質感提案。
+- 本階段只產出現況截圖、差異清單與設計提案；任何前台修改須在獨立分支／候選環境，經確認後才可開始，正式 10000 不得覆蓋。
+
+## 2026-10-16 前台設計第一階段候選版
+
+- 恢復基準：`8365372`；候選 worktree：`C:\Users\alluser\Documents\Codex\2026-10-16\github-johnyu88-cheng-tea-shop-codex\phase1-candidate`。
+- 候選分支：`codex/frontend-design-phase1-20261016`。本階段只修改候選前台，不修改正式 `:10000`、後台、商品／庫存、訂單、照片原檔或音訊。
+- 新增共用 `StorefrontShell`／Header，套用首頁、購物車、結帳與 public storefront；品牌維持「陳老師茶行」，保留首頁人物、茶席、茶湯、商品照片與音訊路徑。
+- 購物車維持數量調整、移除、服務計算與持久化；空購物車也提供首頁、繼續選茶、購物車導覽。
+- 結帳 review step 新增「放棄本次購買」二次確認。取消確認不呼叫清除服務並保留 draft；確認放棄只呼叫既有 `CartService.clearCart()`（若 adapter 不提供則逐項 remove），清除目前購物車與 React 內結帳 draft，已成立訂單不在此流程內。
+- 前台定向 RTL／整合測試：`37/37 PASS`。修改檔案限定 ESLint：`0 errors / 5 warnings`；完整 ESLint 仍有基準既有 3 errors，見測試紀錄。
+- TypeScript：`PASS`。Production build：`PASS`，僅既有 6 個 Turbopack 動態檔案存取 warnings。
+- 完整 Vitest：執行超過兩分鐘後仍未完成且只有既有 SQLite experimental warnings，已停止並列為 `BLOCKED/TIMEOUT`，不可視為 PASS。
+- Production server 瀏覽器驗收：390、412、768、1080、1440px 首頁／空購物車／空結帳均 `scrollWidth <= viewport`；390px 有商品結帳流程確認視窗、取消保留 draft、確認清空購物車均通過。
+- 截圖：`C:\Users\alluser\Documents\Codex\2026-10-16\github-johnyu88-cheng-tea-shop-codex\phase1-screenshots`，含五種寬度首頁／購物車／結帳及 `checkout-abandon-dialog-390.png`。
+- 下一步：等待總管與使用者人工驗收；未經核准不得進入第二階段品牌美術、合併 main 或部署正式環境。
+
+## 2026-10-16 PHASE1-VERIFY-02 補充驗證
+
+- 候選基準重新核對：worktree `phase1-candidate` clean，分支 `codex/frontend-design-phase1-20261016`，HEAD `1421ed1`；恢復基準為 `8365372`。
+- 正式前台唯讀核對：`tea-public-contact-4837371`（image `tea-nextjs:ui-rwd-01-f2a2a78`）的非敏感環境開關為 `PUBLIC_STOREFRONT_SERVER=enabled`、`NEXT_PUBLIC_MERCHANT_MANUAL_ORDER=enabled`、`NEXT_PUBLIC_DEMO_COMMERCE=disabled`；依 `app/checkout/page.tsx` 路由優先序，實際元件是 `MerchantManualCheckoutPage`，不是本候選新增放棄流程的 `CheckoutPage`。正式容器直接入口 `127.0.0.1:8131` 的 `/`, `/cart`, `/checkout` 均回 200；`:10000` 本機轉送入口以目前 Host 條件回 400，未修改或重啟。
+- 正式前台頁面唯讀內容有「陳老師茶行」與既有導覽，但沒有候選 `StorefrontShell` 的 `storefront-shell`／「前台導覽」標記，也沒有「放棄本次購買」；因此共用 Header 與放棄流程在候選原型測試為 PASS，在正式顧客流程為 **FAIL / 未覆蓋**。正式環境未做修正或部署。
+- 正式流程最小修正範圍：需在獨立候選部署驗證 `StorefrontShell` 與相容的 checkout mode，再經人工核准切換正式前台；不得直接在 `:10000` 或現有正式容器熱修。此工單不執行該修正。
+- 完整 Vitest 以 `CI=true corepack pnpm exec vitest run --maxWorkers=1 --no-file-parallelism --reporter=verbose --testTimeout=10000 --hookTimeout=10000` 新鮮執行：73 files / 363 tests PASS，exit 0，Vitest duration 275.45s（外層 280.118s）。沒有卡死檔案或失敗程序；前次兩分鐘觀察窗不足以涵蓋本套件。輸出顯示 jsdom 建立 73 次共 152.66s，是主要既有基準耗時來源；SQLite experimental warnings、React act warnings 與一筆預期錯誤邊界 stderr 均未造成測試失敗。未修改測試設定、未刪除／跳過／弱化測試。
+- 完整 ESLint 基準 `8365372` 與候選 `1421ed1` 均為 exit 1、20 problems（3 errors / 17 warnings）。三個相同 error：`app/admin/products/page.tsx:21:7` `@next/next/no-sync-scripts`；`features/checkout/components/public-order-checkout.tsx:18:33` `react-hooks/set-state-in-effect`；`tests/admin-products-diagnostic.test.ts:35:74` `@typescript-eslint/no-unsafe-function-type`。三個檔案均不在 `8365372..1421ed1` 的修改清單，判定為既有基準問題，非本階段引入。
+- PHASE1 仍維持 **PENDING**，尚未具備正式顧客流程的人工手機驗收條件；候選版的自動化五寬度證據仍僅代表 prototype/candidate，不得代替正式前台驗收。未進入第二階段品牌美術。
+
+## 2026-10-16 PHASE1-CHECKOUT-03 正式結帳模式補修
+
+- 恢復核對：候選 worktree `C:\Users\alluser\Documents\Codex\2026-10-16\github-johnyu88-cheng-tea-shop-codex\phase1-candidate`，分支 `codex/frontend-design-phase1-20261016`，施工前 HEAD `6caaded`；未修改正式 `:10000`、正式後台、正式訂單／商品／庫存或素材。
+- 正式旗標組合下，`app/checkout/page.tsx` 實際選用 `MerchantManualCheckoutPage`。本輪只在候選正式模式補上放棄購買，沒有改寫電話、LINE、匯款、庫存、訂單成立或出貨邏輯。
+- 正式模式資料生命週期確認：目前 checkout draft 是頁面內 React 狀態，購物車由既有 `CartService` 持久化至瀏覽器 key `chen-tea-public-cart-v1`；沒有另行寫入正式訂單或全站草稿資料庫。取消確認不呼叫清除；確認放棄只清除目前 CartService 的未送出購物車與 React draft。清除失敗顯示錯誤並保留資料；已成立訂單不在此流程內。
+- 新增 `tests/merchant-manual-checkout-page.test.tsx` 6 tests。TDD 紅燈證據：實作前 4 failed / 2 passed，失敗均因正式模式尚無放棄按鈕；實作後定向測試 6/6 PASS，涵蓋旗標分流、二次確認、取消保留、確認清除、清除失敗、重複點擊與單一 Header。
+- 完整 Vitest：`74 files / 369 tests PASS`，exit 0；Vitest duration `283.71s`，外層 `289.001s`。未修改全域測試設定，未刪除／跳過／弱化測試。輸出中的既有 SQLite、React act、錯誤邊界與資料檔 warning 未造成失敗。
+- TypeScript `tsc --noEmit` PASS。修改檔案 ESLint exit 0、0 errors、1 個既有 `@next/next/no-img-element` warning；全域 ESLint 的 3 個基準 errors 仍不處理。Production build 以正式非敏感旗標 PASS，20/20 static pages，保留既有 6 個 dynamic filesystem tracing warnings。
+- 候選環境為 `http://127.0.0.1:3111`，使用上述非敏感正式模式旗標；只使用隔離瀏覽器 localStorage 的 synthetic cart line，未連接正式可寫入資料來源，未產生真實訂單。Playwright 五寬度驗證 `390/412/768/1080/1440` 全部無水平捲動、正式模式可見放棄操作、取消保留、確認清除；390px 兩按鈕並列，各 `152x76px`，其餘寬度亦至少 52px 高。
+- 截圖位於 `phase1-checkout-03-screenshots`，含五寬度首頁／購物車／正式結帳與 `checkout-abandon-dialog-390.png`。首頁人物、茶湯、照片與音訊路徑未修改；候選瀏覽器檢查仍可見人物文字、音訊標記與 10 個圖片元素。
+- 本輪候選工程修正完成但 PHASE1 仍為 **PENDING**。候選人工手機驗收、正式前台切換與正式部署均未執行；不得以候選自動化證據宣稱正式站已驗收。候選 server 使用正常 `next start` 會提示 standalone 設定警告，未改動正式容器；此為候選驗證環境風險。
+
+## 2026-10-16 PHASE1-ACCEPT-05 第一階段驗收結案
+
+- 使用者已親自以一般手機完成候選驗收，三項均 PASS：購物車／結帳主要按鈕並列；放棄購買二次確認取消後保留資料；確認放棄後清空購物車且手機無跑版。
+- 人工驗收候選網址：`https://acer-v5.tail4d8b5a.ts.net:10002/`。驗收完成後已執行 `tailscale funnel --https=10002 off`，目前不再公開候選入口；候選程式與 `phase1-checkout-03-screenshots/` 均保留。
+- 正式前台 `10000` 與正式後台 `10001` 唯讀檢查仍回 200；未修改正式路由、正式容器、正式資料或素材。
+- PHASE1 驗收恢復基準：候選分支 `codex/frontend-design-phase1-20261016`，commit `b104163`；PHASE1 正式結案但狀態標記維持 **PENDING**，不得以此推導正式部署核准。
+
+## 2026-10-16 PHASE2 設計盤點（待核准，不施工）
+
+- 已提交 `docs/phase2-design-inventory-20261016.md`，內容涵蓋字體／文字層級、色彩語意、按鈕與商品卡、首頁構圖、人物／茶湯／茶葉素材完整呈現、RWD 與素材庫缺口。
+- 現況截圖沿用 `phase1-checkout-03-screenshots/` 的 390／412／768／1080／1440px 首頁、購物車、結帳與確認視窗證據。
+- 盤點結論：現有紙張米白／深茶綠／茶褐色基礎可保留；下一階段應先核准 typography、spacing、semantic color、button/card hierarchy，再評估首頁構圖與素材缺口。未修改任何程式、照片、音訊或正式環境。
+- PHASE2 目前只停在設計盤點，等待總管確認後才可施工；未進入品牌美術修改。
+
+## 2026-10-16 PHASE1-RECORD-06 狀態分離與 PHASE2-DESIGN-01 候選施工
+
+- 狀態修正：PHASE1 人工手機驗收為 **PASS**（使用者已確認三項通過）；PHASE1 正式部署為 **NOT DEPLOYED**。不再用單一 PENDING 混淆兩者。`b104163` 保留為人工驗收恢復基準；候選程式仍在 `codex/frontend-design-phase1-20261016`。
+- PHASE2-DESIGN-01 已依核准範圍完成候選施工：新增 typography／weight／line-height／spacing／semantic color tokens，統一四種按鈕層級，並改善商品卡標題／摘要／價格閱讀層級。
+- 保留品牌色 `#faf8f2`、`#20352e`、`#dbe6dc`、`#8b6446`；未修改照片、音訊、首頁段落順序、正式訂單、商品資料、PHASE1 購物車與放棄購買行為。
+- 修改前截圖沿用 `phase1-checkout-03-screenshots/`；修改後截圖保存於 `phase2-design-01-screenshots/`，五種寬度與 390px 對話框均已保存。
+- 完整 Vitest：75 files／371 tests PASS，Exit 0；TypeScript PASS；修改檔案 ESLint 0 errors／6 warnings；production build PASS，20/20 static pages，保留既有 6 個動態檔案追蹤 warnings。五寬度均無水平捲動，390px／412px／768px／1080px／1440px 的按鈕與文字換行證據見施工紀錄。
+- 正式前台 10000、正式後台 10001 未變動；10002 未重新開啟；未合併 main、未部署正式站。
+- PHASE2-DESIGN-01 完成後停止，等待人工確認；不得自行進入 PHASE2 下一小階段。
+
+## 2026-10-16 PHASE1-HTTPS-04 專用手機驗收入口
+
+- 施工前唯讀盤點確認 `3111` 僅為候選本機服務；10000／10001 為正式 Funnel，8443／8444／8445 為既有 tailnet-only mapping。新增前確認 10002 未占用，Windows Firewall 三個 profile 均維持原狀，未開放 3111 對外。
+- 新增唯一候選入口：`https://acer-v5.tail4d8b5a.ts.net:10002/` → `http://127.0.0.1:3111`。既有 10000／10001 與 8443–8445 mapping 未變更。停止指令：`tailscale funnel --https=10002 off`；停止後不影響正式入口。
+- 候選程序 command line 指向 `phase1-candidate` worktree，候選首頁／購物車／結帳 HTTPS 回 200；結帳頁包含「放棄本次購買」。正式 HTTPS 10000 與 10001 唯讀回應仍為 200。
+- 候選使用既有隔離 browser synthetic cart 與 manual checkout；本輪沒有送出訂單或呼叫正式資料 API。手機驗收只應使用 synthetic 資料，不輸入真實個資、不按任何可能送出正式訂單的操作。
+- 目前入口已啟用，等待人工 Android／iPhone 驗收；完成後執行上述停止指令，並以 `tailscale serve status` 確認 10002 消失。PHASE1 維持 **PENDING**，未合併 main、未部署正式環境、未進入 PHASE2。
+
+## 2026-10-16 PHASE2-CATEGORY-02 十大茶類手機分類
+
+- 候選施工基準為 `f6c9da9`，分支仍為 `codex/frontend-design-phase1-20261016`；本輪只修改候選前台分類元件、樣式、測試與交接文件，未修改正式 `10000`／`10001`、商品資料、照片、音訊、訂單或庫存。
+- 新增公開分類固定順序：全部、台灣野生山茶、綠茶、白茶、黃茶、青茶、紅茶、黑茶、花茶、特殊茶、老茶。手機分類列為單排 `overflow-x: auto` 橫向滑動，按鈕使用 `aria-pressed` 並保留鍵盤操作；下拉選單備用方案以未展開 `details` 提供。
+- 分類篩選只讀取既有 `Product.category`，公開前台再次限制 `publication === "published"`；沒有符合資料時顯示友善空狀態，不建立假商品。原型 `CatalogBrowser` 與正式旗標下的 `PublicTeaStorefront` 均覆蓋。
+- 映射差異：管理／歷史分類順序不同；`oolong` 顯示為「青茶」，`other` 不列入十大分類。確認公開 fixture 目前有台灣野生山茶、青茶、綠茶、花茶、黃茶、白茶、紅茶、老茶共 8 類，黑茶與特殊茶目前沒有已上架資料；未修改任何資料補類。
+- TDD 紅燈：新增分類測試施工前 `4 failed / 0 passed`。施工後定向分類／CatalogBrowser 測試 `7/7 PASS`；修改檔案 ESLint `0 errors / 3 existing no-img warnings`；TypeScript PASS。完整 Vitest `76 files / 375 tests PASS`、exit 0、235.69 秒；production build PASS（20/20 static pages，保留既有 6 個 dynamic filesystem tracing warnings）。完整 ESLint 仍為 `3 errors / 17 warnings`，三個 error 均為既有基準問題：`app/admin/products/page.tsx:21`、`features/checkout/components/public-order-checkout.tsx:18`、`tests/admin-products-diagnostic.test.ts:35`，本輪未修改。
+- 候選 `127.0.0.1:3111` 五寬度瀏覽器驗證 PASS：390／412／768／1080／1440 均 HTTP 200、11 個分類按鈕、`overflow-x:auto`、`flex-wrap:nowrap`、頁面 `scrollWidth === viewportWidth`；特殊茶無資料顯示空狀態，回到全部後 8 張已上架商品恢復；`/cart`／`/checkout` 均 HTTP 200。PHASE1 放棄購買與結帳回歸包含在完整 Vitest 中通過。
+- 截圖保存於 `phase2-category-02-screenshots/`：`home-390.png`、`home-412.png`、`home-768.png`、`home-1080.png`、`home-1440.png`。候選服務可供人工驗收，但本輪未重新開啟或修改 10002；等待人工確認，不進入下一個 PHASE2 小階段。
+
+## 2026-10-16 PHASE2-REGRESSION-03 前台非授權變更回歸
+
+- 差異定位：`897e319` 只修改分類元件、公開商品篩選、分類樣式、測試與文件；沒有修改「來喝茶」、地址或購物車檔案。`b104163`／`f6c9da9` 已缺少茶行邀請與地址；Git 歷史顯示缺口源自更早的 `1421ed1` Shell 抽取。`4837371` 是可核對的最後歷史內容來源。
+- 最小恢復：在保留共用 `StorefrontShell`、十大分類、銀行資訊與既有購物車行為的前提下，恢復歷史「有空，來找陳老師喝杯茶。」、電話約喝茶、地址 `427 台中市潭子區潭秀里雅潭路一段38巷2號` 與原 Google 地圖連結。未修改商品、價格、訂單、資料庫、照片或音訊。
+- 購物車來源比對：`features/cart/components/cart-page.tsx` 在 `f6c9da9` 與 `897e319` 完全相同；本輪沒有回退按鈕並列、數量、移除、金額或結帳路徑。PHASE1 放棄購買與資料保留仍由既有回歸測試覆蓋。
+- TDD：恢復測試施工前 `1 failed`，恢復後定向回歸／分類測試 `5/5 PASS`。完整 Vitest `77 files / 376 tests PASS`、exit 0、246.52 秒；TypeScript PASS；Production build PASS；完整 ESLint 仍 `3 errors / 17 warnings`，3 errors 為既有基準問題，未修改。
+- 候選瀏覽器驗證：首頁 390／412／768／1080／1440 截圖均保存；首頁文案、地址、地圖連結存在，390px `scrollWidth === viewportWidth`。購物車與結帳三區截圖保存於 `phase2-regression-03-screenshots/`，候選服務 `127.0.0.1:3111` 回應正常。等待使用者手機驗收，不進入下一階段。
+
+## 2026-10-16 PHASE2-CHECKOUT-RECOVERY-04 人工接單流程回歸修復
+
+- 唯讀正式基準：實際 HTTPS `https://acer-v5.tail4d8b5a.ts.net:10000/checkout` 回傳 `MerchantManualCheckoutPage`，電話、LINE、匯款可見，但正式頁沒有「放棄本次購買」；正式站未修改。
+- 候選差異定位：`f87e693` 相較已確認歷史 `f4bc5c0` 少了「複製清單／開啟陳老師 LINE／貼上傳送」三步驟與直接「透過 LINE 聯絡訂購」入口。本輪只恢復缺失 UI，不改 API、訂單或付款邏輯。
+- TDD 證據：施工前定向結果 `1 failed / 6 passed`；修復後定向人工接單／回歸測試 `8/8 PASS`。
+- 完整驗證：Vitest `77 files / 377 tests PASS`、exit 0、87.68s；TypeScript PASS；修改檔案 ESLint `0 errors / 1 existing no-img warning`；production build 以正式非敏感旗標 PASS。既有全域 ESLint 3 errors 未處理。
+- 候選入口：`https://acer-v5.tail4d8b5a.ts.net:10002/` → `127.0.0.1:3111`；10000／10001 與既有 8443–8445 映射未改寫。候選首頁、`/cart`、`/checkout` HTTPS 200。
+- 五寬度截圖保存於 `phase2-checkout-recovery-04-*.png`；390／412／768／1080／1440 均無頁面水平捲動。390px 互動已驗證：取消二次確認保留 cart／訂購清單，確認放棄後回到空購物狀態；對話框為 `phase2-checkout-recovery-04-abandon-dialog-390.png`。
+- 資料隔離：僅使用候選瀏覽器 localStorage 的 synthetic cart，未建立訂單、未送出聯絡資料、未呼叫正式可寫入資料；清除只走既有 `CartService.clearCart()`。入口驗收完成後可執行 `tailscale funnel --https=10002 off`。
+- 目前仍停在人工驗收閘門，不合併 main、不部署正式站、不進入下一階段。
+
+## 2026-10-16 PHASE2-TEA-INVITATION-06 來喝茶區塊字體優化
+
+- 基準：恢復標記 `phase2-checkout-accept-05-aff7262` 指向 `aff7262`；本輪只修改候選首頁「來喝茶」區塊的排版 hooks 與 CSS，未覆蓋標記。
+- 原本文案、地址、電話、LINE、Google 地圖連結完全保留；十大茶類、購物車、LINE、匯款、放棄購買與結帳流程未修改。
+- TDD：新增排版回歸測試，修改前 `1 failed / 1 passed`；修改後定向測試 `2/2 PASS`。
+- 排版實測：390／412px 標題 `26px`、邀請文字 `18px`、地址 `16px`；768px 標題 `30.72px`；1080／1440px 標題 `36px`、邀請文字 `20px`、地址 `18px`。電話與 Google 地圖連結高度約 `54.4px`，可點擊且文字完整。
+- 五寬度瀏覽器驗證：390／412／768／1080／1440 均 `scrollWidth === innerWidth`，無水平溢出。修改前截圖沿用 `phase2-regression-03-screenshots/home-390.png`、`home-412.png`、`home-768.png`、`home-1080.png`、`home-1440.png`；修改後截圖保存於 `phase2-tea-invitation-06-after-390.png`、`after-412.png`、`after-768.png`、`after-1080.png`、`after-1440.png`。
+- 完整 Vitest：`77 files / 378 tests PASS`，exit 0；TypeScript PASS；修改檔案 ESLint `0 errors`（既有圖片與 CSS 設定 warnings）；production build PASS。未開啟 10002、未修改正式 10000／10001。
+- 本輪完成後停止，等待手機人工確認；未進入下一個 PHASE2 小階段。
+
+## 2026-10-16 PHASE2-CHECKOUT-ACCEPT-05 人工驗收封存
+
+- 使用者已以手機驗收候選程式基準 `aff7262`，以下三項為 **PASS**：LINE 三步驟訂購；電話聯絡及匯款資訊；放棄購買二次確認。
+- 十大茶類橫向分類與操作：使用者先前人工驗收為 **PASS**，本次僅封存狀態，未重新宣稱驗收。
+- 「來喝茶」文案與茶行地址：候選版已依歷史來源恢復，工程與候選畫面可核對；本次沒有收到使用者人工 PASS，因此記為 **候選已恢復／人工狀態未確認**，不得視為人工驗收通過。
+- 結帳流程：本次人工確認的人工接單三項為 **PASS**；購物車數量／移除／金額、已成立訂單不受取消操作影響等未在本次手機回報中重新確認，維持既有測試與歷史驗收紀錄，不擴大標記為本次人工 PASS。
+- 建立恢復標記 `phase2-checkout-accept-05-aff7262`，精確指向 `aff7262`；不覆蓋既有 `usable-baseline-2026-10-13` 或其他標記。
+- 本次只更新交接文件與 Git 標記；未修改網站功能、商品、訂單、資料庫或正式部署。候選 HTTPS `10002` 封存後關閉；正式 `10000`／`10001` 保持運作。
+
+## 2026-10-16 PHASE2-TEA-INVITATION-08 手機驗收封存
+
+- 使用者已完成 PHASE2-TEA-INVITATION-07 手機人工驗收，驗收程式基準為 `adbe4309707c1919eb2fc1738d0d373add9f39f1`。
+- 三項結果均為 **PASS**：標題與邀請文字大小適中；茶行地址清楚且自然換行；字體、間距與色調協調。
+- 十大茶類橫向分類與操作的既有人工驗收紀錄仍為 **PASS**；人工訂購流程的 LINE 三步驟、電話／匯款、放棄購買二次確認既有人工驗收紀錄仍為 **PASS**。
+- 建立新恢復標記 `phase2-tea-invitation-08-adbe430`，精確指向 `adbe4309707c1919eb2fc1738d0d373add9f39f1`；既有 `phase2-checkout-accept-05-aff7262` 保留且未覆蓋。
+- 本次只更新交接文件與 Git 標記，未修改網站功能、視覺、正式商品／訂單／資料庫或正式部署。候選 HTTPS 10002 已於封存後關閉；正式 10000／10001 維持運作。
+
+## 2026-10-16 PHASE3-PROD-FRONTEND-DEPLOY-01 正式前台部署
+
+- 使用者已明確授權正式部署；來源固定為 `adbe4309707c1919eb2fc1738d0d373add9f39f1`，驗收標記 `phase2-tea-invitation-08-adbe430`，文件基準 `396d27066e19c626ff116594b4e774d2bd8a3c4f`。未合併 `main`、未改寫驗收標記。
+- 部署時間：`2026-10-16T03:02:51+08:00`。新 image：`tea-nextjs:prod-frontend-adbe430`，digest `sha256:463107219334b60d6e9dd9555ceba9a6b81e0dc12c771f32dd9937b5e39cd148`；新正式前台容器：`tea-public-adbe430-live`／`3048d710450b69d5e13c6762f8584a2c5601e4a4553d6b5f56f27dce8ee3093f`。
+- 10000 Funnel 映射未改寫，仍為 `https://acer-v5.tail4d8b5a.ts.net:10000/` → `127.0.0.1:8131`。原正式容器 `tea-public-contact-4837371`／`f32aeef95b489a6f13a0261a6752610d7566d28041cf25cfe50337573a70d74d` 已停止但保留；原 image `tea-nextjs:ui-rwd-01-f2a2a78`／`sha256:a3ade5517c5b90a09b693ae69c023882d6b38b3e40d57ed8b1fed44bd9f3c8fa` 未刪除。
+- 新容器只掛載 `C:\data\tea-staging\public-visibility-live` → `/app/catalog-sync` 的唯讀掛載，沒有 `/app/data` 或正式可寫入資料掛載。公開 catalog SHA-256 為 `75CB73640D2065F19CD7ED65D666F102317B4B1A25F8EFB5103399335BCC0E43`，切換前後未變更。
+- 部署前：Docker production build、TypeScript、關鍵回歸 5 檔／21 測試 PASS；舊 image 在獨立 `8141` 回退複本實際啟動、首頁 HTTP 200、catalog 可讀後已清理。
+- 切換後：10000 `/`、`/cart`、`/checkout`、`/api/public/catalog` 均 HTTP 200；10001 `/` HTTP 200，Caddy container 與 Funnel `10001 → 8090` 未變。正式 catalog 7 件商品的 ID／分類／上架狀態與切換前一致。390px Playwright 驗證首頁／購物車／結帳無水平溢出；放棄購買對話框、取消保留 cart、確認後清除 cart 均 PASS。未送出 POST、未建立真實訂單。
+- storefront proxy 依正式安全設計封鎖 `/api/health` 為 404；正式與新容器行為一致，健康證據採首頁／catalog／關鍵路由／容器狀態。
+- 回退：`docker stop tea-public-adbe430-live; docker start tea-public-contact-4837371`，10000 Funnel 不需修改。回退後應重新以 `curl -k https://acer-v5.tail4d8b5a.ts.net:10000/` 驗證 HTTP 200。
+- 正式前台已部署，等待使用者手機人工驗收；不進入下一階段，不修改 10001、正式資料、照片、音訊或機密設定。
+
+## 2026-10-16 PHASE3-PROD-FRONTEND-ACCEPT-02 正式部署驗收封存
+
+- 使用者已完成正式前台 `https://acer-v5.tail4d8b5a.ts.net:10000/` 手機人工驗收，3/3 PASS：首頁／十大茶類／商品照片；購物車／LINE／電話／匯款／放棄購買；來喝茶文字／地址／地圖連結。
+- 正式部署基準為程式 commit `adbe4309707c1919eb2fc1738d0d373add9f39f1`、容器 `tea-public-adbe430-live`、image digest `sha256:463107219334b60d6e9dd9555ceba9a6b81e0dc12c771f32dd9937b5e39cd148`；部署時間為 `2026-10-16T03:02:51+08:00`。部署文件基準 `01992cf39a4d5a4def88659a2704aa7f2c2f8852` 保留。
+- 唯讀封存核對：10000 HTTP 200、10001 HTTP 200；正式公開 catalog 仍為 7 件商品。10000 Funnel 維持 `https://acer-v5.tail4d8b5a.ts.net:10000/` → `127.0.0.1:8131`，10001 維持 → `127.0.0.1:8090`。
+- `/api/health` 回傳 404 是 storefront proxy 既有安全行為，不記錄為健康檢查 PASS；本次健康狀態以公開首頁／catalog／路由 HTTP 200 與容器運行狀態記錄。
+- 舊容器 `tea-public-contact-4837371` 與舊 image `tea-nextjs:ui-rwd-01-f2a2a78`／`sha256:a3ade5517c5b90a09b693ae69c023882d6b38b3e40d57ed8b1fed44bd9f3c8fa` 保留未刪除。回退指令：`docker stop tea-public-adbe430-live; docker start tea-public-contact-4837371`，Funnel 不需修改。
+- 建立恢復標記 `phase3-prod-frontend-accept-02-adbe430`，精確指向 `adbe4309707c1919eb2fc1738d0d373add9f39f1`；既有驗收標記全部保留。正式部署驗收封存完成，等待後續明確授權。

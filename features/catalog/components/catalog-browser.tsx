@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useState, type JSX } from "react";
 import Link from "next/link";
 import type { CatalogService, Product, TasteTag } from "@/lib/domain";
+import type { TeaCategory } from "@/lib/domain";
+import { CategoryFilter } from "./category-filter";
 
 type CatalogBrowserProps = { catalogService: CatalogService };
 
@@ -21,7 +23,7 @@ const tasteOptions: Array<{ value: TasteTag | undefined; label: string }> = [
 ];
 
 function ProductCard({ product }: { product: Product }): JSX.Element {
-  const variant = product.variants[0];
+  const variant = Array.isArray(product.variants) ? product.variants[0] : undefined;
 
   return (
     <article className="product-card">
@@ -30,12 +32,12 @@ function ProductCard({ product }: { product: Product }): JSX.Element {
       </div>
       <div className="product-card-content">
         <p className="product-taste">{product.tasteTags.join("・")}</p>
-        <h3>{product.name}</h3>
-        <p className="product-summary">{product.summary}</p>
-        <p className="product-meta">
-          {variant?.specification}／NT${variant?.price.amount.toLocaleString("zh-TW")}
+        <h3 className="product-card-title">{product.name}</h3>
+        <p className="product-summary product-card-summary">{product.summary}</p>
+        <p className="product-meta product-card-price">
+          {variant?.specification ?? "未設定"}／NT${variant?.price?.amount?.toLocaleString("zh-TW") ?? "—"}
         </p>
-        <Link className="product-link" href={`/tea/${product.slug}`}>
+        <Link className="product-link button-quiet" href={`/tea/${product.slug}`}>
           查看茶品
         </Link>
       </div>
@@ -45,12 +47,14 @@ function ProductCard({ product }: { product: Product }): JSX.Element {
 
 export function CatalogBrowser({ catalogService }: CatalogBrowserProps): JSX.Element {
   const [taste, setTaste] = useState<TasteTag | undefined>();
+  const [category, setCategory] = useState<TeaCategory | undefined>();
   const [state, setState] = useState<CatalogState>({ status: "loading", products: [] });
   const [requestKey, setRequestKey] = useState(0);
 
   const loadPage = useCallback(
     async (cursor?: string, append = false) => {
       const query = {
+        ...(category === undefined ? {} : { category }),
         ...(taste === undefined ? {} : { taste }),
         ...(cursor === undefined ? {} : { cursor }),
       };
@@ -67,7 +71,7 @@ export function CatalogBrowser({ catalogService }: CatalogBrowserProps): JSX.Ele
           : { status: "ready", products, nextCursor: result.value.nextCursor, total: result.value.total };
       });
     },
-    [catalogService, taste],
+    [catalogService, category, taste],
   );
 
   useEffect(() => {
@@ -77,6 +81,11 @@ export function CatalogBrowser({ catalogService }: CatalogBrowserProps): JSX.Ele
   const chooseTaste = (nextTaste: TasteTag | undefined) => {
     setState({ status: "loading", products: [] });
     setTaste(nextTaste);
+    setRequestKey((key) => key + 1);
+  };
+  const chooseCategory = (nextCategory: TeaCategory | undefined) => {
+    setState({ status: "loading", products: [] });
+    setCategory(nextCategory);
     setRequestKey((key) => key + 1);
   };
 
@@ -109,11 +118,12 @@ export function CatalogBrowser({ catalogService }: CatalogBrowserProps): JSX.Ele
           </button>
         ))}
       </div>
+      <CategoryFilter value={category} onChange={chooseCategory} />
 
       {state.status === "loading" && <p role="status">正在整理茶品目錄</p>}
       {state.status === "empty" && (
         <div className="catalog-message" role="status">
-          <p>目前找不到符合口感的茶品。</p>
+          <p>目前找不到符合{category === undefined ? "口感" : "茶類"}的茶品。</p>
           <button type="button" className="text-button" onClick={() => chooseTaste(undefined)}>
             查看全部茶品
           </button>
@@ -137,7 +147,7 @@ export function CatalogBrowser({ catalogService }: CatalogBrowserProps): JSX.Ele
           {nextCursor !== null && (
             <button
               type="button"
-              className="load-more-button"
+              className="load-more-button button-secondary"
               aria-label="載入更多茶品"
               onClick={() => {
                 setState((current) => ({ status: "loading", products: current.products }));

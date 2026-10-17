@@ -1,18 +1,21 @@
+"use client";
+
+import { useMemo, useState } from "react";
 import Link from "next/link";
-import type { Product } from "@/lib/domain/types";
+import type { Product, TeaCategory } from "@/lib/domain/types";
+import { CategoryFilter } from "@/features/catalog/components/category-filter";
+import { StorefrontShell } from "@/features/storefront/components/storefront-shell";
 
 const line = "https://line.me/ti/p/TT6TRQyMF6";
 export function PublicTeaStorefront({ teas }: { teas: Product[] }) {
-  return <div className="site-shell">
-    <header className="site-header">
-      <Link className="brand-mark" href="/">陳老師茶行</Link>
-      <nav aria-label="主要導覽">
-        <a href="#tea-list">精選茶品</a>
-        <a href="#contact">聯絡訂購</a>
-        <Link href="/cart">購物車</Link>
-      </nav>
-    </header>
-    <main>
+  const [category, setCategory] = useState<TeaCategory | undefined>();
+  const publishedTeas = useMemo(() => teas.filter((tea) => tea.publication === "published"), [teas]);
+  const visibleTeas = useMemo(
+    () => publishedTeas.filter((tea) => category === undefined || tea.category === category),
+    [category, publishedTeas],
+  );
+
+  return <StorefrontShell><main>
       <section className="hero">
         <p className="eyebrow">陳老師茶行</p>
         <h1>慢慢選一杯好茶</h1>
@@ -32,7 +35,7 @@ export function PublicTeaStorefront({ teas }: { teas: Product[] }) {
           </picture>
           <div className="teacher-story-audio">
             <p>鳥鳴 2／茶園自然聲景</p>
-            <audio aria-label="茶園鳥鳴 2 音效" controls preload="none">
+            <audio aria-label="茶園鳥鳴 2 音效" controls preload="metadata">
               <source src="/media/tea-stream-birds.wav" type="audio/wav" />
               您的瀏覽器不支援音訊播放。
             </audio>
@@ -41,10 +44,12 @@ export function PublicTeaStorefront({ teas }: { teas: Product[] }) {
         </div>
       </section>
       <section id="tea-list" className="catalog-browser" aria-labelledby="teas-heading">
-        <div className="catalog-heading-row"><div><p className="eyebrow">精選茶品</p><h2 id="teas-heading">精選茶品</h2></div><span className="catalog-count">共 {teas.length} 款</span></div>
+        <div className="catalog-heading-row"><div><p className="eyebrow">精選茶品</p><h2 id="teas-heading">精選茶品</h2></div><span className="catalog-count">共 {visibleTeas.length} 款</span></div>
         <p className="muted">茶名、規格與參考價格依既有茶樣資料整理；實際價格與供貨以陳老師確認為準。</p>
+        <CategoryFilter value={category} onChange={setCategory} />
+        {visibleTeas.length === 0 && <div className="catalog-message" role="status"><p>目前找不到符合茶類的茶品。</p><button type="button" className="text-button" onClick={() => setCategory(undefined)}>查看全部茶品</button></div>}
         <div className="product-grid">
-          {teas.map(tea => <article className="product-card" key={tea.id}>
+          {visibleTeas.map(tea => { const variant = Array.isArray(tea.variants) ? tea.variants[0] : undefined; return <article className="product-card" key={tea.id}>
             <div className="product-placeholder" role="img" aria-label={tea.image.alt}>
               {tea.image.src ? <img src={tea.image.src} alt={tea.image.alt} loading="lazy"/> : <p>請洽陳老師確認照片</p>}
             </div>
@@ -52,24 +57,31 @@ export function PublicTeaStorefront({ teas }: { teas: Product[] }) {
               <p className="product-taste">{tea.tasteTags.join("・")}</p>
               <h3>{tea.name}</h3>
               <p className="product-summary">{tea.summary}</p>
-              <p className="product-meta">{tea.variants[0]?.specification}／參考價 NT${tea.variants[0]?.price.amount.toLocaleString("zh-TW")}</p>
+              <p className="product-meta">{variant?.specification ?? "未設定"}／參考價 NT${variant?.price?.amount?.toLocaleString("zh-TW") ?? "—"}</p>
               <Link className="product-link" href={`/tea/${tea.slug}`}>查看茶品／加入購物車</Link>
             </div>
-          </article>)}
+          </article>; })}
         </div>
       </section>
       <section id="contact" className="demo-panel mt-8" aria-labelledby="contact-heading">
-        <h2 id="contact-heading">電話與 LINE 訂購</h2>
-        <p>請先確認茶品、運費與實際金額，再依店家確認方式付款。</p>
-        <div className="form-actions mt-4">
-          <a className="primary-action" href="tel:0919086099">電話 0919-086-099</a>
+        <p className="eyebrow">茶香裡，慢慢聊</p>
+        <h2 id="contact-heading" className="tea-invitation-heading">有空，來找陳老師喝杯茶。</h2>
+        <p className="tea-invitation-copy">不趕時間，坐下來聊聊天、聞聞茶香，慢慢找到自己喜歡的好茶。歡迎先來電或透過 LINE 聯絡，約個方便的時間來喝茶。</p>
+        <div className="form-actions tea-invitation-actions mt-4">
+          <a className="primary-action" href="tel:0919086099">電話約喝茶：0919-086-099</a>
           <a className="filter-button" href={line} target="_blank" rel="noopener noreferrer">LINE 聯絡陳老師</a>
+        </div>
+        <div className="tea-invitation-location mt-6">
+          <h3>來喝茶的地方</h3>
+          <p className="tea-invitation-address">427 台中市潭子區潭秀里雅潭路一段38巷2號</p>
+          <p className="muted">來訪前歡迎先電話或 LINE 約時間。</p>
+          <a className="filter-button mt-3 inline-flex" href="https://maps.app.goo.gl/hu1s5npHJxb1Yghp8?g_st=ic" target="_blank" rel="noopener noreferrer">開啟 Google 地圖導航</a>
         </div>
         <a href={line} target="_blank" rel="noopener noreferrer" aria-label="LINE 聯絡 QR Code">
           <img src="/media/chen-teacher-line-qr.svg" width={160} height={160} alt="陳老師 LINE QR Code"/>
         </a>
         <p>匯款銀行：中國信託；帳號：026540263310。請先由店家確認訂單金額後再匯款。</p>
+        <p className="mt-4">訂購茶品可先透過網站送單，再由陳老師電話確認品項、金額與付款方式。</p>
       </section>
-    </main>
-  </div>;
+    </main></StorefrontShell>;
 }

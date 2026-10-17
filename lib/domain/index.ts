@@ -62,6 +62,7 @@ export type {
   TeaCategory,
   VariantId,
 } from "./types";
+export { storefrontCategoryOptions, storefrontTeaCategories } from "./tea-categories";
 
 export { createMockCatalogService } from "./mock/mock-catalog-service";
 export { createMockCartService } from "./mock/mock-cart-service";
