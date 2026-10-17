@@ -19,7 +19,7 @@ export async function POST(request: Request) {
       mobilePushPreview: createDemoMobilePushPreview(order.orderNumber ?? order.orderId, order.status),
     });
   } catch (error) {
-    if (error instanceof DemoRateLimitError) return Response.json({ ok: false, error: error.message }, { status: 429, headers: { "Retry-After": String(error.retryAfterSeconds) } });
+    if (error instanceof DemoRateLimitError) return demoFailure(error, 429, { headers: { "Retry-After": String(error.retryAfterSeconds) } });
     return demoFailure(new Error("查無符合資料的訂單，或驗證碼無效／過期，請確認訂單編號、姓名及手機末三碼後再試", { cause: error }), 403);
   }
 }

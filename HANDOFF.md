@@ -6,7 +6,7 @@
 - **Code (branch `claude/server-logging`, not deployed):**
   - `lib/server/logger.ts` uses pino and writes one JSON line per event to stdout, with Cloud Logging `severity`/`message` fields and a `service` tag (`LOG_SERVICE`).
   - Credential and contact fields are redacted, and JSON-parse error text (which quotes the request body) is never logged.
-  - Every `demoFailure()` now creates a 6-character `errorCode`. It is returned in the body and in `x-error-code`, logged with the real cause, and shown in the UI as「（錯誤代碼：XXXXXX）」.
+  - Every `demoFailure()` (all `/api/demo/*` failures, including 429) now creates a 6-character `errorCode`. JSON-parse errors are answered and logged as a generic「請求格式錯誤」, so body text never reaches the log. It is returned in the body and in `x-error-code`, logged with the real cause, and shown in the UI as「（錯誤代碼：XXXXXX）」.
   - Routes that used to swallow errors now keep them as `cause`.
   - `instrumentation.ts` logs uncaught server errors with Next's `digest`.
   - All server `console.*` calls were moved to the logger.

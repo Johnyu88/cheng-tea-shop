@@ -3,7 +3,7 @@ import type { DemoOrderSnapshot } from "@/lib/domain/demo-order-service";
 import type { DemoOutboxEntry } from "@/lib/server/demo-notification-outbox";
 import type { DemoMobilePushPreview } from "@/lib/domain/demo-notification-preview";
 import { reportAdminProductsApi, reportAdminProductsApiError } from "@/features/publishing/diagnostics/admin-products-diagnostic";
-import { withErrorCode } from "@/lib/client/error-code";
+import { withErrorCode } from "@/lib/domain/error-code";
 
 type Envelope<T> = { ok: true; value: T } | { ok: false; error: string };
 export class DemoApiError extends Error {

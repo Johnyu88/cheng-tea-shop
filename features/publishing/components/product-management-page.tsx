@@ -7,7 +7,7 @@ import { demoApi, type DemoMerchantStatus } from "@/features/demo/demo-api";
 import { AdminPasskeyLogin } from "@/features/demo/components/admin-passkey-login";
 import { reportAdminProductsApi, reportAdminProductsApiError, reportAdminProductsReactMounted } from "../diagnostics/admin-products-diagnostic";
 import { preparePhotoDataUrl } from "@/lib/client/prepare-photo";
-import { withErrorCode } from "@/lib/client/error-code";
+import { withErrorCode } from "@/lib/domain/error-code";
 import { initialDraft, minimumProblems, ProductFields, type FormDraft } from "./product-form";
 
 type Envelope<T> = { ok: true; value: T } | { ok: false; error: string; errorCode?: string };

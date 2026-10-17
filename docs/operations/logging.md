@@ -19,7 +19,7 @@
 
 | `scope` | 何時出現 |
 |---|---|
-| `api-failure` | 任何 API 回傳失敗。4xx 記 `WARNING`、5xx 記 `ERROR`，帶 `errorCode` 和真正原因 |
+| `api-failure` | `/api/demo/*` 的 API 回傳失敗（包含 429 嘗試次數過多）。4xx 記 `WARNING`、5xx 記 `ERROR`，帶 `errorCode` 和真正原因。passkey 的 `/api/auth/*` 由 better-auth 處理，不在此列 |
 | `demo-catalog` | 後台新增／修改／刪除／讀取商品：`received`、`completed`，含 `requestId`、`httpStatus`、`writeStatus`、`syncStatus`、`durationMs`，**不含**商品內容 |
 | `merchant-session` | 後台登入被拒，含被拒的階段 `stage`（不含輸入的密碼） |
 | `merchant-auth` | 密碼驗證成功／失敗；簡訊登入事件（手機只記雜湊） |
@@ -38,7 +38,7 @@ API 失敗時，回應內容有 `errorCode`，header 有 `x-error-code`，畫面
 - 密碼、passkey 資料、OTP 驗證碼、cookie、session、token、任何密鑰；
 - 客戶的姓名、電話、地址；
 - 商品照片內容（`imageDataUrl`）；
-- request body 原文。JSON 解析錯誤的訊息會引用 body 原文，所以 logger 會把它換成 `Invalid JSON input (content not logged)`。
+- request body 原文。JSON 解析錯誤的訊息會引用 body 原文，所以 `demoFailure()` 會把回應和 log 訊息都換成「請求格式錯誤，請重新整理後再試」，logger 的 `err` 欄位也會把它換成 `Invalid JSON input (content not logged)`。
 
 logger 另外有自動遮蔽：`password`、`credential`、`phone`、`cookie`、`authorization`、`token`、`secret`、`accessSecret`、`imageDataUrl` 這些欄位，就算不小心傳進去，也會變成 `[REDACTED]`。新增 log 時仍然要自己守住上面的規則，自動遮蔽只是最後一道防線。
 
@@ -117,7 +117,10 @@ curl -sSO https://dl.google.com/cloudagents/add-google-cloud-ops-agent-repo.sh
 sudo bash add-google-cloud-ops-agent-repo.sh --also-install
 ```
 
-VM 的服務帳號需要 `roles/logging.logWriter`。預設 Compute Engine 服務帳號通常已經有，沒有的話在 IAM 加上。
+VM 要能寫 log，需要兩個條件：
+
+- VM 的服務帳號有 `roles/logging.logWriter`。較新的專案不會自動給預設服務帳號 Editor 權限，請到 IAM 確認，沒有就加上。
+- VM 的存取範圍（access scopes）包含 Cloud Logging 寫入。在 VM 詳細資料的「API 和身分識別管理」查看，要改的話得先停止 VM。
 
 `/etc/google-cloud-ops-agent/config.yaml`：
 
@@ -150,7 +153,7 @@ logging:
 sudo systemctl restart google-cloud-ops-agent
 ```
 
-說明：Docker 會把每行 log 包成 `{"log": "...", "stream": "stdout", "time": "..."}`。第一個 `parse_json` 拆掉這層外殼，第二個解析程式寫的 JSON，最後把 `severity` 搬到 Cloud Logging 的嚴重程度欄位。log 名稱就是 receiver 名稱 `tea_docker`。
+說明：Docker 會把每行 log 包成 `{"log": "...", "stream": "stdout", "time": "..."}`。第一個 `parse_json` 拆掉這層外殼；第二個解析程式寫的 JSON（log 時間採用收到的時間，跟程式記的 `time` 只差幾秒；刻意不解析 `time`，避免格式不符時整行解析失敗）；最後把 `severity` 搬到 Cloud Logging 的嚴重程度欄位。log 名稱就是 receiver 名稱 `tea_docker`。
 
 ### 3.3 標記是哪個 container
 
@@ -163,26 +166,27 @@ sudo systemctl restart google-cloud-ops-agent
 1. 部署含本功能的 image 後，用手機在後台登入頁故意輸入錯誤密碼，畫面應顯示「（錯誤代碼：XXXXXX）」。
 2. `sudo docker logs --since 5m tea-admin 2>&1 | grep XXXXXX`，應看到一筆 `"scope":"api-failure"`，而且**不含**輸入的密碼。
 3. 1～2 分鐘後，到 Logs Explorer 用 2.1 的查詢找 `XXXXXX`，應找到同一筆，嚴重程度顯示為 Warning。
-4. 如果第 3 步找不到：`sudo systemctl status google-cloud-ops-agent*`，並查看 `/var/log/google-cloud-ops-agent/subagents/logging-module.log`。
+4. 如果第 3 步找不到：`sudo systemctl status google-cloud-ops-agent*`，並查看 `/var/log/google-cloud-ops-agent/subagents/logging-module.log`。也要確認 3.2 提到的寫入權限和存取範圍。
 
 ## 4. 讓 AI agent 能查 log（唯讀）
 
 agent 只拿到**讀 log** 的權限，不能改 VM、不能讀網站資料。
 
-1. GCP 主控台 → IAM 與管理 → 服務帳號 → 建立 `tea-logs-reader`，角色只給 **Logs Viewer（`roles/logging.viewer`）**。
+1. GCP 主控台 → IAM 與管理 → 服務帳號 → 建立 `tea-logs-reader`，角色只給 **Logs Viewer（`roles/logging.viewer`）**。這個角色看得到整個專案 `_Default` 的 log（含 VM 系統 log），但仍然只能讀。想再縮小範圍，可以在 log bucket 建一個只含 `tea_docker` 的 log view，改給 `roles/logging.viewAccessor`。
 2. 在該服務帳號建立 JSON 金鑰並下載。如果主控台不允許建立金鑰（組織政策），先記在 `HANDOFF.md`，改由維護的人代查。
 3. 在 Claude Code 雲端環境設定（session 標題列的環境選單 → Edit）新增環境變數 `GCP_LOGS_READER_KEY`，值為整份 JSON 金鑰內容。新開的 session 才會讀到。
 4. **金鑰不可貼進聊天、不可 commit、不可寫進任何文件**。外洩或不再需要時，到服務帳號頁面刪除該金鑰。
 
-agent 使用方式（金鑰檔放在 scratchpad，不放 repo）：
+agent 使用方式。用一次性的 gcloud 設定目錄，用完整個刪掉；`gcloud auth activate-service-account` 會把金鑰複製進設定目錄，所以只刪金鑰檔不夠：
 
 ```bash
-key_file="$SCRATCHPAD/gcp-logs-reader.json"   # 任何不在 repo 內的暫存路徑
-printf '%s' "$GCP_LOGS_READER_KEY" > "$key_file" && chmod 600 "$key_file"
-gcloud auth activate-service-account --key-file="$key_file"
+export CLOUDSDK_CONFIG="$(mktemp -d)"          # 一次性設定目錄，不在 repo 內
+key_file="$CLOUDSDK_CONFIG/key.json"
+( umask 077; printf '%s' "${GCP_LOGS_READER_KEY:?not set}" > "$key_file" )
+gcloud auth activate-service-account --key-file="$key_file" --quiet
 gcloud logging read 'logName="projects/cheng-tea-shop/logs/tea_docker" AND jsonPayload.errorCode="K7F2QM"' \
   --project=cheng-tea-shop --freshness=7d --format=json
-rm -f "$key_file"
+rm -rf "$CLOUDSDK_CONFIG"; unset CLOUDSDK_CONFIG
 ```
 
 如果雲端環境的網路政策擋住 `logging.googleapis.com`，需要在環境的網路設定允許這個網域。

@@ -1,7 +1,7 @@
 import { afterEach, expect, it, vi } from "vitest";
 import { createLogger, logger, newErrorCode } from "@/lib/server/logger";
 import { demoFailure } from "@/lib/server/demo-route-response";
-import { withErrorCode } from "@/lib/client/error-code";
+import { withErrorCode } from "@/lib/domain/error-code";
 import { POST as sessionPost } from "@/app/api/demo/admin/session/route";
 
 afterEach(() => { vi.restoreAllMocks(); vi.unstubAllEnvs(); });
@@ -39,6 +39,19 @@ it("never logs request body text quoted by JSON parse errors", () => {
   expect(text).not.toContain("typed-secret-123");
   expect(text).toContain("Invalid JSON input (content not logged)");
   expect(text).toContain("登入失敗");
+});
+
+it("keeps request body text quoted by a JSON parse error out of the response and the log", async () => {
+  const warn = vi.spyOn(logger, "warn").mockImplementation(() => undefined);
+  let parseError: unknown;
+  try { JSON.parse('{"name":王小明,"phone":"0912345678"}'); } catch (error) { parseError = error; }
+  const response = demoFailure(parseError);
+  const body = await response.json() as { error: string };
+  expect(body.error).toBe("請求格式錯誤，請重新整理後再試");
+  const [fields, message] = warn.mock.calls[0] as unknown as [Record<string, unknown>, string];
+  expect(message).toBe("API failure 400: 請求格式錯誤，請重新整理後再試");
+  expect(fields.err).toBe(parseError); // the err serializer scrubs it; see the test above
+  expect(JSON.stringify(body) + message).not.toMatch(/王小明|0912345678/);
 });
 
 it("creates short error codes without look-alike characters", () => {

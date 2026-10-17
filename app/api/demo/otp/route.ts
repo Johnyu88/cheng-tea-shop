@@ -22,7 +22,7 @@ export async function POST(request: Request) {
     const challenge = getLocalDemoRuntime().issueOtp(body.phone, body.purpose as "checkout" | "lookup");
     return demoSuccess({ ...challenge, demoCode: "123456" });
   } catch (error) {
-    if (error instanceof DemoRateLimitError) return Response.json({ ok: false, error: error.message }, { status: 429, headers: { "Retry-After": String(error.retryAfterSeconds) } });
+    if (error instanceof DemoRateLimitError) return demoFailure(error, 429, { headers: { "Retry-After": String(error.retryAfterSeconds) } });
     return demoFailure(lookup ? new Error("無法發送驗證碼，請稍後再試", { cause: error }) : error);
   }
 }

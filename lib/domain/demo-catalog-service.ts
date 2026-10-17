@@ -4,7 +4,7 @@ import type { PublishingService, SavedProductDraft } from "./publishing-service"
 import type { CatalogQuery, Page, Product, ProductDraft, ProductSlug } from "./types";
 import type { ServiceResult } from "./result";
 import { createMockPublishingService } from "./mock/mock-publishing-service";
-import { withErrorCode } from "@/lib/client/error-code";
+import { withErrorCode } from "@/lib/domain/error-code";
 
 const failure = <T>(message: string): ServiceResult<T> => ({ ok: false, error: domainError("catalog-unavailable", message, true) });
 
