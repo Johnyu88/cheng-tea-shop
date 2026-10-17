@@ -253,7 +253,7 @@ GitHub 是正式文件與程式來源。聊天中的新指令若尚未寫入 Git
 
 缺少正式茶山或商品照片時，可先使用來源清楚的中性替代素材；商品圖統一使用品牌預設圖並標示「商品照片準備中」，不得使用相近茶品照片冒充實物或暗示虛假產地。店家現有照片的公開使用權已確認；第三方素材仍須保留授權與署名要求。「無毒」或類似商品宣稱須有可查證依據才可公開。
 
-此成果完成首頁真實長度文案與構圖驗證，但尚未完成全部正式素材。網站程式仍未開始。詳細規格見 `docs/superpowers/specs/2026-09-14-homepage-real-content-validation-design.md`。
+此成果完成首頁真實長度文案與構圖驗證，但尚未完成全部正式素材。Wave 1 已建立技術基線，正式前台內容仍待後續 Wave 實作。詳細規格見 `docs/superpowers/specs/2026-09-14-homepage-real-content-validation-design.md`。
 
 ## 21. 龍映茗茶品牌與漸進式商品目錄
 
@@ -281,6 +281,16 @@ GitHub 是正式文件與程式來源。聊天中的新指令若尚未寫入 Git
 - Wave 1 改採乾淨基線，以官方當日已修補的穩定版 Next.js 建立專案；2026-09-14 的已知最低目標為 16.3.3，實作時仍須再次查核官方安全公告。
 - 完整紀錄見 docs/audits/2026-09-14-wave-0-template-audit.md。
 
+## 24. Wave 3 領域介面與 Mock Adapter — 2026-09-20
+
+- 專案自有 TypeScript contracts 現在定義 `Money`、商品與規格、庫存狀態、購物車、結帳草稿及商品草稿。
+- Catalog、cart、checkout 與 publishing service interfaces 已與 fixture 和 adapter 實作分離。
+- deterministic Mock Adapter 包含 48 筆合成商品、cursor 分頁、茶類／口感篩選、空結果與目錄錯誤、售完處理、購買上限、整數 TWD 金額、結帳驗證及單規格草稿發布。
+- Mock Adapter 不包含真實顧客資料、付款憑證、登入、ERP、持久化或未經證實的產地／療效宣稱。
+- Wave 3 本地驗證通過：Vitest 6 個檔案／14 個測試、ESLint、TypeScript 與 production build。
+- 商品頁、目錄 UI 整合、購物車 UI、真實結帳／付款、ERP、瀏覽器 e2e 與 Docker smoke 仍是後續或外部 gate。
+- 詳細規格見 `docs/superpowers/specs/2026-09-20-domain-interfaces-and-mock-adapter-design.md`；實作計畫見 `docs/superpowers/plans/2026-09-20-domain-interfaces-and-mock-adapter-implementation-plan.md`。
+
 ## 23. 目前狀態
 
 - Agent 工作流設計已確認。
@@ -290,8 +300,209 @@ GitHub 是正式文件與程式來源。聊天中的新指令若尚未寫入 Git
 - Phase 1 桌機／平板響應式 Wireframe、必要狀態與年長操作保護已確認。
 - Phase 1 首頁真實長度文案與手機／平板／桌機構圖已確認。
 - Phase 1 仍在進行；現有店家照片公開使用權已確認，缺圖商品可使用有標示的品牌預設圖。前端技術選型與實作計畫已確認，可操作原型的實際年長使用者測試仍待完成。
-- 網站程式尚未開始；沒有任何候選模板程式進入專案。
-- Wave 0 模板稽核已完成並判定不可整包匯入。下一步在稽核 PR 合併後，依 Wave 1 建立乾淨、可測試、可容器化的前端基線。
+- Wave 1 已建立乾淨、可測試、可容器化的前端基線；沒有任何候選模板程式或素材整包進入專案。
+- Wave 0 模板稽核已完成並判定不可整包匯入。下一步是完成 Wave 1 quality gate，再以小範圍進入 Wave 2 品牌 shell。
+
+## 25. Wave 4 首頁目錄展示 — 2026-09-20
+
+- 首頁現在透過 project-owned `CatalogService` 取得前三筆商品，不直接依賴 fixture 或特定 ERP SDK。
+- 商品卡顯示名稱、口感標籤、摘要、規格、整數 TWD 價格與「商品照片準備中」placeholder；目前「查看茶品」仍是 prototype 文案，不建立商品詳情頁。
+- 首頁保留 loading、empty 與 catalog error 狀態，錯誤訊息不會假裝有商品資料。
+- Wave 4 本地驗證通過：Vitest 6 個檔案／17 個測試、ESLint、TypeScript 與 production build。
+- 購物車 UI、產品詳情、checkout UI、真實付款、ERP、登入、持久化與真實商品資料仍不在本切片範圍。
+
+## 26. 陳老師品牌故事媒體 — 2026-09-20
+
+- 使用者提供並核准將陳老師照片與短片用於網站品牌故事區，不作為商品照片或商品真實性證據。
+- 網站只提交最佳化後的 `public/media/teacher-portrait.webp` 與 `public/media/teacher-story.mp4`；原始 JPG／MOV 不進 Git。
+- 影片轉為無音軌 MP4，預設靜音、手動播放、保留 controls，並清除 GPS、裝置與拍攝 metadata。
+- 照片以可存取的替代文字呈現；影片提供 aria label、poster 與瀏覽器不支援時的 fallback 文案。
+
+## 27. Wave 4.1 完整目錄瀏覽 — 2026-09-20
+
+- 首頁保留三款人工精選，並新增完整目錄瀏覽區；UI 只依賴 project-owned `CatalogService`，不直接讀取 fixture 或 ERP SDK。
+- 目錄以 cursor 分頁載入，使用「載入更多茶品」追加結果，不設定 40 筆上限。
+- 提供清香、甘甜、濃郁、焙火四種口感篩選；切換篩選會重置 cursor 並重新載入。
+- 商品卡延續合成資料與「商品照片準備中」標示；保留 loading、空結果、錯誤及重試狀態。
+- Wave 4.1 本地驗證通過：Vitest 7 個檔案／22 個測試、ESLint、TypeScript、Webpack production build、Chromium smoke/axe e2e（3/3）與 headless Chromium 目錄互動檢查（初始 12 筆、焙火篩選、載入更多至 24 筆）。
+- Visual browser surface 因 computer-use request-header policy 無法載入而未完成；Docker smoke 仍待 clean runner 或可用 Docker 環境。
+- 未加入商品詳情、購物車、結帳、付款、ERP、登入、持久化、真實商品或顧客資料。
+
+## 28. Wave 5 商品詳情與購物車 — 2026-09-21
+
+- 目錄商品卡現在以穩定 slug 連到 `/tea/[slug]`；商品詳情透過 project-owned `CatalogService` 讀取商品，首屏顯示品牌預設圖、茶名、口感摘要、規格、整數 TWD 價格與供貨狀態。
+- 有貨商品提供單一 `ProductVariant` 的正整數數量控制與 `maxQuantity` 限制；售完、找不到商品、服務失敗與超過購買上限均保留既有選擇並以頁內可理解訊息處理。
+- `/cart` 透過 `CartService` 處理新增／合併、數量更新、移除與 subtotal；共享 `CommerceProvider` 在 client navigation 間保留同一個 Mock service instance。Wave 5 不使用瀏覽器儲存個資或付款資料。
+- 這一 Wave 只驗證合成商品的前台購買互動。結帳、付款 adapter、訂單 API、物流、會員／登入、ERP、持久化資料庫、多規格、精確庫存與真實商品資料仍是後續範圍。
+- 實作與驗證限制詳見 `.superpowers/sdd/2026-09-20-product-detail-and-cart/task-7-report.md`；未將尚未通過的 typecheck、production build 或 Chromium／WebKit e2e 寫成通過。
+
+## 29. Wave 6 checkout prototype slice — 2026-09-21
+
+- Wave 6 的 domain contracts、checkout／publishing Mock services、購物車到 `/checkout` 邊界、guest checkout prototype 與商品草稿發布 UI 都已完成；最終 build/browser/container gate 的結果另行如實記錄。
+- Checkout 透過 `CommerceProvider` 注入 project-owned `CheckoutService`，提供聯絡資料、宅配／到店取貨、付款方式、確認訂單、處理中、失敗重試與成功狀態；手機必填、Email 選填。
+- 付款仍是 deterministic Mock。原型不渲染信用卡欄位、不保存付款憑證、不使用瀏覽器儲存、不加入登入、持久化、訂單後端、ERP 或真實金流。
+- 有限庫存提示保留電話作為主要聯絡方式、LINE 作為次要聯絡方式；checkout 的個人資料只存在當前 React flow。
+- 已完成 accessible step-heading focus、live status／error alert、四項以上摘要展開狀態、重複提交保護與 provider-boundary failure recovery 測試。
+- Wave 6 checkout 驗證：focused Vitest 18/18、TypeScript、scoped ESLint 與 diff check 通過。Chromium acceptance 因 standalone hydration／靜態資產環境問題未完成，未宣稱通過；WebKit 與 Docker 留待最後品質 gate。
+- 下一個切片是長輩友善商品草稿：單頁最低欄位、0～3 張暫時預覽圖、grounded Mock 文案、草稿儲存、預覽與人工確認後發布。
+
+## 30. Wave 6 商品草稿原型 — 2026-09-21
+
+- `/admin/products/new` 已完成單頁、手機優先的商品草稿原型，最低欄位為茶名、單一規格、整數 TWD 價格、茶類與供貨狀態；另提供可選事實欄位、口感標籤與 0～3 張本機預覽圖。
+- 頁面只透過 `CommerceProvider` 的 `PublishingService` 產生 grounded Mock 介紹、儲存草稿與確認後發布；所有失敗都保留目前草稿與預覽，發布確認會在任何可發布內容變更後失效。
+- 圖片只保留 object URL 與非敏感 metadata，超量／非圖片拒絕時不清除既有資料，移除與卸載時撤銷 object URL；不使用登入、瀏覽器儲存、上傳、ERP、憑證或正式持久化。
+- 操作狀態透過 live region 宣告，save／generate／publish 均有同步重複操作防護；成功狀態顯示 Mock 商品名稱與規格資訊。
+- 商品草稿驗證：focused Vitest 19/19、TypeScript、scoped ESLint、`git diff --check` 與獨立修正輪審查通過。Chromium acceptance 仍因既有 `.next/standalone` 鎖定／建置環境問題未執行，未宣稱通過；WebKit 與 Docker 留待最後 quality gate。
+- 完整 local Vitest 已通過 15 個檔案／96 個測試，TypeScript 通過，full ESLint 以 0 errors 結束（另有 Wave 6 diff 外的一項既有 `no-img-element` warning）。Webpack sandbox 嘗試因 `.next/trace` 的 `EPERM` 未能完成，核准重試則因 `.next/standalone` 鎖定而 `EBUSY`；未在非 fresh build 上啟動 Chromium。WebKit executable 與 Docker CLI 均不可用；spec header whitespace 已修正，完整 `git diff --check` 通過。
+- 下一步是在可寫入、無鎖定的 clean environment 重跑 build 和 Chromium，並在安裝 WebKit/Docker 的環境中補齊對應 gate；真實管理員驗證、持久化、照片上傳、付款、ERP 與正式發布仍維持後續範圍。
+
+## 31. Wave 6 quality gate — 2026-09-21
+
+- 完整 Vitest 15 個檔案／96 個測試、TypeScript、全域 ESLint 與完整 branch diff check 通過；獨立 QA/Security 複審無 Critical、Important 或 Minor 發現。
+- Production webpack build 受本機檔案鎖定環境阻擋，Chromium 因無 fresh standalone build 未啟動；WebKit 執行檔與 Docker CLI 不在目前環境。
+- 最終原型仍明確不包含真實身份驗證、付款、持久化、照片上傳、ERP、顧客或訂單資料；完整證據與限制見 `final-verification-report.md`。
+
+## 32. Wave 7-A 前台購物品質關卡 — 2026-09-22
+
+- 在隔離的 `codex/wave-7-shopping-quality-gate` 分支，以 clean production build 執行前台購物品質關卡；完整 Vitest 15 個檔案／96 個測試、TypeScript、Webpack production build 與 diff check 通過。
+- Chromium 與 WebKit storefront gate 均通過 14/14：首頁、健康檢查、首頁 axe、商品詳情、購物車、checkout、重複提交保護、手機版 overflow 與商品草稿流程；`/tea/mock-tea-001`、`/cart`、`/checkout`、`/admin/products/new` 均無 detectable axe violations。
+- 實際修正品質問題：`.catalog-count` 改用符合對比要求的前景色；購物車 e2e 更新為 Wave 6 已實作的 `/checkout` link contract；checkout e2e 的 alert assertion 排除 Next route-announcer 空 alert；商品草稿與 axe e2e 等待 React hydration／主要 h1 完成，避免 WebKit 在 loading 狀態誤判。
+- 依 Playwright 官方方式安裝 WebKit：`node node_modules/@playwright/test/cli.js install webkit`，因本機憑證鏈要求使用 Node `--use-system-ca`；未關閉 TLS 驗證、未修改系統安全設定。WebKit 26.6／playwright webkit v2359 安裝至使用者 Playwright cache 後通過 14/14。
+- 全域 ESLint 以 0 errors 結束，保留既有 `product-detail-page.tsx` 一項 `@next/next/no-img-element` warning。Docker CLI 仍不可用，列為環境待辦，不阻擋前台品質關卡。
+- 本階段仍不擴充真實付款、登入、持久化、ERP、顧客資料或付費雲端部署；正式 preview 與真實年長使用者走查仍需明確授權、參與者與環境條件。
+
+## 33. 年長使用者參與走查本機準備 — 2026-09-22
+
+- 新增 `docs/testing/older-user-walkthrough.md`，包含主持人開場腳本、T1–T8 購物與商品草稿任務、字體／按鈕／導覽／商品理解／購物車／checkout／錯誤提示觀察表、問題紀錄格式及 P0–P3 判定標準。
+- 新增 `docs/superpowers/plans/2026-09-22-older-user-walkthrough-preparation.md`，定義只使用 localhost、Mock 資料與合成聯絡資料的離線執行方式；不保存真人個資、不啟動 preview、不使用付費服務。
+- 本階段只完成測試準備，不宣稱已完成真人可用性驗證。Wave 7-B 的準備通過線為主要 T1–T5 任務各有完整成功紀錄、無阻斷購物路徑的 P0，且不得誤解 placeholder、Mock checkout 或合成上架結果。
+
+## 34. 年長使用者走查主持人 dry run — 2026-09-22
+
+- 以本機 standalone server、headless Chromium 及 `360×800`／`1280×800` 兩種尺寸完整執行 T1–T8，兩種尺寸均 8/8 PASS，合計 16/16；此為主持流程與路徑驗證，不是真人研究結果。
+- 新增 `docs/testing/older-user-walkthrough-dry-run.mjs` 與紀錄文件；dry run 修正了 loading 等待、購物車商品列定位與 standalone localhost 執行方式，沒有修改前台產品行為。
+- 客觀觀察：checkout 的 T4 返回路徑包含「返回配送方式」與「上一步」兩層；真人走查時需觀察是否理解兩者差異。按鈕是否直覺、文字是否容易理解，仍不可由自動化 dry run 判定。
+- 隔離工作樹的 dev server 受 `node_modules` junction／Turbopack 限制；改用已驗證的本機 standalone server 完成驗證。正式真人走查、preview deployment、付費服務與 Docker 仍暫緩。
+
+## 35. 真人驗證邊界與下一個離線前台項目 — 2026-09-22
+
+- 年長使用者易懂性、按鈕直覺性、導覽理解及商品資訊／placeholder 理解，均標記為必須由真人走查驗證；自動化 dry run 只證明預定路徑可操作，不取代真人研究。
+- 目前前台仍使用 deterministic Mock catalog/cart/checkout/publishing service；商品、購物車、checkout、商品草稿與發布結果都是 prototype／synthetic／transient 邊界，不代表真實資料、真實付款或正式上架。
+- 尚未完成且受外部條件限制的能力：真實內容與素材證據、真人走查、Docker smoke、正式 preview、持久化資料、登入權限、真實付款、物流與 ERP。
+- 下一個可離線完成的前台品質項目候選為 checkout 的 prototype boundary copy：明確說明付款選項只是合成展示、尚未送出真實付款；不接金流、不保存付款資料、不改變 checkout flow。
+
+## 36. Checkout prototype boundary copy — 2026-09-22
+
+- Checkout 的初始步驟與 synthetic success 都顯示「此頁為合成展示／原型，不會送出真實付款，也不會保存付款資料。」；這是前台理解邊界，不是付款流程或資料持久化。
+- 以 TDD 新增兩個 checkout component tests，並在 checkout e2e 驗證 Chromium／WebKit 的初始與成功狀態；未新增 payment provider、credential、storage、API 或流程步驟。
+- 驗證結果：完整 Vitest 15 files／98 tests、TypeScript、Webpack build、lint 0 errors（保留既有一項 `<img>` warning）、Chromium checkout e2e 6/6、WebKit checkout e2e 6/6；完整 Wave 7 storefront gate 仍為 Chromium/WebKit 各 14/14。
+- 真人必驗證的易懂性、按鈕直覺性與商品資訊理解仍不由自動化推論；下一個低風險前台項目尚未選定，避免在沒有實際缺陷或明確設計需求時擴大範圍。
+
+## 37. 下一階段施工圖 — 2026-09-22
+
+### 已完成且驗證通過
+
+- 品牌首頁、陳老師故事媒體、完整合成目錄、口感篩選、cursor 載入、商品詳情與購物車。
+- Guest checkout prototype：聯絡、配送、確認三步，欄位驗證、錯誤保留、重試、重複送出保護與合成成功畫面。
+- Checkout prototype boundary copy：初始、確認與合成成功狀態都明示不會送出真實付款、不會保存付款資料。
+- 長輩友善商品草稿 prototype：最低欄位、暫時照片預覽、grounded Mock 文案、草稿、預覽、人工確認與合成發布。
+- Wave 7-A 驗證：Vitest 98/98、TypeScript、Webpack build、lint 0 errors、Chromium/WebKit storefront gate 各 14/14、主要路由 axe coverage 通過。
+
+### 仍屬 mock／stub／draft
+
+- 所有 Catalog、Cart、Checkout、Publishing 都是 project-owned deterministic Mock adapters。
+- 商品、價格、庫存、照片、訂單編號與發布結果都是合成或暫存資料；購物車與聯絡資料不持久化。
+- 付款選項只是 checkout UI state，沒有 payment intent、token、卡號欄位或 provider call。
+- 商品上架頁沒有管理員登入、權限、媒體上傳、版本、稽核或正式發布。
+
+### 可純本機繼續
+
+- 維護 unit／axe／Chromium／WebKit／TypeScript／lint／build regression gates。
+- 在既有 service interfaces 上增加 local fake adapter 與 DTO/error contract tests，不加入網路或憑證。
+- 只有遇到可重現問題或已核准的設計需求時，才改善 loading、retry、錯誤文案與 prototype boundary copy。
+- 保持 facilitator dry run 可重跑，但不把它當作真人研究證據。
+
+### 必須等真人走查
+
+- 年長使用者與首次購物者是否真正理解文字、價格、供貨狀態、placeholder 與合成提示。
+- 按鈕與導覽是否直覺，尤其 checkout 的「返回配送方式」／「上一步」差異。
+- 任務成功率、停頓、誤觸、求助、錯誤修正與口語理解。
+
+### 必須等 preview／Docker／外部服務
+
+- Docker smoke、容器 release gate、preview、網域、Secrets、預算、log 與 rollback。
+- 真實商品／素材／產地證據、持久化、登入權限、真實付款、物流、ERP、備份與監控。
+
+### 未來 API boundary
+
+- `CatalogService`：未來接 versioned catalog DTO、媒體、庫存與 normalized errors；UI 不直接呼叫 ERP。
+- `CartService`：未來加入 server cart identity、版本／併發檢查、idempotency、權威價格與庫存。
+- `CheckoutService`：未來建立 checkout/order session，server-side 重算金額並只回傳安全 receipt。
+- Payment：新增 tokenized provider adapter，只傳 provider token／狀態，絕不在本 app 接收或保存 raw card data。
+- Logistics：獨立 quote／fulfillment adapter，處理配送可服務性、地址同意與 tracking。
+- `PublishingService`：未來接 authenticated draft/version/media/audit boundary，發布內容必須有證據與狀態。
+- ERP：獨立 domain-to-ERP adapter，處理重試、對帳與 dead-letter；前台不直接依賴 ERP SDK。
+
+### 建議下一個 Phase 與最小可驗證切片
+
+**Phase 8：Integration-readiness contract hardening。** 最小切片是使用 in-memory fake adapters，為四個既有 service interface 補 DTO mapping、normalized error、版本與可替換 adapter 的 contract tests。這個 Phase 不實作真實付款、登入、持久化、物流、ERP 或 preview。
+
+### 未提交檔案來源記錄
+
+- `AGENTS.md`：目前無內容 diff，Git 狀態的 M 為工作樹／換行／索引狀態；內容 hash 與 HEAD 一致，未由本次施工圖工作修改或提交。Next dev 曾自動插入規則，但已不保留該內容。
+- `next-env.d.ts`：包含 Next.js 產生的 `.next/types` references 與 generated comment；在前一階段本機 Next build/dev 後已存在，並非本次文件整理產生。維持未提交，不覆蓋、不提交。
+
+## 38. Phase 8 integration-readiness contract hardening — 2026-09-22
+
+- 建立 `CatalogProductDto`、`CatalogPageDto`、`CartDto`、`CheckoutRequestDto`、`CheckoutReceiptDto`、`ProductDraftDto`，並建立 Payment、Logistics、ERP 的窄化 request/result DTO。Payment DTO 僅接受訂單參照、付款方式與金額，不接收 raw card number、security code、token 或其他付款憑證。
+- 新增 `PaymentService`、`LogisticsService`、`ErpService`，所有 adapter 操作回傳既有 `ServiceResult`；`mapAdapterError` 將 adapter source 正規化為 `payment-unavailable`、`logistics-unavailable`、`erp-unavailable`，保留訊息與 retryable 語意。
+- 新增 `createInMemoryCommerceServices`，將既有 Catalog、Cart、Checkout、Publishing mock 組成可替換 bundle；新增本機合成 Payment、Logistics、ERP fake adapters。這些 fake 只回傳 `simulated` 結果，不連線、不保存、不代表真實交易或同步成功。
+- 另以 `createInMemoryIntegrationAdapters` 將三個外部邊界 fake 集中成可整組替換的 local bundle，仍不接入前台 checkout。
+- `CommerceProvider` 的預設服務改由 in-memory bundle 建立，既有前台注入介面與 UI 行為不變；未把 Payment、Logistics、ERP 接入 checkout UI，避免擴大付款或流程範圍。
+- TDD 契約測試覆蓋 DTO shape、付款敏感欄位排除、錯誤映射、fake adapter 結果、adapter swapping 與可替換 interface。驗證結果：Vitest 16 files／103 tests、TypeScript 通過、ESLint 0 errors（保留既有 `no-img-element` warning）、Webpack production build 通過，Chromium/WebKit storefront regression 各 14/14 通過。
+- 本切片不新增真實付款、登入、持久化、物流、ERP、preview、Docker 或付費服務；真人走查仍是年長使用者易懂性、按鈕直覺性與商品資訊理解的唯一驗證方式。
+
+## 39. Phase 8 Catalog / Cart / Checkout boundary hardening — 2026-09-22
+
+- 新增本機 runtime DTO validators：`validateCatalogQuery`、`validateCartDto`、`validateCheckoutRequestDto`。它們只驗證 service boundary 的資料形狀與基本不變量，不改變現有 UI 流程，也不保存資料。
+- Catalog query 的非法 filter、cursor、limit 會回傳 `invalid-catalog-query`；Cart 會拒絕非法金額、數量、庫存狀態或 line shape；Checkout request 會拒絕不完整聯絡、配送／付款方式或購物車 shape。錯誤均為 project-owned、non-retryable domain errors。
+- `createInMemoryCommerceServices` 仍以注入的 Catalog 建立預設 Cart，契約測試證明替換 Catalog 後 Cart 仍透過替換後的 adapter 解析商品；Checkout 也能獨立替換而不改變 provider contract。
+- TDD／regression 結果：focused integration contracts 9/9；完整 Vitest 16 files／107 tests；TypeScript 通過；ESLint 0 errors（既有 `product-detail-page.tsx` 一項 `<img>` warning）；Webpack production build 通過；Chromium/WebKit 各 14/14 通過（單 worker）。
+- 曾嘗試兩個瀏覽器平行跑 28 tests，出現 1 個共享 standalone mock 狀態的 URL race；單 worker 重跑相關與完整 suite 均通過，未將它誤修成產品行為。未接真實資料庫、付款、物流、ERP 或外部服務。
+
+## 40. Phase 8 Payment / Logistics contract slice — 2026-09-22
+
+- 延續既有 Payment／Logistics DTO、error model 與 service interfaces，新增 `validatePaymentRequestDto`、`validateShippingQuoteRequestDto`、`validateFulfillmentRequestDto`。付款 validation 只接受訂單參照、付款方式與 TWD 金額，沒有 raw card、CVV、token 或 provider credential。
+- 新增 `invalid-payment-request` 與 `invalid-logistics-request`，錯誤在進入 adapter 前被正規化為不可重試的本機 domain error。配送 DTO 要求 home delivery 有 destination；store pickup 可使用 null destination。
+- `createInMemoryIntegrationAdapters` 現在接受 typed overrides，可獨立替換 Payment／Logistics／ERP。測試驗證替換後的 adapter identity 保留，並沒有把 fake 接入前台 checkout。
+- 驗證結果：focused integration contracts 11/11；完整 Vitest 16 files／109 tests；TypeScript 通過；ESLint 0 errors（既有 `<img>` warning）；Webpack production build 通過；Chromium/WebKit 各 14/14 通過（單 worker）。
+- 本階段仍不實作金流、LINE Pay、信用卡、物流 API、資料庫、ERP、登入、持久化、preview 或付費服務；fake 結果維持 `simulated`，不可視為付款授權或物流建立成功。
+
+## 41. Phase 8 Publishing / ERP consistency and coverage matrix — 2026-09-22
+
+- Publishing contract 以 `ProductDraftDto` 與既有 `PublishingService` 為 boundary；ERP contract 以 `ErpProductUpsertDto`、`ErpOrderSyncDto` 與既有 `ErpService` 為 boundary。兩者都透過 `ServiceResult` 回傳，不引入 CMS／ERP SDK。
+- 新增 `validateProductDraftDto`、`validateErpProductUpsertDto`、`validateErpOrderSyncDto`，錯誤分別為 `invalid-publishing-request` 與 `invalid-erp-request`。Publishing adapter error source 也納入 normalized mapping，對應 `publishing-unavailable`；既有 draft validation 的 `invalid-draft` 行為不變。
+- `CommerceProvider` 的 Publishing override 與 integration bundle 的 ERP override 均有 identity-preserving swapping tests；跨服務測試確認所有 local failure 都維持 `{ code, message, retryable }` error shape。
+- Phase 8 contract coverage：Catalog、Cart、Checkout、Payment、Logistics、Publishing、ERP 均已完成 DTO／interface、runtime validation、error model、local fake、override／swapping test 與 UI regression coverage。這只代表本機 contract hardening，不代表真實 provider readiness。
+- 驗證結果：focused integration contracts 14/14；完整 Vitest 16 files／112 tests；TypeScript 通過；ESLint 0 errors（既有 `<img>` warning）；Webpack production build 通過；Chromium/WebKit 各 14/14 通過（單 worker）。
+- 明確未完成：真實 ERP、CMS、資料庫、登入、持久化、付款授權、物流建立、preview、Docker 與真人走查。
+
+## 42. Phase 8 closure — completed / integration-ready prototype — 2026-09-22
+
+- 新增最小 integration smoke test：`tests/phase-8-integration-smoke.test.tsx`。它以預設 in-memory factories 完整跑 Catalog → Cart → Checkout，並呼叫 Payment、Logistics、Publishing、ERP local fakes。
+- Smoke 同時驗證任一 boundary adapter 可由 typed override 替換、替換後仍使用相同 `ServiceResult`／error mapping，且 `CommerceProvider` UI probe 只看 service contract，不渲染 `mock`、`simulated` 或 provider 細節。
+- Phase 8 收尾驗證：smoke 2/2；Vitest 17 files／114 tests；TypeScript 通過；ESLint 0 errors（既有 `<img>` warning）；Webpack production build 通過；Chromium 14/14；WebKit 14/14，均以單 worker 執行。
+- Phase 8 狀態標記為 **completed / integration-ready prototype**。此名稱只代表本機 adapter contract 已可替換與驗證，不代表 production-ready 或任何真實服務已接通。
+- Phase 9 僅整理候選：真人年長使用者走查、真實內容證據、preview／Docker／release readiness、身份驗證與持久化、可觀測性與備份，以及未來 tokenized payment／logistics／CMS／ERP integration planning。未開始任何 Phase 9 實作。
+
+## 43. Phase 9-A 真人走查與真實素材驗證準備 — 2026-09-22
+
+- 建立正式執行包 `docs/testing/phase-9a-older-user-and-content-validation-pack.md`：最終主持開場與中性提示、T1–T8 任務、字體／按鈕／導覽／商品理解／購物車／checkout／錯誤提示觀察、同意與停止規則、P0–P3 分級、完成條件與文件回填方式。
+- 建立 `phase-9a-observation-template.md` 作為去識別化 session record；建立 `phase-9a-real-content-replacement-checklist.md`，逐項要求照片來源／授權／alt text、商品事實證據、文案 owner 與公開核准。
+- 清楚列出目前 placeholder／synthetic data：商品照片準備中、合成商品／價格／供貨狀態、合成 checkout／payment boundary、Mock order receipt、合成 draft publish、local fulfillment 與 ERP references。這些在真實證據前不可冒充正式資料或交易結果。
+- 新增 `phase-9a-preflight.mjs`；本機執行通過，僅檢查執行包文件與 marker，不啟動 server、不聯絡真人、不使用付費服務、不部署。
+- Phase 9-A 目前狀態為「準備完成，真人走查與真實素材驗證尚未執行」。不得填寫假想成功率、可用性結論、參與者偏好或真實內容通過結果。
+- 真人完成後只回填去識別化摘要：WHITEPAPER 記研究範圍與限制、HANDOFF 記 issue／commit／複測、CAPABILITY_MAP 只依直接證據更新 human-validation 與 real-content 狀態。
 
 ### Wave 1 implementation status — 2026-09-16
 
@@ -300,9 +511,25 @@ GitHub 是正式文件與程式來源。聊天中的新指令若尚未寫入 Git
 - The first Quality run exposed pnpm 11's ignored-build policy for `unrs-resolver`; the manifest now permits only that dependency's required build script. A fresh full Quality result is still pending.
 - Local frozen-install and Docker checks remain `BLOCKED_EXTERNAL` by the restricted npm/GitHub TCP environment; clean-runner CI is authoritative for those gates.
 
+### Wave 2 initial shell slice — 2026-09-20
 
-## 24. Wave 1 completion and Wave 2 handoff
+- The project-owned homepage now has a semantic header, named primary navigation, responsive hero spacing, mist-green / warm-ivory / tea-brown tokens, visible focus treatment, and reduced-motion handling.
+- Product catalog, cart, checkout, orders, payment, ERP, authentication, and real customer data remain intentionally absent.
+- Local verification passed for frozen install, Vitest (2 files / 3 tests), ESLint, TypeScript, and production build. Playwright Chromium/WebKit browsers downloaded, but the six-test e2e run hung locally after browser launch and was stopped; e2e and Docker smoke remain unverified. ESLint is pinned to 9.39.1 because the planned 10.10.0 release is incompatible with the installed Next.js React lint plugin API.
 
-Wave 1 is complete and PR #14 is merged into `main` as `ed86232e1a6e42953e6c3bc5c23d2a7e13258a93`. Quality run `35121518151` passed frozen install, lint, typecheck, unit/component tests, production build, Chromium/WebKit plus axe, dependency audits, Docker build, and container smoke. The temporary lockfile regeneration workflow and artifact upload were removed; the committed lockfile is verified by frozen install.
+## 44. Phase 9-A 真實商品素材匯入規格 — 2026-09-22
 
-Wave 2 begins from `RESUME_PROMPT.md` and the merged `main` state. Its first bounded work should be the approved design-system and storefront foundation, with no ERP, real payment, real authentication, or real product data until separately authorized.
+- 建立 `docs/testing/phase-9a-real-product-material-import-spec.md`，只定義真實商品素材的 JSON canonical shape、CSV header、欄位型別／空值規則、圖片格式／尺寸／授權／hash、檔案命名、排序、上下架與證據欄位。
+- 規格涵蓋商品名稱、茶類、產地、年份、重量、價格、香氣、口感、回甘、沖泡建議、庫存、商品圖、排序與上下架狀態；未提供或未證實的值必須是 `null`，不得以 synthetic 值或模型推測代替。
+- 圖片必須能追溯商品對應、來源、公開授權、alt text 與 SHA-256；未通過驗證時維持「商品照片準備中」placeholder。匯入一律先進受控 staging，失敗不覆蓋原 fixture。
+- `harvest_year`、`weight_g`、`aftertaste`、完整 brewing、evidence、sort 等欄位目前只是匯入規格保留欄位；沒有修改現有 TypeScript domain、UI、資料庫或外部 adapter。
+- 驗證流程已定義格式／型別／事實證據／圖片／安全／發布核准／TypeScript／lint／build／axe／Chromium／WebKit 與真人理解閘門。本次沒有填寫任何真實商品內容，也沒有替換 placeholder。
+- 等待店家提供符合規格的資料包與證據後再進行審查；在此之前不匯入、不部署、不啟動付費服務。
+
+## 45. Phase 9-A 商品資料匯入工具鏈 — 2026-09-22
+
+- 建立空白 CSV／JSON 匯入模板與 placeholder／synthetic data 對照表；模板只有 canonical header 或空陣列，不包含任何真實或新增的商品內容。
+- 新增 `scripts/phase-9a-product-import.mjs`：支援 CSV／JSON parsing、必要欄位／enum／型別檢查、缺漏、重複 `content_id`／`sort_order`、價格／重量格式、圖片檔名與 `content_id` 對應、圖片 metadata／SHA-256、可選圖片目錄存在性與 published evidence 檢查。
+- 工具預設為 dry-run，輸出含 row／field／code／message 的清楚 JSON error report、warnings、accepted IDs 與 `wouldWrite: false`；`--apply` 明確拒絕，不會覆蓋既有 fixture、圖片或 placeholder。
+- `phase-9a-product-import.test.ts` focused 5/5 通過；preflight 會檢查模板、對照表、工具與關鍵安全 marker。此工具鏈不接外部服務、不上傳圖片、不新增業務功能。
+- 等待店家提供符合匯入規格的真實資料與證據後，才可另行審查 staging；目前 synthetic catalog 與 placeholder 完全不變。

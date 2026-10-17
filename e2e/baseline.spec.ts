@@ -21,3 +21,13 @@ test("homepage has no detectable axe violations", async ({ page }) => {
   const results = await new AxeBuilder({ page }).analyze();
   expect(results.violations).toEqual([]);
 });
+
+test("primary storefront routes have no detectable axe violations", async ({ page }) => {
+  for (const path of ["/tea/mock-tea-001", "/cart", "/checkout", "/admin/products/new"]) {
+    await page.goto(path);
+    await expect(page.locator("main")).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+    const results = await new AxeBuilder({ page }).analyze();
+    expect(results.violations, `${path} accessibility violations`).toEqual([]);
+  }
+});
